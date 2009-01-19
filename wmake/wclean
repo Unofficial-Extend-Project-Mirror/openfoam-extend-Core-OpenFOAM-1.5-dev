@@ -28,85 +28,125 @@
 #
 # Description
 #     Clean up the wmake control directory Make and remove the include
-#     directory generated for libraries.
-#
-#     Usage: 
-#        wclean                         (cleans Make)
-#        wclean lib??                   (cleans Make and lnInclude)
-#
-#        wclean <dir>                   (cleans dir/Make)
-#        wclean exe <dir>               (cleans dir/Make)
-#        wclean lib?? <dir>             (cleans dir/Make and lnInclude)
-#        wclean exe <dir> <MakeDir>     (cleans dir/MakeDir)
-#        wclean lib?? <dir> <MakeDir>   (cleans dir/MakeDir and lnInclude)
+#     directories generated for libraries.
 #
 #------------------------------------------------------------------------------
+Script=${0##*/}
+
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+usage: $Script [dir]
+       $Script target [dir [MakeDir]]
+
+Clean up the wmake control directory Make and remove the include
+directories generated for libraries.
+
+The targets correspond to a subset of the 'wmake' special targets:
+    all       all subdirectories
+    exe       cleans dir/Make
+    lib       cleans dir/Make and dir/lnInclude
+    libso     cleans dir/Make and dir/lnInclude
+    libo      cleans dir/Make and dir/lnInclude
+
+USAGE
+   exit 1
+}
+
+# provide immediate help
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    usage
+fi
+
 
 #------------------------------------------------------------------------------
 # check arguments and change to the directory in which to run wmake
 #------------------------------------------------------------------------------
 
-makeOption=""
-dir="_"
+unset dir makeOption
+MakeDir=Make
 
 if [ $# -ge 1 ]
 then
-    if [ $1 = "lib" -o $1 = "libso" -o $1 = "libo" -o $1 = "exe" -o $1 = "project" ]
+
+    if [ -d "$1" ]
     then
-        makeOption=$1
-    else
         dir=$1
-    fi
-fi
-
-if [ $# -ge 2 ]
-then
-    dir=$2
-fi
-
-if [ $dir != "_" ]
-then
-    if [ -d $dir ]
-    then
-        cd $dir
     else
-        echo $0: directory $dir does not exist
-        exit 1
+        makeOption=$1
     fi
+
+    if [ $# -ge 2 ]
+    then
+        dir=$2
+    fi
+
+    # alternative name for the Make sub-directory
+    if [ $# -ge 3 ]
+    then
+        MakeDir=$3
+    fi
+
+    if [ "$dir" ]
+    then
+        cd $dir 2>/dev/null || {
+            echo "$Script error: could not change to directory '$dir'" 1>&2
+            exit 1
+        }
+    fi
+
+    # provide some feedback
+    echo "$Script ${dir:-./}"
 fi
 
-if [ $# = 3 ]
+#------------------------------------------------------------------------------
+# Recurse the directories tree
+#------------------------------------------------------------------------------
+
+if [ "$makeOption" = all ]
 then
-	MakeDir=$3
-else
-    MakeDir=Make
+    if [ -e Allclean ]
+    then
+        ./Allclean
+        exit $?
+    elif [ ! -d $MakeDir ]
+    then
+        for dir in `find . \( -type d -a -name Make \) -printf "%h "`
+        do
+            $0 $dir
+        done
+        exit 0
+    fi
+
+    # This is the end of the recursion down the application directories tree
+    # so remove the "all" option so that the call to make builds the application
+    makeOption=
 fi
+
+#------------------------------------------------------------------------------
+# Check the existance of the Make directory
+#------------------------------------------------------------------------------
 
 if [ ! -d $MakeDir ]
 then
-    echo $0: $MakeDir directory does not exist, exiting !
-    exit 0
+    echo "$Script error: '$MakeDir' directory does not exist" 1>&2
+    exit 1
 fi
 
+# -----------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------
-
-rm -rf $MakeDir/$WM_OPTIONS $MakeDir/classes
+rm -rf $MakeDir/$WM_OPTIONS $MakeDir/classes 2>/dev/null
 
 find . -name "*.dep" -exec rm {} \;
 
-if [ "$makeOption" = "lib" -o "$makeOption" = "libso" -o "$makeOption" = "libo" ]
-then
-    if [ -d "lnInclude" ]
-    then
-        rm -rf lnInclude
-    fi
-fi
+case "$makeOption" in
+lib | libso | libo )
+    rm -rf lnInclude 2>/dev/null
+    ;;
+esac
 
-rm -rf ii_files
-rm -rf Templates.DB
-
+rm -rf ii_files Templates.DB 2>/dev/null
 rm -f so_locations
-
 
 #------------------------------------------------------------------------------

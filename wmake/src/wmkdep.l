@@ -56,7 +56,7 @@ void importDirectory(const char* dirName);
 
 %}
 
-%s CMNT CFNAME SCFNAME JFNAME FFNAME
+%x CMNT CFNAME SCFNAME JFNAME FFNAME
 %%
 
 "//".*\n                  ;            /* remove c++ style one line comments */
@@ -304,19 +304,20 @@ void nextFile(const char* fileName)
         exit(1);
     }
 
-    buffers[currentBuffer++] = YY_CURRENT_BUFFER;
+    /* Pointer to new file which is set if the file is successfully opened */
+    FILE* newyyin = NULL;
 
-    if (!(yyin = fopen(fileName, "r")))
+    if (!(newyyin = fopen(fileName, "r")))
     {
         for (d=0; d<nDirectories; d++)
         {
             pathName = addDirectoryName(directories[d], fileName);
 
-            if ((yyin = fopen(pathName, "r")))
+            if ((newyyin = fopen(pathName, "r")))
             { 
                 printf("%s: %s\n", depFile, pathName);
-                yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-                BEGIN(INITIAL);
+                buffers[currentBuffer++] = YY_CURRENT_BUFFER;
+                yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
 
                 free(pathName);
 
@@ -325,6 +326,7 @@ void nextFile(const char* fileName)
 
             free(pathName);
         }
+
         fprintf
         (
             stderr, 
@@ -333,16 +335,14 @@ void nextFile(const char* fileName)
         );
 
         fflush(stdout);
-        currentBuffer--;
-        BEGIN(INITIAL);
     }
     else
     {
         printf("%s: %s\n", depFile, fileName);
         fflush(stdout);
 
-        yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-        BEGIN(INITIAL);
+        buffers[currentBuffer++] = YY_CURRENT_BUFFER;
+        yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
     }
 }
 

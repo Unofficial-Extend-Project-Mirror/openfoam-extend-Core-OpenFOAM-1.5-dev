@@ -27,61 +27,133 @@
 #     wmakeLnInclude
 #
 # Description
-#     Link all the source files in the $1 directory into $1/lnInclude
+#     Link all the source files in the <dir> directory into <dir>/lnInclude
 #
-#     Usage: wmakeLnInclude <directory> <ln options>
+#     Usage: wmakeLnInclude [-f] <dir> [-lnOption]
 #
+#     The desired source files:
+#         *.C *.H *.h *.cpp *.cxx *.hpp *.hxx
+#
+#     Avoid
+#         *.c (C source)
+#         .#* (cvs recovered files)
+#------------------------------------------------------------------------------
+Script=${0##*/}
+
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: $Script [-f] <dir> [-lnOption]
+
+    Link all the source files in the <dir> into <dir>/lnInclude
+    * Use '-f' to force an update when the lnInclude directory already exists.
+
+USAGE
+   exit 1
+}
+
 #------------------------------------------------------------------------------
 
-BASEDIR=""
-LNOPTION="-s"
+# simple option parsing
+unset forceUpdate
+unset findOpt
 
-if [ $# = 1 ]
+# simple parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)   # provide immediate help
+        usage
+        ;;
+    -f)
+        shift
+        forceUpdate=1
+        ;;
+    -*)
+        usage "unknown option/argument: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+baseDir=$1
+# convert incorrect path/dir/lnInclude to something sensible
+while [ "${baseDir##*/}" = lnInclude ]
+do
+    baseDir="${baseDir%/*}"
+    if [ "$baseDir" = lnInclude ]
+    then
+        baseDir="."
+    fi
+done
+incDir=$baseDir/lnInclude
+
+
+if [ $# -eq 1 ]
 then
-    BASEDIR=$1
-
-elif [ $# = 2 ]
+    lnOpt="-s"
+elif [ $# -eq 2 ]
 then
-    BASEDIR=$1
-    LNOPTION=$2
-
+    lnOpt="$2"
 else
-    echo $0: wrong number of arguments
-    echo "usage : wmakeLnInclude <dir> [-lnOption]"
-    exit 1
+    usage "ERROR: incorrect number of arguments"
 fi
 
-if [ ! -d $BASEDIR ]
+
+if [ ! -d $baseDir ]
 then
-    echo Base directory $BASEDIR does not exist, exiting.
+    echo "$Script error: base directory $baseDir does not exist" 1>&2
+    exit 2
+fi
+
+if [ -d $incDir ]
+then
+    if [ ! "$forceUpdate" ]
+    then
+       # echo "$Script error: include directory $incDir already exists" 1>&2
+       exit 0
+    fi
+else
+    mkdir $incDir
+fi
+
+if [ ! -d $incDir ]
+then
+    echo "$Script error: failed to create include directory $incDir" 1>&2
     exit 0
 fi
 
-INCDIR=$BASEDIR/lnInclude
-
-if [ -d $INCDIR ]
-then
-    #echo $0: include directory $INCDIR already exists, exiting.
-    exit 0
-fi
-
-mkdir $INCDIR
-
-if [ ! -d $INCDIR ]
-then
-    echo $0: failed to create include directory $INCDIR
-    exit 0
-fi
+cd $incDir || exit 1
 
 
 # Link include files
 # ~~~~~~~~~~~~~~~~~~
+echo "$Script: linking include files to $incDir"
 
-echo $0: linking include files to $INCDIR
-echo
+#
+# remove any broken links first (this helps when file locations have moved)
+#
+find -L . -type l -exec rm \{\} \;
 
-cd $INCDIR
-find .. -name lnInclude -prune -o -name .svn -prune -o \( -name '*.[hcHCx]*' -o -name '*.type' \) -exec ln $LNOPTION {} . \;
-
+#
+# create links, avoid recreating links unless necessary
+#
+find .. $findOpt \
+    \( -name lnInclude -o -name Make -o -name config \) -prune \
+ -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
+ -a ! -name ".#*" \
+ -print | \
+    while read src
+    do
+        link=$(readlink ${src##*/})
+        if [ "$link" != "$src" ]
+        then
+            rm $link 2>/dev/null
+            ln $lnOpt $src .
+        fi
+    done
 
 #------------------------------------------------------------------------------

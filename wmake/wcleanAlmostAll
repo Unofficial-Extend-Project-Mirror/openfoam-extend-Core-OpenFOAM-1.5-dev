@@ -24,7 +24,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmakeAll
+#     wcleanAlmostAll
 #
 # Description
 #     script that searches all the directories below the current for the
@@ -39,22 +39,19 @@ then
 fi
 
 
-if [ -d lib ]
-then
-    rm -rf lib/*
-fi
+for dir in lib applications/bin
+do
+   if [ -d $dir ]
+      rm -rf $dir/*
+   fi
+done
 
-if [ applications/bin ]
-then
-    rm -rf applications/bin/*
-fi
+( cd tutorials && ./Allclean )
 
-cd tutorials ; ./Allclean ; cd ..
-
-#find . -name '*~' -exec rm {} \;
+# find . -name '*~' -exec rm {} \;
 find . -name '*.dep' -exec rm {} \;
 
-find `find .  -depth \( -name "Make[.A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make[.A-Za-z]*" ! -name "*Make" \) -exec rm -r {} \;
+find `find . -depth \( -name "Make[.A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make[.A-Za-z]*" ! -name "*Make" \) -exec rm -r {} \;
 
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 

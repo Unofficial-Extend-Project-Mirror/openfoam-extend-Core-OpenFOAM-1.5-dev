@@ -24,43 +24,44 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmakeAll
+#     wcleanAll
 #
 # Description
-#     script that searches all the directories below the current for the
-#     object file directories of all machines and then deletes them.
+#     search all the directories below the current for the object file
+#     directories of all machines and delete them.
 #
 #------------------------------------------------------------------------------
-
-if [ ! -d bin -o ! -d src ]
+if [ "$1" = "-h" -o "$1" = "-help" ]
 then
-   echo $0: not in the project top level directory !
-   exit 1
+    echo "Usage: ${0##*/}"
+    echo
+    echo "    Remove all object files and *.dep files"
+    exit 1
 fi
 
+[ -d bin -a -d src ] || {
+    echo "${0##*/}: not in the project top level directory"
+    exit 1
+}
 
-if [ -d lib ]
-then
-    rm -rf lib/*
-fi
+for dir in lib applications/bin
+do
+    echo "Removing $dir/"
+    [ -d $dir ] && rm -rf $dir/*
+done
 
-if [ applications/bin ]
-then
-    rm -rf applications/bin/*
-fi
-
-cd tutorials ; ./Allclean ; cd ..
-
-find . -name '*~' -exec rm {} \;
+echo "Removing *.dep files"
 find . -name '*.dep' -exec rm {} \;
 
-find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
+echo "Cleaning Make subdirectories"
+find `find . -depth \( -name "Make.[A-Za-z]*" -o -name Make \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
 
+echo "Removing lnInclude and intermediate directories"
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
+echo "Removing misc files"
 find . \( -name exe -o -name log -o -name so_locations \) -exec rm {} \;
 
-#rm -rf src/mpich-${MPICH_VERSION}/platforms
-#rm -rf src/mico-${MICO_VERSION}/platforms
+( cd tutorials && ./Allclean )
 
 #------------------------------------------------------------------------------

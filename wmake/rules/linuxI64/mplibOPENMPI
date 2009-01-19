@@ -1,4 +1,0 @@
-PFLAGS     = -DOMPI_SKIP_MPICXX
-PINC       = -I$(OPENMPI_ARCH_PATH)/include
-PLIBS      = -L$(OPENMPI_ARCH_PATH)/lib -lmpi
-

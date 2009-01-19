@@ -60,16 +60,17 @@ LIB_WM_OPTIONS_DIR = $(LIB_DIR)/$(WM_OPTIONS)
 OBJECTS_DIR        = $(MAKE_DIR)/$(WM_OPTIONS)
 CLASSES_DIR        = $(MAKE_DIR)/classes
 
-SYS_INC            = 
-SYS_LIBS           = 
+SYS_INC            =
+SYS_LIBS           =
 
-PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude
+PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude -I$(LIB_SRC)/OSspecific/$(WM_OS)/lnInclude
 PROJECT_LIBS       = -l$(WM_PROJECT)
+PROJECT_VERSION    = $(shell printf -- "-DPROJECT_VERSION=%d%03d%03d" $$(echo $(WM_PROJECT_VERSION) | sed -e 's/\./ /g'))
 
-EXE_INC            = 
-EXE_LIBS           = 
+EXE_INC            =
+EXE_LIBS           =
 
-LIB_LIBS           = 
+LIB_LIBS           =
 
 
 #------------------------------------------------------------------------------
@@ -151,7 +152,7 @@ $(EXE):  $(OBJECTS)
 	     $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(EXE)
 
 exe:     $(SEXE)
-	     @echo \`$(SEXE)\' is up to date.
+	     @echo \'$(SEXE)\' is up to date.
 
 $(SEXE): $(OBJECTS)
 	     @$(WM_SCRIPTS)/mkObjectDir $(SEXE)
@@ -164,7 +165,7 @@ $(SEXE): $(OBJECTS)
 #------------------------------------------------------------------------------
 
 libso:   $(LIB).$(SO)
-	     @echo \`$(LIB).$(SO)\' is up to date.
+	     @echo \'$(LIB).$(SO)\' is up to date.
 
 $(LIB).$(SO): $(OBJECTS)
 	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
@@ -173,7 +174,7 @@ $(LIB).$(SO): $(OBJECTS)
 	     $(LINKLIBSO) $(LOCAL_OBJECTS) -L$(LIB_WM_OPTIONS_DIR) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
 
 lib:     $(LIB).a
-	     @echo \`$(LIB).a\' is up to date.
+	     @echo \'$(LIB).a\' is up to date.
 
 $(LIB).a: $(OBJECTS)
 	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
@@ -182,7 +183,7 @@ $(LIB).a: $(OBJECTS)
 	     $(RANLIB) $(LIB).a
 
 libo:    $(LIB).o
-	     @echo \`$(LIB).o\' is up to date.
+	     @echo \'$(LIB).o\' is up to date.
 
 $(LIB).o: $(OBJECTS)
 	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
@@ -190,7 +191,7 @@ $(LIB).o: $(OBJECTS)
 	     $(LD) -r -o $(LIB).o $(OBJECTS)
 
 jar:     $(LIB).jar
-	     @echo \`$(LIB).jar\' is up to date.
+	     @echo \'$(LIB).jar\' is up to date.
 
 $(LIB).jar: $(OBJECTS)
 	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)

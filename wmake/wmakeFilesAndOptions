@@ -27,42 +27,41 @@
 #     wmakeFilesAndOptions
 #
 # Description
-#     Script to scan the current directory for directories and source files 
+#     Script to scan the current directory for directories and source files
 #     and construct Make/files and Make/options
 #
 #     Usage : wmakeFilesAndOptions
 #
 #------------------------------------------------------------------------------
+Script=${0##*/}
 
-if [ ! "$WM_OPTIONS" ]
+#
+# check environment variables
+#
+for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
+do
+    eval test "\$$check" || {
+        echo "$Script error: environment variable \$$check not set" 1>&2
+        exit 1
+    }
+done
+
+if [ -d Make ]
 then
-    echo 'makeFilesAndOptions : environment variable $WM_OPTIONS not set, exiting !'
+    echo "$Script error: Make directory already exists" 1>&2
     exit 1
-fi
-
-
-if [ ! "$WM_DIR" ]
-then
-    echo 'makeFilesAndOptions : environment variable $WM_DIR not set,'
-    exit 1
-fi
-
-
-if [ ! "$WM_LINK_LANGUAGE" ]
-then
-    echo 'makeFilesAndOptions : environment variable $WM_LINK_LANGUAGE not set,'
-    exit 1
-fi
-
-
-if [ ! -d Make ]
-then
+else
     mkdir Make
 fi
 
+[ -e Make/files ] || {
+    echo "$Script: Creating files"
+    $WM_DIR/scripts/makeFiles
+}
 
-$WM_DIR/scripts/makeFiles
-$WM_DIR/scripts/makeOptions
-
+[ -e Make/options ] || {
+    echo "$Script: Creating options"
+    $WM_DIR/scripts/makeOptions
+}
 
 #------------------------------------------------------------------------------
