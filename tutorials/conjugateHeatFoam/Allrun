@@ -1,0 +1,14 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="conjugateCavity"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+for case in $cases
+do
+    runApplication $application $case
+done 
+

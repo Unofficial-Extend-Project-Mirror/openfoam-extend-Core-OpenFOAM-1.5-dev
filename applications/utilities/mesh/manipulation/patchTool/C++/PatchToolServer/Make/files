@@ -1,0 +1,10 @@
+PatchToolServer.C
+IPatchToolServerImpl.C
+FoamXErrors.C
+LogEntry.C
+LogManager.C
+NameServer.C
+Orb.C
+Paths.C
+
+EXE = $(FOAM_APPBIN)/PatchToolServer

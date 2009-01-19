@@ -1,0 +1,116 @@
+MODULE foamGetRoots
+CATEGORY Foam
+DESCRIPTION Reads and returns root paths defined in ~/.foam2.2/controlDict
+OUTPUT roots[cache: 1]; string;
+
+MODULE foamGetCases
+CATEGORY Foam
+DESCRIPTION Returns case directories in selected root
+INPUT rootDir; string; (none); 
+OUTPUT caseNames[cache: 1]; string;
+
+MODULE foamCreateDatabase
+CATEGORY Foam
+DESCRIPTION Read selected case
+INPUT rootDir; string; (none);
+INPUT caseName; string; (none);
+OUTPUT foamDatabase[cache: 2]; object;
+
+MODULE foamReadMesh
+CATEGORY Foam
+DESCRIPTION Read selected case
+INPUT foamDatabase; object; (none);
+OUTPUT foamMesh[cache: 2]; object;
+OUTPUT mesh[cache: 2]; field;
+
+MODULE foamGetTimes
+CATEGORY Foam
+DESCRIPTION Select nearest time
+INPUT foamDatabase; object; (none);
+INPUT dummy; object; (none);
+OUTPUT timeValues[cache: 2]; scalar list;
+OUTPUT timeNames[cache: 2]; string list;
+
+MODULE foamNearestTime
+CATEGORY Foam
+DESCRIPTION Select nearest time
+INPUT timeValues; scalar list; (none);
+INPUT timeEstimate; scalar; (none);
+OUTPUT timeValue[cache: 1]; scalar;
+OUTPUT timeIndex[cache: 1]; object;
+
+MODULE foamChangeTime
+CATEGORY Foam
+DESCRIPTION Change time (move meshField if required)
+INPUT timeValue; scalar; (none);
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+OUTPUT timeValue2[cache: 0]; scalar;
+OUTPUT foamMesh2[cache: 0]; object;
+OUTPUT mesh2[cache: 0]; field;
+OUTPUT lagrangianPositions[cache: 0]; field;
+
+MODULE foamGetFieldNames
+CATEGORY Foam
+DESCRIPTION Return valid field names for selected time
+INPUT foamDatabase; object; (none);
+INPUT timeValue; scalar; (none);
+INPUT fieldType; string; (none);
+OUTPUT fieldName[cache: 1]; string list;
+
+MODULE foamReadField
+CATEGORY Foam
+DESCRIPTION Read selected field
+INPUT fieldName; string; (none);
+INPUT fieldType; string; (none);
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+INPUT lagrangianPositions; field; (none);
+OUTPUT volField[cache: 2]; field;
+OUTPUT pointField[cache: 2]; field;
+
+MODULE foamIndexCells
+CATEGORY Foam
+DESCRIPTION Read selected field
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+OUTPUT volField[cache: 2]; field;
+
+MODULE foamGetSet
+CATEGORY Foam
+DESCRIPTION Gets indices of selected cells
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+INPUT setName; string; (none);
+OUTPUT volField[cache: 2]; field;
+
+MODULE foamIndexPatches
+CATEGORY Foam
+DESCRIPTION Read selected field
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+OUTPUT patchField[cache: 2]; field;
+
+MODULE foamReadSTL
+CATEGORY Foam
+DESCRIPTION Read STL boundary description
+INPUT foamDatabase; object; (none);
+OUTPUT stlMesh[cache: 2]; field;
+
+MODULE foamFeatureLines
+CATEGORY Foam
+DESCRIPTION Extracts feature lines
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+INPUT patchNumbers; scalar list; (none);
+INPUT featureAngle; scalar; (none);
+OUTPUT featureLines[cache: 2]; field;
+
+MODULE foamShowConnections
+CATEGORY Foam
+DESCRIPTION Extracts mesh edges
+INPUT foamMesh; object; (none);
+INPUT mesh; field; (none);
+OUTPUT meshEdgeLines[cache: 2]; field;
+
+

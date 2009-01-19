@@ -1,0 +1,250 @@
+PatchTool - A tool to set patches on Foam meshes.
+
+Contents
+--------
+1. Intro
+2. Keys
+2. Quick tutorial
+3. Working on surface files
+4. Other
+
+
+
+Intro
+-----
+PatchTool is a tool to combine faces into patches. In normal operation
+it operates directly on existing Foam meshes. Its action will be to
+change the patch information on the faces (on the outside) of the mesh
+and write a changed mesh.
+
+The tool is split into a 3D rendering window and a GUI panel. This
+panel is organized around a number of tabs, each for doing a separate
+task:
+
+Case        : Connect to the (C++) server and load and/or save meshes.
+Patch       : Create / Delete patches
+Faces       : Manipulate the current selected set of faces
+View        : Various concerning 3D display
+Display     : Determine what to display
+DisplayList : Operate on displayed items
+
+In general the Patch and Faces tabs contain all the functionality to
+actually change a mesh. View, Display and DisplayList operate only on
+the  display representation of the mesh and serve to allow 'picking' of
+faces and patches. The displayable objects can be created, deleted and
+hidden at will without affecting the mesh.
+
+The patching works on the concept of a current patch and a current set
+of faces. Patches can be added, deleted and set to be the current one.
+Mouse 'picking' appends to the current face set. Once the current face
+set is complete the faces in it can be changed to be in the current
+patch.
+
+All changes made to any patches are written only when explicitly
+'save'd so one can always reload the current mesh to start again. There
+is no undo facility once the mesh has been written but it will never
+overwrite the 'constant/polyMesh' directory. Instead the mesh will be
+written to the directory indicated by the current database time
+('startTime' in the controlDict)
+
+This tool can also be used to 'patchify' surfaces read from file. In a
+chapter below this is used to set patches on a decomposed case.
+
+
+
+Keys
+----
+Mouse:
+    left : rotate
+    middle: scale
+    right: pan
+
+    shift+left:pick face/edge/vertex.
+        Default behaviour is to add selected individual
+        item to its set. E.g. picking on a patch will add the face to the
+        face set. This behaviour can be changed to add the whole patch
+        ('Add All' in 'SelectMode' menu)
+
+    shift+right:unpick face/edge/vertex. ,,
+
+
+
+Quick tutorial
+--------------
+Start PatchTool on e.g. the cavity from the tutorial. We will use the
+tool to change the left wall into a patch called 'inlet', the right
+wall into a patch called 'outlet' and the remaining faces into a patch
+'rest'. Run the blockMesh as indicated in the tutorial to create a
+polyMesh to start from and start PatchTool:
+
+    runPatchTool <root> tutorial
+
+Wait for a message of the form 'CasePreServer running...' to appear.
+(this is the C++ server indicating it is ready) Go to the <Case> tab
+and click on  connect. 
+
+The Root, Case and Time fields should now be set. Load a mesh and
+change to the <Display> tab. Select 'Create Faces' to create a visual
+representation of the existing patches. In the 3D display the object
+should appear. Use left mouse for rotation, middle for zoom and right
+for pan.
+
+(
+Try selecting faces by using <shift> + left mouse or deselecting with
+<shift> + right mouse. This will select individual faces. Change the
+'SelectMode' in the <View> tab to 'Add all' to select whole patches.
+Alternatively select whole patches with the functionality in the
+<Faces> tab. 'Clear' to clear the face set, 'Add from' to add a whole
+patch, 'Invert' to invert the selection.
+)
+
+In the <Patch> tab add patches 'inlet', 'outlet', 'rest' by entering
+the name in the text field and pressing 'Add'. Select the newly create
+patches one by one. The 'Type' and 'Size' field should show that they
+are of type 'empty' and have 0 faces. Change the type of all three to
+'patch': use the Type menu to select the correct type and press
+'Change'.
+
+Method1
+-------
+Set the patch you want to add faces to. 'Clear' the current faceSet.
+Pick the faces you want to change. Use 'Change to' in the <Faces> tab to
+apply the change.
+
+This method works well when the patches are small.
+
+Method2
+-------
+In the <Display> tab 'remove' the display faces and create feature
+edges instead. Choose a feature edge angle which picks up patch
+boundaries. Now in the <Patch> tab select AutoPatch. This will
+subdivide the surface into patches separated by the feature edges. The
+patches will be called 'dummyPatchXX' with XX a unique number. In the
+cavity tutorial there will be six of these for the six sides.
+
+Select the current patch to be the newly created 'inlet'. Set the
+selection mode (in the <View> tab) to select all and pick on the
+dummyPatch created for the left side. In the <Faces> tab 'Change to'
+these faces to become the current patch. Likewise put the faces on the
+right dummyPatch into the 'outlet' patch.
+
+The remaining faces can be collected by first collecting those from the
+inlet and the outlet patch and then 'Invert'ing the selection. These
+faces can now be put into the 'rest' patch.
+
+The empty dummy and original patches can now be deleted (<Patch> tab)
+and the changes saved to the polyMesh. Remember that this mesh gets
+saved to the current time directory, not to the constant/ directory.
+You'll have to move the directory by hand if you would like this to be
+the case.
+
+
+
+Working on surface files
+------------------------
+The whole process of patching is practically the same with the only 
+differences being that instead of loading from a mesh one now loads
+from a surface file. Likewise saving is now done to file instead of to
+a mesh.
+
+The input format is any of the ones supported by triSurface (currently
+GTS, OBJ, OFF, STL and TRI). The output format is Foam triSurface
+format.
+
+As an example we will set patches on an already decomposed case using
+surface files.
+
+1]
+Use the surfaceMeshTriangulate tool (in the surface tools collection)
+to create a triangulated surface of the boundary faces of the
+decomposed case
+
+    mpirun ... surfaceMeshTriangulate <root> <case> -parallel
+
+This will create a constant/triSurface/ directory in the case directory
+with the boundary faces of the individual partitions combined into one
+big surface (excluding the processor patches)
+
+2]
+Extract the triSurface files into Foam format:
+
+    surfaceRead <root> <case> <case>.foam
+
+This will combine the triSurface/ files into a single Foam surface file.
+
+3]
+Load this file into PatchTool and 'patchify' as usual. Save the
+repatched file.
+
+4]
+Apply the resulting patch information to the decomposed case with the
+surfaceToPatch tool. This tool does not run in parallel so has to be
+run on all the individual partitions one by one:
+
+    surfaceToPatch <root>/<case> <processorn> <case>.foam
+
+This tool reinserts the processor patches (these should never be
+repatched since the ordering has to be consistent with the neighbouring
+processor patch) and applies the new patching from the Foam surface
+file <case>.foam to the mesh. 
+
+
+
+Other
+-----
+polyMesh/boundary: This is the file that contains the patch
+information. Normally one not touch this but expert users can e.g.
+remove empty patches by editing this file.
+
+patching algorithm: The PatchTool tool internally works on a
+triangulated surface. If working on a mesh ('Load Mesh') this surface
+is automatically extracted from the boundary faces. The application of
+patch information (on the triangles) to the mesh ('Save Mesh') is done
+on a geometric basis. It finds for every boundary face in the original
+mesh the nearest triangle and takes its patch information. There are
+two problems with this approach:
+
+- if the triangulate surface was loaded from a file and does not
+closely follow the mesh the nearest triangle might be the 'wrong' one.
+In this case save the mesh, exit PatchTool, restart it and reload the
+new mesh (make sure the time in the controlDict picks up the new mesh)
+and correct the wrong mesh. Since one now works on a closely fitting
+surface representation the patching should be taken over correctly.
+
+- if there are faces on top of eachother the nearest might be the wrong
+one. In this case the matching algorithm tries to find the nearest
+triangle with a close enough normal. This however still can go wrong if
+there are faces with the same normal occupying the same space.
+
+To see the different faces use the 'DrawMode' facility on the <View>
+tab to e.g. set the culling mode to back culling to hide the face with
+away pointing normal. Also it helps to hide (<DIsplayList> tab) all non
+relevant display shapes so they will not be picked on by accident.
+
+Coupled patches: Coupled patches (e.g. cyclics, processorPatches)
+cannot be repatched since this would change the ordering and this needs
+to be consistent among both sides of a coupled patch. Processor patches
+are constructed by the decomposition tools in Foam and are generally
+not useful to set by hand. Cyclics are currently not supported by
+PatchTool.
+
+Corba/C++ Server: PatchTool relays all its mesh operations to a C++
+server communicating with the GUI through Corba. This setup is (almost)
+identical to that of FoamX and for problems refer to the FoamX
+documentation. The difference is that PatchTool allows one to disconnect
+from the server, kill off the server and restart it on a different case
+and reconnect to the server, all without leaving the GUI. Likewise the
+GUI can be killed and restarted and reconnected to an existing server
+(the mesh will need to be reloaded though)
+
+DisplayList: All items in the display list can be (un)hidden by
+selecting one or more and pressing Hide or Show. Likewise they can be
+removed (Remove). 
+
+Face/Edge/Vertex: In the View panel these numbers are relating to
+internal properties. The Face number is the one on the original
+polyMesh after subtracting the number of internal faces and removing
+all coupled boundaries. The edge and vertex number have no direct
+relation to those on the polyMesh.
+
+

@@ -1,0 +1,155 @@
+OpenFOAM release notes for version 1.4 
+Hrvoje Jasak, 21/April/2007
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+OpenFOAM-1.4 is a significant upgrade to version 1.3 in ways which are
+outlined below.  This release passes all our standard tests and the
+tutorials have been broadly checked.  If there are any bugs, please
+report them using the instructions set out in:
+http://www.openfoam.org/bugs.html
+
+Many of the developments in the release are towards improving the
+efficiency and robustness of OpenFOAM for large-scale engineering CFD,
+including including low and high speed aerodynamics and multiphase flows.
+The changes and developments are as follows:
+
+Linux version
+~~~~~~~~~~~~~
+The binary packs of the OpenFOAM release were compiled using SuSE
+Linux version 10.1.  We recommend that users run OpenFOAM on this or an
+equivalent version.  Running on one version lower has been generally
+successful in testing, with one notable problem: the binary distribution
+of the GCC 4.1.2 compiler was found to be incompatible with system 
+utilities of SuSE Linux 9.3.  This can be overcome by compiling GCC
+4.1.2 from sources.
+
+C++ Compiler version
+~~~~~~~~~~~~~~~~~~~~
+- released compiled with GCC 4.1.2, the latest release.
+- built in support for the Intel C++ 9.1 compiler.
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Note: The choice of compiler is controlled by the setting of the 
+  $WM_COMPILER and $WM_COMPILER_ARCH environment variables in the 
+  .OpenFOAM1.3/bashrc (or cshrc) file
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Developments to solvers (applications)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Interface-capturing solver family: incorporate the new multidimensional
+  universal limited explicit solver (MULES) for efficient, unconditionally
+  bounded solution.
+- cavitatingFoam: new solver for fully compressible two-phase flow including
+  cavitation.
+- multiphaseInterFoam: an extension of the interFoam solver for an arbitrary
+  number of phases.
+- rhopSonicFoam: additional control parameters added.
+- solidDisplacementFoam and solidEquilibriumDisplacementFoam: replacement
+  solvers for linear-elastic stress analysis including a solution
+  acceleration procedure for steady-state problems and greater accuracy for
+  bending problems.
+ 
+Developments to utilities
+~~~~~~~~~~~~~~~~~~~~~~~~~ 
+- New ideasUnvToFoam converter to convert meshes from I-DEAS .unv format to
+  OpenFOAM format.
+- ccm26ToFoam: upgraded CCM mesh converter to use CCM version 2.6 library and
+  handle boundary regions better.
+- foamPackSource to pack a source directory, e.g. utility or solver into a
+  .tgz file that removes all superfluous files, e.g. binaries, dependencies,
+  before packing.
+- New patchAverage and patchIntegrate utilities to calculate average and
+  integrand of fields over all patches.
+- New redistributeMeshPar utility which reads a decomposed mesh and
+  redistributes cells across processors (without reconstructing the mesh on a
+  single processor).
+
+Model development
+~~~~~~~~~~~~~~~~~
+- Porous media model including power-law inertial and viscous models for
+  either explicit or implicit implementation in any of the pressure-velocity
+  solvers (demonstration example included).
+- Multiple reference frames (MRF) support for any of the pressure-velocity
+  solvers (demonstration example included).
+- Flexible and efficient finite volume based mesh motion solvers (replacing
+  the finite element mesh motion solvers).
+- Implementation of the k-omega  SST turbulence model for high-Re external and
+  internal flows.
+- Generalisation of particle and cloud base classes in the Lagrangian library
+  to make it easier to create more complex, derived entities.
+
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
+- Generalisation of total pressure boundary conditions, e.g. for entrainment
+  boundaries, and improvements to corresponding velocity boundary conditions.
+- Generalisation of wave transmissive boundary conditions for compressible
+  flow.
+- Mapping plane boundary condition, e.g. for fully-developed inlet conditions,
+  particularly for (but not limited to) LES.
+- Time varying boundary condition interpolated from data, e.g. from
+  experiment.
+
+Generalised geometric/algebraic multigrid (GAMG) solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Includes runtime selectable geometric and algebraic agglomeration algorithms
+  including MGridGen.
+- Has an option for agglomeration to be cached.
+- Operates a flexible V-cycle including pre- and post-smoothing.
+- Optionally agglomerates coarsest matrix onto master processor and uses
+  direct solver thus significantly reducing the communications overhead on
+  latency-dominated Beowulf clusters.
+- Can be used to solve both symmetric and asymmetric matrices.
+
+Preconditioned conjugate gradient solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- With runtime selectable preconditioner including: diagonal
+  incomplete-Cholesky (DIC) (equivalent to ICCG); GAMG; diagonal
+  preconditioning or, optionally, no preconditioning.
+
+Preconditioned bi-conjugate gradient solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- With runtime selectable preconditioner including: diagonal incomplete-LU
+  (DILU) (equivalent to BICCG); diagonal preconditioning or, optionally, no
+  preconditioning.
+
+Discretisation schemes
+~~~~~~~~~~~~~~~~~~~~~~~
+- Improved gradient limiters, including cell and face-based multidimensional
+  forms, particularly useful for improving the accuracy of the general linear
+  upwind scheme.
+- New outletStabilised scheme for entrainment or outlet conditions where flow
+  reversal may occur.
+
+Function objects
+~~~~~~~~~~~~~~~~
+- Implementation of a general method to add logging and post-processing
+  functionality to codes, selected at run-time.
+- The current release is supplied with a more flexible and general replacement
+  for probes, implemented as a function object; for an example, see the
+  tutorials/oodles/pitzDaily case, also configurable in FoamX.
+
+Changes to defaults for parallel running
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- In .OpenFOAM1.4/controlDict, floatTransfer is now switched ON and
+  scheduledTransfer is switched OFF.
+- We recommend that users run tests to find the best settings for their own 
+  hardware.
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Full implementation of symmetric and spherical tensors to improve
+  consistency, elegance, computational speed and storage, particularly for
+  turbulence models.
+- Simple parallelised build system with wmake.
+- New writeAndEnd control parameter, to program an exit from a time loop.
+- Implementation of multiple constraints at corners for volField to pointField
+  interpolation.
+- An improved version of octree.
+- Prefetch cache optimisations for all solvers for the Itanium2 processor.
+
+Known issues
+~~~~~~~~~~~~
+- On a wedge geometry with swirl the current volPointInterpolation method
+  removes the swirl component when interpolating from the cell centre values
+  to vertices; this is a minor issue for post-processing and can be avoided
+  by visualising cell centre rather than vertex values for vector fields.
+

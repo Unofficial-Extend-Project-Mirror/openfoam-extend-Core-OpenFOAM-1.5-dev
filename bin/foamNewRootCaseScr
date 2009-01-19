@@ -1,0 +1,4 @@
+/^instance.*$/d
+s/^local.*$/instance\
+local\
+/

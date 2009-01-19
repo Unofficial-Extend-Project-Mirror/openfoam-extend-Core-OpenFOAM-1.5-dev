@@ -1,0 +1,261 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     wmake
+#
+# Description
+#     General, easy to use make system for multi-platform development.
+#
+#------------------------------------------------------------------------------
+# check environment variables
+#------------------------------------------------------------------------------
+
+if [ ! "$WM_OPTIONS" ]
+then
+    echo $0: 'environment variable $WM_OPTIONS not set, exiting !'
+    exit 1
+fi
+
+
+if [ ! "$WM_LINK_LANGUAGE" ]
+then
+    echo $0: 'environment variable $WM_LINK_LANGUAGE not set, exiting !'
+    exit 1
+fi
+
+
+if [ ! "$WM_DIR" ]
+then
+    echo 'wmake : environment variable $WM_DIR not set, exiting !'
+    exit 1
+fi
+
+
+if [ ! "$WM_PROJECT" -o ! "$WM_PROJECT_DIR" ]
+then
+    if [ $# != 1 -o "$1" != "exe" ]
+    then
+        echo $0: 'environment variable $WM_PROJECT'
+        echo ' or $WM_PROJECT_DIR  not set'
+        echo '        for building project library or executable, exiting !'
+        exit 1
+    fi
+fi
+
+
+#------------------------------------------------------------------------------
+# Select the version of make to be used
+#------------------------------------------------------------------------------
+
+make="make"
+
+if [ "$WM_NCOMPPROCS" ]
+then
+    if [ "$WM_NCOMPPROCS" -ne 1 -a ! "$MAKEFLAGS" ]
+    then
+        lockDir=$HOME/.wmakeScheduler
+
+        if [ -d $lockDir ]
+        then
+            rm -f $lockDir/*
+        else
+            mkdir -p $lockDir
+        fi
+
+        make="make --no-print-directory -j "$WM_NCOMPPROCS
+    fi
+fi
+
+
+#------------------------------------------------------------------------------
+# check arguments and change to the directory in which to run wmake
+#
+# wmake
+# wmake dir
+# wmake target dir
+# wmake target dir MakeDir
+#
+# target is one of the targets in the Makefile
+# (e.g. Make/linuxAMD64Gcc4DPOpt/fvMesh.o) or one of the special targets:
+#   lib     : build statically linked lib (.a)
+#   libso   : build dynamically linked lib (.so)
+#   libo    : ?
+#   jar     : build Java jar
+#   exe     : build statically linked executable
+#   project : ?
+#   all     : all subdirectories
+#------------------------------------------------------------------------------
+
+makeOption=""
+dir="_"
+
+if [ $# -ge 1 ]
+then
+    if [ -d $1 ]
+    then
+        dir=$1
+    else
+        makeOption=$1
+    fi
+fi
+
+if [ $# -ge 2 ]
+then
+    dir=$2
+fi
+
+if [ $dir != "_" ]
+then
+    if [ -d $dir ]
+    then
+        cd $dir
+    else
+        echo $0: directory $dir does not exist
+        exit 1
+    fi
+fi
+
+
+#------------------------------------------------------------------------------
+# Check if there is a special name provided for the Make sub-directory
+#------------------------------------------------------------------------------
+
+if [ $# = 3 ]
+then
+    MakeDir=$3
+else
+    MakeDir=Make
+fi
+
+
+#------------------------------------------------------------------------------
+# Recurse the application directories tree
+#------------------------------------------------------------------------------
+
+if [ "$makeOption" = "all" ]
+then
+    if [ -e Allwmake ]
+    then
+        ./Allwmake
+        exit $?
+    elif [ ! -d $MakeDir ]
+    then
+ 	if [ $WM_ARCH == "darwin" ]
+ 	then
+ 	    # MacOS X find doesn't have a -printf
+ 	    liste=""
+ 	    for name in *
+ 	    do
+ 		if [ -d $name ]
+ 		then
+ 		    if [ $name != "Make" ]
+ 		    then
+ 			liste="$liste $name"
+ 		    fi
+ 		fi
+ 	    done
+ 	    $make -k -f $WM_DIR/MakefileApps FOAM_APPS="$liste"
+ 	else
+         $make -k -f $WM_DIR/MakefileApps FOAM_APPS="`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name "Make" \)  -printf "%f "`"
+	 fi
+        exit $?
+    fi
+
+    # This is the end of the recursion down the application directories tree
+    # so remove the "all" option so that the call to make builds the application
+    makeOption=
+fi
+
+
+#------------------------------------------------------------------------------
+# Check the existance of the Make directory and files file
+# If both exist make the wmake derived files
+#------------------------------------------------------------------------------
+
+if [ ! -d $MakeDir ]
+then
+    echo $0: cannot make, $MakeDir directory does not exist
+    exit 1
+fi
+
+if [ ! -r $MakeDir/files ]
+then
+    echo $0: cannot make, file $MakeDir/files does not exist
+    exit 1
+fi
+
+# Spawn a sub-shell and unset MAKEFLAGS in that sub-shell to stop avoid
+# files and options being built in parallel
+(
+  cd $MakeDir
+  unset MAKEFLAGS
+  make -s -f $WM_DIR/MakefileOptions
+  make -s -f $WM_DIR/MakefileFiles allFiles
+)
+
+
+#------------------------------------------------------------------------------
+# Check the $OBJECTS_DIR = $MakeDir/$WM_OPTIONS/objectFiles file 
+# was created successfully
+#------------------------------------------------------------------------------
+
+OBJECTS_DIR=$MakeDir/$WM_OPTIONS
+
+if [ ! -r $OBJECTS_DIR/objectFiles ]
+then
+    echo $0: cannot make, file $OBJECTS_DIR/objectFiles was not created successfully
+    exit 1
+fi
+
+
+#------------------------------------------------------------------------------
+# Make the dependency files
+#------------------------------------------------------------------------------
+
+touch $OBJECTS_DIR/dontIncludeDeps
+
+if [ "$makeOption" = "lib" -o "$makeOption" = "libso" -o "$makeOption" = "libo" ]
+then
+    $make -s -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/dontIncludeDeps lnInclude/uptodate
+fi
+
+$make -s -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/dontIncludeDeps $OBJECTS_DIR/dependencies
+
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    exit $retVal
+fi
+
+
+#------------------------------------------------------------------------------
+# make the object files and link
+#------------------------------------------------------------------------------
+
+cmd="$make -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/includeDeps $makeOption"
+#echo "cmd=$cmd"
+exec $cmd
+
+#------------------------------------------------------------------------------

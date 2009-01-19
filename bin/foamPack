@@ -1,0 +1,101 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamPack
+#
+# Description
+#     Packs and compresses the foam directory for release
+#
+#------------------------------------------------------------------------------
+
+foam=$WM_PROJECT-$WM_PROJECT_VERSION
+timeStamp=`date +%d_%m_%y`
+foamPackFile=$foam'_'${timeStamp}.tgz
+
+echo Packing foam version $foam into $foamPackFile
+echo
+
+if [ ! -d $foam ]
+then
+    echo directory $foam does not exist, exiting !
+    exit 1
+fi
+
+if [ -f $foamPackFile ]
+then
+    echo $foamPackFile already exists,  exiting !
+    exit 1
+fi
+
+
+# Create time stamp file
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+echo $timeStamp > $foam/.timeStamp
+
+
+# Pack and compress the foamPackFile using GNU tar
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+echo finding and packing
+
+find $foam                     \
+    ! -type d -type f          \
+    ! -name "*~"               \
+ -a ! -name ".*~"              \
+ -a ! -name "*.dep"            \
+ -a ! -name "*.o"              \
+ -a ! -name "*.so"             \
+ -a ! -name "*.a"              \
+ -a ! -name "core"             \
+ -a ! -name "core.[1-9]*"      \
+ -a ! -name "pvml.[1-9]*"      \
+ -a ! -name "log[0-9]*"        \
+ -a ! -name "so_locations"     \
+| sed                          \
+ -e "/$foam\/lib\//d"          \
+ -e "/$foam\/src\/mico-[0-9.]*\/platforms/d" \
+ -e "/$foam\/src\/mpich-[0-9.]*\/platforms/d" \
+ -e "/$foam\/src\/mpich-[0-9.]*\/lib/d" \
+ -e "/$foam\/src\/lam-[0-9.]*\/platforms/d" \
+ -e '/applications\/bin\//d'   \
+ -e '/Make\/[^of]/d'           \
+ -e '/Make.[A-Za-z]*\/[^of]/d' \
+ -e '/doc\/doxygen\/html/d'    \
+ -e '/doc\/doxygen\/latex/d'   \
+ -e '/doc\/doxygen\/man/d'     \
+ -e '/\/lnInclude/d'           \
+ -e '/\/ii_files/d'            \
+ > foamFiles.$$
+
+tar czpf $foamPackFile --files-from foamFiles.$$
+
+rm foamFiles.$$
+
+echo Finished packing and compressing  $foam into file $foamPackFile
+
+
+#------------------------------------------------------------------------------

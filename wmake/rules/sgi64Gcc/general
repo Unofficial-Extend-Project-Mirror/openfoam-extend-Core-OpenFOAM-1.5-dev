@@ -1,0 +1,21 @@
+ABI        = 64
+
+CPP        = /usr/lib/acpp -undef $(GFLAGS)
+RANLIB     = echo
+LD         = ld -$(ABI)
+
+PROJECT_LIBS = -l$(WM_PROJECT) -liberty -lfpe
+
+include $(RULES)/X
+
+include $(GENERAL_RULES)/sourceToDep
+
+include $(GENERAL_RULES)/java
+include $(GENERAL_RULES)/flex
+include $(GENERAL_RULES)/flex++
+include $(GENERAL_RULES)/byacc
+include $(GENERAL_RULES)/btyacc++
+include $(GENERAL_RULES)/moc
+
+include $(RULES)/c
+include $(RULES)/c++

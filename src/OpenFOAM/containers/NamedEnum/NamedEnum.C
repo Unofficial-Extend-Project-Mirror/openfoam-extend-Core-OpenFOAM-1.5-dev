@@ -1,0 +1,63 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright held by original author
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Description
+    Initialise the NamedEnum HashTable from the static list of names.
+
+\*---------------------------------------------------------------------------*/
+
+#include "NamedEnum.H"
+#include "stringList.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Enum, int nEnum>
+Foam::NamedEnum<Enum, nEnum>::NamedEnum()
+:
+    HashTable<int>(2*nEnum)
+{
+    for (int i=0; i<nEnum; i++)
+    {
+        if (!names[i] || names[i][0] == '\0')
+        {
+            stringList goodNames(i);
+
+            for (label j = 0; j < i; j++)
+            {
+                goodNames[j] = names[j];
+            }
+
+            FatalErrorIn("NamedEnum<Enum, nEnum>::NamedEnum()")
+                << "Illegal enumeration name at position " << i << endl
+                << "after entries " << goodNames << ".\n"
+                << "Possibly your NamedEnum<Enum, nEnum>::names array"
+                << " is not of size " << nEnum << endl
+                << abort(FatalError);
+        }
+        insert(names[i], i);
+    }
+}
+
+
+// ************************************************************************* //

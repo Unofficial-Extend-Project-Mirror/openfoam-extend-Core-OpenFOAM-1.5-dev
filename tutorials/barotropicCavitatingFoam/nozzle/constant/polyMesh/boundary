@@ -1,0 +1,63 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/hjasak/OpenFOAM/OpenFOAM-1.3/tutorials/cavitatingFoam";
+    case "nozzle";
+    instance ""constant"";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+in
+{
+    type patch;
+    nFaces 50;
+    startFace 5830;
+}
+
+out
+{
+    type patch;
+    nFaces 50;
+    startFace 5880;
+}
+
+bottom
+{
+    type symmetryPlane;
+    nFaces 90;
+    startFace 5930;
+}
+
+topWall
+{
+    type wall;
+    nFaces 150;
+    startFace 6020;
+}
+
+defaultFaces
+{
+    type empty;
+    nFaces 6000;
+    startFace 6170;
+}
+)
+
+// ************************************************************************* //

@@ -1,0 +1,2 @@
+sed s/"solverRelativeTolerance.cfg"/"relTol.cfg"/g $1 > temp.$$
+mv temp.$$ $1

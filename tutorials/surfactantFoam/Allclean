@@ -1,0 +1,21 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="sphereTransport"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+cleanFaMesh ()
+{
+    rm -rf $1/constant/faMesh/{faceLabels*,boundary*} \
+           > /dev/null 2>&1
+}
+
+for case in $cases
+do
+    cleanTimeDirectories $case
+    cleanFaMesh $case
+done
+

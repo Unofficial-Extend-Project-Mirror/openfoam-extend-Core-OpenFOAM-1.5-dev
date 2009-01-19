@@ -1,0 +1,17 @@
+CPP        = /usr/lib/cpp -undef $(GFLAGS)
+
+PROJECT_LIBS = -l$(WM_PROJECT) -liberty -lnsl -lsocket -L$(FOAM_LIBBIN)/dummy -lPstream
+
+include $(RULES)/X
+
+include $(GENERAL_RULES)/sourceToDep
+
+include $(GENERAL_RULES)/java
+include $(GENERAL_RULES)/flex
+include $(GENERAL_RULES)/flex++
+include $(GENERAL_RULES)/byacc
+include $(GENERAL_RULES)/btyacc++
+include $(GENERAL_RULES)/moc
+
+include $(RULES)/c
+include $(RULES)/c++

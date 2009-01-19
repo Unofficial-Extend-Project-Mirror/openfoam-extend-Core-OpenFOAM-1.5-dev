@@ -1,0 +1,3 @@
+ifeq ($(WM_ARCH),darwin)
+EXE_LIBS = -lOpenFOAM
+endif

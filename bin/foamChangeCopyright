@@ -1,0 +1,10 @@
+sed \
+    -e 's!Copyright (C) 1991-2004 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 1991-2005 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 1991-2007 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 1991-2008 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 2006-2007 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 2006-2008 OpenCFD Ltd.!Copyright held by original author!g' \
+    -e 's!Copyright (C) 2006-07 OpenCFD Ltd.!Copyright held by original author!g' \
+$1 > temp.$$
+mv temp.$$ $1

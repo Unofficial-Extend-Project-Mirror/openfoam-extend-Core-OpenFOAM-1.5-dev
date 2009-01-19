@@ -1,0 +1,20 @@
+// ******************************************************************************** //
+// FoamX Case Dictionary.
+
+version             1.0;
+format              ascii;
+root                "/users/tfd/larsg/foam/larsg2.0/run/bubble";
+case                "test2D";
+local               "constant";
+class               dictionary;
+form                dictionary;
+object              interfacialProperties;
+
+// ******************************************************************************** //
+
+dragModela       		SchillerNaumann;
+dragModelb       		SchillerNaumann;
+
+dragPhase				blended;
+
+// ******************************************************************************** //

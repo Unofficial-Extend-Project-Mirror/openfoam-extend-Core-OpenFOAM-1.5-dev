@@ -1,0 +1,112 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamPackBin
+#
+# Description
+#     Packs and compresses binary version of foam for release
+#
+#------------------------------------------------------------------------------
+
+if [ $# = 0 ]
+then
+   echo foamPackBin : binary type expected, exiting !
+   exit 1
+fi
+
+bin=$1
+foam=$WM_PROJECT-${WM_PROJECT_VERSION}
+foamPackFile=$foam.$bin'_'`date +%d_%m_%y`.tgz
+mpich=`echo $WM_OPTIONS | sed 's/.*MPICH.*/yes/'`
+
+if [ ! -d $foam ]
+then
+    echo directory $foam does not exist, exiting !
+    exit 1
+fi
+
+if [ ! -d $foam/lib/$bin ]
+then
+    echo directory $foam/lib/$bin does not exist, exiting !
+    exit 1
+fi
+
+if [ ! -d $foam/applications/bin/$bin ]
+then
+    echo directory $foam/applications/bin/$bin does not exist, exiting !
+    exit 1
+fi
+
+if [ -f $foamPackFile ]
+then
+    echo $foamPackFile already exists,  exiting !
+    exit 1
+fi
+
+echo Packing $bin port of foam version $foam into $foamPackFile
+echo
+
+packDirs="$foam/lib/$bin $foam/applications/bin/$bin $foam/wmake/rules"
+
+if [ -r $foam/src/mico-[0-9.]*/platforms/$bin ]
+then
+    micoDir=$foam/src/mico-[0-9.]*/platforms/$bin
+else
+    micoDir=""
+fi
+
+if [ -r $foam/src/mpich-[0-9.]*/platforms/$bin ]
+then
+    mpichDir=$foam/src/mpich-[0-9.]*/platforms/$bin
+else
+    mpichDir=""
+fi
+
+if [ -r $foam/src/lam-[0-9.]*/platforms/$bin ]
+then
+    lamDir=$foam/src/lam-[0-9.]*/platforms/$bin
+else
+    lamDir=""
+fi
+
+if [ -r $foam/src/openmpi-[0-9.ab]*/platforms/$bin ]
+then
+    openmpiDir=$foam/src/openmpi-[0-9.ab]*/platforms/$bin
+else
+    openmpiDir=""
+fi
+
+tar czpf $foamPackFile $packDirs $micoDir $mpichDir $lamDir $openmpiDir
+
+if [ $? = 0 ]
+then
+    echo Finished packing and compressing file $foamPackFile
+else
+    echo Failed to pack $foamPackFile. Exiting!
+    rm -f $foamPackFile
+fi
+
+#------------------------------------------------------------------------------

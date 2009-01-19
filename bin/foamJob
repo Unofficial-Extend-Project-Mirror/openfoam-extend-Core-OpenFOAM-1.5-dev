@@ -1,0 +1,243 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamJob
+#
+# Description
+#     
+#------------------------------------------------------------------------------
+
+EXENAME=`basename $0`
+
+printUsage () {
+cat <<EOF
+Usage: $0 [options] <application> <root> <case>
+    Runs a FOAM job in background.
+    Redirects the output to <root>/<case>/log
+
+Options:
+   [-s] also sends output to screen
+   [-p] performs a parallel run of processors
+EOF
+}
+
+findExec() {
+    if [ "`echo $2 | grep /`" ] ; then
+        if [ -x "$2" ] ; then
+            return 0
+        fi
+    fi
+    oldIFS=$IFS
+    IFS=':'
+    for d in $1
+    do
+        #echo "testing: $d/$2" 1>&2
+        if [ -x "$d/$2" -a ! -d "$d/$2" ]; then
+            #echo "Found exec: $d/$2" 1>&2
+            IFS=$oldIFS
+            echo "$d/$2"
+            return 0
+        fi
+    done
+    IFS=$oldIFS
+    echo ""
+    return 1
+}
+
+fullPath () {
+if [ `dirname $1 | cut -c1` = "/" ] ; then
+    echo "$1"
+else
+    echo "`pwd`/$1"
+fi
+}
+
+getPID() {
+    ps -u $LOGNAME -o 'pid,args' | fgrep "$1 " | fgrep -v grep | head -1 | awk '{ print $1 }'
+}
+
+expenv () {
+    eval "echo $1"
+}
+
+nwords () {
+    echo $#
+}
+
+consultGuide () {
+cat<<EOF
+
+Please consult the User Guide for details of parallel running
+EOF
+}
+
+# MAIN SCRIPT
+#~~~~~~~~~~~~
+SCREEN="no"
+PARALLEL="no"
+
+OPTS=`getopt sph $*`
+if [ $? -ne 0 ] ; then
+    echo "Aborting due to invalid option"
+    printUsage
+    exit 1
+fi
+eval set -- "$OPTS"
+while [ $1 != -- ]; do
+    case $1 in
+        -s) SCREEN="yes";;
+        -p) PARALLEL="yes";;
+        -h) printUsage; exit 1;;
+    esac
+    shift
+done
+shift
+
+if [ $1 ] ; then
+    APPLICATION=`findExec "$PATH" $1`
+    if [ $? -ne 0 ] ; then
+        echo "Application '$1' executable not found.  Exiting..."
+        echo ''
+        printUsage
+        exit 1
+    else
+        echo "Application : $1"
+    fi
+else
+    echo 'No application specified.  Exiting...'
+    echo ''
+    printUsage
+    exit 1
+fi    
+shift
+
+if [ $1 ] ; then
+    if [ -d $1 ] ; then
+        echo "Root        : $1"
+        ROOT=`fullPath $1`
+    else
+        echo "Directory '$1' does not exist.  Exiting..."
+        echo ''
+        printUsage
+    exit 1
+    fi
+else
+    echo 'No root directory specified.  Exiting...'
+    echo ''
+    printUsage
+    exit 1    
+fi
+shift
+
+if [ $1 ] ; then
+    if [ -d ${ROOT}/$1 ] ; then
+        echo "Case        : $1"
+        CASE=$1
+    else
+        echo "Case directory '$1' does not exist.  Exiting..."
+        echo ''
+        printUsage
+        exit 1
+    fi
+else
+    echo 'No case directory specified.  Exiting...'
+    echo ''
+    printUsage
+    exit 1    
+fi
+shift
+
+echo ""
+
+if [ "$PARALLEL" = "no" ] ; then
+#
+#   RUN ON SINGLE PROCESSOR
+#
+    if [ "$SCREEN" = "no" ] ; then
+        echo "Executing: $APPLICATION $ROOT $CASE > ${ROOT}/${CASE}/log &"
+        $APPLICATION $ROOT $CASE > ${ROOT}/${CASE}/log &
+    else
+        echo "Executing: $APPLICATION $ROOT $CASE | tee ${ROOT}/${CASE}/log"
+        $APPLICATION $ROOT $CASE | tee ${ROOT}/${CASE}/log &
+        wait $!
+    fi
+else
+#
+#   IS THE CASE DECOMPOSED?   
+#
+    if [ -r "${ROOT}/${CASE}/processor0" ] ; then
+        PROCS="`ls -d ${ROOT}/${CASE}/processor*`"
+        NPROCS=`nwords $PROCS`
+        echo "Case is decomposed into $NPROCS processors"
+    else
+        echo "Case is not currently decomposed"
+        if [ -r ${ROOT}/${CASE}/system/decomposeParDict ] ; then
+            echo "${CASE}/system/decomposeParDict exists"
+            echo "Try decomposing with \"foamJob decomposePar ${ROOT} ${CASE}\""
+            exit 1
+        else
+            echo "Cannot find ${CASE}/system/decomposeParDict file required to decompose the case for parallel running."
+            consultGuide
+            exit 1
+        fi       
+    fi
+#
+#   IS THE MACHINE READY TO RUN PARALLEL?
+#
+    echo "Parallel processing uses $WM_MPLIB"
+    if [ "$WM_MPLIB" = "LAM" ] ; then
+        LAM_PID=`getPID lamd`
+        if [ ! "$LAM_PID" ] ; then
+            echo "No LAM daemon running."
+            if [ -r ${ROOT}/${CASE}/system/machines ] ; then
+                echo "${CASE}/system/machines file exists"
+                echo "Try starting the LAM multicomputer with \"lamboot -v ${ROOT}/${CASE}/system/machines\""
+                exit 1
+            else
+                echo "Cannot find a 'machines' file for LAM in ${CASE}/system"
+                echo "required to start a LAM multicomputer"
+                consultGuide
+                exit 1
+            fi
+        else
+            echo "LAM daemon running (PID $LAM_PID).  Proceeding with MPI run."
+        fi
+    fi
+#
+#   RUN IN PARALLEL
+#
+    if [ "$SCREEN" = "no" ] ; then
+        echo "Executing: mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel > ${ROOT}/${CASE}/log 2>&1"
+        mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel \
+            > ${ROOT}/${CASE}/log 2>&1 &
+    else
+        echo "Executing: mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel | tee ${ROOT}/${CASE}/log"
+        mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel \
+            | tee ${ROOT}/${CASE}/log
+    fi
+fi
+
+#------------------------------------------------------------------------------

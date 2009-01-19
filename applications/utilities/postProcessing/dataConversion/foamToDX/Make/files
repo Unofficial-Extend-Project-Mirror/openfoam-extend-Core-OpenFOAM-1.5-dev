@@ -1,0 +1,3 @@
+foamToDX.C
+
+EXE = $(FOAM_APPBIN)/foamToDX

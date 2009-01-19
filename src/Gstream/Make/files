@@ -1,0 +1,29 @@
+shapes2D = shapes2D
+Gstream  = Gstream
+GLstream = GLstream
+Xstream  = Xstream
+PSstream = PSstream
+
+$(Gstream)/GEvent.C
+$(Gstream)/colourPalette.C
+$(Gstream)/stdColourPalette.C
+$(Gstream)/lineStyle.C
+$(Gstream)/Gstream.C
+
+$(Xstream)/Xstream.C
+
+$(GLstream)/XGLwindow.C
+$(GLstream)/GLstream.C
+
+$(PSstream)/PSstream.C
+
+$(shapes2D)/shape2D.C
+$(shapes2D)/line2D.C
+$(shapes2D)/string2D.C
+$(shapes2D)/rectangle2D.C
+$(shapes2D)/polygon2D.C
+$(shapes2D)/arrow2D.C
+$(shapes2D)/structuredScalars2D.C
+$(shapes2D)/structuredVectors2D.C
+
+LIB = $(FOAM_LIBBIN)/libGstream

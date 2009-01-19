@@ -1,0 +1,12 @@
+#!/bin/sh
+set -x
+
+wmake libso dummy
+
+if [ "$WM_MPLIB" = "LAM" -o "$WM_MPLIB" = "OPENMPI"  -o "$WM_MPLIB" = "MPI" -o "$WM_MPLIB" = "MPICH" -o "$WM_MPLIB" = "MPICH-GM" -o "$WM_MPLIB" = "MPIGAMMA" ]
+then
+    export WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
+    wmake libso mpi
+elif [ "$WM_MPLIB" = "GAMMA" ] ; then
+    wmake libso gamma
+fi 

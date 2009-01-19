@@ -1,0 +1,18 @@
+CPP        = cpp $(WM_CPP_OPTIONS)
+LD         = ld 
+GLIBS      = -L$(FOAM_LIBBIN)/dummy -lPstream
+
+include $(RULES)/X
+
+include $(GENERAL_RULES)/sourceToDep
+
+include $(GENERAL_RULES)/java
+include $(GENERAL_RULES)/flex
+include $(GENERAL_RULES)/flex++
+include $(GENERAL_RULES)/byacc
+include $(GENERAL_RULES)/btyacc++
+include $(GENERAL_RULES)/moc
+
+include $(RULES)/flex++
+include $(RULES)/c
+include $(RULES)/c++

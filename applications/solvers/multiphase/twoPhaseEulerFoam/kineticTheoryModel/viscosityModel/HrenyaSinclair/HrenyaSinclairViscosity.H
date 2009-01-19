@@ -1,0 +1,99 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright held by original author
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+Class
+    HrenyaSinclairViscosity
+
+Description
+
+SourceFiles
+    HrenyaSinclairViscosity.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef HrenyaSinclairViscosity_H
+#define HrenyaSinclairViscosity_H
+
+#include "viscosityModel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                           Class HrenyaSinclairViscosity Declaration
+\*---------------------------------------------------------------------------*/
+
+class HrenyaSinclairViscosity
+:
+    public viscosityModel
+{
+
+        dictionary coeffsDict_;
+    
+        //- characteristic length of geometry
+        dimensionedScalar L_;
+
+
+public:
+
+        //- Runtime type information
+        TypeName("HrenyaSinclair");
+
+
+    // Constructors
+
+        //- Construct from components
+        HrenyaSinclairViscosity(const dictionary& dict);
+
+
+    // Destructor
+
+        virtual ~HrenyaSinclairViscosity();
+
+
+    // Member functions
+
+        virtual tmp<volScalarField> mua
+        (
+            const volScalarField& alpha,
+            const volScalarField& Theta,
+            const volScalarField& g0,
+            const dimensionedScalar& rhoa,
+            const dimensionedScalar& da,
+            const dimensionedScalar& e
+        ) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

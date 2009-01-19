@@ -1,0 +1,190 @@
+// The FOAM Project // File: doublePistonTwoStroke.C
+/*
+-------------------------------------------------------------------------------
+ =========         | Class Implementation
+ \\      /         |
+  \\    /          | Name:   doublePistonTwoStroke
+   \\  /           | Family: engine
+    \\/            |
+    F ield         | FOAM version: 2.3
+    O peration     |
+    A and          | Copyright (C) 1991-2004 Nabla Ltd.
+    M anipulation  |          All Rights Reserved.
+-------------------------------------------------------------------------------
+DESCRIPTION
+
+AUTHOR
+    Hrvoje Jasak.
+
+-------------------------------------------------------------------------------
+*/
+
+#include "doublePistonTwoStroke.H"
+#include "slidingInterface.H"
+#include "layerAdditionRemoval.H"
+#include "surfaceFields.H"
+#include "regionSplit.H"
+#include "componentMixedTetPolyPatchVectorField.H"
+#include "mapPolyMesh.H"
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+void Foam::doublePistonTwoStroke::makeLayersLive()
+{ 
+    const polyTopoChanger& morphs = topoChanger_;
+
+    // Enable layering
+    forAll (morphs, modI)
+    {
+        if (typeid(morphs[modI]) == typeid(layerAdditionRemoval))
+        {
+            morphs[modI].enable();
+        }
+        else if (typeid(morphs[modI]) == typeid(slidingInterface))
+        {
+            morphs[modI].disable();
+        }
+        else
+        {
+            FatalErrorIn("void Foam::doublePistonTwoStroke::makeLayersLive()")
+                << "Don't know what to do with mesh modifier "
+                << modI << " of type " << morphs[modI].type()
+                << abort(FatalError);
+        }
+    }
+}
+
+void Foam::doublePistonTwoStroke::makeSlidersLive()
+{
+ 
+    const polyTopoChanger& morphs = topoChanger_;
+
+    // Enable sliding interface
+    forAll (morphs, modI)
+    {
+    
+        if (typeid(morphs[modI]) == typeid(layerAdditionRemoval))
+        {
+            morphs[modI].disable();
+        }
+        else if (typeid(morphs[modI]) == typeid(slidingInterface))
+        {
+            morphs[modI].enable();
+        }
+        else
+        {
+            FatalErrorIn("void movingSquaresTM::makeLayersLive()")
+                << "Don't know what to do with mesh modifier "
+                << modI << " of type " << morphs[modI].type()
+                << abort(FatalError);
+        }
+    }
+
+}
+
+bool Foam::doublePistonTwoStroke::attached() const
+{
+    const polyTopoChanger& morphs = topoChanger_;
+
+    bool result = false;
+
+    forAll (morphs, modI)
+    {
+        if (typeid(morphs[modI]) == typeid(slidingInterface))
+        {
+            result =
+                result
+             || refCast<const slidingInterface>(morphs[modI]).attached();
+        }
+    }
+
+    // Check thal all sliders are in sync (debug only)
+    forAll (morphs, modI)
+    {
+        if (typeid(morphs[modI]) == typeid(slidingInterface))
+        {
+            if
+            (
+                result 
+             != refCast<const slidingInterface>(morphs[modI]).attached()
+            )
+            {
+                FatalErrorIn("bool movingSquaresTM::attached() const")
+                    << "Slider " << modI << " named " << morphs[modI].name()
+                    << " out of sync: Should be" << result
+                    << abort(FatalError);
+            }
+        }
+    }
+
+    return result;
+}
+
+
+bool Foam::doublePistonTwoStroke::update()
+{
+    
+
+    // Detaching the interface
+    if (attached())
+    {
+    
+        Info << "Decoupling sliding interfaces" << endl;
+        makeSlidersLive();
+        topoChanger_.changeMesh();
+        
+        Info << "sliding interfaces successfully decoupled!!!" << endl;
+    }
+    else
+    {
+        Info << "Sliding interfaces decoupled" << endl;
+    }
+
+    Info << "Executing layer action" << endl;
+    
+
+    // Piston Layering    
+    
+    makeLayersLive();
+
+    
+
+    {
+    
+//        pointField oldPointsNew = oldPoints();
+//        pointField newPointsNew = points();
+
+        // Attach the interface
+        Info << "Coupling sliding interfaces" << endl;
+        makeSlidersLive();
+
+        // Changing topology by hand
+        autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
+
+        Info << "Sliding interfaces coupled: " << attached() << endl;
+    
+/*
+
+            {
+            
+                // correct the motion after attaching the sliding interface
+            
+                pointField mappedOldPointsNew(allPoints().size());
+
+                mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
+            
+                pointField newPoints = allPoints();
+
+                movePoints(mappedOldPointsNew);
+            
+                resetMotion();
+                setV0();
+                movePoints(newPoints);
+            }
+*/            
+    
+    }
+
+    return true;
+    
+}
+

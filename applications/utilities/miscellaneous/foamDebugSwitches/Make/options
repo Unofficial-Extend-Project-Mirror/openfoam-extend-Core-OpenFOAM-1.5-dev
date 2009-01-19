@@ -1,0 +1,28 @@
+EXE_LIBS = \
+    -L/usr/X11R6/lib -lGstream -lGL \
+    -lLESfilters \
+    -lODE \
+    -lcompressibleLESmodels \
+    -lbasicThermophysicalModels \
+    -lfiniteVolume \
+    -lcombustionThermophysicalModels \
+    -lcompressibleTurbulenceModels \
+    -ldieselSpray \
+    -ledgeMesh \
+    -lengine \
+    -lerrorEstimation \
+    -ldynamicMesh \
+    $(WM_DECOMP_LIBS) \
+    -lfiniteArea \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModels \
+    -lincompressibleLESmodels \
+    -llagrangian \
+    -llaminarFlameSpeedModels \
+    -lliquids \
+    -lrandomProcesses \
+    -lsampling \
+    -lspecie \
+    -lthermophysicalFunctions \
+    -ltriSurface \
+    -lpdf

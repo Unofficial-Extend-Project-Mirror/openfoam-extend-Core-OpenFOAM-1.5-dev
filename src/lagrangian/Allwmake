@@ -1,0 +1,6 @@
+#!/bin/sh
+set -x
+
+wmake libso basic
+wmake libso dieselSpray
+wmake libso solidParticle

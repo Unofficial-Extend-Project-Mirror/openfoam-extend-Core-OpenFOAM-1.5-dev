@@ -1,0 +1,5 @@
+EXE_INC = \
+    -DWM_PROJECT_VERSION='"'$(WM_PROJECT_VERSION)'"' \
+    -I$(LIB_SRC)/zlib-1.2.3
+
+LIB_LIBS = -L$(FOAM_LIBBIN)/dummy -lPstream -lz

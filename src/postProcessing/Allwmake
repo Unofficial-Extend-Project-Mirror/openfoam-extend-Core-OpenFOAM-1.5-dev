@@ -1,0 +1,4 @@
+#!/bin/sh
+
+wmake libso incompressible
+#wmake libso compressible

@@ -1,0 +1,22 @@
+CPP        = /usr/ccs/lib/cpp -undef $(WM_CPP_OPTIONS)
+AR         = ar
+ARFLAGS    = cr
+RANLIB     = ranlib
+LD         = ld
+
+include $(RULES)/mplib$(WM_MPLIB)
+
+GFLAGS     = -D$(WM_ARCH) -D$(WM_OPTIONS) -DscalarMachine -DoptSolvers $(PFLAGS)
+GINC       = $(PINC)
+GLIBS      = -lm
+
+include $(GENERAL_RULES)/sourceToDep
+
+include $(GENERAL_RULES)/flex
+include $(GENERAL_RULES)/flex++
+include $(GENERAL_RULES)/byacc
+include $(GENERAL_RULES)/btyacc++
+include $(GENERAL_RULES)/moc
+
+include $(RULES)/c
+include $(RULES)/c++

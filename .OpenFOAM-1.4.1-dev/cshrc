@@ -1,0 +1,273 @@
+#!/bin/csh -f
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     cshrc
+#
+# Description
+#     Startup File for OpenFoam.
+#     Sourced from ~/.cshrc
+#
+#------------------------------------------------------------------------------
+
+setenv WM_PROJECT OpenFOAM
+setenv WM_PROJECT_VERSION 1.4.1-dev
+setenv WM_PROJECT_LANGUAGE c++
+
+setenv WM_NCOMPPROCS 2
+
+#!!User: uncomment one of the lines below to set the WM_PROJECT_INST_DIR to
+#        point to where you installed Foam.
+#
+# Location of FOAM installation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setenv WM_PROJECT_INST_DIR $HOME/$WM_PROJECT
+#setenv WM_PROJECT_INST_DIR ~$WM_PROJECT
+#setenv WM_PROJECT_INST_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
+#setenv WM_PROJECT_INST_DIR /usr/local/$WM_PROJECT
+
+# Check that the installation directory has been set and exists
+if ( $?WM_PROJECT_INST_DIR ) then
+if ( -d $WM_PROJECT_INST_DIR ) then
+
+setenv WM_PROJECT_DIR $WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
+
+# Location of users FOAM files
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
+
+
+# Compiler (if set to "" use the system compiler)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setenv WM_COMPILER Gcc
+setenv WM_COMPILER_ARCH
+setenv WM_COMPILER_LIB_ARCH
+
+
+# Compilation options (default precision, optimised, debug or profiling)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#setenv WM_PRECISION_OPTION SP
+setenv WM_PRECISION_OPTION DP
+
+setenv WM_COMPILE_OPTION Opt
+#setenv WM_COMPILE_OPTION Debug
+#setenv WM_COMPILE_OPTION Prof
+
+setenv WM_64 true
+
+setenv WM_JAVAC_OPTION Opt
+#setenv WM_JAVAC_OPTION Debug
+
+
+# Running options (floating-point signal handling and memory initialisation)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setenv FOAM_SIGFPE
+#setenv FOAM_SETNAN
+
+
+# Detect system type and set environment variables
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set machineTest=`uname -s`
+
+# Linux workstation
+# ~~~~~~~~~~~~~~~~~
+if ($machineTest == Linux) then
+
+    set processor = `uname -m`
+
+    if ($processor == i686) then
+        setenv WM_ARCH linux
+        #setenv WM_COMPILER I32
+    else if ($processor == x86_64) then
+        if ( $?WM_64 ) then
+            setenv WM_ARCH linux64
+            setenv WM_COMPILER_LIB_ARCH 64
+            setenv CC 'gcc'
+            setenv CXX 'g++'
+            setenv CFLAGS '-m64 -fPIC'
+            setenv CXXFLAGS '-m64 -fPIC'
+            setenv LDFLAGS '-m64'
+        else
+            setenv WM_ARCH linux
+            #setenv WM_COMPILER I64
+            setenv WM_COMPILER_ARCH '-64'
+            setenv CC 'gcc'
+            setenv CXX 'g++'
+            setenv CFLAGS '-m32'
+            setenv CXXFLAGS '-m32'
+            setenv LDFLAGS '-m32'
+        endif
+    else if ($processor == ia64) then
+        setenv WM_ARCH linuxIA64
+        setenv WM_COMPILER I64
+    else
+        echo Unknown processor type $processor for Linux
+    endif
+
+    #setenv WM_MPLIB
+    #setenv WM_MPLIB OPENMPI
+    setenv WM_MPLIB LAM
+    #setenv WM_MPLIB MPICH
+    #setenv WM_MPLIB MPICH-GM
+    #setenv WM_MPLIB GAMMA
+    #setenv WM_MPLIB MPI
+
+# SUN workstation 
+# ~~~~~~~~~~~~~~~
+else if ($machineTest == SunOS) then
+
+    setenv WM_ARCH solaris
+
+    #setenv WM_MPLIB
+    setenv WM_MPLIB OPENMPI
+    #setenv WM_MPLIB LAM
+    #setenv WM_MPLIB MPICH
+    #setenv WM_MPLIB MPICH-GM
+
+# Silicon Graphics workstation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+else if ($machineTest == IRIX || $machineTest == IRIX64) then
+
+    setenv WM_ARCH sgiN32
+    #setenv WM_ARCH sgi64
+    #setenv WM_COMPILER_LIB_ARCH /mabi=64
+
+    #setenv WM_MPLIB
+    setenv WM_MPLIB MPI
+    #setenv WM_MPLIB OPENMPI
+    #setenv WM_MPLIB LAM
+    #setenv WM_MPLIB MPICH
+    #setenv WM_MPLIB MPICH-GM
+
+# An unsupported operating system
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+else
+
+    echo \
+        Your $machineTest operating system is not supported\
+        by this release of OpenFOAM. For further assistance,\
+        please contact www.openfoam.org.
+    echo
+
+endif
+
+
+# Clean standard environment variables (path, PATH, MANPATH, LD_LIBRARY_PATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+if (! $?LD_LIBRARY_PATH ) then
+    setenv LD_LIBRARY_PATH ''
+endif
+if (! $?MANPATH) then
+    setenv MANPATH ''
+endif
+
+set cleanProg=$WM_PROJECT_DIR/bin/foamCleanPath
+
+#- Clean path/PATH. Remove anything under top-level foam directory.
+set colonPath=`echo "$path" | sed -e 's/ /:/g'`
+set PATH=`$cleanProg "$colonPath" "$WM_PROJECT_INST_DIR"`
+if ( $status == 0 ) then
+    set path=`echo "$PATH" | sed -e 's/:/ /g'`
+endif
+
+#- Clean LD_LIBRARY_PATH
+setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH" "$WM_PROJECT_INST_DIR"`
+
+#- Clean MANPATH
+setenv MANPATH `$cleanProg "$MANPATH" "$WM_PROJECT_INST_DIR"`
+
+#- Clean everything that looks a bit too much like an old $FOAM_USER_APPBIN from path/PATH
+set colonPath=`echo "$path" | sed -e 's/ /:/g'`
+set PATH=`$cleanProg "$colonPath" "$HOME/$WM_PROJECT/$LOGNAME"`
+if ( $status == 0 ) then
+    set path=`echo "$PATH" | sed -e 's/:/ /g'`
+endif
+
+#- Clean everything that looks a bit too much like an old $FOAM_USER_LIBBIN from LD_LIBRARY_PATH
+setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH" "$HOME/$WM_PROJECT/$LOGNAME"`
+
+
+# FOAM: set-up FOAM release-specific environment
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+alias SOURCE 'set foamDotFile=\!*; source \!*; unset foamDotFile'
+SOURCE $WM_PROJECT_DIR/.cshrc
+
+
+# Alias Declarations
+# ~~~~~~~~~~~~~~~~~~
+alias src 'cd $FOAM_SRC'
+alias lib 'cd $FOAM_LIB'
+alias run 'cd $FOAM_RUN'
+alias foam 'cd $WM_PROJECT_DIR'
+alias foamsrc 'cd $FOAM_SRC/$WM_PROJECT'
+alias foamfv 'cd $FOAM_SRC/finiteVolume'
+alias app 'cd $FOAM_APP'
+alias util 'cd $FOAM_UTILITIES'
+alias sol 'cd $FOAM_SOLVERS'
+alias tut 'cd $FOAM_TUTORIALS'
+alias work 'cd $WM_PROJECT_USER_DIR/work'
+
+
+# Source user setup files for optional packages
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SOURCE $WM_PROJECT_DIR/$FOAM_DOT_DIR/apps/ensightFoam/cshrc
+SOURCE $WM_PROJECT_DIR/$FOAM_DOT_DIR/apps/paraview/cshrc
+SOURCE $WM_PROJECT_DIR/$FOAM_DOT_DIR/apps/dxFoam/cshrc
+#SOURCE $WM_PROJECT_DIR/$FOAM_DOT_DIR/apps/ParaView3/cshrc
+
+
+# Again clean environment (path, PATH, MANPATH, LD_LIBRARY_PATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#- Clean path/PATH. Only remove duplicates
+set colonPath=`echo "$path" | sed -e 's/ /:/g'`
+set PATH=`$cleanProg "$colonPath"`
+if ( $status == 0 ) then
+    set path=`echo "$PATH" | sed -e 's/:/ /g'`
+endif
+
+#- Clean LD_LIBRARY_PATH
+setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH"`
+
+#- Clean MANPATH
+setenv MANPATH `$cleanProg "$MANPATH"`
+
+else
+
+if ( ! $?WM_PROJECT_INST_DIR ) then
+    echo
+    echo "$0: \$WM_PROJECT_INST_DIR not set"
+    echo
+else if ( ! -d $WM_PROJECT_INST_DIR ) then
+    echo
+    echo "$0: cannot find FOAM installation"
+    echo
+endif
+
+endif
+
+# -----------------------------------------------------------------------------

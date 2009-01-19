@@ -1,0 +1,25 @@
+vanDriestDelta/vanDriestDelta.C
+wallFunc/nuSgsWallFunction/nuSgsWallFunctionFvPatchScalarField.C
+
+LESmodel/LESmodel.C
+LESmodel/newLESmodel.C
+
+GenEddyVisc/GenEddyVisc.C
+GenSGSStress/GenSGSStress.C
+
+scaleSimilarity/scaleSimilarity.C
+oneEqEddy/oneEqEddy.C
+dynOneEqEddy/dynOneEqEddy.C
+locDynOneEqEddy/locDynOneEqEddy.C
+Smagorinsky/Smagorinsky.C
+dynSmagorinsky/dynSmagorinsky.C
+mixedSmagorinsky/mixedSmagorinsky.C
+dynMixedSmagorinsky/dynMixedSmagorinsky.C
+LRRDiffStress/LRRDiffStress.C
+DeardorffDiffStress/DeardorffDiffStress.C
+spectEddyVisc/spectEddyVisc.C
+/*Smagorinsky2/Smagorinsky2.C*/
+SpalartAllmaras/SpalartAllmaras.C
+laminar/laminar.C
+
+LIB = $(FOAM_LIBBIN)/libincompressibleLESmodels

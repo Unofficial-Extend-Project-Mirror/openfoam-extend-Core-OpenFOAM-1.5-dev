@@ -1,0 +1,94 @@
+Mesh Changes
+------------
+
+Problem1: both static and moving mesh around (if topology changes)
+Problem2: meshes around until dx decides they have to be deleted
+          (i.e. has run out of memory)
+Problem3: database gets deleted before mesh.
+Problem4: rotation causes old (static) mesh to be displayed.
+
+Ad1: Only the Dx mesh is around. Can be fixed by combining foamChangeTime
+and foamReadMesh, however then change-of-time causes same behaviour
+as reading of mesh which might give problems. Tried this and gets into problems
+if caching is switched off. Has to do with reference counting on DX objects.
+
+As for the Foam mesh: this is (and was) handled correctly. Now the database
+holds a pointer to the current mesh and anyone can delete it and set the pointer
+to null.
+
+Ad2: Can early delete them if Dx deletion functions know they have been deleted.
+The destructor for dxFvMesh does a DXDelete on the DX mesh but I am not
+sure that is correct.
+
+Ad3: Database has to know that meshes are still referring to it. Solved by
+keeping reference count on database and incrementing it if anything gets
+created which uses it and decrementing it in anything that gets deleted.
+
+Ad4: Seems to have to do with rotation or any other rerendering. They
+cause reexecution of the network (even though the 'normal' inputs
+of the modules have not changed). Happens only once though (if caching is
+enabled). Seems as if result of rendering is implicit input to all modules???
+
+
+foamCreateDatabase: should have cache 'Last only'. None would cause it to
+be reevaluated every e.g. rotation. And since it cannot retrieve any
+state from its input (are root and case strings) it would have to reread
+database every time. Can't be 'Cache All' since then it would never actually
+delete database (and thus mesh)
+
+foamReadMesh: only output now is foamMesh which is Private and thus protected
+from deletion. Set 'Last Only'. Could be 'cache all' but not nessecary. Does
+not output DXMesh to protect it from Dx garbage collector.
+
+foamChangeTime: should have 'Last only'. Rerendering evaluation (see above)
+is handled by checking for same time and returning old mesh and spray.
+(that is why all this information is now stored on the database). The
+problem with returning old information is that the garbage collector might
+have enabled them so in foamChangeTime there is a lot of DXReference
+(which explicitly increments the reference count on DX objects). I can explain
+only part of the DXReference but do know that without them it doesn't work
+
+
+
+Dx Evaluation:
+- create key for current inputs
+- check if cached for key on all outputs. If so do nothing.
+- if key not in any of the output caches execute module, thus recreating
+  outputs.
+- if wanted ('cache all', 'cache last') store key/value on output cache.
+  If only cache-last decrement ref count on stored value and remove.
+- decrement refcount on inputs (since no longer used)
+- for all outputs changed check connected modules.
+
+Dx Garbage Collection:
+- All objects get created with ref count of zero
+- When they are used ref counts get decremented?
+
+
+
+Loadable Modules
+----------------
+
+1] wmake libso -> $FOAM_LIBBIN/libdxFoamExec.so
+
+2] check:
+- DXROOT should be set (in ..../apps/dxFoam/cshrc)
+- DXMODULES should contain $FOAM_LIBBIN (usually set in dxFoam)
+- DXEXEC should not be set
+- should be built with dxFoamExec-loadable.c, not dxFoamExec-execuable.c
+- mdf2c with correct arguments:
+    mdf2c -m dxFoamExec-loadable.mdf > dxFoamExec-loadable.c
+    mdf2c dxFoamExec-executable.mdf > dxFoamExec-executable.c
+- dxFoam should load correct dxFoamExec-loadable.mdf (specified in dxFoam)
+- dxFoamExec-loadable.mdf should contain 'LOADABLE libdxFoamExec.so' for every
+module and corresponding function should be in $DXMODULES/libdxFoamExec.so
+- $FOAM_LIBBIN/libdxFoamExec.so should be linked with ALL Foam libraries
+(including LAM etc.). Check messages in Message Window for missing symbols.
+
+
+CellSet
+-------
+FoamGetSet returns valid field with 1 for cells in cellSet, 0 for others.
+
+
+

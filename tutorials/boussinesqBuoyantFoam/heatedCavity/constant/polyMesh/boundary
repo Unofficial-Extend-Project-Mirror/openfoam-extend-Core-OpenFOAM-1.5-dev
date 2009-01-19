@@ -1,0 +1,64 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/hjasak/OpenFOAM/OpenFOAM-1.3/tutorials/boussinesqBuoyantFoam";
+    case "heatedCavity";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+top
+{
+    type wall;
+    nFaces 20;
+    startFace 760;
+}
+
+bottom
+{
+    type wall;
+    nFaces 20;
+    startFace 780;
+}
+
+left
+{
+    type wall;
+    nFaces 20;
+    startFace 800;
+}
+
+right
+{
+    type wall;
+    nFaces 20;
+    startFace 820;
+}
+
+frontAndBack
+{
+    type empty;
+    physicalType empty;
+    nFaces 800;
+    startFace 840;
+}
+)
+
+// ************************************************************************* //

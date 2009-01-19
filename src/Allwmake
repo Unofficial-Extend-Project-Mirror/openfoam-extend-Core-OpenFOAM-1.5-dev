@@ -1,0 +1,166 @@
+#!/bin/sh
+set -x
+
+(cd $FOAM_SRC/OpenFOAM ; wmakeLnInclude . )
+
+wmake libso zlib-1.2.3
+
+if [ "$WM_MPLIB" = "OPENMPI" -a ! -r $OPENMPI_ARCH_PATH/lib/libmpi.a -a ! -r $OPENMPI_ARCH_PATH/lib/libmpi.so -a ! -r $OPENMPI_ARCH_PATH/lib/libmpi.dylib ]
+then
+
+    cd $OPENMPI_HOME
+
+        make distclean
+        rm -rf $OPENMPI_ARCH_PATH
+
+        ./configure \
+            --prefix=$OPENMPI_ARCH_PATH \
+            --disable-mpirun-prefix-by-default \
+            --disable-orterun-prefix-by-default \
+            --enable-shared --disable-static \
+            --disable-mpi-f77 --disable-mpi-f90 --disable-mpi-cxx \
+            --disable-mpi-profile
+
+        make
+        make install
+        make distclean
+
+    cd $FOAM_SRC
+fi
+
+if [ "$WM_MPLIB" = "LAM" -a ! -r $LAM_ARCH_PATH/lib/libmpi.a -a ! -r $LAM_ARCH_PATH/lib/libmpi.so -a ! -r $LAM_ARCH_PATH/lib/libmpi.dylib ]
+then
+
+    cd $LAMHOME
+
+        make distclean
+        rm -rf $LAM_ARCH_PATH
+
+# for Mac OSX remove disable-static
+
+        ./configure \
+            --prefix=$LAM_ARCH_PATH \
+            --enable-shared \
+            --disable-static \
+            --without-romio \
+            --without-mpi2cpp \
+            --without-profiling \
+            --without-fc
+
+        make
+        make install
+        make distclean
+
+    cd $FOAM_SRC
+fi
+
+if [ "$WM_MPLIB" = "MPICH" -a ! -r $MPICH_ARCH_PATH/lib/libmpich.a -a ! -r $MPICH_ARCH_PATH/lib/libmpich.so -a ! -r $MPICH_ARCH_PATH/lib/libmpich.dylib ]
+then
+    
+    cd $MPICH_PATH
+
+        make distclean
+        rm -rf $MPICH_ARCH_PATH
+        rm util/machines/machines.*
+
+        ./configure \
+            --without-mpe \
+            --disable-f77 \
+            --disable-f90 \
+            --disable-f90modules \
+            --disable-c++ \
+            --disable-mpedbg \
+            --disable-devdebug \
+            --disable-debug \
+            --enable-sharedlib=$MPICH_ARCH_PATH/lib \
+            --with-device=ch_p4 \
+            -prefix=$MPICH_ARCH_PATH
+        make
+        make install
+        make distclean
+
+        if [ -r $MPICH_ARCH_PATH ]
+        then
+            cd $MPICH_ARCH_PATH/bin
+            for file in *
+            do
+                sed s%$MPICH_ARCH_PATH%'$MPICH_ARCH_PATH'%g $file > temp.$$
+                mv temp.$$ $file
+                chmod ugo+rx $file
+            done
+
+            cd $MPICH_ARCH_PATH/lib
+
+            if [ -r libmpich.so.1.0 ]
+            then
+                rm *.so
+                ln -s libmpich.so.1.0 libmpich.so
+            fi
+
+            cd $MPICH_ARCH_PATH
+        fi
+
+    cd $FOAM_SRC
+fi
+
+#cd $FOAM_APP/utilities/miscellaneous
+#    wmake exe foamFlex
+#    cp foamFlex/FlexLexer.h $FOAM_SRC/OpenFOAM/lnInclude
+#cd $FOAM_SRC
+
+(cd Pstream ; ./Allwmake)
+wmake libso OpenFOAM
+
+wmake libso lduSolvers
+wmake libso lagrangian/basic
+
+wmake libso triSurface
+wmake libso edgeMesh
+wmake libso meshTools
+
+wmake libso finiteVolume
+wmake libso coupledMatrix
+
+(cd MGridGenGamgAgglomeration ; ./Allwmake)
+
+wmake libso sampling
+
+wmake libso dynamicMesh
+
+(cd tetDecompositionFiniteElement ; ./Allwmake)
+(cd  tetDecompositionMotionSolver; ./Allwmake)
+
+wmake libso fvMotionSolver
+wmake libso dynamicFvMesh
+wmake libso topoChangerFvMesh
+wmake libso engine
+
+wmake libso ODE
+wmake libso randomProcesses
+
+(cd thermophysicalModels ; ./Allwmake)
+(cd transportModels ; ./Allwmake)
+(cd turbulenceModels ; ./Allwmake)
+(cd LESmodels ; ./Allwmake)
+(cd postProcessing ; ./Allwmake)
+
+(cd lagrangian ; ./Allwmake)
+
+wmake libso finiteArea
+
+wmake libso errorEstimation
+
+wmake libso Gstream
+
+(cd malloc ; ./Allwmake)
+
+if [ ! -r $MICO_ARCH_PATH/lib/libmico${MICO_VERSION}.a ]
+then
+    cd $MICO_PATH
+    make distclean
+    ./configure --prefix=$MICO_ARCH_PATH --disable-shared --without-x
+    make
+    make install
+    make distclean
+    cd ..
+fi

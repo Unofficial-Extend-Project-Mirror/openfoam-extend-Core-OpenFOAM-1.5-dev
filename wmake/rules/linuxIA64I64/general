@@ -1,0 +1,21 @@
+CPP        = /lib/cpp $(GFLAGS) -DICC_IA64_PREFETCH
+AR         = ar
+ARFLAGS    = cr
+RANLIB     = ranlib
+LD         = ld
+
+GLIBS      = -liberty
+
+include $(RULES)/X
+
+include $(GENERAL_RULES)/sourceToDep
+
+include $(GENERAL_RULES)/java
+include $(GENERAL_RULES)/flex
+include $(GENERAL_RULES)/flex++
+include $(GENERAL_RULES)/byacc
+include $(GENERAL_RULES)/btyacc++
+include $(GENERAL_RULES)/moc
+
+include $(RULES)/c
+include $(RULES)/c++

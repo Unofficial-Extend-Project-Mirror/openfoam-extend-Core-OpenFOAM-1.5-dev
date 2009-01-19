@@ -1,0 +1,14 @@
+#!/bin/sh -v
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="hydrofoil"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+for case in $cases
+do
+    runApplication makeFaMesh $case
+    runApplication $application $case
+done

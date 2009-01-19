@@ -1,0 +1,7 @@
+#!/bin/sh
+
+chmod o+x $WM_PROJECT_DIR
+chmod o+x $WM_PROJECT_DIR/doc
+chmod o+rx Doxygen
+
+(cd Doxygen ; ./Allwmake)

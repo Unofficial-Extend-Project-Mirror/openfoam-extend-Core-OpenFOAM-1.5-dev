@@ -1,0 +1,5 @@
+liftDrag/liftDrag.C
+forceAndTorque/laminarForceAndTorqueFunctionObject.C
+forceAndTorque/turbulentForceAndTorqueFunctionObject.C
+
+LIB = $(FOAM_LIBBIN)/libincompressiblePostProcessing

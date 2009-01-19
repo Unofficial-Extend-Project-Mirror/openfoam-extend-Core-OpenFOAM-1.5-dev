@@ -1,0 +1,15 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="angledDuctImplicit"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+wclean $application
+
+for case in $cases
+do
+    cleanCase $case
+done 

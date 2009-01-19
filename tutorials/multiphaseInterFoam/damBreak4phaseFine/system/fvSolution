@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          fvSolution;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    pcorr CG
+    {
+        preconditioner
+        {
+            type            AMG;
+            cycle           W-cycle;
+            policy          AAMG;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            groupSize       4;
+            minCoarseEqns   20;
+            nMaxLevels      100;
+            scale           on;
+            smoother        ILU;
+        }
+
+        minIter           0;
+        maxIter           1000;
+        tolerance         1e-8;
+        relTol            0.0;
+    };
+
+    pd CG
+    {
+        preconditioner
+        {
+            type            AMG;
+            cycle           W-cycle;
+            policy          AAMG;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            groupSize       4;
+            minCoarseEqns   20;
+            nMaxLevels      100;
+            scale           on;
+            smoother        ILU;
+        }
+
+        minIter           0;
+        maxIter           1000;
+        tolerance         1e-8;
+        relTol            0.0;
+    };
+
+    pdFinal CG
+    {
+        preconditioner
+        {
+            type            AMG;
+            cycle           W-cycle;
+            policy          AAMG;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            groupSize       4;
+            minCoarseEqns   20;
+            nMaxLevels      100;
+            scale           on;
+            smoother        ILU;
+        }
+
+        minIter           0;
+        maxIter           1000;
+        tolerance         1e-8;
+        relTol            0.0;
+    };
+
+    alpha smoothSolver
+    {
+        smoother         GaussSeidel;
+        nSweeps          1;
+
+        minIter          0;
+        maxIter          1000;
+        tolerance        1e-8;
+        relTol           0;
+    };
+}
+
+PISO
+{
+    nCorrectors     4;
+    nNonOrthogonalCorrectors 0;
+    nAlphaCorr      4;
+    nAlphaSubCycles 4;
+    cycleAlpha      yes;
+    cAlpha          4;
+}
+
+
+// ************************************************************************* //

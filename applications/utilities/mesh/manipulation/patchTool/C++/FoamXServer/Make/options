@@ -1,0 +1,4 @@
+#include "orbOptions"
+
+EXE_INC = $(ORB_INC)
+LIB_LIBS = $(ORB_LIBS)

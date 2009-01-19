@@ -1,0 +1,203 @@
+
+66
+(
+reversibleArrheniusReaction
+    H2 + O2 = OH + OH
+    (117000 0 0)
+reversibleArrheniusReaction
+    H2 + OH = H2O + H
+    (117000 0 0)
+reversibleArrheniusReaction
+    O + OH = O2 + H
+    (5e+10 -0.5 0)
+reversibleArrheniusReaction
+    O + H2 = OH + H
+    (5.06 2.67 3165.07)
+reversiblethirdBodyArrheniusReaction
+    H + O2 = HO2
+    ((2.8e+15 -1.25 0) (1 H2 2.5 H2O 12.5))
+reversibleArrheniusReaction
+    OH + HO2 = H2O + O2
+    (7.89e+09 0 -250.086)
+reversibleArrheniusReaction
+    H + HO2 = OH + OH
+    (1.69e+10 0 439.789)
+reversibleArrheniusReaction
+    O + HO2 = O2 + OH
+    (2.4e+09 0 539.924)
+reversibleArrheniusReaction
+    OH + OH = O + H2O
+    (60000 1.3 0)
+reversiblethirdBodyArrheniusReaction
+    H + H = H2
+    ((1e+14 -1 0) (1 H2 0 H2O 0))
+reversibleArrheniusReaction
+    H + H + H2 = H2 + H2
+    (9.2e+10 -0.6 0)
+reversibleArrheniusReaction
+    H + H + H2O = H2 + H2O
+    (6e+13 -1.25 0)
+reversiblethirdBodyArrheniusReaction
+    H + OH = H2O
+    ((1.6e+18 -2 0) (1))
+reversiblethirdBodyArrheniusReaction
+    H + O = OH
+    ((6.2e+12 -0.6 0) (1))
+reversiblethirdBodyArrheniusReaction
+    O + O = O2
+    ((1.89e+09 0 -899.706) (1))
+reversibleArrheniusReaction
+    H + HO2 = H2 + O2
+    (6.28e+09 0 710.003)
+reversibleArrheniusReaction
+    HO2 + HO2 = H2O2 + O2
+    (4.2e+10 0 6038.29)
+reversibleArrheniusReaction
+    HO2 + HO2 = H2O2 + O2
+    (1.3e+07 0 -825.234)
+reversiblethirdBodyArrheniusReaction
+    H2O2 = OH + OH
+    ((6.3e+15 0 22895.2) (1))
+reversibleArrheniusReaction
+    H2O2 + H = HO2 + H2
+    (1.6e+08 0 1912.13)
+reversibleArrheniusReaction
+    H2O2 + OH = H2O + HO2
+    (1.3e+07 0 -820.202)
+reversibleArrheniusReaction
+    H2O2 + OH = H2O + HO2
+    (5.8e+10 0 4810.51)
+reversibleArrheniusReaction
+    H + HO2 = O + H2O
+    (3.1e+06 0 1806.46)
+reversiblethirdBodyArrheniusReaction
+    O + OH = HO2
+    ((1e+12 0 0) (1))
+reversibleArrheniusReaction
+    H2O2 + H = H2O + OH
+    (1e+09 0 1806.46)
+reversibleArrheniusReaction
+    H2O2 + O = H2O + O2
+    (8.4e+07 0 2143.59)
+reversibleArrheniusReaction
+    H2O2 + O = OH + HO2
+    (2e+09 0 2968.83)
+reversibleArrheniusReaction
+    H2 + HO2 = H2O + OH
+    (2.1e+09 0 9460)
+reversibleArrheniusReaction
+    SIH4 = SIH2 + H2
+    (1e+11 0 26518.2)
+reversibleArrheniusReaction
+    SIH2 + O2 = HSIO + OH
+    (3.2e+10 0 4025.53)
+reversibleArrheniusReaction
+    SIH2 + H2O = SIH2O + H2
+    (3e+08 0 5736.38)
+reversibleArrheniusReaction
+    SIH4 + O2 = SIH3 + HO2
+    (4e+09 0 21536.6)
+reversibleArrheniusReaction
+    SIH4 + H = SIH3 + H2
+    (5e+08 0 1257.98)
+reversibleArrheniusReaction
+    SIH4 + O = SIH3 + OH
+    (4.2e+08 0 805.106)
+reversibleArrheniusReaction
+    SIH4 + OH = SIH3 + H2O
+    (9.4e+08 0 50.3191)
+reversibleArrheniusReaction
+    SIH4 + HO2 = SIH3 + H2O2
+    (2e+08 0 5031.91)
+reversibleArrheniusReaction
+    SIH4 + SIH3O2+ = SIH3 + SIH4O2
+    (1.1e+09 0 9309.04)
+reversibleArrheniusReaction
+    SIH3 + O2 = SIH3O2+
+    (2e+11 0 603.829)
+reversibleArrheniusReaction
+    SIH3O2+ = SIH3O + O
+    (2e+11 0 17108.5)
+reversibleArrheniusReaction
+    SIH3O2+ = SIH2O + OH
+    (3e+10 0 2012.76)
+reversibleArrheniusReaction
+    SIH3O2+ + HO2 = SIH4O2 + O2
+    (3e+07 0 0)
+reversibleArrheniusReaction
+    SIH4O2 + H = SIH3O2+ + H2
+    (4.8e+09 0 4000.37)
+reversibleArrheniusReaction
+    SIH4O2 = SIH3O + OH
+    (6.5e+12 0 24505.4)
+reversibleArrheniusReaction
+    SIH3 + O2 = SIH3O + O
+    (1e+09 0 0)
+reversibleArrheniusReaction
+    SIH3O + O2 = SIH2O + HO2
+    (2e+09 0 0)
+reversibleArrheniusReaction
+    SIH3 + H = SIH2 + H2
+    (2e+09 0 0)
+reversibleArrheniusReaction
+    SIH3 + O = SIH2O + H
+    (2e+09 0 0)
+reversibleArrheniusReaction
+    SIH3 + OH = SIH2O + H2
+    (6e+08 0 0)
+reversibleArrheniusReaction
+    SIH3 + HO2 = SIH2 + H2O2
+    (2e+09 0 0)
+reversibleArrheniusReaction
+    SIH3 + SIH3 = SIH2 + SIH4
+    (2e+08 0 0)
+reversibleArrheniusReaction
+    SIH2O + O2 = HSIO + HO2
+    (4e+10 0 17611.7)
+reversiblethirdBodyArrheniusReaction
+    SIH2O = HSIO + H
+    ((2e+13 0 42519.7) (1))
+reversibleArrheniusReaction
+    SIH2O + H = HSIO + H2
+    (5.3e+10 0 5283.51)
+reversibleArrheniusReaction
+    SIH2O + O = HSIO + OH
+    (1.8e+09 0 1549.83)
+reversibleArrheniusReaction
+    SIH2O + OH = HSIO + H2O
+    (7.5e+08 0 85.5425)
+reversibleArrheniusReaction
+    SIH2O + HO2 = HSIO + H2O2
+    (1e+09 0 6038.29)
+reversiblethirdBodyArrheniusReaction
+    HSIO = H + SIO
+    ((5e+12 0 14592.5) (1))
+reversibleArrheniusReaction
+    HSIO + O2 = SIO + HO2
+    (3e+09 0 0)
+nonEquilibriumReversibleLandauTellerReaction
+    HSIO + H = SIO + H2
+    (2e+10 0 0 1 2) (0.0001 2 1.50957 3 4)
+reversiblepowerSeriesReaction
+    HSIO + O = SIO + OH
+    (1e+10 0 0 1 2 3 4)
+reversibleArrheniusReaction
+    HSIO + OH = SIO + H2O
+    (1e+10 0 0)
+reversibleArrheniusReaction
+    HSIO + HO2 = SIO + H2O2
+    (1e+10 0 0)
+reversibleArrheniusTroeFallOffReaction
+    SIO + OH = SIO2 + H
+    ((0.0001 2 1.50957) (4e+08 0 2868.19) (1 2 3 4) (0 H 1))
+reversibleLandauTellerReaction
+    SIO + HO2 = SIO2 + OH
+    (1e+08 0 0 1 3)
+reversiblethirdBodyArrheniusReaction
+    SIO + O = SIO2
+    ((0 0 0) (1))
+nonEquilibriumReversibleArrheniusReaction
+    SIO + O2^4 = SIO2^3 + O
+    (4000 0 0.503191) (1e-10 2 1.50957)
+)
+

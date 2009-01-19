@@ -1,0 +1,84 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamPackSource
+#
+# Description
+#     Packs and compresses the .C and .H files and Make/options
+#     and Make/files in a given directory.
+#
+#------------------------------------------------------------------------------
+
+# Default value for TMPDIR
+TMPDIR=${TMPDIR:-/tmp}
+
+if [ $# -ne 2 ]; then
+    echo "Usage : `basename $0` directory tarFile"
+    echo ""
+    echo "Packs all .C and .H files and Make/options and Make/files into"
+    echo "<tarFile>"
+    echo ""
+    exit
+fi
+
+if [ ! -d $1 ]; then
+    echo "No directory $1"
+    exit 1
+fi
+
+if [ -f $2 ]; then
+    echo "$2 already exists."
+    exit 1
+fi
+
+find $1                        \
+    ! -type d                  \
+   \( -type f -o -type l \)    \
+    ! -name "*~"               \
+ -a ! -name ".*~"              \
+ -a ! -name "*.dep"            \
+ -a ! -name "*.o"              \
+ -a ! -name "*.so"             \
+ -a ! -name "*.a"              \
+ -a ! -name "*.tgz"            \
+ -a ! -name "core"             \
+ -a ! -name "core.[1-9]*"      \
+ -a ! -name "log[0-9]*"        \
+| sed                          \
+ -e "/$1\/lib\//d"          \
+ -e "/$1\/src\/mico-[0-9.]*\/platforms/d" \
+ -e "/$1\/src\/mpich-[0-9.]*\/platforms/d" \
+ -e "/$1\/src\/mpich-[0-9.]*\/lib/d" \
+ -e "/$1\/src\/lam-[0-9.]*\/platforms/d" \
+ -e '/applications\/bin\//d'   \
+ -e '/Make[.A-Za-z]*\/[^\/]*\//d'    \
+ > $TMPDIR/foamFiles.$$
+
+tar czpf $2 --files-from $TMPDIR/foamFiles.$$
+
+rm $TMPDIR/foamFiles.$$
+
+#------------------------------------------------------------------------------

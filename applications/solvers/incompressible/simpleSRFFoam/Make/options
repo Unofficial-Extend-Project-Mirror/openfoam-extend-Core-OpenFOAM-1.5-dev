@@ -1,0 +1,14 @@
+EXE_INC = \
+    -ISRFModel \
+    -ISRFVelocityFvPatchVectorField \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/transportModels
+
+EXE_LIBS = \
+    -lincompressibleTurbulenceModels \
+    -lincompressibleTransportModels \
+    -lfiniteVolume \
+    -lmeshTools \
+    -llduSolvers \
+    /* $(LIB_WM_OPTIONS_DIR)/libfbsdmalloc.o */

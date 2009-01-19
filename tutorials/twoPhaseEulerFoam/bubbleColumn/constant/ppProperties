@@ -1,0 +1,40 @@
+// The FOAM Project // File: conversionProperties
+/*
+-------------------------------------------------------------------------------
+ =========         | dictionary
+ \\      /         |
+  \\    /          | Name:   transportProperties
+   \\  /           | Family: Data file
+    \\/            |
+    F ield         | FOAM version: 1.9.6
+    O peration     | Product of Nabla Ltd.
+    A and          |
+    M anipulation  | Email: Enquiries@Nabla.co.uk
+-------------------------------------------------------------------------------
+*/
+
+version  0.5;
+format   ascii;
+
+root     "/home/nordin/foam/run/bed";
+case     "case4";
+instance "system";
+local    "";
+
+note     "particle-particle interaction Properties for Foam";
+
+class    dictionary;
+object   ppProperties;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+preAlphaExp         300;
+
+expMax              10.0;
+
+alphaMax            0.6;
+
+//g0                  g0 [ 0 2 -2 0 0 0 0 ] 1000 ;
+g0                  g0 [ 0 2 -2 0 0 0 0 ] 0 ;
+
+// ************************************************************************* //
