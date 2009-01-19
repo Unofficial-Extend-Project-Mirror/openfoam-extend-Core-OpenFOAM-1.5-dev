@@ -5,7 +5,7 @@ application=`basename $currDir`
 cases="sphereTransport"
 
 tutorialPath=`dirname $0`/..
-. $tutorialPath/RunFunctions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 for case in $cases
 do

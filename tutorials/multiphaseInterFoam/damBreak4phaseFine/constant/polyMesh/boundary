@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "";
-    case "";
-    instance "";
-    local "";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 5
@@ -27,7 +19,6 @@ FoamFile
 leftWall
 {
     type wall;
-    physicalType wallNoSurfaceTension;
     nFaces 195;
     startFace 68014;
 }
@@ -35,7 +26,6 @@ leftWall
 rightWall
 {
     type wall;
-    physicalType wallNoSurfaceTension;
     nFaces 195;
     startFace 68209;
 }
@@ -43,7 +33,6 @@ rightWall
 lowerWall
 {
     type wall;
-    physicalType wallNoSurfaceTension;
     nFaces 206;
     startFace 68404;
 }
@@ -51,7 +40,6 @@ lowerWall
 atmosphere
 {
     type patch;
-    physicalType atmosphere;
     nFaces 176;
     startFace 68610;
 }

@@ -1,6 +1,35 @@
 #!/bin/sh
-
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright held by original author
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
 #
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     Alltest
+#
+# Description
+#
+#------------------------------------------------------------------------------
+
 # FUNCTIONS
 #
 printUsage () {
@@ -14,32 +43,11 @@ Options are:
 EOF
 }
 
-newRunApplication () {
-cat<<EOF
-runApplication ()
-{
-    if [ -f \$2/log.\$1 ] ; then
-        echo "$1 already run on $2: remove log file to run"
-    else
-        mv \$2/system/controlDict \$2/system/controlDict.org
-        sed \\
-        -e s/"\(startFrom[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 latestTime;"/g \\
-        -e s/"\(stopAt[ \t]*\)\([a-zA-Z]*\);"/"\1 nextWrite;"/g \\
-        -e s/"\(writeControl[ \t]*\)\([a-zA-Z]*\);"/"\1 timeStep;"/g \\
-        -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \\
-        \$2/system/controlDict.org > \$2/system/controlDict
-        echo "Running \$1 on \$2"
-        \$1 . \$2 > \$2/log.\$1 2>&1
-    fi
-}
-EOF
-}
-
 setDefaultFvSchemes () {
 cat<<EOF
 gradSchemes { default Gauss linear; }
-divSchemes 
-{ 
+divSchemes
+{
     default Gauss linear;
     div(phi,fu_ft_h) Gauss multivariateSelection
     {
@@ -54,7 +62,7 @@ divSchemes
         b  upwind;
         h  upwind;
         hu upwind;
-    };    
+    };
 }
 laplacianSchemes { default Gauss linear corrected; }
 interpolationSchemes { default linear; }
@@ -65,7 +73,20 @@ EOF
 #
 # VARIABLE
 #
-MAIN_CONTROL_DICT=${WM_PROJECT_DIR}/${FOAM_DOT_DIR}/controlDict
+MAIN_CONTROL_DICT=
+
+for i in \
+  $HOME/.$WM_PROJECT-$WM_PROJECT_VERSION \
+  $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
+  $HOME/.$WM_PROJECT \
+  $WM_PROJECT_DIR/etc \
+  ;
+do
+  if [ -f "$i/controlDict" ]; then
+     MAIN_CONTROL_DICT="$i/controlDict"
+     break
+  fi
+done
 TUTORIALS_DIR=.
 TEST_RUN_DIR=../tutorialsTest
 FV_SCHEMES=\
@@ -111,20 +132,31 @@ if [ -d "$TEST_RUN_DIR" ] ; then
 fi
 
 echo "Modifying ${MAIN_CONTROL_DICT}"
+if [ -e ${MAIN_CONTROL_DICT}.org ]
+then
+    echo "File " ${MAIN_CONTROL_DICT}.org " already exists"
+    echo "Did Alltest fail in some way and then run again?"
+    exit 1
+fi
+
+# Clean up on termination and on Ctrl-C
+trap 'mv ${MAIN_CONTROL_DICT}.org ${MAIN_CONTROL_DICT} 2>/dev/null; exit 0' \
+    EXIT TERM INT
 cp ${MAIN_CONTROL_DICT} ${MAIN_CONTROL_DICT}.org
+
 sed \
 -e s/"\(fvSchemes[ \t]*\)\([0-9]\);"/"\1 1;"/g \
 -e s/"\(fvSolution[ \t]*\)\([0-9]\);"/"\1 1;"/g \
 ${MAIN_CONTROL_DICT}.org > ${MAIN_CONTROL_DICT}
 
 echo "Copying the tutorials"
-cp -r ${TUTORIALS_DIR} ${TEST_RUN_DIR}
+cp -a ${TUTORIALS_DIR} ${TEST_RUN_DIR}
 
 echo "Modifying the controlDicts to run only one time step"
 cd ${TEST_RUN_DIR}
 
 for CD in `find . -name "controlDict*"`
-do 
+do
     mv ${CD} ${CD}.org
     sed \
    -e s/"\(startFrom[ \t]*\)\([a-zA-Z]*\);"/"\1 latestTime;"/g \
@@ -133,10 +165,6 @@ do
     -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \
     ${CD}.org > ${CD}
 done
-
-mv RunFunctions RunFunctions.org
-sed '/runApplication/,/\}/d' RunFunctions.org > RunFunctions
-newRunApplication >> RunFunctions
 
 if [ $DEFAULT_SCHEMES = 1 ] ; then
     echo "Modifying the fvSchemes to contain only default schemes"
@@ -154,7 +182,8 @@ fi
 ./Allrun
 
 sed -e :a -e '/\\$/N; s/\\\n//; ta' Allrun > temp
-APPLICATIONS=`grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g'`
+APPLICATIONS=\
+    `grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g'`
 
 rm $SCHEMES_FILE > /dev/null 2>&1
 for APP in $APPLICATIONS
@@ -182,4 +211,5 @@ do
     echo "" >> $SOLVERS_FILE
 done
 
-mv ${MAIN_CONTROL_DICT}.org ${MAIN_CONTROL_DICT}
+
+# ----------------------------------------------------------------- end-of-file

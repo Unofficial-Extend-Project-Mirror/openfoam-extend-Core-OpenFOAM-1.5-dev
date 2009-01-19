@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSchemes;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
@@ -36,17 +28,17 @@ gradSchemes
 divSchemes
 {
     default          none;
-    div(phi,rho)     Gauss Gamma 1;
-    div(phi,U)       Gauss GammaV 1;
+    div(phi,rho)     Gauss limitedLinear 1;
+    div(phi,U)       Gauss limitedLinearV 1;
     div(phiU,p)      Gauss linear;
-    div(phi,k)       Gauss Gamma 1;
-    div(phi,epsilon) Gauss Gamma 1;
+    div(phi,k)       Gauss limitedLinear 1;
+    div(phi,epsilon) Gauss limitedLinear 1;
     div(phi,Yi_h)    Gauss  upwind;
     div(phi,fu_ft_h) Gauss multivariateSelection 
     {
-        fu              Gamma 1;
-        ft              Gamma 1;
-        h               Gamma 1;
+        fu              limitedLinear 1;
+        ft              limitedLinear 1;
+        h               limitedLinear 1;
     };
     div((muEff*dev2(grad(U).T()))) Gauss linear;
 }
@@ -78,6 +70,5 @@ fluxRequired
 {
     p;
 }
-
 
 // ************************************************************************* //

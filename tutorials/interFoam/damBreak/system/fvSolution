@@ -1,92 +1,55 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
     pcorr PCG
     {
-        preconditioner
-        {
-            type         DIC;
-        }
-
-        minIter          0;
-        maxIter          1000;
+        preconditioner   DIC;
         tolerance        1e-10;
         relTol           0;
     };
     pd PCG
     {
-        preconditioner
-        {
-            type         DIC;
-        }
-
-        minIter          0;
-        maxIter          1000;
+        preconditioner   DIC;
         tolerance        1e-7;
         relTol           0.05;
     };
     pdFinal PCG
     {
-        preconditioner
-        {
-            type         DIC;
-        }
-
-        minIter          0;
-        maxIter          1000;
+        preconditioner   DIC;
         tolerance        1e-7;
         relTol           0;
     };
     U PBiCG
     {
-        preconditioner
-        {
-            type         DILU;
-        }
-
-        minIter          0;
-        maxIter          1000;
+        preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;
     };
 }
 
-
 PISO
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
     nGammaCorr      1;
     nGammaSubCycles 2;
     cGamma          1;
-
-    pdRefCell        0;
-    pdRefValue       0.0;
 }
-
 
 // ************************************************************************* //

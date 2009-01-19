@@ -43,8 +43,8 @@ laplacianSchemes
 {
     default         none;
     laplacian(nu,U) Gauss linear corrected;
-    laplacian(rUA,pcorr) Gauss linear corrected;
-    laplacian(rUA,p) Gauss linear corrected;
+    laplacian(rAU,pcorr) Gauss linear corrected;
+    laplacian(rAU,p) Gauss linear corrected;
 }
 
 interpolationSchemes

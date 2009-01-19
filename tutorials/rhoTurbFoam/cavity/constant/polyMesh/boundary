@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "rhoTurbFoam";
-    case "cavity";
-    instance ""constant"";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 3
@@ -27,7 +19,6 @@ FoamFile
 movingWall
 {
     type wall;
-    physicalType adiabaticWallFunctions;
     nFaces 20;
     startFace 760;
 }
@@ -35,7 +26,6 @@ movingWall
 fixedWalls
 {
     type wall;
-    physicalType adiabaticWallFunctions;
     nFaces 60;
     startFace 780;
 }
@@ -43,7 +33,6 @@ fixedWalls
 frontAndBack
 {
     type empty;
-    physicalType empty;
     nFaces 800;
     startFace 840;
 }

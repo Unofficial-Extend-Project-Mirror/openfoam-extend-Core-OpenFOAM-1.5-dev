@@ -5,7 +5,7 @@ application=`basename $currDir`
 cases="springDamper sixDOFmotion"
 
 tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 for case in $cases
 do

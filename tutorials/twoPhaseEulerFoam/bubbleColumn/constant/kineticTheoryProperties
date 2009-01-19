@@ -1,57 +1,50 @@
-// The FOAM Project // File: kneticTheoryProperties
-/*
--------------------------------------------------------------------------------
- =========         | dictionary
- \\      /         |
-  \\    /          | Name:   kineticTheoryProperties
-   \\  /           | Family: Data file
-    \\/            |
-    F ield         | FOAM version: 2.0
-    O peration     | Product of Nabla Ltd.
-    A and          |
-    M anipulation  | Email: Enquiries@Nabla.co.uk
--------------------------------------------------------------------------------
-*/
-
-version  0.5;
-format   ascii;
-
-root     "/home/nordin/foam/run/bed";
-case     "case2";
-instance "constant";
-local    "";
-
-note     "kineticTheoryProperties for Foam";
-
-class    dictionary;
-object   kineticTheoryProperties;
-
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      kineticTheoryProperties;
+}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-kineticTheory           	off;
+kineticTheory               off;
 
-equilibrium					on;
+equilibrium                 on;
 
-e           				e  				[ 0 0 0 0 0 0 0 ] 0.9 ;
+e                           e               [ 0 0 0 0 0 0 0 ] 0.9 ;
 
-alphaMax         			alphaMax   		[ 0 0 0 0 0 0 0 ] 0.6 ;
+alphaMax                    alphaMax        [ 0 0 0 0 0 0 0 ] 0.6 ;
 
-alphaMinFriction 			alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.5 ;
+alphaMinFriction            alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.5 ;
 
-Fr              			Fr    			[ 1 -1 -2 0 0 0 0 ] 0.05 ;
+Fr                          Fr              [ 1 -1 -2 0 0 0 0 ] 0.05 ;
 
-eta          				eta 			[ 0 0 0 0 0 0 0 ] 2.0 ;
+eta                         eta             [ 0 0 0 0 0 0 0 ] 2.0 ;
 
-p       					p     			[ 0 0 0 0 0 0 0 ] 5.0 ;
+p                           p               [ 0 0 0 0 0 0 0 ] 5.0 ;
 
-phi   						phi     		[ 0 0 0 0 0 0 0 ] 25.0 ;
+phi                         phi             [ 0 0 0 0 0 0 0 ] 25.0 ;
 
-viscosityModel       		Syamlal;
+viscosityModel              Syamlal;
 
-conductivityModel     		HrenyaSinclair;
+conductivityModel           HrenyaSinclair;
+
+granularPressureModel       Lun;
+
+frictionalStressModel       JohnsonJackson;
+
+radialModel                 Gidaspow;
 
 HrenyaSinclairCoeffs
 {
-        L      				L       		[ 0 1 0 0 0 0 0 ] 5.0e-4 ;
+        L                   L               [ 0 1 0 0 0 0 0 ] 5.0e-4 ;
 }
+
 // ************************************************************************* //

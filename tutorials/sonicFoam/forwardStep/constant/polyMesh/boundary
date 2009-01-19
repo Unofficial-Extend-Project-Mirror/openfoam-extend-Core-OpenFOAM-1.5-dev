@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "sonicFoam";
-    case "forwardStep";
-    instance ""constant"";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 6
@@ -27,7 +19,6 @@ FoamFile
 inlet
 {
     type patch;
-    physicalType supersonicInlet;
     nFaces 50;
     startFace 10325;
 }
@@ -35,7 +26,6 @@ inlet
 outlet
 {
     type patch;
-    physicalType pressureTransmissiveOutlet;
     nFaces 40;
     startFace 10375;
 }
@@ -43,7 +33,6 @@ outlet
 bottom
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 25;
     startFace 10415;
 }
@@ -51,7 +40,6 @@ bottom
 top
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 125;
     startFace 10440;
 }
@@ -59,7 +47,6 @@ top
 obstacle
 {
     type patch;
-    physicalType adiabaticWall;
     nFaces 110;
     startFace 10565;
 }

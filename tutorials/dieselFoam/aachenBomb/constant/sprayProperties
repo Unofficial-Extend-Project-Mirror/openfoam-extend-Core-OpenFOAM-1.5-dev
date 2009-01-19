@@ -1,25 +1,17 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          sprayProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      sprayProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 interpolationSchemes
@@ -59,20 +51,13 @@ dragModel       standardDragModel;
 
 wallModel       reflect;
 
-sprayIteration
-{
-       sprayRelaxFactor        0.9;
-       sprayIterate                5;
-       minimumParcelMass       1e-20;
-}
-
 specConstAtomizationCoeffs
 {
-    dropletNozzleDiameterRatio 
+    dropletNozzleDiameterRatio
     (
         0.4
     );
-    sprayAngle      
+    sprayAngle
     (
         10
     );
@@ -149,9 +134,9 @@ hollowConeInjectorCoeffs
 {
     dropletPDF
     {
-        //pdfType           exponential;    
+        //pdfType           exponential;
         pdfType         RosinRammler;
-    
+
         RosinRammlerPDF
         {
             minValue        1.00e-6;
@@ -161,7 +146,7 @@ hollowConeInjectorCoeffs
             (
                 1.5e-4
             );
-    
+
             n
             (
                 3
@@ -194,6 +179,5 @@ reflectCoeffs
 {
     elasticity      0.9;
 }
-
 
 // ************************************************************************* //

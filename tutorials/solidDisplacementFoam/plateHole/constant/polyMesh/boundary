@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "";
-    case "";
-    instance "";
-    local "";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 6
@@ -27,7 +19,6 @@ FoamFile
 left
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 30;
     startFace 1930;
 }
@@ -35,7 +26,6 @@ left
 right
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 30;
     startFace 1960;
 }
@@ -43,7 +33,6 @@ right
 down
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 30;
     startFace 1990;
 }
@@ -51,7 +40,6 @@ down
 up
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 30;
     startFace 2020;
 }
@@ -59,7 +47,6 @@ up
 hole
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 20;
     startFace 2050;
 }
@@ -67,7 +54,6 @@ hole
 frontAndBack
 {
     type empty;
-    physicalType empty;
     nFaces 2000;
     startFace 2070;
 }

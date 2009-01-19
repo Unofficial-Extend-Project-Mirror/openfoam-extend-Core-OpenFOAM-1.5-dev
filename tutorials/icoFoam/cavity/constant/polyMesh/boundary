@@ -1,52 +1,39 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "/home/hjasak/OpenFOAM/OpenFOAM-1.3/tutorials/icoFoam";
-    case "cavity";
-    instance ""constant"";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 3
 (
-movingWall
-{
-    type wall;
-    physicalType wall;
-    nFaces 20;
-    startFace 760;
-}
-
-fixedWalls
-{
-    type wall;
-    physicalType wall;
-    nFaces 60;
-    startFace 780;
-}
-
-frontAndBack
-{
-    type empty;
-    physicalType empty;
-    nFaces 800;
-    startFace 840;
-}
+    movingWall
+    {
+        type            wall;
+        nFaces          20;
+        startFace       760;
+    }
+    fixedWalls
+    {
+        type            wall;
+        nFaces          60;
+        startFace       780;
+    }
+    frontAndBack
+    {
+        type            empty;
+        nFaces          800;
+        startFace       840;
+    }
 )
 
 // ************************************************************************* //

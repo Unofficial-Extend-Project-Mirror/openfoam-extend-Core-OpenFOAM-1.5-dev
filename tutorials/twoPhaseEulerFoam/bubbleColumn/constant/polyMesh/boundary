@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "twoPhaseEulerFoam";
-    case "bubbleColumn";
-    instance ""constant"";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 4
@@ -27,7 +19,6 @@ FoamFile
 inlet
 {
     type patch;
-    physicalType inlet;
     nFaces 25;
     startFace 3650;
 }
@@ -35,7 +26,6 @@ inlet
 outlet
 {
     type patch;
-    physicalType inletOutlet;
     nFaces 25;
     startFace 3675;
 }
@@ -43,7 +33,6 @@ outlet
 walls
 {
     type wall;
-    physicalType wallFunctions;
     nFaces 150;
     startFace 3700;
 }

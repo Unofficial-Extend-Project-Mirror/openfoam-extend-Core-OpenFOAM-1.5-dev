@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -41,85 +33,43 @@ solvers
     };
     Ua PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     Ub PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     alpha PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-10;
         relTol           0;
     };
     beta PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-10;
         relTol           0;
     };
     Theta PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     k PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     epsilon PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
@@ -134,6 +84,5 @@ PISO
     pRefCell        0;
     pRefValue       0;
 }
-
 
 // ************************************************************************* //

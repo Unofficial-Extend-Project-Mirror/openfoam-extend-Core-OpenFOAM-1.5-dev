@@ -1,17 +1,18 @@
-// ************************************************************************* //
-// Field Dictionary
-
-version             1.0;
-format              ascii;
-root                "/users/tfd/nordin/foam/nordin2.0/run/larsg";
-case                "5x50";
-instance            "0.000000e+00";
-local               "";
-class               volScalarField;
-form                dictionary;
-object              Theta;
-
-// ************************************************************************* //
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      Theta;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions          [ 0 2 -2 0 0 0 0 ];
 

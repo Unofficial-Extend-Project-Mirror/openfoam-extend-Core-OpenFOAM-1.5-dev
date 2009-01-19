@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -27,91 +19,56 @@ solvers
     // Solver for the rho equation
     rho PCG
     {
-        preconditioner
-        {
-            type        DIC;
-        }
-
-        minIter          0;
-        maxIter          2000;
+        preconditioner   DIC;
         tolerance        1e-05;
         relTol           0;
     };
     // Solver for the U equation
     U PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     // Solver for the p equation
     p PCG
     {
-        preconditioner
-        {
-            type        DIC;
-        }
-
-        minIter          0;
-        maxIter          2000;
+        preconditioner   DIC;
         tolerance        1e-06;
         relTol           0;
     };
     // Solver for the h equation
     h PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     // Solver for the R equation
     R PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     // Solver for the k equation
     k PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
     // Solver for the epsilon equation
     epsilon PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
+        tolerance        1e-05;
+        relTol           0;
+    };
+    // Solver for the omega equation
+    omega PBiCG
+    {
+        preconditioner   DILU;
         tolerance        1e-05;
         relTol           0;
     };
@@ -126,6 +83,5 @@ PISO
     // momentumPredictor?
     momentumPredictor yes;
 }
-
 
 // ************************************************************************* //

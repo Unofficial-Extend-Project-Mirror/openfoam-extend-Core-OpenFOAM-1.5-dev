@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -98,37 +90,19 @@ solvers
 
     k PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-08;
         relTol           0;
     };
     B PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-08;
         relTol           0;
     };
     nuTilda PBiCG
     {
-        preconditioner
-        {
-            type        DILU;
-        }
-
-        minIter          0;
-        maxIter          500;
+        preconditioner   DILU;
         tolerance        1e-08;
         relTol           0;
     };
@@ -136,13 +110,12 @@ solvers
 
 PISO
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nCorrectors     2;
     nNonOrthogonalCorrectors 1;
     nGammaCorr      1;
     nGammaSubCycles 4;
     cGamma          1;
 }
-
 
 // ************************************************************************* //

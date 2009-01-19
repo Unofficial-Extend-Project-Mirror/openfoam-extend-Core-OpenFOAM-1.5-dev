@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          chemistryProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      chemistryProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 chemistry               off;
@@ -29,13 +21,6 @@ chemistrySolver         ODE;
 //chemistrySolver       sequential;
 
 initialChemicalTimeStep     1.0e-7;
-
-onlineProperties
-{
-    online          off;
-    maxElements     1000;
-    tolerance       0.1;
-}
 
 sequentialCoeffs
 {

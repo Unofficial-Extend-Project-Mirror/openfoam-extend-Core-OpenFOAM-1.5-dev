@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSchemes;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
@@ -35,15 +27,15 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phia,Ua)    Gauss GammaV 1;
-    div(phib,Ub)    Gauss GammaV 1;
-    div(phib,k)      Gauss Gamma 1;
-    div(phib,epsilon) Gauss Gamma 1;
-    div(phi,alpha)  Gauss Gamma01 1;
-    div(phir,alpha) Gauss Gamma01 1;
-    div(phi,Theta) Gauss Gamma 1;
-    div((-nuEffa*grad(Ua).T())) Gauss linear;
-    div((-nuEffb*grad(Ub).T())) Gauss linear;
+    div(phia,Ua)    Gauss limitedLinearV 1;
+    div(phib,Ub)    Gauss limitedLinearV 1;
+    div(phib,k)      Gauss limitedLinear 1;
+    div(phib,epsilon) Gauss limitedLinear 1;
+    div(phi,alpha)  Gauss limitedLinear01 1;
+    div(phir,alpha) Gauss limitedLinear01 1;
+    div(phi,Theta)  Gauss limitedLinear 1;
+    div(Rca)        Gauss linear;
+    div(Rcb)        Gauss linear;
 }
 
 laplacianSchemes
@@ -52,7 +44,7 @@ laplacianSchemes
     laplacian(nuEffa,Ua) Gauss linear corrected;
     laplacian(nuEffb,Ub) Gauss linear corrected;
     laplacian((rho*(1|A(U))),p) Gauss linear corrected;
-    laplacian(ppMagf,alpha) Gauss linear corrected;
+    laplacian(alphaPpMag,alpha) Gauss linear corrected;
     laplacian((alphak*nuEffb),k) Gauss linear corrected;
     laplacian((alphaEps*nuEffb),epsilon) Gauss linear corrected;
 }
@@ -72,6 +64,5 @@ fluxRequired
     default         no;
     p;
 }
-
 
 // ************************************************************************* //

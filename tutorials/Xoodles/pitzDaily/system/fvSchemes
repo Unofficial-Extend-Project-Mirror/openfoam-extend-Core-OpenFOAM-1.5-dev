@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSchemes;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
@@ -36,22 +28,22 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss GammaV 1;
+    div(phi,U)      Gauss limitedLinearV 1;
     div(phid,p)     Gauss linear;
     div(phiU,p)     Gauss linear;
-    div(phi,k)      Gauss Gamma 1;
-    div(phi,B)      Gauss Gamma 1;
+    div(phi,k)      Gauss limitedLinear 1;
+    div(phi,B)      Gauss limitedLinear 1;
     div(B)          Gauss linear;
-    div(phiXi,Xi)   Gauss Gamma 1;
-    div(phiXi,Su)   Gauss Gamma 1;
-    div(phiSt,b)    Gauss Gamma01 1;
+    div(phiXi,Xi)   Gauss limitedLinear 1;
+    div(phiXi,Su)   Gauss limitedLinear 1;
+    div(phiSt,b)    Gauss limitedLinear01 1;
     div(phi,ft_b_h_hu) Gauss multivariateSelection 
     {
-        fu              Gamma01 1;
-        ft              Gamma01 1;
-        b               Gamma01 1;
-        h               Gamma 1;
-        hu              Gamma 1;
+        fu              limitedLinear01 1;
+        ft              limitedLinear01 1;
+        b               limitedLinear01 1;
+        h               limitedLinear 1;
+        hu              limitedLinear 1;
     };
     div(U)          Gauss linear;
     div((Su*grad(b))) Gauss linear;
@@ -87,6 +79,5 @@ fluxRequired
     default         no;
     p;
 }
-
 
 // ************************************************************************* //

@@ -1,18 +1,17 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
+# Source tutorial clean functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
 keepCases="damBreak"
 loseCases="damBreakFine"
 
-tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
-
 for case in $keepCases
 do
-    cleanCase $case
-    if [ "$case" = "damBreak" ] 
-    then 
+    (cd $case && foamCleanTutorials)
+
+    if [ "$case" = "damBreak" ]
+    then
         cp $case/0/gamma.org $case/0/gamma
     fi
 done

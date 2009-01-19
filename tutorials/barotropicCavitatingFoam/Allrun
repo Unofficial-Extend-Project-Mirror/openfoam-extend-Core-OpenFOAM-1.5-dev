@@ -5,7 +5,7 @@ application=`basename $currDir`
 case="nozzle"
 
 tutorialPath=`dirname $0`/..
-. $tutorialPath/RunFunctions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication blockMesh $case
 runApplication $application $case

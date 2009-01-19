@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.4                                   |
@@ -10,12 +10,6 @@ FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          fvSchemes;
 }
@@ -43,8 +37,8 @@ laplacianSchemes
 {
     default         none;
     laplacian(nu,U) Gauss linear corrected;
-    laplacian(rUA,pcorr) Gauss linear corrected;
-    laplacian(rUA,p) Gauss linear corrected;
+    laplacian(rAU,pcorr) Gauss linear corrected;
+    laplacian(rAU,p) Gauss linear corrected;
 }
 
 interpolationSchemes

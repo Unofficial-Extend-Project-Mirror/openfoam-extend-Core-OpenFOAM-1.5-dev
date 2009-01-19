@@ -1,23 +1,18 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="cylinder pitzDaily"
-utility=analyticalCylinder
+# Source tutorial clean functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
+cd cylinder
+    cleanCase
+    rm -rf 0 > /dev/null 2>&1
+    cp -r 0.org 0
+    wclean analyticalCylinder
+cd ..
 
-for case in $cases
-do
-    cleanCase $case
-    rm -rf $case/0 > /dev/null 2>&1
-    cp -r $case/0.org $case/0
-
-    if [ "$case" = "cylinder" ] 
-    then
-        wclean $case/$utility
-    fi
-done 
-
+cd pitzDaily
+    cleanCase
+    rm -rf 0 > /dev/null 2>&1
+    cp -r 0.org 0
+cd ..
 

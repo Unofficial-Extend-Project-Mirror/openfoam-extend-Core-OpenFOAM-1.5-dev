@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSchemes;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
@@ -38,8 +30,8 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss upwind;
-    div(phid,p)     Gauss Gamma 1;
-    div(phi,e)      Gauss Gamma 1;
+    div(phid,p)     Gauss limitedLinear 1;
+    div(phi,e)      Gauss limitedLinear 1;
 }
 
 laplacianSchemes
@@ -47,7 +39,7 @@ laplacianSchemes
     default         none;
     laplacian(mu,U) Gauss linear corrected;
     laplacian(mu,e) Gauss linear corrected;
-    laplacian((rho*1|A(U)),p) Gauss linear corrected;
+    laplacian((rho*(1|A(U))),p) Gauss linear corrected;
 }
 
 interpolationSchemes
@@ -65,6 +57,5 @@ fluxRequired
     default         no;
     p;
 }
-
 
 // ************************************************************************* //

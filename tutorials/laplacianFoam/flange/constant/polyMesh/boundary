@@ -1,60 +1,45 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "laplacianFoam";
-    case "flange";
-    instance ""constant"";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 4
 (
-patch1
-{
-    type patch;
-    physicalType adiabatic;
-    nFaces 2440;
-    startFace 15316;
-}
-
-patch2
-{
-    type patch;
-    physicalType fixedTemp;
-    nFaces 348;
-    startFace 17756;
-}
-
-patch3
-{
-    type patch;
-    physicalType adiabatic;
-    nFaces 96;
-    startFace 18104;
-}
-
-patch4
-{
-    type patch;
-    physicalType fixedTemp;
-    nFaces 384;
-    startFace 18200;
-}
+    patch1
+    {
+        type            patch;
+        nFaces          2440;
+        startFace       15316;
+    }
+    patch2
+    {
+        type            patch;
+        nFaces          348;
+        startFace       17756;
+    }
+    patch3
+    {
+        type            patch;
+        nFaces          96;
+        startFace       18104;
+    }
+    patch4
+    {
+        type            patch;
+        nFaces          384;
+        startFace       18200;
+    }
 )
 
 // ************************************************************************* //

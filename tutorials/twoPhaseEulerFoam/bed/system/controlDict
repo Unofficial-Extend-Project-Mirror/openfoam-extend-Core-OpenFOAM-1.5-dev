@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          controlDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 applicationClass twoPhaseEulerFoam;
@@ -30,17 +22,17 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         2;
+endTime         10;
 
-deltaT          5e-4;
+deltaT          1e-3;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.01;
+writeInterval   0.1;
 
 purgeWrite      0;
 
-writeFormat     ascii;
+writeFormat     binary;
 
 writePrecision  6;
 
@@ -50,12 +42,53 @@ timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable on;
+runTimeModifiable   on;
 
-adjustTimeStep  no;
+adjustTimeStep  yes;
 
-maxCo           0.9;
+maxCo           0.5;
 
-maxDeltaT       1e-5;
+maxDeltaT      1;
+
+functions
+(
+    fieldAverage1
+    {
+        // Type of functionObject
+        type fieldAverage;
+
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libfieldAverage.so");
+
+        // Fields to be  averaged - runTime modifiable
+        fields
+        (
+            Ua
+            {
+                mean            on;
+                prime2Mean      off;
+                base            time;
+            }
+            Ub
+            {
+                mean            on;
+                prime2Mean      off;
+                base            time;
+            }
+            alpha
+            {
+                mean            on;
+                prime2Mean      off;
+                base            time;
+            }
+            p
+            {
+                mean            on;
+                prime2Mean      off;
+                base            time;
+            }
+        );
+    }
+);
 
 // ************************************************************************* //

@@ -1,27 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
-// FoamX Case Dictionary.
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "rhoTurbFoam";
-    case            "cavity";
-    instance        "system";
-    local           "";
-
-    class           dictionary;
-    object          controlDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Foam Application Class
@@ -77,6 +67,5 @@ maxCo           0.3;
 
 // maxDeltaT
 maxDeltaT       1;
-
 
 // ************************************************************************* //

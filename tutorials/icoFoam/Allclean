@@ -1,16 +1,15 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
+# Source tutorial clean functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
 keepCases="cavity cavityGrade cavityClipped elbow"
 loseCases="cavityFine cavityHighRe"
 
-tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
-
 for case in $keepCases
 do
-    cleanCase $case
+    (cd $case && foamCleanTutorials)
+
     if [ "$case" = "elbow" ]
     then
         rm -rf $case/fluentInterface
