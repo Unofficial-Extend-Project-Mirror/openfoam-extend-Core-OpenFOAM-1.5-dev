@@ -224,6 +224,7 @@ Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
 
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
 (
+    const Pstream::commsTypes,
     const unallocLabelList& interfaceData
 ) const
 {
@@ -244,6 +245,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
 
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
 (
+    const Pstream::commsTypes,
     const unallocLabelList& iF
 ) const
 {

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cyclicLduInterface
+    Foam::cyclicLduInterface
 
 Description
     An abstract base class for cyclic coupled interfaces.
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class cyclicLduInterface Declaration
+                  Class cyclicLduInterface Declaration
 \*---------------------------------------------------------------------------*/
 
 class cyclicLduInterface

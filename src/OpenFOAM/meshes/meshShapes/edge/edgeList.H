@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    edgeList
+Typedef
+    Foam::edgeList
 
 \*---------------------------------------------------------------------------*/
 
@@ -31,7 +31,6 @@ Type
 #define edgeList_H
 
 #include "edge.H"
-#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

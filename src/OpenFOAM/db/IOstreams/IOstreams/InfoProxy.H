@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    InfoProxy
+    Foam::InfoProxy
 
 Description
+    A helper class for outputting values to Ostream
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,14 +52,20 @@ class InfoProxy
 {
 public:
 
+    #ifndef __MAKECINT__
     const T& t_;
+    #endif
 
     InfoProxy(const T& t)
     :
         t_(t)
     {}
     
-    friend Ostream& operator<< <T>(Ostream&, const InfoProxy<T>&);
+    friend Ostream& operator<<
+    #ifndef __CINT__
+    <T>
+    #endif
+    (Ostream&, const InfoProxy<T>&);
 };
 
 

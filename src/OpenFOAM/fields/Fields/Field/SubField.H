@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SubField
+    Foam::SubField
 
 Description
-    SubField is a Field obtained as a section of another Field.  Thus it is
-    itself unallocated so that no storage is allocated or de-allocated
-    during it's use.  To achieve this behaviour, SubField is derived from
-    UnallocatedField rather than Field.
+    SubField is a Field obtained as a section of another Field.
+
+    Thus it is itself unallocated so that no storage is allocated or
+    deallocated during its use.  To achieve this behaviour, SubField is
+    derived from a SubList rather than a List.
 
 SourceFiles
     SubFieldI.H
@@ -98,7 +99,7 @@ public:
     // Member functions
 
         //- Return a null SubField
-        static inline SubField<Type>& null();
+        static inline const SubField<Type>& null();
 
         //- Return a component field of the field
         inline tmp<Field<cmptType> > component(const direction) const;

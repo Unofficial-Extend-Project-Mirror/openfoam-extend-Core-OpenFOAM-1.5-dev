@@ -39,8 +39,7 @@ SourceFiles
 #ifndef ggiPointPatch_H
 #define ggiPointPatch_H
 
-#include "facePointPatch.H"
-#include "faceList.H"
+#include "coupledFacePointPatch.H"
 #include "ggiPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,8 +53,14 @@ namespace Foam
 
 class ggiPointPatch
 :
-    public facePointPatch
+    public coupledFacePointPatch
 {
+    // Private data
+
+        //- Local reference cast into the cyclic patch
+        const ggiPolyPatch& ggiPolyPatch_;
+
+
     // Private Member Functions
 
         //- Disallow default construct as copy
@@ -63,6 +68,25 @@ class ggiPointPatch
 
         //- Disallow default assignment
         void operator=(const ggiPointPatch&);
+
+
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry();
+
+        //- Calculate mesh points
+        virtual void calcGeometry();
+
+        //- Initialise the patches for moving points
+        virtual void initMovePoints(const pointField&);
+
+        //- Correct patches after moving points
+        virtual void movePoints(const pointField&);
+
+        //- Initialise the update of the patch topology
+        virtual void initUpdateMesh();
+
+        //- Update of the patch topology
+        virtual void updateMesh();
 
 
 public:
@@ -94,10 +118,7 @@ public:
         // Access
 
             //- Return true because this patch is coupled
-            virtual bool coupled() const
-            {
-                return true;
-            }
+            virtual bool coupled() const;
 };
 
 

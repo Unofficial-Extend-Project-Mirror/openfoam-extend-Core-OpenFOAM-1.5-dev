@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ChemicallyActivatedReactionRate
+    Foam::ChemicallyActivatedReactionRate
 
 Description
     General class for handling chemically-activated bimolecular reactions.
@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class ReactionRate, class ChemicallyActivationFunction>
 class ChemicallyActivatedReactionRate;

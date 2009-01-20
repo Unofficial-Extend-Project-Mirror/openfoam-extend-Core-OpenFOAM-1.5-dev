@@ -22,27 +22,30 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    typeInfo
+Typedef
+    Foam::typeInfo
 
 Description
-    Basic run-time type information using word as the type's name. 
+    Basic run-time type information using word as the type's name.
     Used to enhance the standard RTTI to cover I/O.
 
     The user can get the type's type name using the type info access function
-
+    @code
         type()
+    @endcode
 
     The reference type cast template function:
-
+    @code
         refCast<T>(r)
+    @endcode
 
     wraps dynamic_cast to handle the bad_cast exception and generate a
     FatalError.
 
     The isA function:
-
+    @code
         isA<T>(r)
+    @endcode
 
     returns true if r is of type T or derived from type T.
 

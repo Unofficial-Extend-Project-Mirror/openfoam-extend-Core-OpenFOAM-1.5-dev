@@ -91,16 +91,6 @@ public:
             const DimensionedField<vector, Mesh>&
         );
 
-        //- Construct from patch and internal field, value
-        // and value fraction
-        ComponentMixedPointPatchVectorField
-        (
-            const PointPatch&,
-            const DimensionedField<vector, Mesh>&,
-            const vectorField&,
-            const vectorField&
-        );
-
         //- Construct from patch, internal field and dictionary
         ComponentMixedPointPatchVectorField
         (
@@ -205,7 +195,10 @@ public:
         // Evaluation functions
 
             //- Insert boundary value into the internal field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Set boundary condition to matrix
             virtual void setBoundaryCondition

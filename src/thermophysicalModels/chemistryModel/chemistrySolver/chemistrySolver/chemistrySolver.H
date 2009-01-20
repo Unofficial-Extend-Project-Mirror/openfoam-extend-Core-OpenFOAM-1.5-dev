@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    chemistrySolver
+    Foam::chemistrySolver
 
 Description
+    An abstract class for solving chemistry
 
 SourceFiles
     chemistrySolver.C
@@ -94,7 +95,7 @@ public:
         static autoPtr<chemistrySolver> New
         (
             const dictionary& dict,
-            chemistryModel& chemistry        
+            chemistryModel& chemistry
         );
 
 

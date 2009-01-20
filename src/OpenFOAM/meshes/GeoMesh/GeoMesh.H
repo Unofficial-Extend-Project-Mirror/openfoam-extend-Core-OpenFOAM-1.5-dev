@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    GeoMesh
+    Foam::GeoMesh
 
 Description
     Generic mesh wrapper used by volMesh, surfaceMesh, pointMesh etc.
@@ -33,7 +33,7 @@ Description
 #ifndef GeoMesh_H
 #define GeoMesh_H
 
-#include "label.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,6 +71,15 @@ public:
         :
             mesh_(mesh)
         {}
+
+
+    // Member Functions
+
+        //- Return the object registry
+        const objectRegistry& db() const
+        {
+            return mesh_;
+        }
 
 
     // Member Operators

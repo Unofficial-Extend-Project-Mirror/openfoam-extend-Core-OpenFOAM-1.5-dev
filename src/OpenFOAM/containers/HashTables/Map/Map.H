@@ -23,10 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Map
+    Foam::Map
 
 Description
-    Map
+    A HashTable to objects of type \<T\> with a label key.
+
+See Also
+    PtrMap
 
 \*---------------------------------------------------------------------------*/
 

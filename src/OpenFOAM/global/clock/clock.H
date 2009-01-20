@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    clock
+    Foam::clock
 
 Description
+    Read access to the system clock with formatting.
 
 SourceFiles
     clock.C
@@ -62,7 +63,7 @@ class clock
         mutable time_t newTime_;
 
         //- Names of the months
-        static const char *monthnames[];
+        static const char *monthNames[];
 
 
 public:
@@ -80,6 +81,10 @@ public:
 
         //- Return the current wall-clock date as a raw struct
         static const struct tm rawDate();
+
+        //- Return the current wall-clock date/time as a string
+        //  format according to ISO-8601 (yyyy-mm-ddThh:mm:ss)
+        static string dateTime();
 
         //- Return the current wall-clock date as a string
         static string date();

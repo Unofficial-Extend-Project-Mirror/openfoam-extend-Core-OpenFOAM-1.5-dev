@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    mathematicalConstants
+    Foam::mathematicalConstant
 
 Description
-    Mathematical constants.
+    Mathematical constants such as pi, e.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,6 +47,7 @@ namespace mathematicalConstant
     const scalar e(M_E);
     const scalar pi(M_PI);
     const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

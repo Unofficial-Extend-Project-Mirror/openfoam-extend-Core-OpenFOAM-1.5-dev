@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    NamedEnum
+    Foam::NamedEnum
 
 Description
+    Initialise the NamedEnum HashTable from the static list of names.
 
 SourceFiles
     NamedEnum.C
@@ -78,24 +79,10 @@ public:
 
         //- Read a word from Istream and return the corresponding
         //  enumeration element
-        const Enum read(Istream& is) const
-        {
-            word name(is);
+        Enum read(Istream& is) const;
 
-            HashTable<int>::const_iterator iter = find(name);
-
-            if (iter == HashTable<int>::end())
-            {
-                FatalIOErrorIn
-                (
-                    "NamedEnum<Enum, nEnum>::read(Istream& is) const",
-                    is
-                ) << name << " is not in enumeration " << toc()
-                  << exit(FatalIOError);
-            }
-
-            return Enum(iter());
-        }
+        //- Write the name representation of the enumeration to an Ostream
+        void write(const Enum e, Ostream& os) const;
 
 
     // Member Operators

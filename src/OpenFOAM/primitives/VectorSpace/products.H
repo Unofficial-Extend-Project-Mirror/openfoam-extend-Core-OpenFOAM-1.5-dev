@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    product
+InNamespace
+    Foam
 
 Description
     Traits classes for inner and outer products of primitives.
@@ -61,6 +61,8 @@ public:
 };
 
 
+#ifndef __CINT__
+
 template<class arg1, class arg2>
 class outerProduct
 {
@@ -86,7 +88,6 @@ public:
     >::type type;
 };
 
-
 template<class arg1, class arg2>
 class innerProduct
 {
@@ -98,7 +99,6 @@ public:
         int(pTraits<arg1>::rank) + int(pTraits<arg2>::rank) - 2
     >::type type;
 };
-
 
 template<class arg1, class arg2>
 class scalarProduct
@@ -120,6 +120,52 @@ public:
         arg2*int(pTraits<arg1>::rank)
     >::type type;
 };
+
+#else
+
+template<class arg1, class arg2>
+class outerProduct
+{
+public:
+
+    typedef arg1 type;
+};
+
+
+template<class arg1, class arg2>
+class crossProduct
+{
+public:
+
+    typedef arg1 type;
+};
+
+template<class arg1, class arg2>
+class innerProduct
+{
+public:
+
+    typedef arg1 type;
+};
+
+template<class arg1, class arg2>
+class scalarProduct
+{
+public:
+
+    typedef typename pTraits<arg1>::cmptType type;
+};
+
+
+template<class arg1, int arg2>
+class powProduct
+{
+public:
+
+    typedef arg1 type;
+};
+
+#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

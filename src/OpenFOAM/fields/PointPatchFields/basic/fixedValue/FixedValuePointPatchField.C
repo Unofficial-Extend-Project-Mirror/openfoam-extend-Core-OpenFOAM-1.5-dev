@@ -67,27 +67,6 @@ FixedValuePointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>
-        (p, iF, f)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-FixedValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
-FixedValuePointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :

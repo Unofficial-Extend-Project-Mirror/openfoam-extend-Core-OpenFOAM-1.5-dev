@@ -24,15 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-inline SubField<Type>::SubField
+inline Foam::SubField<Type>::SubField
 (
     const SubList<Type>& slist
 )
@@ -41,7 +36,7 @@ inline SubField<Type>::SubField
 {}
 
 template<class Type>
-inline SubField<Type>::SubField
+inline Foam::SubField<Type>::SubField
 (
     const UList<Type>& list,
     const label subSize
@@ -52,7 +47,7 @@ inline SubField<Type>::SubField
 
 
 template<class Type>
-inline SubField<Type>::SubField
+inline Foam::SubField<Type>::SubField
 (
     const UList<Type>& list,
     const label subSize,
@@ -64,7 +59,7 @@ inline SubField<Type>::SubField
 
 
 template<class Type>
-inline SubField<Type>::SubField
+inline Foam::SubField<Type>::SubField
 (
     const SubField<Type>& sfield
 )
@@ -76,9 +71,8 @@ inline SubField<Type>::SubField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null Field
 template<class Type>
-inline SubField<Type>& SubField<Type>::null()
+inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
 {
     SubField<Type>* nullPtr = reinterpret_cast<SubField<Type>*>(NULL);
     return *nullPtr;
@@ -86,7 +80,8 @@ inline SubField<Type>& SubField<Type>::null()
 
 
 template<class Type>
-inline tmp<Field<typename SubField<Type>::cmptType> > SubField<Type>::component
+inline Foam::tmp<Foam::Field<typename Foam::SubField<Type>::cmptType> >
+Foam::SubField<Type>::component
 (
     const direction d
 ) const
@@ -96,7 +91,7 @@ inline tmp<Field<typename SubField<Type>::cmptType> > SubField<Type>::component
 
 
 template<class Type>
-inline tmp<Field<Type> > SubField<Type>::T() const
+inline Foam::tmp<Foam::Field<Type> > Foam::SubField<Type>::T() const
 {
     return (reinterpret_cast<const Field<Type>&>(*this)).T();
 }
@@ -105,22 +100,17 @@ inline tmp<Field<Type> > SubField<Type>::T() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-inline void SubField<Type>::operator=(const SubField<Type>& rhs)
+inline void Foam::SubField<Type>::operator=(const SubField<Type>& rhs)
 {
     UList<Type>::operator=(rhs);
 }
 
 
-// Allow cast to a const Field<Type>&
 template<class Type>
-inline SubField<Type>::operator const Field<Type>&() const
+inline Foam::SubField<Type>::operator const Foam::Field<Type>&() const
 {
     return *(reinterpret_cast<const Field<Type>*>(this));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    StaticHashTable
+    Foam::StaticHashTable
 
 Description
-    STL conforming hash table. Uses straight lists as underlying type.
-    Is slower to insert than the standard HashTable but should be more
+    STL conforming hash table.
+
+    Uses straight lists as underlying type.
+    Is slower to insert than the standard HashTable, but should be more
     memory efficient and faster to access.
     Explicitly does not have default size.
 
@@ -50,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T>
 class List;
@@ -226,6 +228,7 @@ public:
 
     // STL iterator
 
+        //- An STL iterator
         template<class TRef, class TableRef>
         class Iterator
         {

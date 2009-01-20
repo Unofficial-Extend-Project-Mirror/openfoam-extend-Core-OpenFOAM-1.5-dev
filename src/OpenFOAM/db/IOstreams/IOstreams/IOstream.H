@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    IOstream
+    Foam::IOstream
 
 Description
-    An IOstream is an abstract base class for all input/output
-    systems; be they streams, files, token lists etc.
-    The basic operations are construct, close, read token,
-    read primitive and read binary block.  In addition version control
-    and line number counting is incorporated.  Usually one would use
-    the read primitive member functions,  but if one were reading a
-    stream on unknown data sequence one can read token by token, and
-    then analyse.
+    An IOstream is an abstract base class for all input/output systems; be
+    they streams, files, token lists etc.
+
+    The basic operations are construct, close, read token, read primitive
+    and read binary block.  In addition version control and line number
+    counting is incorporated.  Usually one would use the read primitive
+    member functions, but if one were reading a stream on unknown data
+    sequence one can read token by token, and then analyse.
 
 SourceFiles
     IOprint.C
@@ -73,6 +73,8 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                            Class IOstream Declaration
 \*---------------------------------------------------------------------------*/
+
+#include "CintDefs.H"
 
 class IOstream
 {
@@ -191,7 +193,9 @@ public:
 
 
             //- Ostream operator
+            #ifndef __MAKECINT__
             friend Ostream& operator<<(Ostream& os, const versionNumber& vn);
+            #endif
         };
 
 
@@ -375,10 +379,10 @@ public:
             }
 
 
-        // Inquiry
+        // Stream state functions
 
             //- Return stream format of given format name
-            static streamFormat format(const word&);
+            static streamFormat formatEnum(const word&);
 
             //- Return current stream format
             streamFormat format() const
@@ -386,19 +390,59 @@ public:
                 return format_;
             }
 
-            //- Return current stream version
+            //- Set the stream format
+            streamFormat format(const streamFormat fmt)
+            {
+                streamFormat fmt0 = format_;
+                format_ = fmt;
+                return fmt0;
+            }
+
+            //- Set the stream format from word
+            streamFormat format(const word& fmt)
+            {
+                streamFormat fmt0 = format_;
+                format_ = formatEnum(fmt);
+                return fmt0;
+            }
+
+            //- Return the stream version
             versionNumber version() const
             {
                 return version_;
             }
 
-            //- Return compression of given compression name
-            static compressionType compression(const word&); 
+            //- Set the stream version
+            versionNumber version(const versionNumber ver)
+            {
+                versionNumber ver0 = version_;
+                version_ = ver;
+                return ver0;
+            }
 
-            //- Return current compression
+            //- Return compression of given compression name
+            static compressionType compressionEnum(const word&); 
+
+            //- Return the stream compression
             compressionType compression() const
             {
                 return compression_;
+            }
+
+            //- Set the stream compression
+            compressionType compression(const compressionType cmp)
+            {
+                compressionType cmp0 = compression_;
+                compression_ = cmp;
+                return cmp0;
+            }
+
+            //- Set the stream compression from word
+            compressionType compression(const word& cmp)
+            {
+                compressionType cmp0 = compression_;
+                compression_ = compressionEnum(cmp);
+                return cmp0;
             }
 
             //- Return current stream line number
@@ -407,17 +451,22 @@ public:
                 return lineNumber_;
             }
 
-            //- Return flags of stream
-            virtual ios_base::fmtflags flags() const = 0;
-
-
-        // Edit
-
             //- Return current stream line number
             label& lineNumber()
             {
                 return lineNumber_;
             }
+
+            //- Set the stream line number
+            label lineNumber(const label ln)
+            {
+                label ln0 = lineNumber_;
+                lineNumber_ = ln;
+                return ln0;
+            }
+
+            //- Return flags of stream
+            virtual ios_base::fmtflags flags() const = 0;
 
             //- Return the default precision
             static unsigned int defaultPrecision()
@@ -431,36 +480,6 @@ public:
                 unsigned int precision0 = precision_;
                 precision_ = p;
                 return precision0;
-            }
-
-            //- Set the stream format
-            void set(const streamFormat fmt)
-            {
-                format_ = fmt;
-            }
-
-            //- Set the stream format from word
-            void setFormat(const word& fmt)
-            {
-                format_ = format(fmt);
-            }
-
-            //- Reset stream version
-            void set(const versionNumber version)
-            {
-                version_ = version;
-            }
-
-            //- Reset stream version
-            void setVersion(const versionNumber version)
-            {
-                version_ = version;
-            }
-
-            //- Reset stream compression
-            void setCompression(const compressionType compression)
-            {
-                compression_ = compression;
             }
 
             //- Set stream to have reached eof
@@ -526,10 +545,16 @@ public:
             }
 };
 
+#include "CintUndefs.H"
+
+Ostream& operator<<(Ostream& os, const IOstream::streamFormat& sf);
+Ostream& operator<<(Ostream& os, const IOstream::versionNumber& vn);
+
 
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
+#ifndef __CINT__
 
 typedef IOstream& (*IOstreamManip)(IOstream&);
 
@@ -569,6 +594,8 @@ inline IOstream& scientific(IOstream& io)
     io.setf(ios_base::scientific, ios_base::floatfield);
     return io;
 }
+
+#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

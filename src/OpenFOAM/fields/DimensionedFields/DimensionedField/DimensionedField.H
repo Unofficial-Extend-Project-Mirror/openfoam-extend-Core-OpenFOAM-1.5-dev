@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DimensionedField<T>
+    Foam::DimensionedField
 
 Description
     Field with dimensions and associated with geometry type GeoMesh which is
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
  
 template<class Type, class GeoMesh> class DimensionedField;
 
@@ -66,7 +66,7 @@ template<class Type, class GeoMesh> Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                   Class DimensionedField Declaration
+                           Class DimensionedField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class GeoMesh>
@@ -134,13 +134,13 @@ public:
         (
             const IOobject&,
             const Mesh& mesh,
-            const word& fieldDictEntry = "value"
+            const word& fieldDictEntry="value"
         );
 
         void readField
         (
             const dictionary& fieldDict,
-            const word& fieldDictEntry = "value"
+            const word& fieldDictEntry="value"
         );
 
         //- Construct as copy
@@ -220,7 +220,7 @@ public:
         inline Field<Type>& field();
 
         //- Return a null DimensionedField
-        static DimensionedField<Type, GeoMesh>& null();
+        static const DimensionedField<Type, GeoMesh>& null();
 
         //- Return a component field of the field
         tmp<DimensionedField<cmptType, GeoMesh> > component

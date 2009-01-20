@@ -106,7 +106,8 @@ Istream& regIOobject::readStream(const word& aType)
         // instantiated is a dictionary
         if
         (
-            headerClassName() != aType
+            aType != word::null
+         && headerClassName() != aType
          && headerClassName() != "dictionary"
         )
         {

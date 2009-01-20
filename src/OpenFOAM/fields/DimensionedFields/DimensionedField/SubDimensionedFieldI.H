@@ -78,7 +78,7 @@ inline SubDimensionedField<Type, GeoMesh>::SubDimensionedField
 
 // Return a null Field
 template<class Type, class GeoMesh>
-inline SubDimensionedField<Type, GeoMesh>&
+inline const SubDimensionedField<Type, GeoMesh>&
 SubDimensionedField<Type, GeoMesh>::null()
 {
     SubDimensionedField<Type, GeoMesh>* nullPtr

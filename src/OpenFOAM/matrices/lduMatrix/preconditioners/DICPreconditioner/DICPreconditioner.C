@@ -88,6 +88,8 @@ void Foam::DICPreconditioner::calcReciprocalD
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
 Foam::DICPreconditioner::DICPreconditioner
 (
     const lduMatrix& matrix,

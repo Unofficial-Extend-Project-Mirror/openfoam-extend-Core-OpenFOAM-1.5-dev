@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    chemistryModel
+    Foam::chemistryModel
 
 Description
+    Foam::chemistryModel
 
 SourceFiles
     chemistryModelI.H
@@ -66,7 +67,7 @@ public:
 private:
 
     // Private data
-    
+
         const hCombustionThermo& thermo_;
 
         PtrList<volScalarField>& Y_;
@@ -95,18 +96,17 @@ private:
         //- Chemistry solver
         autoPtr<chemistrySolver> solver_;
 
-
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=(const chemistryModel&);
-
-protected:
         //- the chemical source term
         PtrList<scalarField> RR_;
 
         //- Latest estimation of integration step
         scalarField deltaTChem_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const chemistryModel&);
 
 
 public:
@@ -141,7 +141,7 @@ public:
         }
 
         //- Access the density field
-        const volScalarField& rho() const 
+        const volScalarField& rho() const
         {
             return rho_;
         }

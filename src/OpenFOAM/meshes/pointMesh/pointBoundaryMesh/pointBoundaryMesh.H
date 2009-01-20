@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointBoundaryMesh
+    Foam::pointBoundaryMesh
 
 Description
+    Foam::pointBoundaryMesh
 
 SourceFiles
     pointBoundaryMesh.C
@@ -42,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class pointMesh;
 class polyBoundaryMesh;
 class globalPointPatch;
@@ -63,6 +64,9 @@ class pointBoundaryMesh
 
     // Private Member Functions
 
+        //- Calculate the geometry for the patches (transformation tensors etc.)
+        void calcGeometry();
+
         //- Disallow default bitwise copy construct
         pointBoundaryMesh(const pointBoundaryMesh&);
 
@@ -71,6 +75,10 @@ class pointBoundaryMesh
 
 
 public:
+
+    //- Declare friendship with pointMesh
+    friend class pointMesh;
+
 
     // Constructors
 
@@ -92,6 +100,12 @@ public:
 
         //- Return reference to globalPointPatch
         const globalPointPatch& globalPatch() const;
+
+        //- Correct polyBoundaryMesh after moving points
+        void movePoints(const pointField&);
+
+        //- Correct polyBoundaryMesh after topology update
+        void updateMesh();
 };
 
 

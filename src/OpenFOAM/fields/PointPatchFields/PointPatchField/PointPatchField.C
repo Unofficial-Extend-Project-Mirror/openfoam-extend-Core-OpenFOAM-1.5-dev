@@ -353,7 +353,10 @@ template
     class Type
 >
 void
-PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate()
+PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     if (!updated_)
     {

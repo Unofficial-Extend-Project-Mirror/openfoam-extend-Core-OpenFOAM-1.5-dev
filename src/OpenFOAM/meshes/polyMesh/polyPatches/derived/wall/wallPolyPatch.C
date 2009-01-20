@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "wallPolyPatch.H"
@@ -33,20 +31,15 @@ Description
 
 namespace Foam
 {
+    defineTypeNameAndDebug(wallPolyPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(wallPolyPatch, 0);
-
-addToRunTimeSelectionTable(polyPatch, wallPolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, wallPolyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, wallPolyPatch, dictionary);
-
+    addToRunTimeSelectionTable(polyPatch, wallPolyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, wallPolyPatch, dictionary);
+}
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-// Construct from components
-wallPolyPatch::wallPolyPatch
+Foam::wallPolyPatch::wallPolyPatch
 (
     const word& name,
     const label size,
@@ -59,20 +52,7 @@ wallPolyPatch::wallPolyPatch
 {}
 
 
-// Construct from Istream
-wallPolyPatch::wallPolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm)
-{}
-
-
-// Construct from dictionary
-wallPolyPatch::wallPolyPatch
+Foam::wallPolyPatch::wallPolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -84,8 +64,7 @@ wallPolyPatch::wallPolyPatch
 {}
 
 
-//- Construct as copy, resetting the boundary mesh
-wallPolyPatch::wallPolyPatch
+Foam::wallPolyPatch::wallPolyPatch
 (
     const wallPolyPatch& pp,
     const polyBoundaryMesh& bm
@@ -95,8 +74,7 @@ wallPolyPatch::wallPolyPatch
 {}
 
 
-//- Construct as copy, resetting the face list and boundary mesh data
-wallPolyPatch::wallPolyPatch
+Foam::wallPolyPatch::wallPolyPatch
 (
     const wallPolyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -108,9 +86,5 @@ wallPolyPatch::wallPolyPatch
     polyPatch(pp, bm, index, newSize, newStart)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

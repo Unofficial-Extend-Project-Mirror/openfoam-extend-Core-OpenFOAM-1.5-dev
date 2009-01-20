@@ -35,7 +35,6 @@ License
 namespace Foam
 {
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 oscillatingVelocityPointPatchVectorField::

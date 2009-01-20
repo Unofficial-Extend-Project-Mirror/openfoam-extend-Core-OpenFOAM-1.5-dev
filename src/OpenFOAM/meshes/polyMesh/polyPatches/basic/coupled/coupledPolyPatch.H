@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledPolyPatch
+    Foam::coupledPolyPatch
 
 Description
-    coupledPolyPatch is an abstract base class for patches that couple regions
-    of the computational domain e.g. cyclic and processor-processor links.
+    The coupledPolyPatch is an abstract base class for patches that couple
+    regions of the computational domain e.g. cyclic and processor-processor
+    links.
 
 SourceFiles
     coupledPolyPatch.C
@@ -53,7 +54,12 @@ class coupledPolyPatch
 :
     public polyPatch
 {
-    // Private data
+protected:
+
+    // Protected data
+
+        // Alowing derived classes to create their own transformation
+        // HJ, 24/Oct/2008
 
         //- Offset (distance) vector from one side of the couple to the other
         mutable vectorField separation_;
@@ -65,24 +71,19 @@ class coupledPolyPatch
         mutable tensorField reverseT_;
 
 
-protected:
-
-        //- Calculate the uniform transformation tensors
-        void calcTransformTensors
-        (
-            const vector& Cf,
-            const vector& Cr,
-            const vector& nf,
-            const vector& nr
-        ) const;
+    // Protected Member Functions
 
         //- Calculate the transformation tensors
+        //  smallDist : matching distance per face
+        //  absTol    : absolute error in normal
         void calcTransformTensors
         (
             const vectorField& Cf,
             const vectorField& Cr,
             const vectorField& nf,
-            const vectorField& nr
+            const vectorField& nr,
+            const scalarField& smallDist,
+            const scalar absTol = matchTol_
         ) const;
 
         //- Initialise the calculation of the patch geometry
@@ -114,13 +115,6 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm
-        );
-
-        //- Construct from Istream
-        coupledPolyPatch
-        (
-            Istream&,
-            const label index, const polyBoundaryMesh&
         );
 
         //- Construct from dictionary

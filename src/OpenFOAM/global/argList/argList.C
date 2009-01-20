@@ -22,12 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    argList
-
-Description
-    Make, print and check argList
-
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -40,58 +34,137 @@ Description
 #include "JobInfo.H"
 #include "labelList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-SLList<string> argList::validArgs;
-HashTable<string> argList::validOptions;
-HashTable<string> argList::validParOptions;
-
-argList::initValidTables::initValidTables()
+namespace Foam
 {
-    validArgs.append("root");
-    validArgs.append("case");
+    SLList<string>    argList::validArgs;
+    HashTable<string> argList::validOptions;
+    HashTable<string> argList::validParOptions;
+}
 
+
+Foam::argList::initValidTables::initValidTables()
+{
+    validOptions.insert("case", "dir");
     validOptions.insert("parallel", "");
     validParOptions.insert("parallel", "");
 
     Pstream::addValidParOptions(validParOptions);
 }
 
-argList::initValidTables dummyInitValidTables;
+
+Foam::argList::initValidTables dummyInitValidTables;
 
 
-int argList::findArg(const string& arg) const
+// convert argv -> args_
+// transform sequences with "(" ... ")" into string lists in the process
+bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
-    int argi = 1;
-    for
-    (
-        SLList<string>::iterator iter = validArgs.begin();
-        iter != validArgs.end();
-        ++iter, ++argi
-    )
+    int level = 0;
+    int nArgs = 0;
+    string tmpString;
+
+    // note: we also re-write directly into args_
+    // and use a second pass to sort out args/options
+    for (int argi=0; argi < argc; argi++)
     {
-        if (iter() == arg)
+        if (strcmp(argv[argi], "(") == 0)
         {
-            return argi;
+            level++;
+            tmpString += "(";
+        }
+        else if (strcmp(argv[argi], ")") == 0)
+        {
+            if (level >= 1)
+            {
+                level--;
+                tmpString += ")";
+                if (level == 0)
+                {
+                    args_[nArgs++] = tmpString;
+                    tmpString.clear();
+                }
+            }
+            else
+            {
+                args_[nArgs++] = argv[argi];
+            }
+        }
+        else if (level)
+        {
+            // quote each string element
+            tmpString += "\"";
+            tmpString += argv[argi];
+            tmpString += "\"";
+        }
+        else
+        {
+            args_[nArgs++] = argv[argi];
         }
     }
 
-    return 0;
+    if (tmpString.size())
+    {
+        args_[nArgs++] = tmpString;
+    }
+
+    args_.setSize(nArgs);
+
+    return nArgs < argc;
+}
+
+
+// get rootPath_ / globalCase_ from one of the following forms
+//   * [-case dir]
+//   * cwd
+void Foam::argList::getRootCase()
+{
+    fileName casePath;
+
+    // [-case dir] specified
+    HashTable<string>::iterator iter = options_.find("case");
+
+    if (iter != options_.end())
+    {
+        casePath = iter();
+        casePath.removeRepeated('/');
+        casePath.removeTrailing('/');
+    }
+    else
+    {
+        // nothing specified, use the current dir
+        casePath = cwd();
+
+        // we could add this back in as '-case'?
+        // options_.insert("case", casePath);
+    }
+
+    rootPath_   = casePath.path();
+    globalCase_ = casePath.name();
+    case_       = globalCase_;
+}
+
+
+Foam::stringList::subList Foam::argList::additionalArgs() const
+{
+    return stringList::subList(args_, args_.size() - 1, 1);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
+Foam::argList::argList
+(
+    int& argc,
+    char**& argv,
+    bool checkArgs,
+    bool checkOpts
+)
 :
     args_(argc),
-    options_(argc),
-    parRun_(false)
+    options_(argc)
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar (might filter argv)
@@ -108,36 +181,36 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
                 break;
             }
         }
-    }    
+    }
 
     // Print the banner once only for parallel runs
     if (Pstream::master())
     {
-        IOobject::writeLogBanner(Info);
+        IOobject::writeBanner(Info, true);
     }
-   
+
+    // convert argv -> args_ and capture ( ... ) lists
+    // for normal arguments and for options
+    regroupArgv(argc, argv);
 
     // Get executable name
+    args_[0]    = fileName(argv[0]);
+    executable_ = fileName(argv[0]).name();
+
+    // Check arguments and options, we already have argv[0]
+    int nArgs = 1;
+    string argListString = args_[0];
+
+    for (int argi = 1; argi < args_.size(); argi++)
     {
-        wordList execCmpts = fileName(argv[0]).components();
-        executable_ = execCmpts[execCmpts.size()-1];
-    }
-
-    // Check arguments and options
-    int nArgs = 0;
-
-    string argListString;
-
-    for (int argi=0; argi<argc; argi++)
-    {
-        argListString += argv[argi];
         argListString += ' ';
+        argListString += args_[argi];
 
-        if (argv[argi][0] == '-')
+        if (args_[argi][0] == '-')
         {
-            const char *optionName = &argv[argi][1];
+            const char *optionName = &args_[argi][1];
 
-            if 
+            if
             (
                 (
                     validOptions.found(optionName)
@@ -149,7 +222,8 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
                 )
             )
             {
-                if (argi >= argc - 1)
+                argi++;
+                if (argi >= args_.size())
                 {
                     FatalError
                         << "option " << "'-" << optionName << '\''
@@ -157,11 +231,9 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
                         << exit(FatalError);
                 }
 
-                options_.insert(optionName, argv[argi + 1]);
-                argi++;
-
-                argListString += argv[argi];
                 argListString += ' ';
+                argListString += args_[argi];
+                options_.insert(optionName, args_[argi]);
             }
             else
             {
@@ -170,25 +242,63 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
         }
         else
         {
-            args_[nArgs++] = argv[argi];
+            if (nArgs != argi)
+            {
+                args_[nArgs] = args_[argi];
+            }
+            nArgs++;
         }
     }
 
     args_.setSize(nArgs);
 
-    Info<< endl << "Exec   : " << argListString.c_str() << endl;
+    // Help/documentation options:
+    //   -help    print the usage
+    //   -doc     display application documentation in browser
+    //   -srcDoc  display source code in browser
+    if
+    (
+        options_.found("help")
+     || options_.found("doc")
+     || options_.found("srcDoc")
+    )
+    {
+        if (options_.found("help"))
+        {
+            printUsage();
+        }
 
-    // Case is a single processor run unless it is running parallel
-    int nProcs = 1;
+        // only display one or the other
+        if (options_.found("srcDoc"))
+        {
+            displayDoc(true);
+        }
+        else if (options_.found("doc"))
+        {
+            displayDoc(false);
+        }
+
+        ::exit(0);
+    }
+
+    // Print the usage message and exit if the number of arguments is incorrect
+    if (!check(checkArgs, checkOpts))
+    {
+        FatalError.exit();
+    }
+
 
     string dateString = clock::date();
     string timeString = clock::clockTime();
-    fileName currentDir = cwd();
 
-    Pout<< "Date   : " << dateString.c_str() << nl
-        << "Time   : " << timeString.c_str() << nl
-        << "Host   : " << hostName() << nl
-        << "PID    : " << pid() << endl;
+    if (Pstream::master())
+    {
+        Info<< "Exec   : " << argListString.c_str() << nl
+            << "Date   : " << dateString.c_str() << nl
+            << "Time   : " << timeString.c_str() << nl
+            << "Host   : " << hostName() << nl
+            << "PID    : " << pid() << endl;
+    }
 
     jobInfo.add("startDate", dateString);
     jobInfo.add("startTime", timeString);
@@ -196,15 +306,14 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
     jobInfo.add("foamVersion", word(FOAMversion));
     jobInfo.add("code", executable_);
     jobInfo.add("argList", argListString);
-    jobInfo.add("currentDir", currentDir);
+    jobInfo.add("currentDir", cwd());
     jobInfo.add("PPID", ppid());
     jobInfo.add("PGID", pgid());
 
-    if (!check(checkArgs, checkOpts))
-    {
-        FatalError.exit();
-    }
-    
+
+    // Case is a single processor run unless it is running parallel
+    int nProcs = 1;
+
     // If this actually is a parallel run
     if (parRunControl_.parRun())
     {
@@ -213,155 +322,180 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
         {
             fileNameList roots;
 
-            // Set the root and case argument indices
-            int rootIndex = findArg("root");
-            int caseIndex = findArg("case");
+            // establish rootPath_/globalCase_/case_ for master
+            getRootCase();
 
-            if (rootIndex && caseIndex)
+            IFstream decompDictStream
+            (
+                rootPath_/globalCase_/"system/decomposeParDict"
+            );
+
+            if (!decompDictStream.good())
             {
-                rootPath_ = fileName(args_[rootIndex]).expand();
-                globalCase_ = args_[caseIndex];
-                case_ = globalCase_;
+                FatalError
+                    << "Cannot read "
+                    << decompDictStream.name()
+                    << exit(FatalError);
+            }
 
-                IFstream decompostionDictStream
-                (
-                    rootPath_/globalCase_/"system/decomposeParDict"
-                );
+            dictionary decompositionDict(decompDictStream);
 
-                if (!decompostionDictStream.good())
+            Switch distributed(false);
+
+            if (decompositionDict.found("distributed"))
+            {
+                decompositionDict.lookup("distributed") >> distributed;
+
+                if (distributed)
                 {
-                    FatalError
-                        << "Cannot read "
-                        << decompostionDictStream.name()
-                        << exit(FatalError);
-                }
+                    decompositionDict.lookup("roots") >> roots;
 
-                dictionary decompositionDict(decompostionDictStream);
-
-                Switch distributed(false);
-
-                if (decompositionDict.found("distributed"))
-                {
-                    decompositionDict.lookup("distributed") >> distributed;
-
-                    if (distributed)
-                    {
-                        decompositionDict.lookup("roots") >> roots;
-
-                        if (roots.size() != Pstream::nProcs())
-                        {
-                            FatalError
-                                << "number of entries in "
-                                << "decompositionDict::roots"
-                                << " is not equal to the number of processors "
-                                << Pstream::nProcs()
-                                << exit(FatalError);
-                        }
-                    }
-                }
-
-
-                label dictNProcs
-                (
-                    readLabel
-                    (
-                        decompositionDict.lookup("numberOfSubdomains")
-                    )
-                );
-
-                // Check number of processors. We have nProcs(number of
-                // actual processes), dictNProcs(wanted number of processes read
-                // from decompositionDict) and nProcDirs(number of processor
-                // directories - n/a when running distributed)
-                //
-                // - normal running : nProcs = dictNProcs = nProcDirs
-                // - decomposition to more processors : nProcs = dictNProcs
-                // - decomposition to less processors : nProcs = nProcDirs
-
-                if (dictNProcs > Pstream::nProcs())
-                {
-                    FatalError
-                        << decompostionDictStream.name()
-                        << " specifies " << dictNProcs
-                        << " processors but job was started with "
-                        << Pstream::nProcs() << " processors."
-                        << exit(FatalError);
-                }
-
-                if (!distributed && dictNProcs < Pstream::nProcs())
-                {
-                    // Possibly going to less processors. Check if all procDirs
-                    // are there.
-                    label nProcDirs = 0;
-                    while 
-                    (
-                        dir
-                        (
-                            rootPath_/globalCase_/"processor" 
-                          + name(++nProcDirs)
-                        )
-                    )
-                    {}
-
-                    if (nProcDirs != Pstream::nProcs())
+                    if (roots.size() != Pstream::nProcs())
                     {
                         FatalError
-                            << "number of processor directories = "
-                            << nProcDirs
-                            << " is not equal to the number of processors = "
+                            << "number of entries in "
+                            << "decompositionDict::roots"
+                            << " is not equal to the number of processors "
                             << Pstream::nProcs()
                             << exit(FatalError);
                     }
                 }
             }
 
-            // Distribute the master's argument list
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
-            {
-                if (rootIndex && roots.size())
-                {
-                    args_[rootIndex] =  roots[slave-1];
-                }
 
-                OPstream toSlave(slave, 0, false);
-                toSlave << args_ << options_;
+            label dictNProcs
+            (
+                readLabel
+                (
+                    decompositionDict.lookup("numberOfSubdomains")
+                )
+            );
+
+            // Check number of processors. We have nProcs(number of
+            // actual processes), dictNProcs(wanted number of processes read
+            // from decompositionDict) and nProcDirs(number of processor
+            // directories - n/a when running distributed)
+            //
+            // - normal running : nProcs = dictNProcs = nProcDirs
+            // - decomposition to more processors : nProcs = dictNProcs
+            // - decomposition to less processors : nProcs = nProcDirs
+            if (dictNProcs > Pstream::nProcs())
+            {
+                FatalError
+                    << decompDictStream.name()
+                    << " specifies " << dictNProcs
+                    << " processors but job was started with "
+                    << Pstream::nProcs() << " processors."
+                    << exit(FatalError);
             }
 
-            if (rootIndex && roots.size())
+            if (!distributed && dictNProcs < Pstream::nProcs())
             {
-                args_[rootIndex] = rootPath_;
+                // Possibly going to fewer processors.
+                // Check if all procDirs are there.
+                label nProcDirs = 0;
+                while
+                (
+                    dir
+                    (
+                        rootPath_/globalCase_/"processor"
+                      + name(++nProcDirs)
+                    )
+                )
+                {}
+
+                if (nProcDirs != Pstream::nProcs())
+                {
+                    FatalError
+                        << "number of processor directories = "
+                        << nProcDirs
+                        << " is not equal to the number of processors = "
+                        << Pstream::nProcs()
+                        << exit(FatalError);
+                }
+            }
+
+            // distributed data
+            if (roots.size())
+            {
+                bool hadOptCase = options_.found("case");
+
+                // Distribute the master's argument list (with new root)
+                for
+                (
+                    int slave=Pstream::firstSlave();
+                    slave<=Pstream::lastSlave();
+                    slave++
+                )
+                {
+                    options_.erase("case");
+                    options_.insert
+                    (
+                        "case",
+                        fileName(roots[slave-1])/globalCase_
+                    );
+
+                    OPstream toSlave(Pstream::scheduled, slave);
+                    toSlave << args_ << options_;
+                }
+
+                options_.erase("case");
+
+                // restore [-case dir]
+                if (hadOptCase)
+                {
+                    options_.insert("case", rootPath_/globalCase_);
+                }
+            }
+            else
+            {
+                // Distribute the master's argument list (unaltered)
+                for
+                (
+                    int slave=Pstream::firstSlave();
+                    slave<=Pstream::lastSlave();
+                    slave++
+                )
+                {
+                    OPstream toSlave(Pstream::scheduled, slave);
+                    toSlave << args_ << options_;
+                }
             }
         }
         else
         {
             // Collect the master's argument list
-            IPstream fromMaster(Pstream::masterNo());
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
             fromMaster >> args_ >> options_;
+
+            // establish rootPath_/globalCase_/case_ for slave
+            getRootCase();
         }
 
         nProcs = Pstream::nProcs();
+        case_ = globalCase_/(word("processor") + name(Pstream::myProcNo()));
+    }
+    else
+    {
+        // establish rootPath_/globalCase_/case_
+        getRootCase();
+
+        case_ = globalCase_;
     }
 
-    // Do transfer of machineInfo from slave to master.
-    wordList machinesInfo(1);
-    machinesInfo[0] = hostName();
 
-    labelList pids(1);
-    pids[0] = pid();
+    wordList slaveProcs;
 
+    // collect slave machine/pid
     if (parRunControl_.parRun())
     {
         if (Pstream::master())
         {
-            machinesInfo.setSize(Pstream::nProcs());
-            pids.setSize(Pstream::nProcs());
+            slaveProcs.setSize(Pstream::nProcs() - 1);
+            word  slaveMachine;
+            label slavePid;
 
-            // From all slaves
+            label procI = 0;
             for
             (
                 int slave=Pstream::firstSlave();
@@ -369,61 +503,35 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
                 slave++
             )
             {
-                label slavei = slave - Pstream::masterNo();
-                IPstream fromSlave(slave);
-                fromSlave >> machinesInfo[slavei] >> pids[slavei];
+                IPstream fromSlave(Pstream::scheduled, slave);
+                fromSlave >> slaveMachine >> slavePid;
+
+                slaveProcs[procI++] = slaveMachine + "." + name(slavePid);
             }
         }
         else
         {
-            OPstream toMaster(Pstream::masterNo(), 0, false);
-            toMaster << machinesInfo[0] << pids[0];
-        }
-    }
-
-    wordList slaveProcs(machinesInfo.size() - 1);
-    for (int proci = 1; proci < machinesInfo.size(); proci++)
-    {
-         slaveProcs[proci-1] = machinesInfo[proci] + "." + name(pids[proci]);
-    }
-
-    if (int rootIndex = findArg("root"))
-    {
-        rootPath_ = fileName(args_[rootIndex]).expand();
-    }
-
-    if (int caseIndex = findArg("case"))
-    {
-        globalCase_ = args_[caseIndex];
-
-        if (globalCase_[globalCase_.size() - 1] == '/')
-        {
-            FatalError
-                << "case " << globalCase_
-                << " does not exist in root " << rootPath_
-                << exit(FatalError);
-        }
-
-        if (parRunControl_.parRun())
-        {
-            case_ =
-                globalCase_/::Foam::word(::Foam::word("processor")
-              + name(Pstream::myProcNo()));
-        }
-        else
-        {
-            case_ = globalCase_;
+            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+            toMaster << hostName() << pid();
         }
     }
 
 
-    Pout<< "Root   : " << rootPath_.c_str() << nl
-        << "Case   : " << globalCase_.c_str() << nl
-        << "Nprocs : " << nProcs << endl;
-
-    if (slaveProcs.size() != 0)
+    if (Pstream::master())
     {
-        Pout<< "Slaves : " << slaveProcs << endl;
+        Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
+            << "nProcs : " << nProcs << endl;
+    }
+
+    if (parRunControl_.parRun() && Pstream::master())
+    {
+        Info<< "Slaves : " << slaveProcs << nl
+            << "Pstream initialized with:" << nl
+            << "    floatTransfer     : " << Pstream::floatTransfer << nl
+            << "    nProcsSimpleSum   : " << Pstream::nProcsSimpleSum << nl
+            << "    commsType         : "
+            << Pstream::commsTypeNames[Pstream::defaultCommsType]
+            << endl;
     }
 
     jobInfo.add("root", rootPath_);
@@ -435,9 +543,8 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
     }
     jobInfo.write();
 
-    // Set the root and case as environment variables
-    setEnv("FOAM_ROOT", rootPath_, true);
-    setEnv("FOAM_CASE", globalCase_, true);
+    // Set the case as an environment variable
+    setEnv("FOAM_CASE", rootPath_/globalCase_, true);
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.
@@ -445,12 +552,18 @@ argList::argList(int& argc, char**& argv, bool checkArgs, bool checkOpts)
     sigInt_.set();
     sigQuit_.set();
     sigSegv_.set();
+
+    if (Pstream::master())
+    {
+        Info<< endl;
+        IOobject::writeDivider(Info);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-argList::~argList()
+Foam::argList::~argList()
 {
     jobInfo.end();
 }
@@ -458,15 +571,16 @@ argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void argList::noParallel()
+void Foam::argList::noParallel()
 {
     validOptions.erase("parallel");
 }
 
 
-void argList::printUsage() const
+void Foam::argList::printUsage() const
 {
-    Info<< "Usage: " << executable_;
+    Info<< nl
+        << "Usage: " << executable_;
 
     for
     (
@@ -475,7 +589,7 @@ void argList::printUsage() const
         ++iter
     )
     {
-        Info<< ' ' << '<' << iter().c_str() << '>';
+        Info<< " <" << iter().c_str() << '>';
     }
 
     for
@@ -495,11 +609,66 @@ void argList::printUsage() const
         Info<< ']';
     }
 
-    Info<< endl;
+    // place help/doc options of the way at the end,
+    // but with an extra space to separate it a little
+    Info<< "  [-help] [-doc] [-srcDoc]" << endl;
 }
 
 
-bool argList::check(bool checkArgs, bool checkOpts) const
+void Foam::argList::displayDoc(bool source) const
+{
+    const dictionary& docDict = debug::controlDict().subDict("Documentation");
+    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+    List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
+
+    // for source code: change foo_8C.html to foo_8C-source.html
+    if (source)
+    {
+        forAll(docExts, extI)
+        {
+            docExts[extI].replace(".", "-source.");
+        }
+    }
+
+    fileName docFile;
+    bool found = false;
+
+    forAll(docDirs, dirI)
+    {
+        forAll(docExts, extI)
+        {
+            docFile = docDirs[dirI]/executable_ + docExts[extI];
+            docFile.expand();
+
+            if (exists(docFile))
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
+            break;
+        }
+    }
+
+    if (found)
+    {
+        string docBrowser(docDict.lookup("docBrowser"));
+        docBrowser.replaceAll("%f", docFile);
+
+        Info<< "Show documentation: " << docBrowser.c_str() << endl;
+
+        system(docBrowser);
+    }
+    else
+    {
+        Info<< "No documentation found" << endl;
+    }
+}
+
+
+bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 {
     bool ok = true;
 
@@ -532,7 +701,6 @@ bool argList::check(bool checkArgs, bool checkOpts) const
 
         if (!ok)
         {
-            Info<< endl;
             printUsage();
         }
     }
@@ -541,47 +709,31 @@ bool argList::check(bool checkArgs, bool checkOpts) const
 }
 
 
-bool argList::checkRootCase() const
+bool Foam::argList::checkRootCase() const
 {
-    if (args_.size() >= 2)
-    {
-        if (!dir(rootPath()))
-        {
-            FatalError
-                << executable_
-                << ": cannot open root directory " << rootPath()
-                << endl;
-
-            return false;
-        }
-
-        if (!dir(path()) && Pstream::master())
-        {
-            // Allow slaves on non-existing processor directories. Created
-            // later.
-            FatalError
-                << executable_
-                << ": Cannot open case directory " << path()
-                << endl;
-
-            return false;
-        }
-
-        return true;
-    }
-    else
+    if (!dir(rootPath()))
     {
         FatalError
             << executable_
-            << ": <root> <case> not given" << endl;
+            << ": cannot open root directory " << rootPath()
+            << endl;
 
         return false;
     }
+
+    if (!dir(path()) && Pstream::master())
+    {
+        // Allow slaves on non-existing processor directories, created later
+        FatalError
+            << executable_
+            << ": cannot open case directory " << path()
+            << endl;
+
+        return false;
+    }
+
+    return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

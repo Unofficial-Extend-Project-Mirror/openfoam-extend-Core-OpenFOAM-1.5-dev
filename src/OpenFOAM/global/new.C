@@ -28,9 +28,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include <new>
-#include <cstdlib>
 #include <iostream>
-#include <cstring>
+#include <cstdlib>
 
 namespace Foam
 {

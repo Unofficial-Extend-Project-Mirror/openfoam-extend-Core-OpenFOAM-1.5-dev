@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    FixedList<T, Size>
+    Foam::FixedList
 
 Description
-    FixedList<T, Size> is a 1D vector of objects of type T of size Size.
+    A 1D vector of objects of type \<T\> with a fixed size \<Size\>.
 
 SourceFiles
     FixedList.C
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T, label Size> class FixedList;
 
@@ -128,7 +128,7 @@ public:
     // Member functions
 
         //- Return a null FixedList
-        static FixedList<T, Size>& null();
+        static const FixedList<T, Size>& null();
 
 
         // Access
@@ -305,10 +305,17 @@ public:
     // IOstream operators
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>> <T>(Istream&, FixedList<T, Size>&);
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <T, Size>
+        #endif
+        (Istream&, FixedList<T, Size>&);
 
         // Write FixedList to Ostream.
-        friend Ostream& operator<< <T, Size>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T, Size>
+        #endif
         (
             Ostream&,
             const FixedList<T, Size>&
@@ -322,7 +329,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "FixedListI.H"
+#include "FixedListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "matchPoints.H"
@@ -36,7 +34,7 @@ bool Foam::matchPoints
 (
     const UList<point>& pts0,
     const UList<point>& pts1,
-    const UList<scalar>& tols,
+    const UList<scalar>& matchDistances,
     const bool verbose,
     labelList& from0To1,
     const point& origin
@@ -47,56 +45,60 @@ bool Foam::matchPoints
 
     bool fullMatch = true;
 
-    SortableList<scalar> pts0Mag(mag(pts0 - origin));
+    SortableList<scalar> pts0MagSqr(magSqr(pts0 - origin));
 
-    SortableList<scalar> pts1Mag(mag(pts1 - origin));
+    SortableList<scalar> pts1MagSqr(magSqr(pts1 - origin));
 
-    forAll(pts0Mag, i)
+    forAll(pts0MagSqr, i)
     {
-        scalar dist0 = pts0Mag[i];
+        scalar dist0 = pts0MagSqr[i];
 
-        label face0I = pts0Mag.indices()[i];
+        label face0I = pts0MagSqr.indices()[i];
 
-        scalar tol = tols[face0I];
+        scalar matchDist = matchDistances[face0I];
 
-        label startI = findLower(pts1Mag, 0.99999*dist0 - tol);
+        label startI = findLower(pts1MagSqr, 0.99999*dist0 - matchDist);
 
         if (startI == -1)
         {
             startI = 0;
         }
 
-        label face1I = -1;
 
-        // Go through range of equal mag and find equal vector.
+        // Go through range of equal mag and find nearest vector.
+        scalar minDistSqr = VGREAT;
+        label minFaceI = -1;
+    
         for
         (
             label j = startI;
             (
-                (j < pts1Mag.size())
-             && (pts1Mag[j] < 1.00001*dist0 + tol)
+                (j < pts1MagSqr.size())
+             && (pts1MagSqr[j] < 1.00001*dist0 + matchDist)
             );
             j++
         )
         {
-            label faceI = pts1Mag.indices()[j];
-
+            label faceI = pts1MagSqr.indices()[j];
             // Compare actual vectors
-            if (mag(pts0[face0I] - pts1[faceI]) < tol)
-            {
-                face1I = faceI;
+            scalar distSqr = magSqr(pts0[face0I] - pts1[faceI]);
 
-                break;
+            if (distSqr <= sqr(matchDist) && distSqr < minDistSqr)
+            {
+                minDistSqr = distSqr;
+                minFaceI = faceI;
             }
         }
 
-        if (face1I == -1)
+        if (minFaceI == -1)
         {
+            fullMatch = false;
+
             if (verbose)
             {
                 Pout<< "Cannot find point in pts1 matching point " << face0I
                     << " coord:" << pts0[face0I]
-                    << " in pts0 when using tolerance " << tol << endl;
+                    << " in pts0 when using tolerance " << matchDist << endl;
 
                 // Go through range of equal mag and find equal vector.
                 Pout<< "Searching started from:" << startI << " in pts1"
@@ -105,24 +107,22 @@ bool Foam::matchPoints
                 (
                     label j = startI;
                     (
-                        (j < pts1Mag.size())
-                     && (pts1Mag[j] < dist0 + tol)
+                        (j < pts1MagSqr.size())
+                     && (pts1MagSqr[j] < 1.00001*dist0 + matchDist)
                     );
                     j++
                 )
                 {
-                    label faceI = pts1Mag.indices()[j];
+                    label faceI = pts1MagSqr.indices()[j];
 
                     Pout<< "Compared coord:" << pts1[faceI]
                         << " with difference to point "
                         << mag(pts1[faceI] - pts0[face0I]) << endl;
                 }
             }
-
-            fullMatch = false;
         }
 
-        from0To1[face0I] = face1I;
+        from0To1[face0I] = minFaceI;
     }
 
     return fullMatch;

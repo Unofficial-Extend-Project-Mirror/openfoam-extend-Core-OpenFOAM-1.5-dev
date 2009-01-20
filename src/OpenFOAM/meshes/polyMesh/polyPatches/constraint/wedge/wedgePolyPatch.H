@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wedgePolyPatch
+    Foam::wedgePolyPatch
 
 Description
     Wedge front and back plane patch.
@@ -59,6 +59,9 @@ class wedgePolyPatch
         //- Centre normal between the wedge boundaries
         vector centreNormal_;
 
+        //- Normal to the patch
+        vector patchNormal_;
+
         //- Face transformation tensor
         tensor faceT_;
 
@@ -86,9 +89,6 @@ public:
             const label index,
             const polyBoundaryMesh& bm
         );
-
-        //- Construct from Istream
-        wedgePolyPatch(Istream&, const label index, const polyBoundaryMesh&);
 
         //- Construct from dictionary
         wedgePolyPatch
@@ -136,12 +136,6 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~wedgePolyPatch()
-        {}
-
-
     // Member functions
 
         // Access
@@ -156,6 +150,12 @@ public:
             const vector& centreNormal() const
             {
                 return centreNormal_;
+            }
+
+            //- Return the normal to the patch
+            const vector& patchNormal() const
+            {
+                return patchNormal_;
             }
 
             //- Return face transformation tensor

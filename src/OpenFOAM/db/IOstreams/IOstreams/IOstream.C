@@ -36,8 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return stream format of given format name
-IOstream::streamFormat IOstream::format(const word& format)
+IOstream::streamFormat IOstream::formatEnum(const word& format)
 {
     if (format == "ascii")
     {
@@ -49,7 +48,7 @@ IOstream::streamFormat IOstream::format(const word& format)
     }
     else
     {
-        WarningIn("IOstream::format(const word&)")
+        WarningIn("IOstream::formatEnum(const word&)")
             << "bad format specifier "
             << format << " using ASCII"
             << endl;
@@ -59,8 +58,7 @@ IOstream::streamFormat IOstream::format(const word& format)
 }
 
 
-// Return compression of given compression name
-IOstream::compressionType IOstream::compression(const word& compression)
+IOstream::compressionType IOstream::compressionEnum(const word& compression)
 {
     if (compression == "uncompressed")
     {
@@ -72,7 +70,7 @@ IOstream::compressionType IOstream::compression(const word& compression)
     }
     else
     {
-        WarningIn("IOstream::compression(const word&)")
+        WarningIn("IOstream::compressionEnum(const word&)")
             << "bad compression specifier "
             << '\'' << compression << '\''
             << ", use 'compressed' or 'uncompressed'.  "

@@ -202,6 +202,7 @@ public:
 };
 
 
+#ifndef __CINT__
 template<class Cmpt>
 class innerProduct<SphericalTensor<Cmpt>, SphericalTensor<Cmpt> >
 {
@@ -226,6 +227,7 @@ public:
 
     typedef Vector<Cmpt> type;
 };
+#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    functionObject
+    Foam::functionObject
 
 Description
     Abstract base-class for Time/database function objects.
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -78,8 +78,8 @@ public:
             autoPtr,
             functionObject,
             dictionary,
-            (const Time& t, const dictionary& dict),
-            (t, dict)
+            (const word& name, const Time& t, const dictionary& dict),
+            (name, t, dict)
         );
 
 
@@ -108,7 +108,11 @@ public:
                 time_(t)
             {}
 
-            autoPtr<functionObject> operator()(Istream& is) const;
+            autoPtr<functionObject> operator()
+            (
+                const word& name,
+                Istream& is
+            ) const;
         };
 
 
@@ -117,6 +121,7 @@ public:
         //- Select from Time and Istream
         static autoPtr<functionObject> New
         (
+            const word& name,
             const Time&,
             const dictionary&
         );
@@ -135,7 +140,7 @@ public:
         //- execute is called at each ++ or += of the time-loop
         virtual bool execute() = 0;
 
-        //- Read and set the function object if it's data has changed
+        //- Read and set the function object if its data has changed
         virtual bool read(const dictionary& dict) = 0;
 };
 

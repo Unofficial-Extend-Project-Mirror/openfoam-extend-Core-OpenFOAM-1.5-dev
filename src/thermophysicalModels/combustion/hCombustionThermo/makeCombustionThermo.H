@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    hCombustionThermo
+InClass
+    Foam::hCombustionThermo
 
 Description
 
@@ -34,7 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCombustionThermo(CThermo,MixtureThermo,Mixture,Transport,Thermo,EqnOfState)                                                                       \
+#define makeCombustionThermo(CThermo,MixtureThermo,Mixture,Transport,Thermo,EqnOfState)  \
                                                                               \
 typedef MixtureThermo                                                         \
     <Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >                \

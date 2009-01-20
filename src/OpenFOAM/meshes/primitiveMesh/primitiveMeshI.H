@@ -33,9 +33,39 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline label primitiveMesh::nInternalPoints() const
+{
+    return nInternalPoints_;
+}
+
+
 inline label primitiveMesh::nPoints() const
 {
     return nPoints_;
+}
+
+
+inline label primitiveMesh::nInternal0Edges() const
+{
+    // Force edge calculation
+    nEdges();
+    return nInternal0Edges_;
+}
+
+
+inline label primitiveMesh::nInternal1Edges() const
+{
+    // Force edge calculation
+    nEdges();
+    return nInternal1Edges_;
+}
+
+
+inline label primitiveMesh::nInternalEdges() const
+{
+    // Force edge calculation
+    nEdges();
+    return nInternalEdges_;
 }
 
 
@@ -65,18 +95,6 @@ inline label primitiveMesh::nFaces() const
 inline label primitiveMesh::nCells() const
 {
     return nCells_;
-}
-
-
-inline const labelList& primitiveMesh::faceOwner() const
-{
-    return faceOwner_;
-}
-
-
-inline const labelList& primitiveMesh::faceNeighbour() const
-{
-    return faceNeighbour_;
 }
 
 

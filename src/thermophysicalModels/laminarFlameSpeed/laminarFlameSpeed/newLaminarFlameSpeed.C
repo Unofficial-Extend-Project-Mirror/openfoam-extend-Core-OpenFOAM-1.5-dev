@@ -22,25 +22,13 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Selection function for internal energy based thermodynamics package.
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "laminarFlameSpeed.H"
-#include "constLaminarFlameSpeed.H"
-#include "guldersLaminarFlameSpeed.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<laminarFlameSpeed> laminarFlameSpeed::New
+Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 (
     const hhuCombustionThermo& ct
 )
@@ -85,9 +73,5 @@ autoPtr<laminarFlameSpeed> laminarFlameSpeed::New
     return autoPtr<laminarFlameSpeed>(cstrIter()(laminarFlameSpeedDict, ct));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

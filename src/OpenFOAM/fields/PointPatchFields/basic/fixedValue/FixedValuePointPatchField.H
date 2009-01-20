@@ -74,14 +74,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        FixedValuePointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         FixedValuePointPatchField
         (
@@ -144,13 +136,20 @@ public:
         //- Insert boundary value into the internal field
         //  Fixed values need to be inserted first. In the second go,
         //  there's nothing to do
-        virtual void initEvaluate(const bool=false)
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        )
         {
             ValuePointPatchField
-                <PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate();
+                <PatchField, Mesh, PointPatch, MatrixType, Type>::
+                evaluate(commsType);
         }
 
-        virtual void evaluate()
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        )
         {}
 
         virtual void setBoundaryCondition

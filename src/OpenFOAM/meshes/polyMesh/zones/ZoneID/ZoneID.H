@@ -23,13 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ZoneID
+    Foam::ZoneID
 
 Description
-    A class holds the data needed to identify a zone in a dynamic
-    mesh.  The zone is identified by name and its index in the
-    zone mesh is updated if the mesh has changed.
+    A class that holds the data needed to identify a zone in a dynamic mesh.
 
+    The zone is identified by name.
+    Its index in the zoneMesh is updated if the mesh has changed.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,9 +45,9 @@ Description
 namespace Foam
 {
 
-template<class ZoneType> class ZoneMesh;
+template<class ZoneType, class MeshType> class ZoneMesh;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class ZoneType> class ZoneID;
 
@@ -75,14 +75,14 @@ public:
     // Constructors
 
         //- Construct from name
-        ZoneID(const word& name, const ZoneMesh<ZoneType>& zm)
+        ZoneID(const word& name, const ZoneMesh<ZoneType, polyMesh>& zm)
         :
             name_(name),
             index_(zm.findZoneID(name))
         {}
 
         //- Construct from Istream
-        ZoneID(Istream& is, const ZoneMesh<ZoneType>& zm)
+        ZoneID(Istream& is, const ZoneMesh<ZoneType, polyMesh>& zm)
         :
             name_(is),
             index_(zm.findZoneID(name_))
@@ -117,11 +117,11 @@ public:
         // Edit
 
             //- Update
-            void update(const ZoneMesh<ZoneType>& zm)
+            void update(const ZoneMesh<ZoneType, polyMesh>& zm)
             {
                 index_ = zm.findZoneID(name_);
             }
-            
+
 
     // IOstream Operators
 

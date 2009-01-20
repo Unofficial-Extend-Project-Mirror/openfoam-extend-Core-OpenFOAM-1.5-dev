@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointMesh
+    Foam::pointMesh
 
 Description
     Mesh representing a set of points created from polyMesh.
@@ -58,6 +58,9 @@ class pointMesh
 
     // Private Member Functions
 
+        //- Map all fields
+        void mapFields(const mapPolyMesh&);
+
         //- Disallow default bitwise copy construct
         pointMesh(const pointMesh&);
 
@@ -69,6 +72,7 @@ public:
 
     typedef pointMesh Mesh;
     typedef pointBoundaryMesh BoundaryMesh;
+
 
     // Constructors
 
@@ -94,13 +98,19 @@ public:
             return mesh.mesh_.nPoints();
         }
 
-        //- Return number of points (checking of patch size.  Reconsider)
+        //- Return number of points
+        //  Needed because point and elemant fields in FEM share
+        //  templated patch field type(checking of patch size).
+        //  HJ, 16/Oct/2008
         label nPoints() const
         {
             return mesh_.nPoints();
         }
 
-        //- Return number of cells (checking of patch size.  Reconsider)
+        //- Return number of points
+        //  Needed because point and elemant fields in FEM share
+        //  templated patch field type(checking of patch size).
+        //  HJ, 16/Oct/2008
         label nCells() const
         {
             return mesh_.nCells();
@@ -112,17 +122,20 @@ public:
             return boundary_;
         }
 
-        //- Correct stuff for moving mesh.
-        bool movePoints()
-        {
-            return true;
-        }
-
         //- Return parallel info
         const globalMeshData& globalData() const
         {
             return mesh_.globalData();
         }
+
+
+        // Mesh motion
+
+            //- Move points, returns volumes swept by faces in motion
+            void movePoints(const pointField&);
+
+            //- Update the mesh corresponding to given map
+            void updateMesh(const mapPolyMesh& mpm);
 
 
     // Member Operators

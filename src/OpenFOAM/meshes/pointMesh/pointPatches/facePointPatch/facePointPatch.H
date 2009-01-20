@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    facePointPatch
+    Foam::facePointPatch
 
 Description
     A pointPatch based on a polyPatch
@@ -47,6 +47,9 @@ SourceFiles
 namespace Foam
 {
 
+class processorPointPatch;
+class cyclicPointPatch;
+
 /*---------------------------------------------------------------------------*\
                   Class facePointPatch Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,11 +58,43 @@ class facePointPatch
 :
     public pointPatch
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Reference to the underlying polyPatch
         const polyPatch& polyPatch_;
 
+        // Optional data used if the pointPatch has points not associated
+        // with faces, i.e. not accessible via polyPatch
+
+            mutable labelList meshPoints_;
+            mutable pointField localPoints_;
+            mutable vectorField pointNormals_;
+
+
+    // Protected Member Functions
+
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry();
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry();
+
+        //- Initialise the patches for moving points
+        virtual void initMovePoints(const pointField&);
+
+        //- Correct patches after moving points
+        virtual void movePoints(const pointField&);
+
+        //- Initialise the update of the patch topology
+        virtual void initUpdateMesh();
+
+        //- Update of the patch topology
+        virtual void updateMesh();
+
+
+private:
 
     // Private Member Functions
 
@@ -72,11 +107,15 @@ class facePointPatch
 
 public:
 
-    typedef pointBoundaryMesh BoundaryMesh;
+    // Declare friendship with the coupledPointPatches to allow them to extend
+    // the set of points with those not associated with faces
+    friend class processorPointPatch;
+    friend class cyclicPointPatch;
 
 
     //- Runtime type information
     TypeName(polyPatch::typeName_());
+
 
     // Declare run-time constructor selection tables
 
@@ -133,13 +172,7 @@ public:
         //- Return size
         virtual label size() const
         {
-            return polyPatch_.nPoints();
-        }
-
-        //- Return number of faces
-        virtual label nFaces() const
-        {
-            return polyPatch_.size();
+            return meshPoints().size();
         }
 
         //- Return the index of this patch in the pointBoundaryMesh
@@ -148,26 +181,14 @@ public:
             return polyPatch_.index();
         }
 
+        //- Return mesh points
+        virtual const labelList& meshPoints() const;
 
-        // Access functions for demand driven data
+        //- Return pointField of points in patch
+        virtual const pointField& localPoints() const;
 
-            //- Return mesh points
-            virtual const labelList& meshPoints() const
-            {
-                return polyPatch_.meshPoints();
-            }
-
-            //- Return pointField of points in patch
-            virtual const pointField& localPoints() const
-            {
-                return polyPatch_.localPoints();
-            }
-
-            //- Return point unit normals
-            virtual const vectorField& pointNormals() const
-            {
-                return polyPatch_.pointNormals();
-            }
+        //- Return point unit normals
+        virtual const vectorField& pointNormals() const;
 };
 
 

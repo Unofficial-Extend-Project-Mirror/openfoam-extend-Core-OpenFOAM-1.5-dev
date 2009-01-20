@@ -44,6 +44,13 @@ inline label PtrList<T>::size() const
 
 
 template<class T>
+inline bool PtrList<T>::set(const label i) const
+{
+    return ptrs_[i] != NULL;
+}
+
+
+template<class T>
 inline autoPtr<T> PtrList<T>::set(const label i, T* ptr)
 {
     autoPtr<T> old(ptrs_[i]);

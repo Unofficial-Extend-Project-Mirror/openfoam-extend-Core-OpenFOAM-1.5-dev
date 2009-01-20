@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    HashPtrTable
+    Foam::HashPtrTable
 
 Description
+    A HashTable specialization for hashing pointers.
 
 SourceFiles
     HashPtrTable.C
@@ -46,7 +47,7 @@ namespace Foam
 class Istream;
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T, class Key, class Hash> class HashPtrTable;
 
@@ -127,13 +128,19 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>> <T, Key, Hash>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <T, Key, Hash>
+        #endif
         (
             Istream&,
             HashPtrTable<T, Key, Hash>&
         );
 
-        friend Ostream& operator<< <T, Key, Hash>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T, Key, Hash>
+        #endif
         (
             Ostream&,
             const HashPtrTable<T, Key, Hash>&

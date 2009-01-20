@@ -25,29 +25,20 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveEntry.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from keyword and a T
 template<class T>
-primitiveEntry::primitiveEntry(const word& keyword, const T& t)
+Foam::primitiveEntry::primitiveEntry(const word& keyword, const T& t)
 :
     entry(keyword),
     ITstream(keyword, tokenList(10))
 {
     OStringStream os;
     os << t << token::END_STATEMENT;
-    readData(IStringStream(os.str())());
+    readEntry(dictionary::null, IStringStream(os.str())());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

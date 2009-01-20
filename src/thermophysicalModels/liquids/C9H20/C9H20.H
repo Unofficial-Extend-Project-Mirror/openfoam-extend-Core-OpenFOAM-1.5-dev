@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C9H20
+    Foam::C9H20
 
 Description
     nNonane

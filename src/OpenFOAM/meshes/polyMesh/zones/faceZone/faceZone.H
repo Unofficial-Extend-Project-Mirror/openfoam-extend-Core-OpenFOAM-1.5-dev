@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceZone
+    Foam::faceZone
 
 Description
     A subset of mesh faces organised as a primitive patch.
-    For quick check whether a face belongs to the zone use the lookup mechanism
-    in faceZoneMesh, where all the zoned faces are registered with their zone
-    number.
+
+    For quick check whether a face belongs to the zone use the lookup
+    mechanism in faceZoneMesh, where all the zoned faces are registered
+    with their zone number.
 
 SourceFiles
     faceZone.C
@@ -55,7 +56,7 @@ namespace Foam
 
 class mapPolyMesh;
 
-// * * * * * * * * Forward declaration of friend functions * * * * * * * * * //
+// Forward declaration of friend functions and operators
 
 class faceZone;
 Ostream& operator<<(Ostream&, const faceZone&);

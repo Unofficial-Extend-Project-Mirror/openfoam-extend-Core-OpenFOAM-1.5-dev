@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dimensionSet
+    Foam::dimensionSet
 
 Description
     Dimension set for the base types.
@@ -49,6 +49,59 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class dimensionSet;
+
+// Friend functions
+
+dimensionSet max(const dimensionSet&, const dimensionSet&);
+dimensionSet min(const dimensionSet&, const dimensionSet&);
+dimensionSet cmptMultiply(const dimensionSet&, const dimensionSet&);
+dimensionSet cmptDivide(const dimensionSet&, const dimensionSet&);
+
+dimensionSet pow(const dimensionSet&, const scalar);
+dimensionSet pow(const dimensionSet&, const dimensionedScalar&);
+dimensionSet pow(const dimensionedScalar&, const dimensionSet&);
+
+dimensionSet sqr(const dimensionSet&);
+dimensionSet pow3(const dimensionSet&);
+dimensionSet pow4(const dimensionSet&);
+dimensionSet pow5(const dimensionSet&);
+dimensionSet pow6(const dimensionSet&);
+
+dimensionSet sqrt(const dimensionSet&);
+dimensionSet magSqr(const dimensionSet&);
+dimensionSet mag(const dimensionSet&);
+dimensionSet sign(const dimensionSet&);
+dimensionSet pos(const dimensionSet&);
+dimensionSet neg(const dimensionSet&);
+dimensionSet inv(const dimensionSet&);
+
+// Function to check the argument is dimensionless
+//  for transcendental functions
+dimensionSet trans(const dimensionSet&);
+
+// Return the argument; transformations do not change the dimensions
+dimensionSet transform(const dimensionSet&);
+
+// Friend operators
+
+dimensionSet operator-(const dimensionSet&);
+dimensionSet operator+(const dimensionSet&, const dimensionSet&);
+dimensionSet operator-(const dimensionSet&, const dimensionSet&);
+dimensionSet operator*(const dimensionSet&, const dimensionSet&);
+dimensionSet operator/(const dimensionSet&, const dimensionSet&);
+dimensionSet operator&(const dimensionSet&, const dimensionSet&);
+dimensionSet operator^(const dimensionSet&, const dimensionSet&);
+dimensionSet operator&&(const dimensionSet&, const dimensionSet&);
+
+// IOstream operators
+
+Istream& operator>>(Istream&, dimensionSet&);
+Ostream& operator<<(Ostream&, const dimensionSet&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class dimensionSet Declaration
@@ -94,7 +147,7 @@ private:
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("dimensionSet");
 
 
@@ -153,7 +206,16 @@ public:
 
         friend dimensionSet max(const dimensionSet&, const dimensionSet&);
         friend dimensionSet min(const dimensionSet&, const dimensionSet&);
-        friend dimensionSet scale(const dimensionSet&, const dimensionSet&);
+        friend dimensionSet cmptMultiply
+        (
+            const dimensionSet&,
+            const dimensionSet&
+        );
+        friend dimensionSet cmptDivide
+        (
+            const dimensionSet&,
+            const dimensionSet&
+        );
 
         friend dimensionSet pow(const dimensionSet&, const scalar);
         friend dimensionSet pow(const dimensionSet&, const dimensionedScalar&);
@@ -162,6 +224,8 @@ public:
         friend dimensionSet sqr(const dimensionSet&);
         friend dimensionSet pow3(const dimensionSet&);
         friend dimensionSet pow4(const dimensionSet&);
+        friend dimensionSet pow5(const dimensionSet&);
+        friend dimensionSet pow6(const dimensionSet&);
 
         friend dimensionSet sqrt(const dimensionSet&);
         friend dimensionSet magSqr(const dimensionSet&);

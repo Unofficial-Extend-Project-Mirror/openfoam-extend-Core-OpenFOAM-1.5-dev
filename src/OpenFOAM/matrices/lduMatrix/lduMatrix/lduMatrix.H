@@ -257,16 +257,6 @@ public:
             //- Is the stop criterion reached
             bool stop(lduMatrix::solverPerformance& solverPerf) const;
 
-            //- Read a control parameter from dictionary
-            template<class T>
-            inline void readControl
-            (
-                const dictionary& dict,
-                T& control,
-                const word& controlName
-            );
-
-
             //- Read the control parameters from the dictionary
             virtual void readControls();
 

@@ -23,15 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    primitiveEntry
+    Foam::primitiveEntry
 
 Description
     A keyword and a list of tokens is a 'primitiveEntry'.
     An primitiveEntry can be read, written and printed, and the types and
-    values of its tokens analysed.  A primitiveEntry is a high-level building
-    block for data description.  It is a front-end for the token parser.
-    A list of entries can be used as a set of keyword syntax elements,
-    for example.
+    values of its tokens analysed.
+
+    A primitiveEntry is a high-level building block for data description. It
+    is a front-end for the token parser. A list of entries can be used as a
+    set of keyword syntax elements, for example.
 
 SourceFiles
     primitiveEntry.C
@@ -65,9 +66,41 @@ class primitiveEntry
     public entry,
     public ITstream
 {
+
+public:
+
     // Private member functions
 
-        void readData(Istream&);
+        //- Append the given token to this entry
+        void append
+        (
+            const token& currToken,
+            const dictionary& dict,
+            Istream& is
+        );
+
+        //- Append the given tokens starting at the current tokenIndex
+        void append(const tokenList& varTokens);
+
+        //- Expand the given variable (keyword starts with $)
+        bool expandVariable(const word& keyword, const dictionary& dict);
+
+        //- Expand the given function (keyword starts with #)
+        bool expandFunction
+        (
+            const word& keyword,
+            const dictionary& dict,
+            Istream& is
+        );
+
+        //- Read tokens from the given stream
+        bool read(const dictionary& dict, Istream&);
+
+        //- Read the complete entry from the given stream
+        void readEntry(const dictionary& dict, Istream&);
+
+        //- Insert the given tokens at token i
+        void insert(const tokenList& varTokens, const label i);
 
 
 public:
@@ -76,6 +109,9 @@ public:
 
         //- Construct from keyword and a Istream
         primitiveEntry(const word& keyword, Istream&);
+
+        //- Construct from keyword, parent dictionary and a Istream
+        primitiveEntry(const word& keyword, const dictionary&, Istream&);
 
         //- Construct from keyword and a ITstream
         primitiveEntry(const word& keyword, const ITstream&);
@@ -90,7 +126,7 @@ public:
         template<class T>
         primitiveEntry(const word&, const T&);
 
-        autoPtr<entry> clone() const
+        autoPtr<entry> clone(const dictionary&) const
         {
             return autoPtr<entry>(new primitiveEntry(*this));
         }
@@ -125,8 +161,13 @@ public:
         //- Return token stream if this entry is a primitive entry
         ITstream& stream() const;
 
-        //- Return token stream if this entry is a primitive entry
+        //- This entry is not a dictionary,
+        //  calling this function generates a FatalError
         const dictionary& dict() const;
+
+        //- This entry is not a dictionary,
+        //  calling this function generates a FatalError
+        dictionary& dict();
 
         // Write
         void write(Ostream&) const;
@@ -138,6 +179,10 @@ public:
             return *this;
         }
 };
+
+
+template<>
+Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -48,7 +48,8 @@ dictionary* infoSwitchesPtr_(NULL);
 dictionary* optimisationSwitchesPtr_(NULL);
 dictionary* tolerancesPtr_(NULL);
 
-// Class to ensure controlDictPtr_ is deleted at the end of the run
+//- Class to ensure controlDictPtr_ is deleted at the end of the run
+//  @cond ignore documentation for this class
 class deleteControlDictPtr
 {
 public:
@@ -64,7 +65,7 @@ public:
         }
     }
 };
-
+//! @endcond
 
 deleteControlDictPtr deleteControlDictPtr_;
 
@@ -79,10 +80,11 @@ dictionary& switchSet(const char* switchSetName, dictionary* switchSetPtr)
                 << "    Cannot find " <<  switchSetName
             << " in dictionary " << controlDictPtr_->name().c_str()
             << std::endl << std::endl;
+
             ::exit(1);
         }
 
-        switchSetPtr = 
+        switchSetPtr =
             const_cast<dictionary*>(&(controlDict().subDict(switchSetName)));
     }
 

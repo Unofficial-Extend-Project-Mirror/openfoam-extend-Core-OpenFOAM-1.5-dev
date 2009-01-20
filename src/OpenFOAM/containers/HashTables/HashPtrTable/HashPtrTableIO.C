@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    HashPtrTable
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "HashPtrTable.H"
@@ -75,7 +70,7 @@ void HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
                 {
                     Key key;
                     is >> key;
-                    insert(key, inewt(is).ptr());
+                    insert(key, inewt(key, is).ptr());
 
                     is.fatalCheck
                     (
@@ -122,7 +117,7 @@ void HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
             is.putBack(lastToken);
             Key key;
             is >> key;
-            insert(key, inewt(is).ptr());
+            insert(key, inewt(key, is).ptr());
 
             is.fatalCheck
             (

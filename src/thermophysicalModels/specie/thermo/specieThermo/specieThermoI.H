@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Basic thermodynamics type based on the use of fitting functions for
-    cp, h, s obtained from the template argument type thermo.  All other
-    properties are derived from these primitive functions.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"

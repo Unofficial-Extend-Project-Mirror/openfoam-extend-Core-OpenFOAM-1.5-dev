@@ -22,22 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "patchIdentifier.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-patchIdentifier::patchIdentifier
+Foam::patchIdentifier::patchIdentifier
 (
     const word& name,
     const label index,
@@ -50,16 +42,7 @@ patchIdentifier::patchIdentifier
 {}
 
 
-// Construct from Istream
-patchIdentifier::patchIdentifier(Istream& is, const label index)
-:
-    name_(is),
-    boundaryIndex_(index)
-{}
-
-
-// Construct from dictionary
-patchIdentifier::patchIdentifier
+Foam::patchIdentifier::patchIdentifier
 (
     const word& name,
     const dictionary& dict,
@@ -76,8 +59,7 @@ patchIdentifier::patchIdentifier
 }
 
 
-// Construct from geometric patch, resetting the index
-patchIdentifier::patchIdentifier
+Foam::patchIdentifier::patchIdentifier
 (
     const patchIdentifier& p,
     const label index
@@ -91,46 +73,30 @@ patchIdentifier::patchIdentifier
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-patchIdentifier::~patchIdentifier()
+Foam::patchIdentifier::~patchIdentifier()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Write
-void patchIdentifier::write(Ostream& os) const
-{
-    os  << nl << name_;
-
-    if (physicalType_.size())
-    {
-        os  << nl << physicalType_;
-    }
-}
-
-
-void patchIdentifier::writeDict(Ostream& os) const
+void Foam::patchIdentifier::write(Ostream& os) const
 {
     if (physicalType_.size())
     {
-        os  << "    physicalType " << physicalType_ << token::END_STATEMENT
-            << nl;
+        os.writeKeyword("physicalType") << physicalType_
+            << token::END_STATEMENT << nl;
     }
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const patchIdentifier& gp)
+Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& pi)
 {
-    gp.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const patchIdentifier& gp)");
+    pi.write(os);
+    os.check("Ostream& operator<<(Ostream&, const patchIdentifier&)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

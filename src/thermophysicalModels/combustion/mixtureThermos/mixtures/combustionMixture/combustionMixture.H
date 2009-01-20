@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    combustionMixture
+    Foam::combustionMixture
 
 Description
+    combustion mixture
 
 SourceFiles
     combustionMixture.C
@@ -45,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class combustionMixture Declaration
+                    Class combustionMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 class combustionMixture
@@ -73,6 +74,12 @@ public:
             const wordList& specieNames,
             const fvMesh&
         );
+
+
+    // Destructor
+
+        virtual ~combustionMixture()
+        {}
 
 
     // Member functions

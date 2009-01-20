@@ -38,25 +38,21 @@ defineTypeNameAndDebug(primitiveMesh, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 primitiveMesh::primitiveMesh()
 :
+    nInternalPoints_(0),    // note: points are considered ordered on empty mesh
     nPoints_(0),
+    nInternal0Edges_(-1),
+    nInternal1Edges_(-1),
+    nInternalEdges_(-1),
     nEdges_(-1),
     nInternalFaces_(0),
     nFaces_(0),
     nCells_(0),
 
-    points_(UList<point>(), nPoints_),
-    faces_(UList<face>(), nFaces_),
-    faceOwner_(UList<label>(), nFaces_),
-    faceNeighbour_(UList<label>(), nInternalFaces_),
-    clearedPrimitives_(false),
-
-    oldPointsPtr_(NULL),
-
     cellShapesPtr_(NULL),
     edgesPtr_(NULL),
+    orderedEdgesPtr_(NULL),
     ccPtr_(NULL),
     ecPtr_(NULL),
     pcPtr_(NULL),
@@ -85,29 +81,19 @@ primitiveMesh::primitiveMesh
     const label nPoints,
     const label nInternalFaces,
     const label nFaces,
-    const label nCells,
-    const pointField& p,
-    const faceList& f,
-    const labelList& own,
-    const labelList& nei
+    const label nCells
 )
 :
+    nInternalPoints_(-1),
     nPoints_(nPoints),
     nEdges_(-1),
     nInternalFaces_(nInternalFaces),
     nFaces_(nFaces),
     nCells_(nCells),
 
-    points_(p, nPoints_),
-    faces_(f, nFaces_),
-    faceOwner_(own, nFaces_),
-    faceNeighbour_(nei, nInternalFaces_),
-    clearedPrimitives_(false),
-
-    oldPointsPtr_(NULL),
-
     cellShapesPtr_(NULL),
     edgesPtr_(NULL),
+    orderedEdgesPtr_(NULL),
     ccPtr_(NULL),
     ecPtr_(NULL),
     pcPtr_(NULL),
@@ -126,44 +112,153 @@ primitiveMesh::primitiveMesh
     faceCentresPtr_(NULL),
     cellVolumesPtr_(NULL),
     faceAreasPtr_(NULL)
-{}
+{
+    
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 primitiveMesh::~primitiveMesh()
 {
-    clearAll();
+    clearOut();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool primitiveMesh::calcPointOrder
+(
+    label& nInternalPoints,
+    labelList& oldToNew,
+    const faceList& faces,
+    const label nInternalFaces,
+    const label nPoints
+)
+{
+    // Internal points are points that are not used by a boundary face.
+
+    // Map from old to new position
+    oldToNew.setSize(nPoints);
+    oldToNew = -1;
+
+
+    // 1. Create compact addressing for boundary points. Start off by indexing
+    // from 0 inside oldToNew. (shifted up later on)
+
+    label nBoundaryPoints = 0;
+    for (label faceI = nInternalFaces; faceI < faces.size(); faceI++)
+    {
+        const face& f = faces[faceI];
+
+        forAll(f, fp)
+        {
+            label pointI = f[fp];
+
+            if (oldToNew[pointI] == -1)
+            {
+                oldToNew[pointI] = nBoundaryPoints++;
+            }
+        }
+    }
+
+    // Now we know the number of boundary and internal points
+
+    nInternalPoints = nPoints - nBoundaryPoints;
+
+    // Move the boundary addressing up
+    forAll(oldToNew, pointI)
+    {
+        if (oldToNew[pointI] != -1)
+        {
+            oldToNew[pointI] += nInternalPoints;
+        }
+    }
+
+
+    // 2. Compact the internal points. Detect whether internal and boundary
+    // points are mixed.
+
+    label internalPointI = 0;
+
+    bool ordered = true;
+
+    for (label faceI = 0; faceI < nInternalFaces; faceI++)
+    {
+        const face& f = faces[faceI];
+
+        forAll(f, fp)
+        {
+            label pointI = f[fp];
+
+            if (oldToNew[pointI] == -1)
+            {
+                if (pointI >= nInternalPoints)
+                {
+                    ordered = false;
+                }
+                oldToNew[pointI] = internalPointI++;
+            }
+        }
+    }
+
+    return ordered;
+}
+
+
 void primitiveMesh::reset
 (
     const label nPoints,
     const label nInternalFaces,
     const label nFaces,
-    const label nCells,
-    const pointField& p,
-    const faceList& f,
-    const labelList& own,
-    const labelList& nei
+    const label nCells
 )
 {
-    clearAll();
+    clearOut();
 
     nPoints_ = nPoints;
     nEdges_ = -1;
+    nInternal0Edges_ = -1;
+    nInternal1Edges_ = -1;
+    nInternalEdges_ = -1;
+
     nInternalFaces_ = nInternalFaces;
     nFaces_ = nFaces;
     nCells_ = nCells;
 
-    points_ = pointField::subField(p, nPoints_);
-    faces_ = faceList::subList(f, nFaces_);
-    faceOwner_ = labelList::subList(own, nFaces_);
-    faceNeighbour_ = labelList::subList(nei, nInternalFaces_);
-    clearedPrimitives_ = false;
+    // Check if points are ordered
+    label nInternalPoints;
+    labelList pointMap;
+
+    bool isOrdered = calcPointOrder
+    (
+        nInternalPoints,
+        pointMap,
+        faces(),
+        nInternalFaces_,
+        nPoints_
+    );
+
+    if (isOrdered)
+    {
+        nInternalPoints_ = nInternalPoints;
+    }
+    else
+    {
+        nInternalPoints_ = -1;
+    }
+
+    if (debug)
+    {
+        Pout<< "primitiveMesh::reset : mesh reset to"
+            << " nInternalPoints:" << nInternalPoints_
+            << " nPoints:" << nPoints_
+            << " nEdges:" << nEdges_
+            << " nInternalFaces:" << nInternalFaces_
+            << " nFaces:" << nFaces_
+            << " nCells:" << nCells_
+            << endl;
+    }
 }
 
 
@@ -173,10 +268,6 @@ void primitiveMesh::reset
     const label nInternalFaces,
     const label nFaces,
     const label nCells,
-    const pointField& p,
-    const faceList& f,
-    const labelList& own,
-    const labelList& nei,
     cellList& c
 )
 {
@@ -185,91 +276,42 @@ void primitiveMesh::reset
         nPoints,
         nInternalFaces,
         nFaces,
-        nCells,
-        p,
-        f,
-        own,
-        nei
+        nCells
     );
 
     cfPtr_ = new cellList(c, true);
 }
 
 
-const pointField& primitiveMesh::points() const
-{
-    if (clearedPrimitives_)
-    {
-        FatalErrorIn("const pointField& primitiveMesh::points() const")
-            << "points deallocated"
-            << abort(FatalError);
-    }
-
-    return points_;
-}
-
-
-const faceList& primitiveMesh::faces() const
-{
-    if (clearedPrimitives_)
-    {
-        FatalErrorIn("const faceList& primitiveMesh::faces() const")
-            << "faces deallocated"
-            << abort(FatalError);
-    }
-
-    return faces_;
-}
-
-
-const pointField& primitiveMesh::oldPoints() const
-{
-    if (!oldPointsPtr_)
-    {
-        FatalErrorIn("const pointField& primitiveMesh::oldPoints() const")
-            << "oldPoints not allocated"
-            << abort(FatalError);
-    }
-
-    return *oldPointsPtr_;
-}
-
-
-// Move points
 tmp<scalarField> primitiveMesh::movePoints
 (
     const pointField& newPoints,
     const pointField& oldPoints
 )
 {
-    if (newPoints.size() <  nPoints() || oldPoints.size() < nPoints())
+    if (newPoints.size() < nPoints() || oldPoints.size() < nPoints())
     {
         FatalErrorIn
         (
             "primitiveMesh::movePoints(const pointField& newPoints, "
             "const pointField& oldPoints)"
         )   << "Cannot move points: size of given point list smaller "
-            << "than the number of active points"
+            << "than the number of active points" << nl
+            << "newPoints: " << newPoints.size()
+            << " oldPoints: " << oldPoints.size()
+            << " nPoints(): " << nPoints() << nl
             << abort(FatalError);
     }
 
     // Create swept volumes
     const faceList& f = faces();
 
-    // Grab new points
-    points_ = pointField::subField(newPoints, nPoints());
-
-    // Slice old points
-    deleteDemandDrivenData(oldPointsPtr_);
-    oldPointsPtr_ = new pointField::subField(oldPoints, nPoints());
-    const pointField::subField& oldP = *oldPointsPtr_;
-
     tmp<scalarField> tsweptVols(new scalarField(f.size()));
     scalarField& sweptVols = tsweptVols();
 
-    forAll (f, faceI)
+    forAll(f, faceI)
     {
-        sweptVols[faceI] = f[faceI].sweptVol(oldP, points_);
+        sweptVols[faceI] = f[faceI].sweptVol(oldPoints, newPoints);
     }
 
     // Force recalculation of all geometric data with new points

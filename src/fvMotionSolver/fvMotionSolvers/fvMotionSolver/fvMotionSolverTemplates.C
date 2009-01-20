@@ -60,6 +60,13 @@ Foam::wordList Foam::fvMotionSolver::cellMotionBoundaryTypes
         {
             cmUbf[patchi] = cellMotionFvPatchField<Type>::typeName;
         }
+
+        if (debug)
+        {
+            Pout<< "Patch:" << fvMesh_.boundary()[patchi].patch().name()
+                << " pointType:" << pmUbf.types()[patchi]
+                << " cellType:" << cmUbf[patchi] << endl;
+        }
     }
 
     return cmUbf;

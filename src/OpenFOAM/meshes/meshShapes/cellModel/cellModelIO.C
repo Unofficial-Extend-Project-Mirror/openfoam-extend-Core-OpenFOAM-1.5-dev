@@ -40,7 +40,7 @@ namespace Foam
 
 cellModel::cellModel(Istream& is)
 {
-    dictionaryEntry entry(is);
+    dictionaryEntry entry(dictionary::null, is);
     name_ = entry.keyword();
     entry.lookup("index") >> index_;
     entry.lookup("numberOfPoints") >> nPoints_;

@@ -50,8 +50,9 @@ boundBox::boundBox(const pointField& points, const bool doReduce)
         else
         {
             WarningIn("boundBox::boundBox(const pointField& points)")
-                << "cannot find bounding box for zero sized pointField"
-                << "returning zero" << endl;
+                << "Cannot find bounding box for zero sized pointField, "
+                   "returning zero"
+                << endl;
 
             return;
         }

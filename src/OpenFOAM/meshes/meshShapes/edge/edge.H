@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    edge
+    Foam::edge
 
 Description
     An edge is a list of two point labels. The functionality it provides
@@ -46,6 +46,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class edge;
+inline bool operator==(const edge& a, const edge& b);
+inline bool operator!=(const edge& a, const edge& b);
+
+
 /*---------------------------------------------------------------------------*\
                            Class edge Declaration
 \*---------------------------------------------------------------------------*/
@@ -57,6 +64,11 @@ class edge
 
 public:
 
+    // Static data members
+
+        static const char* const typeName;
+
+
     // Constructors
 
         //- Null constructor for lists
@@ -65,8 +77,11 @@ public:
         //- Construct from components
         inline edge(const label a, const label b);
 
+        //- Construct from FixedList
+        inline edge(const FixedList<label, 2>&);
+
         //- Construct from Istream
-        inline explicit edge(Istream&);
+        inline edge(Istream&);
 
 
     // Member Functions
@@ -104,15 +119,21 @@ public:
         //- Return edge line
         inline linePointRef line(const pointField&) const;
 
+        //- compare edges
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        static inline int compare(const edge&, const edge&);
+
 
     // Friend Operators
 
-        inline friend bool operator==(const edge& a, const edge& b);
-        inline friend bool operator!=(const edge& a, const edge& b);
+        friend bool operator==(const edge& a, const edge& b);
+        friend bool operator!=(const edge& a, const edge& b);
 };
 
 
-//- Hash<edge> specialisation 
+//- Hash<edge> specialisation
 //  Simple commutative hash.
 template<>
 inline label Hash<edge>::operator()(const edge& e) const

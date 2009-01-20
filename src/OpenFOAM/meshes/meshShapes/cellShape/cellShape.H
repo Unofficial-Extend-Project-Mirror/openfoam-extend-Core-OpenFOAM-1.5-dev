@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellShape
+    Foam::cellShape
 
 Description
     An analytical geometric cellShape.
@@ -45,6 +45,7 @@ SourceFiles
 #include "pointField.H"
 #include "labelList.H"
 #include "cellModel.H"
+#include "autoPtr.H"
 #include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,8 +53,16 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class cell;
+
+// Forward declaration of friend functions and operators
+
+class cellShape;
+bool operator==(const cellShape&, const cellShape&);
+Istream& operator>>(Istream&, cellShape&);
+Ostream& operator<<(Ostream&, const cellShape&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class cellShape Declaration
@@ -66,10 +75,8 @@ class cellShape
     // Private data
 
         //- Access to the cellShape's model
-        const cellModel *m_;
+        const cellModel *m;
 
-
-    // Private Member Functions
 
 public:
 
@@ -102,12 +109,7 @@ public:
         inline const cellModel& model() const;
 
         //- Mesh face labels of this cell (in order of model)
-        inline labelList
-        meshFaces
-        (
-            const faceList& allFaces,
-            const cell&
-        ) const;
+        inline labelList meshFaces(const faceList& allFaces, const cell&) const;
 
         //- Mesh edge labels of this cell (in order of model)
         inline labelList meshEdges
@@ -139,7 +141,7 @@ public:
 
         //- Return info proxy.
         //  Used to print token information to a stream
-        InfoProxy<cellShape> info() const
+        Foam::InfoProxy<cellShape> info() const
         {
             return *this;
         }
@@ -149,6 +151,7 @@ public:
 
         //- Collapse shape to correct one after removing duplicate vertices
         void collapse();
+
 
     // Friend Operators
 

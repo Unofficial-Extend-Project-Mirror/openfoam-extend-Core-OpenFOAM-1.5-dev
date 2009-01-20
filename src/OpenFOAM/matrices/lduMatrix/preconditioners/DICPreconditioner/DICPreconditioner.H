@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DICPreconditioner
+    Foam::DICPreconditioner
 
 Description
     Simplified diagonal-based incomplete Cholesky preconditioner for symmetric
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class DICPreconditioner Declaration
+                           Class DICPreconditioner Declaration
 \*---------------------------------------------------------------------------*/
 
 class DICPreconditioner

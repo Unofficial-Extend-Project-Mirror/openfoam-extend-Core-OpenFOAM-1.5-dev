@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    IOmanip
+InNamespace
+    Foam::IOmanip
 
 Description
     Istream and Ostream manipulators taking arguments.
@@ -41,7 +41,7 @@ Description
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class Smanip;
 template<class T> class Imanip;
@@ -167,6 +167,33 @@ inline Smanip<ios_base::fmtflags> setf
 )
 {
     return Smanip<ios_base::fmtflags>(&IOstream::setf, flags);
+}
+
+
+inline Omanip<IOstream::streamFormat> setformat
+(
+    const IOstream::streamFormat fmt
+)
+{
+    return Omanip<IOstream::streamFormat>(&IOstream::format, fmt);
+}
+
+
+inline Omanip<IOstream::versionNumber> setversion
+(
+    const IOstream::versionNumber ver
+)
+{
+    return Omanip<IOstream::versionNumber>(&IOstream::version, ver);
+}
+
+
+inline Omanip<IOstream::compressionType> setcompression
+(
+    const IOstream::compressionType cmp
+)
+{
+    return Omanip<IOstream::compressionType>(&IOstream::compression, cmp);
 }
 
 

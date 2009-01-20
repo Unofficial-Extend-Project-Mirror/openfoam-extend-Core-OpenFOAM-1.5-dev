@@ -36,13 +36,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cloud::cloud(const objectRegistry& obr)
+Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
 :
-    regIOobject
+    objectRegistry
     (
         IOobject
         (
-            "positions",
+            cloudName,
             obr.time().timeName(),
             "lagrangian",
             obr,

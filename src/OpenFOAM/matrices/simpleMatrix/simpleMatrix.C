@@ -61,6 +61,8 @@ Foam::simpleMatrix<T>::simpleMatrix(Istream& is)
 template<class T>
 Foam::Field<T> Foam::simpleMatrix<T>::solve() const
 {
+    // Since matrix and source are trashed during solution,
+    // a copy is made.  HJ, 23/Dec/2008
     scalarMatrix tmpMatrix = *this;
     Field<T> sourceSol = source_;
 
@@ -73,6 +75,8 @@ Foam::Field<T> Foam::simpleMatrix<T>::solve() const
 template<class T>
 Foam::Field<T> Foam::simpleMatrix<T>::LUsolve() const
 {
+    // Since matrix and source are trashed during solution,
+    // a copy is made.  HJ, 23/Dec/2008
     scalarMatrix luMatrix = *this;
     Field<T> sourceSol = source_;
 

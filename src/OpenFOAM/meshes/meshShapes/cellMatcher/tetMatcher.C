@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "tetMatcher.H"
@@ -31,7 +29,6 @@ Description
 #include "primitiveMesh.H"
 #include "primitiveMesh.H"
 #include "cellModeller.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -68,7 +65,7 @@ bool Foam::tetMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -124,7 +121,7 @@ bool Foam::tetMatcher::matchShape
         (
             face3vert0,
             faceSize_[face3I],
-            !(faceOwner[faceMap_[face3I]] == cellI)
+            !(owner[faceMap_[face3I]] == cellI)
         );
     vertLabels_[1] = pointMap_[face3[face3vert1]];
 
@@ -134,7 +131,7 @@ bool Foam::tetMatcher::matchShape
         (
             face3vert1,
             faceSize_[face3I],
-            !(faceOwner[faceMap_[face3I]] == cellI)
+            !(owner[faceMap_[face3I]] == cellI)
         );
     vertLabels_[2] = pointMap_[face3[face3vert2]];
 
@@ -181,7 +178,7 @@ bool Foam::tetMatcher::matchShape
         (
             face1vert0,
             faceSize_[face1I],
-            (faceOwner[faceMap_[face1I]] == cellI)
+            (owner[faceMap_[face1I]] == cellI)
         );
     vertLabels_[3] = pointMap_[face1[face1vert3]];
 

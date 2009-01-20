@@ -28,63 +28,108 @@ License
 #include "IPstream.H"
 #include "OPstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions * * *  * * * * * * * * * * //
 
 template<class Type>
-void processorLduInterface::send
+void Foam::processorLduInterface::send
 (
-    const UList<Type>& f,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType,
+    const UList<Type>& f
 ) const
 {
-    OPstream::write
-    (
-        neighbProcNo(),
-        reinterpret_cast<const char*>(f.begin()),
-        f.byteSize(),
-        bufferedTransfer
-    );
+    if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
+    {
+        OPstream::write
+        (
+            commsType,
+            neighbProcNo(),
+            reinterpret_cast<const char*>(f.begin()),
+            f.byteSize()
+        );
+    }
+    else if (commsType == Pstream::nonBlocking)
+    {
+        resizeBuf(receiveBuf_, f.size()*sizeof(Type));
+
+        IPstream::read
+        (
+            commsType,
+            neighbProcNo(),
+            receiveBuf_.begin(),
+            receiveBuf_.size()
+        );
+
+        resizeBuf(sendBuf_, f.byteSize());
+        memcpy(sendBuf_.begin(), f.begin(), f.byteSize());
+
+        OPstream::write
+        (
+            commsType,
+            neighbProcNo(),
+            sendBuf_.begin(),
+            f.byteSize()
+        );
+    }
+    else
+    {
+        FatalErrorIn("processorLduInterface::send")
+            << "Unsupported communications type " << commsType
+            << exit(FatalError);
+    }
 }
 
+
 template<class Type>
-void processorLduInterface::receive
+void Foam::processorLduInterface::receive
 (
+    const Pstream::commsTypes commsType,
     UList<Type>& f
 ) const
 {
-    IPstream::read
-    (
-        neighbProcNo(), 
-        reinterpret_cast<char*>(f.begin()),
-        f.byteSize()
-    );
+    if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
+    {
+        IPstream::read
+        (
+            commsType,
+            neighbProcNo(),
+            reinterpret_cast<char*>(f.begin()),
+            f.byteSize()
+        );
+    }
+    else if (commsType == Pstream::nonBlocking)
+    {
+        memcpy(f.begin(), receiveBuf_.begin(), f.byteSize());
+    }
+    else
+    {
+        FatalErrorIn("processorLduInterface::receive")
+            << "Unsupported communications type " << commsType
+            << exit(FatalError);
+    }
 }
 
+
 template<class Type>
-tmp<Field<Type> > processorLduInterface::receive
+Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::receive
 (
+    const Pstream::commsTypes commsType,
     const label size
 ) const
 {
     tmp<Field<Type> > tf(new Field<Type>(size));
-    receive(tf());
+    receive(commsType, tf());
     return tf;
 }
 
 
 template<class Type>
-void processorLduInterface::compressedSend
+void Foam::processorLduInterface::compressedSend
 (
-    const UList<Type>& f,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType,
+    const UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer)
+    if (sizeof(scalar) != sizeof(float) && f.size() && Pstream::floatTransfer)
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;
@@ -94,7 +139,8 @@ void processorLduInterface::compressedSend
 
         const scalar *sArray = reinterpret_cast<const scalar*>(f.begin());
         const scalar *slast = &sArray[nm1];
-        float fArray[nFloats];
+        resizeBuf(sendBuf_, nBytes);
+        float *fArray = reinterpret_cast<float*>(sendBuf_.begin());
 
         for (register label i=0; i<nm1; i++)
         {
@@ -103,27 +149,57 @@ void processorLduInterface::compressedSend
 
         reinterpret_cast<Type&>(fArray[nm1]) = f[f.size() - 1];
 
-        OPstream::write
-        (
-            neighbProcNo(),
-            reinterpret_cast<const char*>(fArray),
-            nBytes,
-            bufferedTransfer
-        );
+        if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
+        {
+            OPstream::write
+            (
+                commsType,
+                neighbProcNo(),
+                sendBuf_.begin(),
+                nBytes
+            );
+        }
+        else if (commsType == Pstream::nonBlocking)
+        {
+            resizeBuf(receiveBuf_, nBytes);
+
+            IPstream::read
+            (
+                commsType,
+                neighbProcNo(),
+                receiveBuf_.begin(),
+                receiveBuf_.size()
+            );
+
+            OPstream::write
+            (
+                commsType,
+                neighbProcNo(),
+                sendBuf_.begin(),
+                nBytes
+            );
+        }
+        else
+        {
+            FatalErrorIn("processorLduInterface::compressedSend")
+                << "Unsupported communications type " << commsType
+                << exit(FatalError);
+        }
     }
     else
     {
-        this->send(f, bufferedTransfer);
+        this->send(commsType, f);
     }
 }
 
 template<class Type>
-void processorLduInterface::compressedReceive
+void Foam::processorLduInterface::compressedReceive
 (
-     UList<Type>& f
+    const Pstream::commsTypes commsType,
+    UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer)
+    if (sizeof(scalar) != sizeof(float) && f.size() && Pstream::floatTransfer)
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;
@@ -131,10 +207,27 @@ void processorLduInterface::compressedReceive
         label nFloats = nm1 + nlast;
         label nBytes = nFloats*sizeof(float);
 
-        float fArray[nFloats];
+        if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
+        {
+            resizeBuf(receiveBuf_, nBytes);
 
-        IPstream::read(neighbProcNo(), reinterpret_cast<char*>(fArray), nBytes);
+            IPstream::read
+            (
+                commsType,
+                neighbProcNo(),
+                receiveBuf_.begin(),
+                nBytes
+            );
+        }
+        else if (commsType != Pstream::nonBlocking)
+        {
+            FatalErrorIn("processorLduInterface::compressedReceive")
+                << "Unsupported communications type " << commsType
+                << exit(FatalError);
+        }
 
+        const float *fArray =
+            reinterpret_cast<const float*>(receiveBuf_.begin());
         f[f.size() - 1] = reinterpret_cast<const Type&>(fArray[nm1]);
         scalar *sArray = reinterpret_cast<scalar*>(f.begin());
         const scalar *slast = &sArray[nm1];
@@ -146,24 +239,21 @@ void processorLduInterface::compressedReceive
     }
     else
     {
-        this->receive<Type>(f);
+        this->receive<Type>(commsType, f);
     }
 }
 
 template<class Type>
-tmp<Field<Type> > processorLduInterface::compressedReceive
+Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 (
+    const Pstream::commsTypes commsType,
     const label size
 ) const
 {
     tmp<Field<Type> > tf(new Field<Type>(size));
-    compressedReceive(tf());
+    compressedReceive(commsType, tf());
     return tf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

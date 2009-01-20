@@ -23,14 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fileName
+    Foam::fileName
 
 Description
     A class for handling file names.
-    A fileName can be  constructed from a char* or a word.
-    FileNames may be concatenated by adding a '/' separator.
-    FileNames may be decomposed into the path, name or component list.
-    FileNames may be interogated for type and access mode.
+
+    A fileName can be
+      - constructed from a char*, a string or a word
+      - concatenated by adding a '/' separator
+      - decomposed into the path, name or component list
+      - interrogated for type and access mode
+
+    The string::expand() method expands environment variables, etc,
 
 SourceFiles
     fileName.C
@@ -50,6 +54,14 @@ namespace Foam
 
 template<class T> class List;
 typedef List<word> wordList;
+
+// Forward declaration of friend functions and operators
+
+class fileName;
+
+Istream& operator>>(Istream&, fileName&);
+Ostream& operator<<(Ostream&, const fileName&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class fileName Declaration
@@ -76,11 +88,12 @@ public:
         LINK
     };
 
-    //- Debug switch
-    static int debug;
 
-    //- Null fileName
-    static const fileName null;
+    // Static data members
+
+        static const char* const typeName;
+        static int debug;
+        static const fileName null;
 
 
     // Constructors

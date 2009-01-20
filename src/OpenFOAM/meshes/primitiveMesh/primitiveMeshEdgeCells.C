@@ -20,75 +20,17 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void primitiveMesh::calcEdgeCells() const
-{
-    if (debug)
-    {
-        Pout<< "primitiveMesh::calcEdgeCells() : "
-            << "calculating edgeCells"
-            << endl;
-    }
-
-    // It is an error to attempt to recalculate edgeCells
-    // if the pointer is already set
-    if (ecPtr_)
-    {
-        FatalErrorIn("primitiveMesh::calcEdgeCells() const")
-            << "edgeCells already calculated"
-            << abort(FatalError);
-    }
-    else
-    {
-        const labelListList& ce = cellEdges();
-
-        labelList nec(nEdges(), 0);
-
-        forAll (ce, cellI)
-        {
-            const labelList& curEdges = ce[cellI];
-
-            forAll (curEdges, edgeI)
-            {
-                nec[curEdges[edgeI]]++;
-            }
-        }
-
-        ecPtr_ = new labelListList(nec.size());
-        labelListList& edgeCellAddr = *ecPtr_;
-
-        forAll (edgeCellAddr, edgeI)
-        {
-            edgeCellAddr[edgeI].setSize(nec[edgeI]);
-        }
-        nec = 0;
-
-        forAll (ce, cellI)
-        {
-            const labelList& curEdges = ce[cellI];
-
-            forAll (curEdges, edgeI)
-            {
-                label eI = curEdges[edgeI];
-
-                edgeCellAddr[eI][nec[eI]++] = cellI;
-            }
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -96,7 +38,9 @@ const labelListList& primitiveMesh::edgeCells() const
 {
     if (!ecPtr_)
     {
-        calcEdgeCells();
+        // Invert cellEdges
+        ecPtr_ = new labelListList(nEdges());
+        invertManyToMany(nEdges(), cellEdges(), *ecPtr_);
     }
 
     return *ecPtr_;

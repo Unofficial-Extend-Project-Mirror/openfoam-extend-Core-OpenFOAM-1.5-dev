@@ -67,14 +67,7 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const = 0;
-
-            //- Return face reverse transformation tensor
-            virtual const tensorField& reverseT() const = 0;
+    // Not currently needed.  HJ, 14/Jan/2009
 };
 
 

@@ -113,44 +113,172 @@ void Foam::inplaceReorder
             newLst[elemI] = lst[elemI];
         }
     }
+
+    lst.transfer(newLst);
+}
+
+
+template<class Container>
+void Foam::inplaceMapValue
+(
+    const labelList& oldToNew,
+    Container& lst
+)
+{
+    for
+    (
+        typename Container::iterator iter = lst.begin();
+        iter != lst.end();
+        ++iter
+    )
+    {
+        if (iter() >= 0)
+        {
+            iter() = oldToNew[iter()];
+        }
+    }
+}
+
+
+template<class Container>
+void Foam::inplaceMapKey
+(
+    const labelList& oldToNew,
+    Container& lst
+)
+{
+    Container newLst(lst);
+
+    for
+    (
+        typename Container::iterator iter = lst.begin();
+        iter != lst.end();
+        ++iter
+    )
+    {
+        if (iter.key() >= 0)
+        {
+            newLst.insert(oldToNew[iter.key()], iter());
+        }
+    }
     
     lst.transfer(newLst);
 }
 
 
 template<class T, class List>
-List Foam::extract(const UList<T>& regions, const T& region, const List& lst)
+List Foam::subset(const UList<T>& regions, const T& region, const List& lst)
 {
-    if (regions.size() != lst.size())
+    if (regions.size() < lst.size())
     {
-        FatalErrorIn("extract(const UList<T>&, const T&, const List&)")
-            << "Regions is of size " << regions.size() << " list it is supposed"
-            << " to index is of size " << lst.size()
+        FatalErrorIn("subset(const UList<T>&, const T&, const List&)")
+            << "Regions is of size " << regions.size()
+            << "; list it is supposed to index is of size " << lst.size()
             << abort(FatalError);
     }
 
     List newLst(lst.size());
-    label newElemI = 0;
 
-    forAll(regions, elemI)
+    label nElem = 0;
+    forAll(lst, elemI)
     {
         if (regions[elemI] == region)
         {
-            newLst[newElemI++] = lst[elemI];
+            newLst[nElem++] = lst[elemI];
         }
     }
-    newLst.setSize(newElemI);
+    newLst.setSize(nElem);
 
     return newLst;
 }
 
 
+template<class T, class List>
+void Foam::inplaceSubset(const UList<T>& regions, const T& region, List& lst)
+{
+    if (regions.size() < lst.size())
+    {
+        FatalErrorIn("inplaceSubset(const UList<T>&, const T&, List&)")
+            << "Regions is of size " << regions.size()
+            << "; list it is supposed to index is of size " << lst.size()
+            << abort(FatalError);
+    }
+
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (regions[elemI] == region)
+        {
+            if (nElem != elemI)
+            {
+                lst[nElem] = lst[elemI];
+            }
+            ++nElem;
+        }
+    }
+
+    lst.setSize(nElem);
+}
+
+
+// As clarification coded as inversion from pointEdges to edges but completely
+// general.
+template<class InList, class OutList>
+void Foam::invertManyToMany
+(
+    const label nEdges,
+    const UList<InList>& pointEdges,
+    List<OutList>& edges
+)
+{
+    // Number of points per edge
+    labelList nPointsPerEdge(nEdges, 0);
+
+    forAll(pointEdges, pointI)
+    {
+        const InList& pEdges = pointEdges[pointI];
+
+        forAll(pEdges, j)
+        {
+            nPointsPerEdge[pEdges[j]]++;
+        }
+    }
+
+    // Size edges
+    edges.setSize(nEdges);
+
+    forAll(nPointsPerEdge, edgeI)
+    {
+        edges[edgeI].setSize(nPointsPerEdge[edgeI]);
+    }
+    nPointsPerEdge = 0;
+
+    // Fill edges
+    forAll(pointEdges, pointI)
+    {
+        const InList& pEdges = pointEdges[pointI];
+
+        forAll(pEdges, j)
+        {
+            label edgeI = pEdges[j];
+
+            edges[edgeI][nPointsPerEdge[edgeI]++] = pointI;
+        }
+    }
+}
+
+
 template<class List>
-Foam::label Foam::findIndex(const List& l, typename List::const_reference t)
+Foam::label Foam::findIndex
+(
+    const List& l,
+    typename List::const_reference t,
+    const label start
+)
 {
     label index = -1;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -167,13 +295,14 @@ template<class List>
 Foam::labelList Foam::findIndices
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
     // Count occurrences
     label n = 0;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -185,7 +314,7 @@ Foam::labelList Foam::findIndices
     labelList indices(n);
     n = 0;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -228,16 +357,16 @@ List Foam::createWithValues
 
 
 template<class List>
-Foam::label Foam::findMax(const List& l)
+Foam::label Foam::findMax(const List& l, const label start)
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label index = 0;
+    label index = start;
 
-    for (label i = 1; i < l.size(); i++)
+    for (label i = start+1; i < l.size(); i++)
     {
         if (l[i] > l[index])
         {
@@ -250,16 +379,16 @@ Foam::label Foam::findMax(const List& l)
 
 
 template<class List>
-Foam::label Foam::findMin(const List& l)
+Foam::label Foam::findMin(const List& l, const label start)
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label index = 0;
+    label index = start;
 
-    for (label i = 1; i < l.size(); i++)
+    for (label i = start+1; i < l.size(); i++)
     {
         if (l[i] < l[index])
         {
@@ -275,15 +404,16 @@ template<class List>
 Foam::label Foam::findSortedIndex
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label low = 0;
+    label low = start;
     label high = l.size() - 1;
 
     while (low <= high)
@@ -312,15 +442,16 @@ template<class List>
 Foam::label Foam::findLower
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label low = 0;
+    label low = start;
     label high = l.size() - 1;
 
     while ((high - low) > 1)
@@ -352,6 +483,37 @@ Foam::label Foam::findLower
             return -1;
         }
     }
+}
+
+
+template<class Container, class T, int nRows>
+Foam::List<Container> Foam::initList(const T elems[nRows])
+{
+    List<Container> faces(nRows);
+
+    forAll(faces, faceI)
+    {
+        faces[faceI] = Container(elems[faceI]);
+    }
+    return faces;
+}
+
+
+template<class Container, class T, int nRows, int nColumns>
+Foam::List<Container> Foam::initListList(const T elems[nRows][nColumns])
+{
+    List<Container> faces(nRows);
+
+    Container f(nColumns);
+    forAll(faces, faceI)
+    {
+        forAll(f, i)
+        {
+            f[i] = elems[faceI][i];
+        }
+        faces[faceI] = f;
+    }
+    return faces;
 }
 
 

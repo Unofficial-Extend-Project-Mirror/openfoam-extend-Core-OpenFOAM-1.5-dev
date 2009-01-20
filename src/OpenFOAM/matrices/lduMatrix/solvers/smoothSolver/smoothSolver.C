@@ -72,7 +72,7 @@ Foam::smoothSolver::smoothSolver
 void Foam::smoothSolver::readControls()
 {
     lduSolver::readControls();
-    readControl(dict(), nSweeps_, "nSweeps");
+    dict().readIfPresent("nSweeps", nSweeps_);
 }
 
 
@@ -86,7 +86,8 @@ Foam::lduSolverPerformance Foam::smoothSolver::solve
     // Setup class containing solver performance data
     lduSolverPerformance solverPerf(typeName, fieldName());
 
-    // If the nSweeps is negative do a fixed number of sweeps
+    // Do a minimum number of sweeps
+    // HJ, 19/Jan/2009
     if (minIter() > 0)
     {
         autoPtr<lduMatrix::smoother> smootherPtr = lduMatrix::smoother::New
@@ -108,70 +109,70 @@ Foam::lduSolverPerformance Foam::smoothSolver::solve
 
         solverPerf.nIterations() += minIter();
     }
-    else
+
+    // HJ, bug fix.  Now do normal sweeps.  HJ, 19/Jan/2009
+    scalar normFactor = 0;
+
     {
-        scalar normFactor = 0;
+        scalarField Ax(x.size());
+        scalarField temp(x.size());
 
+        // Calculate A.x
+        matrix_.Amul(Ax, x, coupleBouCoeffs_, interfaces_, cmpt);
+
+        // Calculate normalisation factor
+        normFactor = this->normFactor(x, b, Ax, temp, cmpt);
+
+        // Calculate residual magnitude
+        solverPerf.initialResidual() = gSumMag(b - Ax)/normFactor;
+        solverPerf.finalResidual() = solverPerf.initialResidual();
+    }
+
+    if (lduMatrix::debug >= 2)
+    {
+        Info<< "   Normalisation factor = " << normFactor << endl;
+    }
+
+
+    // Check convergence, solve if not converged
+    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    {
+        autoPtr<lduMatrix::smoother> smootherPtr =
+            lduMatrix::smoother::New
+            (
+                word(dict().lookup("smoother")),
+                matrix_,
+                coupleBouCoeffs_,
+                coupleIntCoeffs_,
+                interfaces_
+            );
+
+        // Smoothing loop
+        do
         {
-            scalarField Ax(x.size());
-            scalarField temp(x.size());
+            smootherPtr->smooth
+            (
+                x,
+                b,
+                cmpt,
+                nSweeps_
+            );
 
-            // Calculate A.x
-            matrix_.Amul(Ax, x, coupleBouCoeffs_, interfaces_, cmpt);
-
-            // Calculate normalisation factor
-            normFactor = this->normFactor(x, b, Ax, temp, cmpt);
-
-            // Calculate residual magnitude
-            solverPerf.initialResidual() = gSumMag(b - Ax)/normFactor;
-            solverPerf.finalResidual() = solverPerf.initialResidual();
-        }
-
-        if (lduMatrix::debug >= 2)
-        {
-            Info<< "   Normalisation factor = " << normFactor << endl;
-        }
-
-
-        // Check convergence, solve if not converged
-        if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
-        {
-            autoPtr<lduMatrix::smoother> smootherPtr =
-                lduMatrix::smoother::New
-                (
-                    word(dict().lookup("smoother")),
-                    matrix_,
-                    coupleBouCoeffs_,
-                    coupleIntCoeffs_,
-                    interfaces_
-                );
-
-            // Smoothing loop
-            do
-            {
-                smootherPtr->smooth
+            // Calculate the residual to check convergence
+            solverPerf.finalResidual() = gSumMag
+            (
+                matrix_.residual
                 (
                     x,
                     b,
-                    cmpt,
-                    nSweeps_
-                );
+                    coupleBouCoeffs_,
+                    interfaces_,
+                    cmpt
+                )
+            )/normFactor;
 
-                // Calculate the residual to check convergence
-                solverPerf.finalResidual() = gSumMag
-                (
-                    matrix_.residual
-                    (
-                        x,
-                        b,
-                        coupleBouCoeffs_,
-                        interfaces_,
-                        cmpt
-                    )
-                )/normFactor;
-                solverPerf.nIterations() += nSweeps_;
-            } while (!stop(solverPerf));
-        }
+            solverPerf.nIterations() += nSweeps_;
+        } while (!stop(solverPerf));
     }
 
     return solverPerf;

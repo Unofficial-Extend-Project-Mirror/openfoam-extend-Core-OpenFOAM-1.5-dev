@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    dimensionedTensor
+    Foam::dimensionedTensor
 
 Description
     Dimensioned tensor obtained from generic dimensioned type.
@@ -56,6 +56,7 @@ dimensionedScalar tr(const dimensionedTensor&);
 dimensionedTensor dev(const dimensionedTensor&);
 dimensionedTensor dev2(const dimensionedTensor&);
 dimensionedScalar det(const dimensionedTensor&);
+dimensionedTensor cof(const dimensionedTensor&);
 dimensionedTensor inv(const dimensionedTensor&);
 dimensionedSymmTensor symm(const dimensionedTensor&);
 dimensionedSymmTensor twoSymm(const dimensionedTensor&);

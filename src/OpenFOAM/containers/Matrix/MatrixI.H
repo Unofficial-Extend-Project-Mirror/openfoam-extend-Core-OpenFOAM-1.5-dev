@@ -24,17 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Matrix<T>::Matrix()
+inline Foam::Matrix<T>::Matrix()
 :
     v_(NULL),
     n_(0),
@@ -43,7 +36,7 @@ inline Matrix<T>::Matrix()
 
 
 template<class T>
-inline autoPtr<Matrix<T> > Matrix<T>::clone() const
+inline Foam::autoPtr<Foam::Matrix<T> > Foam::Matrix<T>::clone() const
 {
     return autoPtr<Matrix<T> >(new Matrix<T>(*this));
 }
@@ -53,7 +46,7 @@ inline autoPtr<Matrix<T> > Matrix<T>::clone() const
 
 //- Return the number of rows
 template<class T>
-inline label Matrix<T>::n() const
+inline Foam::label Foam::Matrix<T>::n() const
 {
     return n_;
 }
@@ -61,7 +54,7 @@ inline label Matrix<T>::n() const
 
 //- Return the number of columns
 template<class T>
-inline label Matrix<T>::m() const
+inline Foam::label Foam::Matrix<T>::m() const
 {
     return m_;
 }
@@ -69,7 +62,7 @@ inline label Matrix<T>::m() const
 
 //- Return the number of columns
 template<class T>
-inline label Matrix<T>::size() const
+inline Foam::label Foam::Matrix<T>::size() const
 {
     return n_*m_;
 }
@@ -77,7 +70,7 @@ inline label Matrix<T>::size() const
 
 // Check index i is within valid range (0 ... n-1).
 template<class T>
-inline void Matrix<T>::checki(const label i) const
+inline void Foam::Matrix<T>::checki(const label i) const
 {
     if (!n_)
     {
@@ -96,7 +89,7 @@ inline void Matrix<T>::checki(const label i) const
 
 // Check index j is within valid range (0 ... n-1).
 template<class T>
-inline void Matrix<T>::checkj(const label j) const
+inline void Foam::Matrix<T>::checkj(const label j) const
 {
     if (!m_)
     {
@@ -117,7 +110,7 @@ inline void Matrix<T>::checkj(const label j) const
 
 // Return subscript-checked element access
 template<class T>
-inline T* Matrix<T>::operator[](const label i)
+inline T* Foam::Matrix<T>::operator[](const label i)
 {
 #   ifdef FULLDEBUG
     checki(i);
@@ -128,7 +121,7 @@ inline T* Matrix<T>::operator[](const label i)
 
 // Return subscript-checked const element access
 template<class T>
-inline const T* Matrix<T>::operator[](const label i) const
+inline const T* Foam::Matrix<T>::operator[](const label i) const
 {
 #   ifdef FULLDEBUG
     checki(i);
@@ -136,9 +129,5 @@ inline const T* Matrix<T>::operator[](const label i) const
     return v_[i];
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

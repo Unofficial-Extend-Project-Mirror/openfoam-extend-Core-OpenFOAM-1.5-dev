@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    ReadFields
+Global
+    Foam::ReadFields
 
 Description
     Helper routine to read fields
@@ -46,12 +46,14 @@ namespace Foam
 
 class IOobjectList;
 
+//- Helper routine to read fields
 template<class GeoField, class Mesh>
 wordList ReadFields
 (
     const Mesh& mesh,
     const IOobjectList& objects,
-    PtrList<GeoField>& fields
+    PtrList<GeoField>& fields,
+    const bool syncPar = true
 );
 
 } // End namespace Foam

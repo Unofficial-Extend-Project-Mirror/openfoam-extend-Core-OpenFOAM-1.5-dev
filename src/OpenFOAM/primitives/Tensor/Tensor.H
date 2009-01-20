@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Tensor
+    Foam::Tensor
 
 Description
     Templated 3D tensor derived from VectorSpace adding construction from

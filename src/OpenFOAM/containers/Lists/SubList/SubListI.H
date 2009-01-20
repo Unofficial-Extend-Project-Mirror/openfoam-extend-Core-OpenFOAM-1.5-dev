@@ -24,15 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline SubList<T>::SubList
+inline Foam::SubList<T>::SubList
 (
     const UList<T>& list,
     const label subSize
@@ -47,7 +42,7 @@ inline SubList<T>::SubList
 
 
 template<class T>
-inline SubList<T>::SubList
+inline Foam::SubList<T>::SubList
 (
     const UList<T>& list,
     const label subSize,
@@ -77,9 +72,52 @@ inline SubList<T>::SubList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null SubList
 template<class T>
-SubList<T>& SubList<T>::null()
+inline void Foam::SubList<T>::reset
+(
+    const UList<T>& list,
+    const label subSize
+)
+{
+    UList<T>::reset(list.v_, subSize);
+
+#   ifdef FULLDEBUG
+    list.checkSize(subSize);
+#   endif
+}
+
+
+template<class T>
+inline void Foam::SubList<T>::reset
+(
+    const UList<T>& list,
+    const label subSize,
+    const label startIndex
+)
+{
+    UList<T>::reset(&(list.v_[startIndex]), subSize);
+
+#   ifdef FULLDEBUG
+
+    // Artificially allowing the start of a zero-sized subList to be
+    // one past the end of the original list.  
+    if (subSize > 0)
+    {
+        list.checkStart(startIndex);
+        list.checkSize(startIndex + subSize);
+    }
+    else
+    {
+        // Start index needs to fall between 0 and size.  One position
+        // behind the last element is allowed
+        list.checkSize(startIndex);
+    }
+#   endif
+}
+
+
+template<class T>
+const Foam::SubList<T>& Foam::SubList<T>::null()
 {
     SubList<T>* nullPtr = reinterpret_cast<SubList<T>*>(NULL);
     return *nullPtr;
@@ -88,16 +126,11 @@ SubList<T>& SubList<T>::null()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Allow cast to a const List<T>&
 template<class T>
-inline SubList<T>::operator const List<T>&() const
+inline Foam::SubList<T>::operator const Foam::List<T>&() const
 {
     return *reinterpret_cast<const List<T>*>(this);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

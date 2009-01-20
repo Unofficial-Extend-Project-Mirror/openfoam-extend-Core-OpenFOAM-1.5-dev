@@ -23,11 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellModeller
+    Foam::cellModeller
 
 Description
-    A cellModeller is a static collection of cell models, and a means
-    of looking them up.
+    A static collection of cell models, and a means of looking them up.
 
 SourceFiles
     cellModeller.C

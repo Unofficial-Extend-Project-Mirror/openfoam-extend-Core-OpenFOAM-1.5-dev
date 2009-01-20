@@ -77,7 +77,8 @@ void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes
 ) const
 {
     scalarField pnf(size());

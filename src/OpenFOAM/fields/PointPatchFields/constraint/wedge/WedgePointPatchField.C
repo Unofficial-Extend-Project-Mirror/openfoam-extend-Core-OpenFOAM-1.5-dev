@@ -70,28 +70,6 @@ WedgePointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    PatchField<Type>(p, iF, f)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    class WedgePointPatch,
-    template<class> class MatrixType,
-    class Type
->
-WedgePointPatchField
-<PatchField, Mesh, PointPatch, WedgePointPatch, MatrixType, Type>::
-WedgePointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :
@@ -220,7 +198,10 @@ template
 >
 void
 WedgePointPatchField
-<PatchField, Mesh, PointPatch, WedgePointPatch, MatrixType, Type>::evaluate()
+<PatchField, Mesh, PointPatch, WedgePointPatch, MatrixType, Type>::evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     // In order to ensure that the wedge patch is always flat, take the
     // normal vector from the first point

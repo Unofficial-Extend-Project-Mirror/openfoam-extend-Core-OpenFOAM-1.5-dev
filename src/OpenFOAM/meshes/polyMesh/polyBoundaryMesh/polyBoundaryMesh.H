@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    polyBoundaryMesh
+    Foam::polyBoundaryMesh
 
 Description
+    Foam::polyBoundaryMesh
 
 SourceFiles
     polyBoundaryMesh.C
@@ -45,10 +46,14 @@ namespace Foam
 {
 
 typedef List<labelPair> labelPairList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 class polyMesh;
+
+// Forward declaration of friend functions and operators
+
+class polyBoundaryMesh;
+
+Ostream& operator<<(Ostream&, const polyBoundaryMesh&);
+
 
 /*---------------------------------------------------------------------------*\
                       Class polyBoundaryMesh Declaration
@@ -73,6 +78,9 @@ class polyBoundaryMesh
         //- Create identity map
         static labelList ident(const label len);
 
+        //- Calculate the geometry for the patches (transformation tensors etc.)
+        void calcGeometry();
+
         //- Disallow construct as copy
         polyBoundaryMesh(const polyBoundaryMesh&);
 
@@ -81,6 +89,10 @@ class polyBoundaryMesh
 
 
 public:
+
+    //- Declare friendship with polyMesh
+    friend class polyMesh;
+
 
     //- Runtime type information
     TypeName("polyBoundaryMesh");
@@ -118,9 +130,6 @@ public:
 
     // Member functions
 
-        //- Calculate the geometry for the patches (transformation tensors etc.)
-        void calcGeometry();
-
         //- Return the mesh reference
         const polyMesh& mesh() const
         {
@@ -149,6 +158,10 @@ public:
 
         //- Return patch index for a given face label
         label whichPatch(const label faceIndex) const;
+
+        //- Return the set of patch IDs corresponding to the given list of names
+        //  Wild cards are expanded.
+        labelHashSet patchSet(const wordList&) const;
 
         //- Check whether all procs have all patches and in same order. Return
         //  true if in error.

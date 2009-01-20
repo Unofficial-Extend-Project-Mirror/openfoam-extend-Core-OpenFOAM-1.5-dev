@@ -30,7 +30,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::scalar Foam::intersection::planarTol_
+const Foam::scalar Foam::intersection::planarTol_
 (
     debug::tolerances("intersectionPlanarTol", 0.2)
 );

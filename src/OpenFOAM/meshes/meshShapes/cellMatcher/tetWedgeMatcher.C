@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "tetWedgeMatcher.H"
@@ -31,7 +29,6 @@ Description
 #include "primitiveMesh.H"
 #include "primitiveMesh.H"
 #include "cellModeller.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,7 +64,7 @@ bool Foam::tetWedgeMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -135,7 +132,7 @@ bool Foam::tetWedgeMatcher::matchShape
             (
                 face0vert0,
                 faceSize_[face0I],
-                !(faceOwner[faceMap_[face0I]] == cellI)
+                !(owner[faceMap_[face0I]] == cellI)
             );
         vertLabels_[1] = pointMap_[face0[face0vert1]];
 
@@ -164,7 +161,7 @@ bool Foam::tetWedgeMatcher::matchShape
             (
                 face0vert1,
                 faceSize_[face0I],
-                !(faceOwner[faceMap_[face0I]] == cellI)
+                !(owner[faceMap_[face0I]] == cellI)
             );
         vertLabels_[2] = pointMap_[face0[face0vert2]];
 
@@ -199,7 +196,7 @@ bool Foam::tetWedgeMatcher::matchShape
             (
                 face3vert2,
                 faceSize_[face3I],
-                (faceOwner[faceMap_[face3I]] == cellI)
+                (owner[faceMap_[face3I]] == cellI)
             );
 
         const face& face3 = localFaces_[face3I];
@@ -212,7 +209,7 @@ bool Foam::tetWedgeMatcher::matchShape
             (
                 face3vert4,
                 faceSize_[face3I],
-                (faceOwner[faceMap_[face3I]] == cellI)
+                (owner[faceMap_[face3I]] == cellI)
             );
         vertLabels_[3] = pointMap_[face3[face3vert3]];
 

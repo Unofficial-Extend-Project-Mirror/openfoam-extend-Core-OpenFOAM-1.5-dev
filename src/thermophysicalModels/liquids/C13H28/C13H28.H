@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C13H28
+    Foam::C13H28
 
 Description
     nTriDecane

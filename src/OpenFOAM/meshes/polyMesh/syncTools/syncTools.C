@@ -29,13 +29,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Define dummy transform for labels.
-Foam::label Foam::transform(const tensor&, const label val)
-{
-    return val;
-}
-
-
 // Does anyone have couples? Since meshes might have 0 cells and 0 proc
 // boundaries need to reduce this info.
 bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
@@ -348,8 +341,69 @@ void Foam::syncTools::separateList
     {
         FatalErrorIn
         (
-            "syncTools::separateList(const vectorField&, UList<T>&)"
+            "syncTools::separateList(const vectorField&, UList<vector>&)"
         )   << "Sizes of field and transformation not equal. field:"
+            << field.size() << " transformation:" << separation.size()
+            << abort(FatalError);
+    }
+}
+
+
+template <>
+void Foam::syncTools::separateList
+(
+    const vectorField& separation,
+    Map<vector>& field
+)
+{
+    if (separation.size() == 1)
+    {
+        // Single value for all.
+        forAllIter(Map<vector>, field, iter)
+        {
+            iter() += separation[0];
+        }
+    }
+    else if (separation.size() == field.size())
+    {
+        forAllIter(Map<vector>, field, iter)
+        {
+            iter() += separation[iter.key()];
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "syncTools::separateList(const vectorField&, Map<vector>&)"
+        )   << "Sizes of field and transformation not equal. field:"
+            << field.size() << " transformation:" << separation.size()
+            << abort(FatalError);
+    }
+}
+
+
+template <>
+void Foam::syncTools::separateList
+(
+    const vectorField& separation,
+    EdgeMap<vector>& field
+)
+{
+    if (separation.size() == 1)
+    {
+        // Single value for all.
+        forAllIter(EdgeMap<vector>, field, iter)
+        {
+            iter() += separation[0];
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "syncTools::separateList(const vectorField&, EdgeMap<vector>&)"
+        )   << "Multiple separation vectors not supported. field:"
             << field.size() << " transformation:" << separation.size()
             << abort(FatalError);
     }

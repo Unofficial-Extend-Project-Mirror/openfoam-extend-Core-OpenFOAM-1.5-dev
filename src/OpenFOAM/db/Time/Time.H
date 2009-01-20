@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Time
+    Foam::Time
 
 Description
     Class to control time during FOAM simulations which is also the
@@ -124,6 +124,9 @@ protected:
         label purgeWrite_;
         mutable FIFOStack<word> previousOutputTimes_;
 
+        //- Is the time currently being sub-cycled
+        bool subCycling_;
+
         //- Time directory name format
         static fmtflags format_;
 
@@ -132,6 +135,9 @@ protected:
 
         //- Adjust the time step so that writing occurs at the specified time
         void adjustDeltaT();
+
+        //- Set the controls from the current controlDict
+        void setControls();
 
         //- Read the control dictionary and set the write controls etc.
         virtual void readDict();
@@ -165,7 +171,7 @@ public:
 
     TypeName("time");
 
-    //- Return the default control dictionary name
+    //- The default control dictionary name
     static word controlDictName;
 
 
@@ -275,9 +281,6 @@ public:
             //- Read the objects that have been modified
             void readModifiedObjects();
 
-            //- Set the controls from the current controlDict
-            void setControls();
-
             //- Return the location of "dir" containing the file "name".
             //  (Used in reading mesh data)
             word findInstance
@@ -377,9 +380,6 @@ public:
 
             //- Reset time step
             virtual void setDeltaT(const scalar);
-
-            //- Increment time
-            virtual void increment();
 
             //- Set time to sub-cycle for the given number of steps
             virtual TimeState subCycle(const label nSubCycles);

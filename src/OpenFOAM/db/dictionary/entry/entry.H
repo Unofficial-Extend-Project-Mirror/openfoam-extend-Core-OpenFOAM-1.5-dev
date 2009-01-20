@@ -23,14 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    entry
+    Foam::entry
 
 Description
     A keyword and a list of tokens is an 'entry'.
-    An entry can be read, written and printed, and the types and values of its
-    tokens analysed.  An entry is a high-level building block for data
-    description.  It is a front-end for the token parser. A list of entries can
-    be used as a set of keyword syntax elements, for example.
+
+    An entry can be read, written and printed, and the types and values of
+    its tokens analysed.  An entry is a high-level building block for data
+    description.  It is a front-end for the token parser. A list of entries
+    can be used as a set of keyword syntax elements, for example.
 
 SourceFiles
     entry.C
@@ -53,6 +54,11 @@ namespace Foam
 class ITstream;
 class dictionary;
 
+// Forward declaration of friend functions and operators
+
+class entry;
+Ostream& operator<<(Ostream&, const entry&);
+
 /*---------------------------------------------------------------------------*\
                            Class entry Declaration
 \*---------------------------------------------------------------------------*/
@@ -67,6 +73,12 @@ class entry
         word keyword_;
 
 
+    // Private Member Functions
+
+        //- Get the next valid keyword otherwise return false
+        static bool getKeyword(word& keyword, Istream& is);
+
+
 public:
 
     // Constructors
@@ -77,10 +89,22 @@ public:
         //- Construct as copy
         entry(const entry&);
 
-        virtual autoPtr<entry> clone() const = 0;
+        //- Construct on freestore as copy with reference to the
+        //  dictionary the copy belongs to
+        virtual Foam::autoPtr<entry> clone
+        (
+            const dictionary& parentDict
+        ) const = 0;
 
-        //- Construct on freestore from Istream
-        static autoPtr<entry> New(Istream& is);
+        //- Construct on freestore as copy
+        //  Note: the parent directory is set to dictionary::null
+        virtual Foam::autoPtr<entry> clone() const;
+
+        //- Construct from Istream and insert into dictionary
+        static bool New(dictionary& parentDict, Istream& is);
+
+        //- Construct on freestore from Istream and return
+        static Foam::autoPtr<entry> New(Istream& is);
 
 
     // Destructor
@@ -130,8 +154,11 @@ public:
             return false;
         }
 
-        //- Return token stream if this entry is a primitive entry
+        //- Return dictionary if this entry is a dictionary
         virtual const dictionary& dict() const = 0;
+
+        //- Return non-const access to dictionary if this entry is a dictionary
+        virtual dictionary& dict() = 0;
 
         //- Write
         virtual void write(Ostream&) const = 0;

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    HashTable
+    Foam::HashTable
 
 Description
-    STL conforming hash table.
+    An STL-conforming hash table.
 
 SourceFiles
     HashTableI.H
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T>
 class List;
@@ -123,6 +123,11 @@ class HashTable
         label nElmts_;
 
 
+    // Private Member Functions
+
+        //- Assign a new hashedEntry to a possibly already existing key
+        bool set(const Key& key, const T& newElmt, bool protect);
+
 public:
 
         //- Declare friendship with the HashPtrTable class
@@ -181,7 +186,10 @@ public:
         // Edit
 
             //- Insert a new hashedEntry
-            bool insert(const Key& key, const T& newElmt);
+            inline bool insert(const Key& key, const T& newElmt);
+
+            //- Assign a new hashedEntry, overwriting existing entries
+            inline bool set(const Key& key, const T& newElmt);
 
             //- Erase an hashedEntry specified by given iterator
             bool erase(const iterator& it);
@@ -236,6 +244,7 @@ public:
 
     // STL iterator
 
+        //- An STL-conforming iterator
         class iterator
         {
             friend class HashTable;
@@ -295,6 +304,7 @@ public:
 
     // STL const_iterator
 
+        //- An STL-conforming const_iterator
         class const_iterator
         {
             friend class iterator;
@@ -347,7 +357,7 @@ public:
         };
 
 
-        //- const_iterator set to the begining of the HashTable
+        //- const_iterator set to the beginning of the HashTable
         inline const_iterator begin() const;
 
         //- const_iterator set to beyond the end of the HashTable
@@ -356,13 +366,19 @@ public:
 
     // IOstream Operator
 
-        friend Istream& operator>> <T, Key, Hash>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <T, Key, Hash>
+        #endif
         (
             Istream&,
             HashTable<T, Key, Hash>&
         );
 
-        friend Ostream& operator<< <T, Key, Hash>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T, Key, Hash>
+        #endif
         (
             Ostream&,
             const HashTable<T, Key, Hash>&

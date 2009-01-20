@@ -54,11 +54,29 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
     {
         w = t.wordToken();
     }
+    else if (t.isString())
+    {
+        // try a bit harder and convert string to word
+        w = t.stringToken();
+        string::stripInvalid<word>(w);
+
+        // flag empty strings and bad chars as an error
+        if (!w.size() || w.size() != t.stringToken().size())
+        {
+            is.setBad();
+            FatalIOErrorIn("operator>>(Istream&, word&)", is)
+                << "wrong token type - expected word found non-word characters "
+                << t.info()
+                << exit(FatalIOError);
+            return is;
+        }
+    }
     else
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, word&)", is)
-            << "wrong token type - expected word found " << t.info()
+            << "wrong token type - expected word found "
+            << t.info()
             << exit(FatalIOError);
 
         return is;

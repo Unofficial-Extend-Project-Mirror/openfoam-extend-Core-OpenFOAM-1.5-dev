@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    processorPolyPatch
+    Foam::processorPolyPatch
 
 Description
     Neighbour processor patch.
@@ -51,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class processorPolyPatch Declaration
+                       Class processorPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorPolyPatch
@@ -81,10 +81,15 @@ class processorPolyPatch
         mutable labelList* neighbEdgesPtr_;
 
 
+
     // Private static data
 
         //- Whether to use geometric or topological matching
         static bool geometricMatch_;
+
+        //- Relative tolerance (for geometric matching only). Is factor of
+        //  maximum edge length per face.
+        static scalar matchTol_;
 
 
 protected:
@@ -116,14 +121,6 @@ public:
     TypeName("processor");
 
 
-    // Static data
-
-        //- Relative tolerance (for geometric matching only).
-        //  Calculated as a factor of maximum edge length per face.
-        //  HJ, 21/Dec/2006
-        static scalar areaMatchTol;
-
-
     // Constructors
 
         //- Construct from components
@@ -136,14 +133,6 @@ public:
             const polyBoundaryMesh& bm,
             const int myProcNo,
             const int neighbProcNo
-        );
-
-        //- Construct from Istream
-        processorPolyPatch
-        (
-            Istream& is,
-            const label index,
-            const polyBoundaryMesh&
         );
 
         //- Construct from dictionary
@@ -230,18 +219,6 @@ public:
             return !owner();
         }
 
-        //- Force calculation of transformation tensors
-        void calcTransformTensors
-        (
-            const vectorField& Cf,
-            const vectorField& Cr,
-            const vectorField& nf,
-            const vectorField& nr
-        ) const
-        {
-            coupledPolyPatch::calcTransformTensors(Cf, Cr, nf, nr);
-        }
-
         //- Return processor-neighbbour patch face centres
         const vectorField& neighbFaceCentres() const
         {
@@ -260,16 +237,14 @@ public:
             return neighbFaceCellCentres_;
         }
 
-        //- Return neighbour point labels. This is for my local point the
-        //  corresponding local point on the other side. Call
-        //  polyBoundaryMesh::setExtendedAddressing(true) on all processors
-        //  before using this.
+        //- Return neighbour point labels. This is for my local point (-1 or)
+        //  the corresponding local point on the other side. It is -1 if
+        //  there are multiple corresponding points on this or the other side
+        //  (can happen for cyclics being converted into proc patches)
         const labelList& neighbPoints() const;
 
-        //- Return neighbour edge labels. This is for my local edge the
-        //  corresponding local edge on the other side. Call
-        //  polyBoundaryMesh::setExtendedAddressing(true) on all processors
-        //  before using this.
+        //- Return neighbour edge labels. This is for my local edge (-1 or) the
+        //  corresponding local edge on the other side. See above for -1 cause.
         const labelList& neighbEdges() const;
 
 
@@ -290,11 +265,8 @@ public:
         ) const;
 
 
-        //- Write
+        //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;
-
-        //- Write dictionary
-        virtual void writeDict(Ostream&) const;
 };
 
 

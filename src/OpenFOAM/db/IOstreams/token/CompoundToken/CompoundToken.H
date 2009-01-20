@@ -23,14 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    CompoundToken
+    Foam::CompoundToken
 
 Description
-
-SourceFiles
-    CompoundTokenI.H
-    CompoundToken.C
-    CompoundTokenIO.C
+    An abstract base class for managing compound tokens
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +42,12 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class CompoundToken;
+Ostream& operator<<(Ostream&, const CompoundToken&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class CompoundToken Declaration
@@ -118,7 +120,6 @@ public:
 
     // IOstream Operators
 
-      //friend Istream& operator>>(Istream&, CompoundToken&);
         friend Ostream& operator<<(Ostream&, const CompoundToken&);
 };
 
@@ -126,10 +127,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//#include "CompoundTokenI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -28,6 +28,7 @@ License
 #include "motionDiffusivity.H"
 #include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,11 +56,11 @@ Foam::direction Foam::displacementComponentLaplacianFvMotionSolver::cmpt
     {
         return vector::X;
     }
-    else if (cmptName_ == "y")
+    else if (cmptName == "y")
     {
         return vector::Y;
     }
-    else if (cmptName_ == "z")
+    else if (cmptName == "z")
     {
         return vector::Z;
     }
@@ -70,7 +71,7 @@ Foam::direction Foam::displacementComponentLaplacianFvMotionSolver::cmpt
             "displacementComponentLaplacianFvMotionSolver::"
             "displacementComponentLaplacianFvMotionSolver"
             "(const polyMesh& mesh, Istream& msData)"
-        )   << "Given component name " << cmptName_ << " should be x, y or z"
+        )   << "Given component name " << cmptName << " should be x, y or z"
             << exit(FatalError);
 
         return 0;
@@ -101,7 +102,8 @@ displacementComponentLaplacianFvMotionSolver
                 polyMesh::meshSubDir,
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
         ).component(cmpt_)
     ),
@@ -136,11 +138,56 @@ displacementComponentLaplacianFvMotionSolver
         ),
         cellMotionBoundaryTypes<scalar>(pointDisplacement_.boundaryField())
     ),
+    pointLocation_(NULL),
     diffusivityPtr_
     (
         motionDiffusivity::New(*this, lookup("diffusivity"))
+    ),
+    frozenPointsZone_
+    (
+        found("frozenPointsZone")
+      ? fvMesh_.pointZones().findZoneID(lookup("frozenPointsZone"))
+      : -1
     )
-{}
+{
+    IOobject io
+    (
+        "pointLocation",
+        fvMesh_.time().timeName(),
+        fvMesh_,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (debug)
+    {
+        Info<< "displacementComponentLaplacianFvMotionSolver:" << nl
+            << "    diffusivity       : " << diffusivityPtr_().type() << nl
+            << "    frozenPoints zone : " << frozenPointsZone_ << endl;
+    }
+
+    if (io.headerOk())
+    {
+        pointLocation_.reset
+        (
+            new pointVectorField
+            (
+                io,
+                pointMesh_
+            )
+        );
+
+        if (debug)
+        {
+            Info<< "displacementComponentLaplacianFvMotionSolver :"
+                << " Read pointVectorField "
+                << io.name() << " to be used for boundary conditions on points."
+                << nl
+                << "Boundary conditions:"
+                << pointLocation_().boundaryField().types() << endl;
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -155,28 +202,83 @@ Foam::displacementComponentLaplacianFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::displacementComponentLaplacianFvMotionSolver::curPoints() const
 {
-    // The points have moved so before interpolation update
-    // volPointInterpolation accordingly
-    vpi_.movePoints();
-
     vpi_.interpolate(cellDisplacement_, pointDisplacement_);
 
-    tmp<pointField> tcurPoints(new pointField(fvMesh_.points()));
+    if (pointLocation_.valid())
+    {
+        if (debug)
+        {
+            Info<< "displacementComponentLaplacianFvMotionSolver : applying "
+                << " boundary conditions on " << pointLocation_().name()
+                << " to new point location."
+                << endl;
+        }
 
-    tcurPoints().replace
-    (
-        cmpt_,
-        points0_ + pointDisplacement_.internalField()
-    );
+        // Apply pointLocation_ b.c. to mesh points.
 
-    twoDCorrectPoints(tcurPoints());
+        pointLocation_().internalField() = fvMesh_.points();
 
-    return tcurPoints;
+        pointLocation_().internalField().replace
+        (
+            cmpt_,
+            points0_ + pointDisplacement_.internalField()
+        );
+
+        pointLocation_().correctBoundaryConditions();
+
+        // Implement frozen points
+        if (frozenPointsZone_ != -1)
+        {
+            const pointZone& pz = fvMesh_.pointZones()[frozenPointsZone_];
+
+            forAll(pz, i)
+            {
+                label pointI = pz[i];
+
+                pointLocation_()[pointI][cmpt_] = points0_[pointI];
+            }
+        }
+
+        twoDCorrectPoints(pointLocation_().internalField());
+
+        return tmp<pointField>(pointLocation_().internalField());
+    }
+    else
+    {
+        tmp<pointField> tcurPoints(new pointField(fvMesh_.points()));
+
+        tcurPoints().replace
+        (
+            cmpt_,
+            points0_ + pointDisplacement_.internalField()
+        );
+
+        // Implement frozen points
+        if (frozenPointsZone_ != -1)
+        {
+            const pointZone& pz = fvMesh_.pointZones()[frozenPointsZone_];
+
+            forAll(pz, i)
+            {
+                label pointI = pz[i];
+
+                tcurPoints()[pointI][cmpt_] = points0_[pointI];
+            }
+        }
+
+        twoDCorrectPoints(tcurPoints());
+
+        return tcurPoints;
+    }
 }
 
 
 void Foam::displacementComponentLaplacianFvMotionSolver::solve()
 {
+    // The points have moved so before interpolation update
+    // the fvMotionSolver accordingly
+    movePoints(fvMesh_.points());
+
     diffusivityPtr_->correct();
     pointDisplacement_.boundaryField().updateCoeffs();
 
@@ -189,6 +291,72 @@ void Foam::displacementComponentLaplacianFvMotionSolver::solve()
             "laplacian(diffusivity,cellDisplacement)"
         )
     );
+}
+
+
+void Foam::displacementComponentLaplacianFvMotionSolver::updateMesh
+(
+    const mapPolyMesh& mpm
+)
+{
+    fvMotionSolver::updateMesh(mpm);
+
+    // Map points0_. Bit special since we somehow have to come up with
+    // a sensible points0 position for introduced points.
+    // Find out scaling between points0 and current points
+
+    // Get the new points either from the map or the mesh
+    const scalarField points
+    (
+        mpm.hasMotionPoints()
+      ? mpm.preMotionPoints().component(cmpt_)
+      : fvMesh_.points().component(cmpt_)
+    );
+
+    // Get extents of points0 and points and determine scale
+    const scalar scale =
+        (gMax(points0_)-gMin(points0_))
+       /(gMax(points)-gMin(points));
+
+    scalarField newPoints0(mpm.pointMap().size());
+
+    forAll(newPoints0, pointI)
+    {
+        label oldPointI = mpm.pointMap()[pointI];
+    
+        if (oldPointI >= 0)
+        {
+            label masterPointI = mpm.reversePointMap()[oldPointI];
+
+            if (masterPointI == pointI)
+            {
+                newPoints0[pointI] = points0_[oldPointI];
+            }
+            else
+            {
+                // New point. Assume motion is scaling.
+                newPoints0[pointI] =
+                    points0_[oldPointI]
+                  + scale*(points[pointI]-points[masterPointI]);
+            }
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                "displacementLaplacianFvMotionSolver::updateMesh"
+                "(const mapPolyMesh& mpm)"
+            )   << "Cannot work out coordinates of introduced vertices."
+                << " New vertex " << pointI << " at coordinate "
+                << points[pointI] << exit(FatalError);
+        }
+    }
+    points0_.transfer(newPoints0);
+
+    // Update diffusivity. Note two stage to make sure old one is de-registered
+    // before creating/registering new one.
+    diffusivityPtr_.reset(NULL);
+    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
 }
 
 

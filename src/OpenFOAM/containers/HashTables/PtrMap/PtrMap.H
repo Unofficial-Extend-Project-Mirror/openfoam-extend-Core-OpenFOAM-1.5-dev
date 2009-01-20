@@ -23,10 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PtrMap
+    Foam::PtrMap
 
 Description
-    PtrMap
+    A HashTable of pointers to objects of type \<T\> with a label key.
+
+See Also
+    Map, HashPtrTable
 
 \*---------------------------------------------------------------------------*/
 

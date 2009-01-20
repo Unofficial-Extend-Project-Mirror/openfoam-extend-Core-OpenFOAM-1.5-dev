@@ -69,28 +69,6 @@ EmptyPointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    PatchField<Type>(p, iF)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    class EmptyPointPatch,
-    template<class> class MatrixType,
-    class Type
->
-EmptyPointPatchField
-<PatchField, Mesh, PointPatch, EmptyPointPatch, MatrixType, Type>::
-EmptyPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :

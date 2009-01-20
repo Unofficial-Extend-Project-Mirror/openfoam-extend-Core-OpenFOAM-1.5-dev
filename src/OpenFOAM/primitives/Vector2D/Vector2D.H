@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Vector2D
+    Foam::Vector2D
 
 Description
     Templated 2D Vector derived from VectorSpace adding construction from
@@ -101,6 +101,12 @@ public:
 
             inline Cmpt& x();
             inline Cmpt& y();
+
+
+        // Operators
+
+            //- perp dot product (dot product with perpendicular vector)
+            inline scalar perp(const Vector2D<Cmpt>& b) const;
 };
 
 

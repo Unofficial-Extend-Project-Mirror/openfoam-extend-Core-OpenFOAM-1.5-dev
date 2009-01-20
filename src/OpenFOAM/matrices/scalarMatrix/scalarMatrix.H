@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    scalarMatrix
+    Foam::scalarMatrix
 
 Description
+    Foam::scalarMatrix
 
 SourceFiles
     scalarMatrix.C
@@ -99,6 +100,9 @@ public:
             const labelList& pivotIndices,
             Field<T>& source
         );
+
+        //- Invert the matrix using LU decomposition with pivoting
+        scalarMatrix LUinvert() const;
 
         //- Solve the matrix using LU decomposition with pivoting
         //  returning the LU form of the matrix and the solution in the source

@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
-#include <cstdlib>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -104,7 +103,7 @@ inline bool Foam::string::stripInvalid(string& s)
                 ++nValid;
             }
         }
-    
+
         s.resize(nValid);
 
         return true;

@@ -94,27 +94,6 @@ ValuePointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    PatchField<Type>(p, iF),
-    Field<Type>(f)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
-ValuePointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :
@@ -278,7 +257,10 @@ template
     class Type
 >
 void
-ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate()
+ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     // Evaluate boundary condition
     updateBoundaryField();
@@ -294,7 +276,8 @@ ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate()
         setInInternalField(iF, values);
     }
 
-    PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate();
+    PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::evaluate
+        (commsType);
 }
 
 

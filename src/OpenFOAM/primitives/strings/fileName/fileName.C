@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,9 +31,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::fileName::debug(debug::debugSwitch("fileName", 0));
-const Foam::fileName Foam::fileName::null;
-
+const char* const Foam::fileName::typeName = "fileName";
+int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

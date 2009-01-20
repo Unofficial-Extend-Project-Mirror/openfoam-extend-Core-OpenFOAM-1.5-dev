@@ -22,15 +22,15 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Pstream
+InClass
+    Foam::Pstream
 
 Description
-    Combination-Reduction operation for a parallel run.  The
-    information from all nodes is collected on the master node,
+    Combination-Reduction operation for a parallel run.
+
+    The information from all nodes is collected on the master node,
     combined using the given combination function and the result is
     broadcast to all nodes
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -128,11 +128,12 @@ Op(plus, x + y)
 Op(minus, x - y)
 Op(multiply, x * y)
 Op(divide, x / y)
+Op(cmptMultiply, cmptMultiply(x, y))
+Op(cmptDivide, cmptDivide(x, y))
+Op(stabilise, stabilise(x, y))
 Op(max, max(x, y))
 Op(min, min(x, y))
 Op(minMod, minMod(x, y))
-Op(scale, scale(x, y))
-Op(invScale, invScale(x, y))
 Op(and, x && y)
 Op(or, x || y)
 Op(eqEq, x == y)

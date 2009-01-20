@@ -23,29 +23,31 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellMatcher
+    Foam::cellMatcher
 
 Description
     Base class for cellshape matchers (hexMatch, prismMatch, etc.). These are
     classes which given a mesh and cell number find out the orientation of
     the cellShape and construct cell-vertex to mesh-vertex mapping and
     cell-face to mesh-face mapping.
-    E.g.
+
+    For example,
+    @verbatim
         hexMatcher hex(mesh);
         cellShape shape;
         ..
         bool isHex = hex.match(cellI, shape);
-
-    Now shape is set to the correct Hex cellShape (if isHex is true)
+    @endverbatim
+    Now shape is set to the correct Hex cellShape (if @a isHex is true)
 
     Alternatively there is direct access to the vertex and face mapping:
-
+    @verbatim
         const labelList& hexVertLabels = hex.vertLabels();
         const labelList& hexFaceLabels = hex.faceLabels();
-        Now
-            hexVertLabels[n] is vertex label of hex vertex n
-            hexFaceLabels[n] ,, face    ,,                 n
-            etc.
+    @endverbatim
+    Now
+      - @c hexVertLabels[n] is vertex label of hex vertex n
+      - @c hexFaceLabels[n] is face   label of hex vertex n
 
     Process of cellShape recognition consists of following steps:
     - renumber vertices of cell to local vertex numbers
@@ -87,7 +89,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class primitiveMesh;
 class cell;
 class cellShape;

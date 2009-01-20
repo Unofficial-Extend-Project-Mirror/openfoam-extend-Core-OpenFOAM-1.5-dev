@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    N2
+    Foam::N2
 
 Description
+    Liquid N2
 
 SourceFiles
     N2.C

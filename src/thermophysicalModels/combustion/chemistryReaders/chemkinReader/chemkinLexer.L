@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    chemkinReader
-
-Description
-    
 \*---------------------------------------------------------------------------*/
 
 %{
@@ -55,8 +50,11 @@ int yyFlexLexer::yylex()
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-int yywrap()
-// int yyFlexLexer::yywrap()
+#if YY_FLEX_SUBMINOR_VERSION < 34
+extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -613,15 +611,15 @@ bool finishReaction = false;
 
         HashPtrTable<reactionThermo>::iterator specieThermoIter
         (
-            specieThermo_.find(currentSpecieName)
+            speciesThermo_.find(currentSpecieName)
         );
 
-        if (specieThermoIter != specieThermo_.end())
+        if (specieThermoIter != speciesThermo_.end())
         {
-            specieThermo_.erase(specieThermoIter);
+            speciesThermo_.erase(specieThermoIter);
         }
 
-        specieThermo_.insert
+        speciesThermo_.insert
         (
             currentSpecieName,
             new reactionThermo
@@ -748,7 +746,7 @@ bool finishReaction = false;
                         << "Plasma momentum-transfer in reaction on line "
                         << lineNo_ << "not yet supported"
                         << exit(FatalError);
-                            
+
                     BEGIN(readReactionKeyword);
                     break;
                 }
@@ -900,7 +898,7 @@ bool finishReaction = false;
                         FatalErrorIn("chemkinReader::lex()")
                             << "HIGH keyword given for a chemically"
                                " activated bimolecular reaction which does not"
-                               " contain a pressure dependent specie" 
+                               " contain a pressure dependent specie"
                             << " on line " << lineNo_
                             << exit(FatalError);
                     }
@@ -941,7 +939,7 @@ bool finishReaction = false;
                             << exit(FatalError);
                     }
 
-                    if 
+                    if
                     (
                         fofType == unknownFallOffFunctionType
                      || fofType == Lindemann
@@ -975,7 +973,7 @@ bool finishReaction = false;
                             << exit(FatalError);
                     }
 
-                    if 
+                    if
                     (
                         fofType == unknownFallOffFunctionType
                      || fofType == Lindemann
@@ -1052,7 +1050,7 @@ bool finishReaction = false;
                     }
 
                     rrType = LandauTeller;
-                    reactionCoeffsName = 
+                    reactionCoeffsName =
                         word(reactionTypeNames[rType])
                       + reactionRateTypeNames[rrType];
                     BEGIN(readReactionCoeffs);
@@ -1322,7 +1320,7 @@ bool finishReaction = false;
 <readPDependentSpecie>{pDependentSpecie} {
 
         word rhsPDependentSpecieName = pDependentSpecieName;
-        pDependentSpecieName = 
+        pDependentSpecieName =
             foamName(foamSpecieString(YYText()));
         pDependentSpecieName =
             pDependentSpecieName(0, pDependentSpecieName.size() - 1);
@@ -1418,7 +1416,7 @@ bool finishReaction = false;
         else
         {
             FatalErrorIn("chemkinReader::lex()")
-                << "unknown specie " << currentSpecieName 
+                << "unknown specie " << currentSpecieName
                 << " given in reaction-order specification"
                 << " on line " << lineNo_ << nl
                 << "Valid species are : " << nl
@@ -1455,7 +1453,7 @@ bool finishReaction = false;
             }
 
             FatalErrorIn("chemkinReader::lex()")
-                << "Specie " << currentSpecieName 
+                << "Specie " << currentSpecieName
                 << " on line " << lineNo_
                 << " not present in " << side << " of reaction " << nl << lrhs
                 << exit(FatalError);

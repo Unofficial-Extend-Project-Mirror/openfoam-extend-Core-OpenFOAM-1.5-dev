@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    transform
+InNamespace
+    Foam
 
 Description
     3D tensor transformation operations.
@@ -34,6 +34,7 @@ Description
 #define transform_H
 
 #include "tensor.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +53,12 @@ inline tensor rotationTensor
         (n1 & n2)*I
       + (1 - (n1 & n2))*sqr(n1 ^ n2)/(magSqr(n1 ^ n2) + VSMALL)
       + (n2*n1 - n1*n2);
+}
+
+
+inline label transform(const tensor&, const label i)
+{
+    return i;
 }
 
 
@@ -174,6 +181,36 @@ template<>
 inline symmTensor transformMask<symmTensor>(const tensor& t)
 {
     return symm(t);
+}
+
+//- Estimate angle of vec in coordinate system (e0, e1, e0^e1).
+//  Is guaranteed to return increasing number but is not correct
+//  angle. Used for sorting angles.  All input vectors need to be normalized.
+//
+// Calculates scalar which increases with angle going from e0 to vec in
+// the coordinate system e0, e1, e0^e1
+//
+// Jumps from 2PI -> 0 at -SMALL so parallel vectors with small rounding errors
+// should hopefully still get the same quadrant.
+//
+inline scalar pseudoAngle
+(
+    const vector& e0,
+    const vector& e1,
+    const vector& vec
+)
+{
+    scalar cos = vec & e0;
+    scalar sin = vec & e1;
+
+    if (sin < -SMALL)
+    {
+        return (3.0 + cos)*mathematicalConstant::piByTwo;
+    }
+    else
+    {
+        return (1.0 - cos)*mathematicalConstant::piByTwo;
+    }
 }
 
 

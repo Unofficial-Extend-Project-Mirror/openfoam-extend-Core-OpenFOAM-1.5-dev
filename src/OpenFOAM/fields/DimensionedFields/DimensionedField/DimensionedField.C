@@ -146,11 +146,15 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 )
 :
     regIOobject(tdf(), true),
-    Field<Type>(const_cast<Field<Type>&>(tdf()), tdf.isTmp()),
+    Field<Type>
+    (
+        const_cast<DimensionedField<Type, GeoMesh>&>(tdf()),
+        tdf.isTmp()
+    ),
     mesh_(tdf().mesh_),
     dimensions_(tdf().dimensions_)
 {
-    tdf().clear();
+    tdf.clear();
 }
 #endif
 
@@ -207,7 +211,11 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 )
 :
     regIOobject(IOobject(newName, tdf().time().timeName(), tdf().db())),
-    Field<Type>(const_cast<Field<Type>&>(tdf()), tdf.isTmp()),
+    Field<Type>
+    (
+        const_cast<DimensionedField<Type, GeoMesh>&>(tdf()),
+        tdf.isTmp()
+    ),
     mesh_(tdf().mesh_),
     dimensions_(tdf().dimensions_)
 {
@@ -238,7 +246,7 @@ DimensionedField<Type, GeoMesh>::~DimensionedField()
 
 // Return a null Field
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>& DimensionedField<Type, GeoMesh>::null()
+const DimensionedField<Type, GeoMesh>& DimensionedField<Type, GeoMesh>::null()
 {
     DimensionedField<Type, GeoMesh>* nullPtr = 
         reinterpret_cast<DimensionedField<Type, GeoMesh>*>(NULL);

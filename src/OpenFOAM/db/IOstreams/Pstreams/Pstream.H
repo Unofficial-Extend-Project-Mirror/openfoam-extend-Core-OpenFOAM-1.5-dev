@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Pstream
+    Foam::Pstream
 
 Description
-    Inter-processor comunications stream
+    Inter-processor communications stream
 
 SourceFiles
     Pstream.C
@@ -46,6 +46,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "HashTable.H"
 #include "string.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +62,17 @@ class Pstream
 
 public:
 
+    //- Types of communications
+    enum commsTypes
+    {
+        blocking,
+        scheduled,
+        nonBlocking
+    };
+
+    static const NamedEnum<commsTypes, 3> commsTypeNames;
+
+    //- Structure for communicating between processors
     class commsStruct
     {
         // Private data
@@ -113,7 +125,7 @@ public:
                 label above() const
                 {
                     return above_;
-                } 
+                }
 
                 const labelList& below() const
                 {
@@ -140,7 +152,9 @@ public:
 
          // Ostream Operator
 
+            #ifndef __CINT__
             friend Ostream& operator<<(Ostream&, const commsStruct&);
+            #endif
     };
 
 
@@ -187,6 +201,9 @@ protected:
 
     // Protected data
 
+        //- Communications type of this stream
+        commsTypes commsType_;
+
         //- Transfer buffer
         List<char> buf_;
 
@@ -217,15 +234,20 @@ public:
         //  to tree
         static int nProcsSimpleSum;
 
-        //- Switch for scheduled vs non-scheduled transfer
-        static bool scheduledTransfer;
+        //- Default commsType
+        static commsTypes defaultCommsType;
 
 
     // Constructors
 
         //- Construct given optional buffer size
-        Pstream(const label bufSize = 0)
+        Pstream
+        (
+            const commsTypes commsType,
+            const label bufSize = 0
+        )
         :
+            commsType_(commsType),
             bufPosition_(0)
         {
             if (bufSize)
@@ -317,6 +339,20 @@ public:
             return msgType_;
         }
 
+            //- Get the communications type of the stream
+            commsTypes commsType() const
+            {
+                return commsType_;
+            }
+
+            //- Set the communications type of the stream
+            commsTypes commsType(const commsTypes ct)
+            {
+                commsTypes oldCommsType = commsType_;
+                commsType_ = ct;
+                return oldCommsType;
+            }
+
         //- Exit program
         static void exit(int errnum = 1);
 
@@ -402,6 +438,38 @@ public:
             template <class T>
             static void listCombineScatter(List<T>& Value);
 
+        // Combine variants working on whole map at a time. Container needs to
+        // have iterators and find() defined.
+
+            template <class Container, class CombineOp>
+            static void mapCombineGather
+            (
+                const List<commsStruct>& comms,
+                Container& Values,
+                const CombineOp& cop
+            );
+
+            //- Like above but switches between linear/tree communication
+            template <class Container, class CombineOp>
+            static void mapCombineGather
+            (
+                Container& Values,
+                const CombineOp& cop
+            );
+
+            //- Scatter data. Reverse of combineGather
+            template <class Container>
+            static void mapCombineScatter
+            (
+                const List<commsStruct>& comms,
+                Container& Values
+            );
+
+            //- Like above but switches between linear/tree communication
+            template <class Container>
+            static void mapCombineScatter(Container& Values);
+
+
 
         // Gather/scatter keeping the individual processor data separate.
         // Values is a List of size Pstream::nProcs() where
@@ -437,6 +505,9 @@ inline void Pstream::enlargeBuffer(size_t count)
 {
     buf_.setSize(max(int(buf_.size() + count), 2*buf_.size()));
 }
+
+
+Ostream& operator<<(Ostream&, const Pstream::commsStruct&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

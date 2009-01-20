@@ -107,7 +107,7 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
         Pstream::scatterList(*this);
     }
 
-    if (Pstream::parRun() && Pstream::scheduledTransfer)
+    if (Pstream::parRun() && Pstream::defaultCommsType == Pstream::scheduled)
     {
         label patchEvali = 0;
 
@@ -119,11 +119,9 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             if (!isType<ProcPatch>(patches[patchi]))
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = true;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = true;
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = false;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = false;
             }
         }
 
@@ -179,20 +177,16 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             if (Pstream::myProcNo() > nb)
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = true;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = true;
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = false;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = false;
             }
             else
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = false;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = false;
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = true;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = true;
             }
         }
     }
@@ -213,11 +207,9 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             if (!isType<ProcPatch>(patches[patchi]))
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = true;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = true;
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = false;
-                patchSchedule_[patchEvali++].bufferedTransfer = false;
+                patchSchedule_[patchEvali++].init = false;
             }
         }
 
@@ -230,8 +222,7 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             if (isType<ProcPatch>(patches[patchi]))
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = true;
-                patchSchedule_[patchEvali++].bufferedTransfer = true;
+                patchSchedule_[patchEvali++].init = true;
             }
         }
 
@@ -241,8 +232,7 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             if (isType<ProcPatch>(patches[patchi]))
             {
                 patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali].init = false;
-                patchSchedule_[patchEvali++].bufferedTransfer = true;
+                patchSchedule_[patchEvali++].init = false;
             }
         }
     }

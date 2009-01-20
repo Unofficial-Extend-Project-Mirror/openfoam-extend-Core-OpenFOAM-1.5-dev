@@ -22,33 +22,150 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Entry constructor from Istream and Ostream output operator.
-
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
+#include "functionEntry.H"
+#include "includeEntry.H"
+#include "inputModeEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+bool Foam::entry::getKeyword(word& keyword, Istream& is)
 {
+    token keywordToken;
 
-//- Construct on freestore from Istream
-autoPtr<entry> entry::New(Istream& is)
+    // Read the next valid token discarding spurious ';'s
+    do
+    {
+        if
+        (
+            is.read(keywordToken).bad()
+         || is.eof()
+         || !keywordToken.good()
+        )
+        {
+            return false;
+        }
+    }
+    while (keywordToken == token::END_STATEMENT);
+
+    // If the token is a valid keyword set 'keyword' return true...
+    if (keywordToken.isWord())
+    {
+        keyword = keywordToken.wordToken();
+        return true;
+    }
+    // If it is the end of the dictionary or file return false...
+    else if (keywordToken == token::END_BLOCK || is.eof())
+    {
+        return false;
+    }
+    // Otherwise the token is invalid
+    else
+    {
+        cerr<< "--> FOAM Warning : " << std::endl
+            << "    From function "
+            << "entry::getKeyword(word& keyword, Istream& is)" << std::endl
+            << "    in file " << __FILE__
+            << " at line " << __LINE__ << std::endl
+            << "    Reading " << is.name().c_str() << std::endl
+            << "    found " << keywordToken << std::endl
+            << "    expected either " << token::END_BLOCK << " or EOF"
+            << std::endl;
+
+        return false;
+    }
+}
+
+
+bool Foam::entry::New(dictionary& parentDict, Istream& is)
 {
-    is.fatalCheck("primitiveEntry::primitiveEntry(Istream& is)");
+    is.fatalCheck("entry::New(const dictionary& parentDict, Istream& is)");
 
-    // Get the keyword
-    token keywordToken(is);
+    word keyword;
 
-    // If end of file return empty tokenList without error
-    if (is.eof() || !keywordToken.isWord())
+    // Get the next keyword and if invalid return false
+    if (!getKeyword(keyword, is))
+    {
+        return false;
+    }
+    else // Keyword starts entry ...
+    {
+        if (keyword[0] == '#')        // ... Function entry
+        {
+            word functionName = keyword(1, keyword.size()-1);
+            return functionEntry::execute(functionName, parentDict, is);
+        }
+        else if (keyword[0] == '$')    // ... Substitution entry
+        {
+            parentDict.substituteKeyword(keyword);
+            return true;
+        }
+        else if (keyword == "include") // ... For backward compatibility
+        {
+            return functionEntries::includeEntry::execute(parentDict, is);
+        }
+        else                           // ... Data entries
+        {
+            token nextToken(is);
+            is.putBack(nextToken);
+
+            // Deal with duplicate entries
+            bool mergeEntry = false;
+
+            entry* existingPtr = parentDict.lookupEntryPtr(keyword);
+            if (existingPtr)
+            {
+                if (functionEntries::inputModeEntry::overwrite())
+                {
+                    // clear dictionary so merge acts like overwrite
+                    if (existingPtr->isDict())
+                    {
+                        existingPtr->dict().clear();
+                    }
+                    mergeEntry = true;
+                }
+                else if (functionEntries::inputModeEntry::merge())
+                {
+                    mergeEntry = true;
+                }
+            }
+
+            if (nextToken == token::BEGIN_BLOCK)
+            {
+                return parentDict.add
+                (
+                    new dictionaryEntry(keyword, parentDict, is),
+                    mergeEntry
+                );
+            }
+            else
+            {
+                return parentDict.add
+                (
+                    new primitiveEntry(keyword, parentDict, is),
+                    mergeEntry
+                );
+            }
+        }
+    }
+}
+
+
+Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
+{
+    is.fatalCheck("entry::New(Istream& is)");
+
+    word keyword;
+
+    // Get the next keyword and if invalid return false
+    if (!getKeyword(keyword, is))
     {
         return autoPtr<entry>(NULL);
     }
-    else if (keywordToken.isWord())
+    else // Keyword starts entry ...
     {
         token nextToken(is);
         is.putBack(nextToken);
@@ -57,38 +174,27 @@ autoPtr<entry> entry::New(Istream& is)
         {
             return autoPtr<entry>
             (
-                new dictionaryEntry(keywordToken.wordToken(), is)
+                new dictionaryEntry(keyword, dictionary::null, is)
             );
         }
         else
         {
             return autoPtr<entry>
             (
-                new primitiveEntry(keywordToken.wordToken(), is)
+                new primitiveEntry(keyword, is)
             );
         }
-    }
-    else
-    {
-        FatalIOErrorIn("primitiveEntry::primitiveEntry(Istream&)", is)
-            << "bad keyword " << keywordToken.info()
-            << exit(FatalIOError);
-
-        return autoPtr<entry>(NULL);
     }
 }
 
 
 // * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const entry& e)
+Foam::Ostream& Foam::operator<<(Ostream& os, const entry& e)
 {
     e.write(os);
     return os;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

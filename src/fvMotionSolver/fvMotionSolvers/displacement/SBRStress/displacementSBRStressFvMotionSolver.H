@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    displacementSBRStressFvMotionSolver
+    Foam::displacementSBRStressFvMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
@@ -105,25 +105,31 @@ public:
 
     // Member Functions
 
-        //- Return reference to the point motion velocity field
+        //- Return reference to the reference field
+        const pointField& points0() const
+        {
+            return points0_;
+        }
+
+        //- Return reference to the point motion displacement field
         pointVectorField& pointDisplacement()
         {
             return pointDisplacement_;
         }
 
-        //- Return const reference to the point motion velocity field
+        //- Return const reference to the point motion displacement field
         const pointVectorField& pointDisplacement() const
         {
             return pointDisplacement_;
         }
 
-        //- Return reference to the cell motion velocity field
+        //- Return reference to the cell motion displacement field
         volVectorField& cellDisplacement()
         {
             return cellDisplacement_;
         }
 
-        //- Return const reference to the cell motion velocity field
+        //- Return const reference to the cell motion displacement field
         const volVectorField& cellDisplacement() const
         {
             return cellDisplacement_;
@@ -134,6 +140,9 @@ public:
 
         //- Solve for motion
         virtual void solve();
+
+        //- Update topology
+        virtual void updateMesh(const mapPolyMesh&);
 };
 
 

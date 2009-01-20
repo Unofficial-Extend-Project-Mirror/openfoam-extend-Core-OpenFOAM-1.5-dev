@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    OPstream
+    Foam::OPstream
 
 Description
     Output inter-processor communications stream.
@@ -58,7 +58,6 @@ class OPstream
     // Private data
 
         int toProcNo_;
-        bool bufferedTransfer_;
 
 
     // Private member functions
@@ -82,9 +81,9 @@ public:
         //  write format and IO version
         OPstream
         (
+            const commsTypes commsType,
             const int toProcNo,
             const label bufSize = 0,
-            const bool bufferedTransfer = true,
             streamFormat format=BINARY,
             versionNumber version=currentVersion
         );
@@ -111,11 +110,17 @@ public:
             //- Write given buffer to given processor
             static bool write
             (
+                const commsTypes commsType,
                 const int toProcNo,
                 const char* buf,
-                const std::streamsize bufSize,
-                const bool bufferedTransfer = true
+                const std::streamsize bufSize
             );
+
+            //- Non-blocking writes: wait until all have finished.
+            static void waitRequests();
+
+            //- Non-blocking writes: has request i finished?
+            static bool finishedRequest(const label i);
 
             //- Write next token to stream
             Ostream& write(const token&);
@@ -181,20 +186,6 @@ public:
             int precision(const int)
             {
                  return 0;
-            }
-
-            //- Get the data transfer option of the stream
-            bool bufferedTransfer() const
-            {
-                return bufferedTransfer_;
-            }
-
-            //- Set the buffering option of the stream
-            bool bufferedTransfer(const bool bfrdTransfer)
-            {
-                bool oldBufferedTransfer = bufferedTransfer_;
-                bufferedTransfer_ = bfrdTransfer;
-                return oldBufferedTransfer;
             }
 
 

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    patchIdentifier
+    Foam::patchIdentifier
 
 Description
+    Identifies patch by name, patch index and physical type
 
 SourceFiles
     patchIdentifier.C
@@ -44,6 +45,12 @@ namespace Foam
 {
 
 class dictionary;
+
+// Forward declaration of friend functions and operators
+
+class patchIdentifier;
+Ostream& operator<<(Ostream&, const patchIdentifier&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class patchIdentifier Declaration
@@ -75,9 +82,6 @@ public:
             const word& physicalType = word::null
         );
 
-        //- Construct from Istream
-        patchIdentifier(Istream&, const label index);
-
         //- Construct from dictionary
         patchIdentifier
         (
@@ -107,6 +111,12 @@ public:
             return name_;
         }
 
+        //- Return name for modification
+        word& name()
+        {
+            return name_;
+        }
+
         //- Return the optional physical type of the patch
         const word& physicalType() const
         {
@@ -131,11 +141,8 @@ public:
             return boundaryIndex_;
         }
 
-        //- Write
+        //- Write patchIdentifier as a dictionary
         void write(Ostream&) const;
-
-        //- Write dictionary
-        void writeDict(Ostream&) const;
 
 
     // Ostream Operator

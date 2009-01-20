@@ -128,7 +128,6 @@ Istream& IPstream::read(doubleScalar& s)
 }
 
 
-// read binary block
 Istream& IPstream::read(char* data, std::streamsize count)
 {
     if (format() != BINARY)
@@ -143,7 +142,6 @@ Istream& IPstream::read(char* data, std::streamsize count)
 }
 
 
-//- Rewind the IPstream so that it may be read again
 Istream& IPstream::rewind()
 {
     bufPosition_ = 0;

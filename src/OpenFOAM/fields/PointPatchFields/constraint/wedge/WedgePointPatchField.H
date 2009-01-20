@@ -76,14 +76,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        WedgePointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         WedgePointPatchField
         (
@@ -158,7 +150,10 @@ public:
     // Member functions
 
         //- Update the patch field
-        virtual void evaluate();
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        );
 };
 
 

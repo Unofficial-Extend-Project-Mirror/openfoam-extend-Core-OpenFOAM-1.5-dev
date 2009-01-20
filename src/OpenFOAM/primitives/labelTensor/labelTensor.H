@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    labelTensor
+Typedef
+    Foam::labelTensor
 
 Description
     3D labelTensor obtained from generic Tensor
@@ -47,15 +47,6 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef Tensor<label> labelTensor;
-
-// Identity labelTensor
-static const labelTensor labelI
-(
-    1, 0, 0,
-    0, 1, 0,
-    0, 0, 1
-);
-
 
 //- Specify data associated with labelTensor type is contiguous
 template<>

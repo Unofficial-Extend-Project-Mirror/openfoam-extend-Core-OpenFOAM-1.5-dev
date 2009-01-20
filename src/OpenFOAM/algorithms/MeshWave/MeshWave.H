@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    MeshWave
+    Foam::MeshWave
 
 Description
-    FaceCellWave + data.
+    FaceCellWave plus data
 
 SourceFiles
     MeshWave.C
@@ -139,6 +139,7 @@ public:
             return calc_.getUnsetCells();
         }
 
+        //- Get number of unvisited faces
         label getUnsetFaces() const
         {
             return calc_.getUnsetFaces();

@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    NSRDSfunc5
+    Foam::NSRDSfunc5
 
 Description
     NSRDS function number 105
 
     Source:
+    @verbatim
                       NSRDS - AICHE
                  Data Compilation Tables
                     of Properties of
@@ -47,6 +48,7 @@ Description
             Department of Chemical Engineering
             The Pennsylvania State University
                 University Park, PA 16802
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 

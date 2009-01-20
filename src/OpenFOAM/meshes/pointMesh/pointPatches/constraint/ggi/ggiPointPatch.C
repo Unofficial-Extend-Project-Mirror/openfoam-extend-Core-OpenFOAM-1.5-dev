@@ -32,44 +32,87 @@ Author
 #include "pointMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(ggiPointPatch, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        ggiPointPatch,
+        polyPatch
+    );
+}
 
-defineTypeNameAndDebug(ggiPointPatch, 0);
 
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    ggiPointPatch,
-    polyPatch
-);
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void Foam::ggiPointPatch::initGeometry()
+{}
+
+
+void Foam::ggiPointPatch::calcGeometry()
+{
+    meshPoints_ = ggiPolyPatch_.meshPoints();
+
+    nonGlobalPatchPoints_.setSize(meshPoints_.size());
+    forAll(nonGlobalPatchPoints_, i)
+    {
+        nonGlobalPatchPoints_[i] = i;
+    }
+}
+
+
+void Foam::ggiPointPatch::initMovePoints(const pointField&)
+{}
+
+
+void Foam::ggiPointPatch::movePoints(const pointField&)
+{}
+
+
+void Foam::ggiPointPatch::initUpdateMesh()
+{
+    facePointPatch::initUpdateMesh();
+    ggiPointPatch::initGeometry();
+}
+
+
+void Foam::ggiPointPatch::updateMesh()
+{
+    facePointPatch::updateMesh();
+    ggiPointPatch::calcGeometry();
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 //- Construct from components
-ggiPointPatch::ggiPointPatch
+Foam::ggiPointPatch::ggiPointPatch
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
 )
 :
-    facePointPatch(patch, bm)
+    coupledFacePointPatch(patch, bm),
+    ggiPolyPatch_(refCast<const ggiPolyPatch>(patch))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-ggiPointPatch::~ggiPointPatch()
+Foam::ggiPointPatch::~ggiPointPatch()
 {}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
+bool Foam::ggiPointPatch::coupled() const
+{
+    return true;
+}
+
 
 // ************************************************************************* //

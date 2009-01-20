@@ -27,6 +27,32 @@ License
 #include "pointMesh.H"
 #include "globalMeshData.H"
 #include "globalPointPatch.H"
+#include "pointMeshMapper.H"
+#include "pointFields.H"
+#include "MapGeometricFields.H"
+#include "MapPointField.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::pointMesh::mapFields(const mapPolyMesh& mpm)
+{
+    // Create a mapper
+    const pointMeshMapper m(*this, mpm);
+
+    MapGeometricFields<scalar, pointPatchField, pointMeshMapper, pointMesh>(m);
+    MapGeometricFields<vector, pointPatchField, pointMeshMapper, pointMesh>(m);
+    MapGeometricFields
+    <
+        sphericalTensor,
+        pointPatchField,
+        pointMeshMapper,
+        pointMesh
+    >(m);
+    MapGeometricFields<symmTensor, pointPatchField, pointMeshMapper, pointMesh>
+    (m);
+    MapGeometricFields<tensor, pointPatchField, pointMeshMapper, pointMesh>(m);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,12 +75,29 @@ Foam::pointMesh::pointMesh
             boundary_.size() - 1,
             new globalPointPatch
             (
-                mesh_.globalData(),
                 boundary_,
                 boundary_.size() - 1
             )
         );
     }
+
+    // Calculate the geometry for the patches (transformation tensors etc.)
+    boundary_.calcGeometry();
+}
+
+
+void Foam::pointMesh::movePoints(const pointField& newPoints)
+{
+    boundary_.movePoints(newPoints);
+}
+
+
+void Foam::pointMesh::updateMesh(const mapPolyMesh& mpm)
+{
+    boundary_.updateMesh();
+
+    // Map all registered point fields
+    mapFields(mpm);
 }
 
 

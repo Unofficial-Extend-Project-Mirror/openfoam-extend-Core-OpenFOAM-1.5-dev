@@ -258,7 +258,7 @@ Foam::cellMapper::cellMapper(const mapPolyMesh& mpm)
     // Check for inserted cells
     // HJ, different criterion in faces: this is due to the fact that
     // I can retire faces but cannot retire cells
-    // HJ, 5/Spe/2007
+    // HJ, 5/Sep/2007
     if (direct_ && (mpm_.cellMap().size() == 0 || min(mpm_.cellMap()) > -1))
     {
         insertedCells_ = false;

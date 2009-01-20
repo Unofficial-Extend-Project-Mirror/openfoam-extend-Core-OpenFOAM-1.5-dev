@@ -29,42 +29,48 @@ Description
 
 #include "dictionaryEntry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-dictionaryEntry::dictionaryEntry(Istream& is)
+Foam::dictionaryEntry::dictionaryEntry
+(
+    const dictionary& parentDict,
+    Istream& is
+)
 :
     entry(is),
-    dictionary(is)
+    dictionary(parentDict, is)
 {
     is.fatalCheck
     (
-        "dictionaryEntry::dictionaryEntry(Istream& is)"
+        "dictionaryEntry::dictionaryEntry"
+        "(Istream& is, const dictionary& parentDict)"
     );
 }
 
 
-dictionaryEntry::dictionaryEntry(const word& key, Istream& is)
+Foam::dictionaryEntry::dictionaryEntry
+(
+    const word& key,
+    const dictionary& parentDict,
+    Istream& is
+)
 :
     entry(key),
-    dictionary(is)
+    dictionary(parentDict, is)
 {
     name() += "::" + key;
 
     is.fatalCheck
     (
-        "dictionaryEntry::dictionaryEntry(const word& keyword, Istream& is)"
+        "dictionaryEntry::dictionaryEntry"
+        "(const word& keyword, const dictionary& parentDict, Istream& is)"
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void dictionaryEntry::write(Ostream& os) const
+void Foam::dictionaryEntry::write(Ostream& os) const
 {
     os.writeKeyword(keyword());
     dictionary::write(os);
@@ -73,7 +79,7 @@ void dictionaryEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const dictionaryEntry& de)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryEntry& de)
 {
     de.write(os);
     return os;
@@ -83,7 +89,11 @@ Ostream& operator<<(Ostream& os, const dictionaryEntry& de)
 #if defined (__GNUC__)
 template<>
 #endif
-Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<dictionaryEntry>& ip
+)
 {
     const dictionaryEntry& e = ip.t_;
 
@@ -92,9 +102,5 @@ Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

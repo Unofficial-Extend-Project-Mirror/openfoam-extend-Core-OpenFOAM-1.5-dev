@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    speciesTable
+    Foam::speciesTable
 
 Description
+    A table of species
 
 SourceFiles
     speciesTableI.H
@@ -87,7 +88,7 @@ public:
         //- Return a specie's name
         inline const word& operator[](const label) const;
 
-        //- Lookup a specie's name and return it's index
+        //- Lookup a specie's name and return its index
         inline label operator[](const word&) const;
 
 

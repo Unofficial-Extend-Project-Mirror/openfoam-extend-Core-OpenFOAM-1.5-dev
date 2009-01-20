@@ -23,15 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dictionary
+    Foam::dictionary
 
 Description
-    A dictionary is a list of keyword definitions. A keyword definition
-    consists of a keyword followed by any number of values 
-    (e.g. words and numbers).  Dictionary is the base class for IOdictionary
-    It serves the purpose of a bootstrap dictionary for the objectRegistry data
-    dictionaries, since unlike the IOdictionary class, it does not use a
+    A list of keyword definitions, which are a keyword followed by any number
+    of values (e.g. words and numbers).
+
+    The dictionary class is the base class for IOdictionary.
+    It also serves as a bootstrap dictionary for the objectRegistry data
+    dictionaries since, unlike the IOdictionary class, it does not use an
     objectRegistry itself to work.
+
+ToDo
+    A merge() member function with a non-const dictionary parameter.
+    This would avoid unnecessary cloning in the add(entry*,bool) method
 
 SourceFiles
     dictionary.C
@@ -47,12 +52,20 @@ SourceFiles
 #include "fileName.H"
 #include "ITstream.H"
 #include "HashTable.H"
+#include "wordList.H"
 #include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class dictionary;
+Istream& operator>>(Istream&, dictionary&);
+Ostream& operator<<(Ostream&, const dictionary&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class dictionary Declaration
@@ -70,16 +83,27 @@ class dictionary
         //- HashTable of the enries held on the DL-list for quick lookup
         HashTable<entry*> hashedEntries_;
 
-        //- Add a new entry
-        void add(entry*);
-
-        //- Read dictionary from Istream
-        bool read(Istream&, const word& = word::null);
+        //- Parent dictionary
+        const dictionary& parent_;
 
 
 public:
 
-    // Declare name of the class and it's debug switch
+        //- Read dictionary from Istream
+        bool read(Istream&);
+
+        //- Substitute the given keyword prepended by '$' with the
+        //  corresponding sub-dictionary entries
+        bool substituteKeyword(const word& keyword);
+
+
+public:
+
+    //- Declare friendship with the entry class for IO
+    friend class entry;
+
+
+    // Declare name of the class and its debug switch
     ClassName("dictionary");
 
 
@@ -89,23 +113,35 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct top-level dictionary null
         dictionary();
 
-        //- Construct from Istream, reading entries until lastEntry or EOF
-        dictionary(Istream&, const word& lastEntry = word::null);
+        //- Construct from the parent dictionary and Istream, reading entries
+        //  until lastEntry or EOF
+        dictionary
+        (
+            const dictionary& parentDict,
+            Istream&
+        );
 
-        //- Construct as copy
-        dictionary(const dictionary&);
+        //- Construct top-level dictionary from Istream, reading entries
+        //  until EOF
+        dictionary(Istream&);
+
+        //- Construct as copy given the parent dictionary
+        dictionary(const dictionary& parentDict, const dictionary& dict);
+
+        //- Construct top-level dictionary as copy
+        dictionary(const dictionary& dict);
 
         //- Construct and return clone
-        autoPtr<dictionary> clone() const;
+        Foam::autoPtr<dictionary> clone() const;
 
-        //- Construct on freestore from Istream
-        static autoPtr<dictionary> New(Istream& is);
+        //- Construct top-level dictionary on freestore from Istream
+        static Foam::autoPtr<dictionary> New(Istream& is);
 
 
-    // Desstructor
+    // Destructor
 
         ~dictionary();
 
@@ -124,32 +160,90 @@ public:
             return name_;
         }
 
+        //- Return the parent dictionary
+        const dictionary& parent() const
+        {
+            return parent_;
+        }
+
         //- Return line number of first token in dictionary
         label startLineNumber() const;
 
         //- Return line number of last token in dictionary
         label endLineNumber() const;
 
-        //- Clear the dictionary
-        void clear();
-
 
         // Search and lookup
 
             //- Search dictionary for given keyword
-            bool found(const word& keyword) const;
+            //  If recursive search parent dictionaries
+            bool found(const word& keyword, bool recursive=false) const;
+
+            //- Find and return an entry data stream pointer if present
+            //  otherwise return NULL.
+            //  If recursive search parent dictionaries
+            const entry* lookupEntryPtr
+            (
+                const word&, bool recursive=false
+            ) const;
+
+            //- Find and return an entry data stream pointer for manipulation
+            //  if present otherwise return NULL.
+            //  If recursive search parent dictionaries
+            entry* lookupEntryPtr(const word&, bool recursive=false);
+
+            //- Find and return an entry data stream if present otherwise error.
+            //  If recursive search parent dictionaries
+            const entry& lookupEntry(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream
-            const entry& lookupEntry(const word&) const;
+            //  If recursive search parent dictionaries
+            ITstream& lookup(const word&, bool recursive=false) const;
 
-            //- Find and return an entry data stream
-            ITstream& lookup(const word&) const;
+            //- Find and return a T,
+            //  if not found return the given default value
+            //  If recursive search parent dictionaries
+            template<class T>
+            T lookupOrDefault
+            (
+                const word&,
+                const T&,
+                bool recursive=false
+            ) const;
+
+            //- Find and return a T, if not found return the given
+            //  default value, and add to dictionary.
+            //  If recursive search parent dictionaries
+            template<class T>
+            T lookupOrAddDefault
+            (
+                const word&,
+                const T&,
+                bool recursive=false
+            );
+
+            //- Find an entry if present, and assign to T
+            //  Returns true if the entry was found
+            template<class T>
+            bool readIfPresent
+            (
+                const word&,
+                T&,
+                bool recursive=false
+            ) const;
 
             //- Check if entry is a sub-dictionary
             bool isDict(const word&) const;
 
+            //- Find and return a sub-dictionary pointer if present
+            //  otherwise return NULL.
+            const dictionary* subDictPtr(const word&) const;
+
             //- Find and return a sub-dictionary
             const dictionary& subDict(const word&) const;
+
+            //- Find and return a sub-dictionary for manipulation
+            dictionary& subDict(const word&);
 
             //- Return the table of contents
             wordList toc() const;
@@ -157,36 +251,58 @@ public:
 
         // Editing
 
-            //- Add an entry
-            void add(const entry&);
+            //- Add a new entry
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            bool add(entry*, bool mergeEntry=false);
 
-            //- Add a token entry
-            void add(const word& keyword, const token&);
+            //- Add an entry
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            void add(const entry&, bool mergeEntry=false);
 
             //- Add a word entry
-            void add(const word& keyword, const word&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const word&, bool overwrite=false);
 
             //- Add a string entry
-            void add(const word& keyword, const Foam::string&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const string&, bool overwrite=false);
 
             //- Add a label entry
-            void add(const word& keyword, const label);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const label, bool overwrite=false);
 
             //- Add a scalar entry
-            void add(const word& keyword, const scalar);
-
-            //- Add an entry constructed from a ITstream
-            void add(const word& keyword, const ITstream&);
-
-            //- Add an entry constructed from a tokenList
-            void add(const word& keyword, const tokenList& tokens);
-
-            //- Add a T entry
-            template<class T>
-            void add(const word& keyword, const T&);
+            //  optionally overwrite an existing entry
+            void add (const word& keyword, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
-            void add(const word& keyword, const dictionary&);
+            //  optionally merge with an existing sub-dictionary
+            void add
+            (
+                const word& keyword,
+                const dictionary&,
+                bool mergeEntry=false
+            );
+
+            //- Add a T entry
+            //  optionally overwrite an existing entry
+            template<class T>
+            void add(const word& keyword, const T&, bool overwrite=false);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(entry*);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(const entry&);
+
+            //- Assign a dictionary entry, overwrite any existing entry
+            void set(const word& keyword, const dictionary&);
+
+            //- Assign a T entry, overwrite any existing entry
+            template<class T>
+            void set(const word& keyword, const T&);
 
             //- Remove an entry specified by keyword
             bool remove(const word& keyword);
@@ -200,8 +316,15 @@ public:
                 bool forceOverwrite = false
             );
 
+            //- Merge entries from the given dictionary.
+            //  Also merge sub-dictionaries as required.
+            bool merge(const dictionary&);
 
-        // Write 
+            //- Clear the dictionary
+            void clear();
+
+
+        // Write
 
             void write(Ostream& os, bool subDict = true) const;
 
@@ -238,14 +361,12 @@ public:
 
 // Global Operators
 
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Warn, but do not overwrite the entries from dict1.
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
-   
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Do not overwrite the entries from dict1.
+
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 
 

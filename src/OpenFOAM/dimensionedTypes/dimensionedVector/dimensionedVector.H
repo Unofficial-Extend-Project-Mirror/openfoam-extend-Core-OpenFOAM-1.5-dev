@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    dimensionedVector
+Typedef
+    Foam::dimensionedVector
 
 Description
     Dimensioned vector obtained from generic dimensioned type.

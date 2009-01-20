@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C2H5OH
+    Foam::C2H5OH
 
 Description
     ethanol

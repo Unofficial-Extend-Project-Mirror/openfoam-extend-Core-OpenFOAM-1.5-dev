@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    objectHit
+    Foam::objectHit
 
 Description
     This class describes a combination of target object index and success flag.
@@ -40,6 +40,14 @@ Description
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class objectHit;
+inline bool operator==(const objectHit& a, const objectHit& b);
+inline bool operator!=(const objectHit& a, const objectHit& b);
+inline Ostream& operator<<(Ostream& os, const objectHit& b);
+
 
 /*---------------------------------------------------------------------------*\
                            Class objectHit Declaration
@@ -99,12 +107,12 @@ public:
 
     // Friend Operators
 
-        inline friend bool operator==(const objectHit& a, const objectHit& b)
+        friend bool operator==(const objectHit& a, const objectHit& b)
         {
             return ((a.hit_ == b.hit_) && (a.hitObject_ == b.hitObject_));
         }
             
-        inline friend bool operator!=(const objectHit& a, const objectHit& b)
+        friend bool operator!=(const objectHit& a, const objectHit& b)
         {
             return (!(a == b));
         }

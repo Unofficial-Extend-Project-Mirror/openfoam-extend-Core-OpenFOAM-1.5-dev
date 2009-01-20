@@ -23,9 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    xmgrGraph
+    Foam::xmgrGraph
 
 Description
+    Output and @b agr file for @em xmgrace
+    (http://plasma-gate.weizmann.ac.il/Grace/)
 
 SourceFiles
     xmgrGraph.C

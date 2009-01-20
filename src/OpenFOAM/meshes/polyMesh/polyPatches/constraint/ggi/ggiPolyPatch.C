@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
+
+Contributor
+    Martin Beaudoin, Hydro-Quebec, (2008)
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,25 +42,22 @@ Author
 namespace Foam
 {
     defineTypeNameAndDebug(ggiPolyPatch, 0);
-
-    addToRunTimeSelectionTable(polyPatch, ggiPolyPatch, Istream);
     addToRunTimeSelectionTable(polyPatch, ggiPolyPatch, dictionary);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ggiPolyPatch::calcInterpolation() const
+void Foam::ggiPolyPatch::calcPatchToPatch() const
 {
     // Create patch-to-patch interpolation
     if (patchToPatchPtr_)
     {
-        FatalErrorIn("void ggiPolyPatch::calcInterpolation() const")
+        FatalErrorIn("void ggiPolyPatch::calcPatchToPatch() const")
             << "Patch to patch interpolation already calculated"
             << abort(FatalError);
     }
 
-#ifdef TestGGI
     if (master())
     {
         patchToPatchPtr_ =
@@ -65,37 +65,28 @@ void Foam::ggiPolyPatch::calcInterpolation() const
             (
                 *this,
                 boundaryMesh()[shadowIndex()],
-                intersection::VISIBLE,
-                intersection::VECTOR
+                forwardT(),
+                reverseT(),
+                0,             // Non-overlapping face tolerances
+                0              // HJ, 24/Oct/2008
             );
     }
     else
     {
-        FatalErrorIn("void ggiPolyPatch::calcInterpolation() const")
-            << "Attempting to create GGIinterpolation on a shadow"
+        FatalErrorIn("void ggiPolyPatch::calcPatchToPatch() const")
+            << "Attempting to create GGIInterpolation on a shadow"
             << abort(FatalError);
     }
-#else
-    patchToPatchPtr_ =
-        new patchToPatchInterpolation
-        (
-            boundaryMesh()[shadowIndex()],
-            *this,
-            intersection::VISIBLE,
-            intersection::VECTOR
-        );
-#endif
 }
 
 
-#ifdef TestGGI
 const Foam::ggiInterpolation& Foam::ggiPolyPatch::patchToPatch() const
 {
     if (master())
     {
         if (!patchToPatchPtr_)
         {
-            calcInterpolation();
+            calcPatchToPatch();
         }
 
         return *patchToPatchPtr_;
@@ -105,41 +96,26 @@ const Foam::ggiInterpolation& Foam::ggiPolyPatch::patchToPatch() const
         return shadow().patchToPatch();
     }
 }
-#else
-const Foam::patchToPatchInterpolation& Foam::ggiPolyPatch::patchToPatch() const
-{
-    if (!patchToPatchPtr_)
-    {
-        calcInterpolation();
-    }
-
-    return *patchToPatchPtr_;
-}
-#endif
 
 
 void Foam::ggiPolyPatch::calcReconFaceCellCentres() const
 {
     // Create neighbouring face centres using interpolation
-
     if (master())
     {
         const label shadowID = shadowIndex();
 
-        // Reconstruct the shadow cell face centres
-        vectorField localCtrs = faceCellCentres();
-
-        vectorField reconCtrs =
-            interpolate
-            (
-                boundaryMesh()[shadowID].faceCellCentres()
-            );
-
-        // Calculate reconstructed centres by eliminating non-orthogonality
-        const vectorField& n = faceNormals();
-
+        // Get the transformed and interpolated shadow face cell centers
         reconFaceCellCentresPtr_ =
-            new vectorField(localCtrs + n*(n & (reconCtrs - localCtrs)));
+            new vectorField
+            (
+                interpolate
+                (
+                    boundaryMesh()[shadowID].faceCellCentres()
+                  - boundaryMesh()[shadowID].faceCentres()
+                )
+              + faceCentres()
+            );
     }
     else
     {
@@ -159,6 +135,23 @@ void Foam::ggiPolyPatch::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::ggiPolyPatch::ggiPolyPatch
+(
+    const word& name,
+    const label size,
+    const label start,
+    const label index,
+    const polyBoundaryMesh& bm
+)
+:
+    coupledPolyPatch(name, size, start, index, bm),
+    shadowName_(word::null),
+    shadowIndex_(-1),
+    patchToPatchPtr_(NULL),
+    reconFaceCellCentresPtr_(NULL)
+{
+}
+
 // Construct from components
 Foam::ggiPolyPatch::ggiPolyPatch
 (
@@ -172,22 +165,6 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(name, size, start, index, bm),
     shadowName_(shadowName),
-    shadowIndex_(-1),
-    patchToPatchPtr_(NULL),
-    reconFaceCellCentresPtr_(NULL)
-{}
-
-
-// Construct from Istream
-Foam::ggiPolyPatch::ggiPolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    coupledPolyPatch(is, index, bm),
-    shadowName_(is),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -256,7 +233,7 @@ Foam::ggiPolyPatch::~ggiPolyPatch()
 
 Foam::label Foam::ggiPolyPatch::shadowIndex() const
 {
-    if (shadowIndex_ == -1)
+    if (shadowIndex_ == -1 && shadowName_ != Foam::word::null)
     {
         // Grab shadow patch index
         polyPatchID shadow(shadowName_, boundaryMesh());
@@ -272,12 +249,20 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
         shadowIndex_ = shadow.index();
 
         // Check the other side is a ggi
-        if (!isType<ggiPolyPatch>(boundaryMesh()[shadowIndex_]))
+        if (!isA<ggiPolyPatch>(boundaryMesh()[shadowIndex_]))
         {
             FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
                 << "Shadow of ggi patch " << name()
-                << " named " << shadowName() << " is not a ggi." << nl
+                << " named " << shadowName() << " is not a ggi.  Type: "
+                << boundaryMesh()[shadowIndex_].type() << nl
                 << "This is not allowed.  Please check your mesh definition."
+                << abort(FatalError);
+        }
+
+        if (index() == shadowIndex_)
+        {
+            FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
+                << "ggi patch " << name() << " created as its own shadow"
                 << abort(FatalError);
         }
     }
@@ -292,8 +277,7 @@ const Foam::ggiPolyPatch& Foam::ggiPolyPatch::shadow() const
 }
 
 
-const Foam::vectorField&
-Foam::ggiPolyPatch::reconFaceCellCentres() const
+const Foam::vectorField& Foam::ggiPolyPatch::reconFaceCellCentres() const
 {
     if (!reconFaceCellCentresPtr_)
     {
@@ -313,10 +297,13 @@ void Foam::ggiPolyPatch::initGeometry()
 void Foam::ggiPolyPatch::calcGeometry()
 {
     // Reconstruct the cell face centres
-    if (master())
+    if (patchToPatchPtr_ && master())
     {
         reconFaceCellCentres();
     }
+
+    calcTransforms();
+    polyPatch::calcGeometry();
 }
 
 
@@ -353,29 +340,19 @@ void Foam::ggiPolyPatch::updateMesh()
 }
 
 
-void Foam::ggiPolyPatch::calcTransformTensors
-(
-    const vectorField& Cf,
-    const vectorField& Cr,
-    const vectorField& nf,
-    const vectorField& nry
-) const
+void Foam::ggiPolyPatch::calcTransforms()
 {
-    FatalErrorIn("void ggiPolyPatch::calcTransformTensors")
-        << "Not ready"
-        << abort(FatalError);
+    // Simplest GGI: no transform or separation.  HJ, 24/Oct/2008
+    forwardT_.setSize(0);
+    reverseT_.setSize(0);
+    separation_.setSize(0);
 }
 
 
-//- Initialize ordering (on new mesh)
 void Foam::ggiPolyPatch::initOrder(const primitivePatch& pp) const
 {}
 
 
-//- Return new ordering. Ordering is -faceMap: for every face index
-//  the new face -rotation:for every new face the clockwise shift
-//  of the original face. Return false if nothing changes (faceMap
-//  is identity, rotation is 0)
 bool Foam::ggiPolyPatch::order
 (
     const primitivePatch& pp,
@@ -383,35 +360,19 @@ bool Foam::ggiPolyPatch::order
     labelList& rotation
 ) const
 {
-    faceMap.setSize(pp.size());
-    faceMap = -1;
-
-    rotation.setSize(pp.size());
-    rotation = 0;
+    faceMap.setSize(pp.size(), -1);
+    rotation.setSize(pp.size(), 0);
 
     // Nothing changes
     return false;
 }
 
 
-// Write
 void Foam::ggiPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
-
-    os  << nl << shadowName_ << endl;
-}
-
-
-void Foam::ggiPolyPatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
-    patchIdentifier::writeDict(os);
-    os  << "    nFaces " << size() << token::END_STATEMENT << nl
-        << "    startFace " << start() << token::END_STATEMENT << nl
-        << "    shadowPatch " << shadowName_ << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
+    os.writeKeyword("shadowPatch") << shadowName_
+        << token::END_STATEMENT << nl;
 }
 
 

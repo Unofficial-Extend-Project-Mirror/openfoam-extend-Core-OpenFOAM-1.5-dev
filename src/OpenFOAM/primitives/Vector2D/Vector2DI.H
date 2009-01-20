@@ -100,6 +100,13 @@ operator&(const Vector2D<Cmpt>& v1, const Vector2D<Cmpt>& v2)
 }
 
 
+template <class Cmpt>
+inline scalar Vector2D<Cmpt>::perp(const Vector2D<Cmpt>& b) const
+{
+    return x()*b.y()-y()*b.x();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

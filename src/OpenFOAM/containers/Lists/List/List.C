@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -327,9 +327,8 @@ List<T>::~List()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null List
 template<class T>
-List<T>& List<T>::null()
+const List<T>& List<T>::null()
 {
     List<T>* nullPtr = reinterpret_cast<List<T>*>(NULL);
     return *nullPtr;
@@ -423,6 +422,24 @@ void List<T>::transfer(List<T>& a)
 
 
 template<class T>
+template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+void List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
+{
+    // shrink the allocated space to the number of elements used
+    a.shrink();
+
+    if (this->size_) delete[] this->v_;
+
+    this->size_ = a.size_;
+    this->v_ = a.v_;
+
+    a.size_ = 0;
+    a.v_ = 0;
+    a.nextFree_ = 0;
+}
+
+
+template<class T>
 void sort(List<T>& a)
 {
     std::sort(a.begin(), a.end());
@@ -433,6 +450,20 @@ template<class T, class Cmp>
 void sort(List<T>& a, const Cmp& cmp)
 {
     std::sort(a.begin(), a.end(), cmp);
+}
+
+
+template<class T>
+void stableSort(List<T>& a)
+{
+    std::stable_sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void stableSort(List<T>& a, const Cmp& cmp)
+{
+    std::stable_sort(a.begin(), a.end(), cmp);
 }
 
 

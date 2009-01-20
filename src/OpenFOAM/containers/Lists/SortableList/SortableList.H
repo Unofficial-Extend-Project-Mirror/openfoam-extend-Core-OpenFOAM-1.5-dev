@@ -23,9 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SortableList
+    Foam::SortableList
 
 Description
+    A list that is sorted upon construction or when explicitly requested
+    with the sort() method.
 
 SourceFiles
     SortableList.C
@@ -46,7 +48,7 @@ namespace Foam
                            Class SortableList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
+template <class Type>
 class SortableList
 :
     public List<Type>
@@ -84,14 +86,10 @@ public:
 
         //- Construct from List, sorting the elements. Starts with indices set
         //  to index in argument
-        SortableList(const List<Type>&);
-
-        //- Construct from List, sorting the elements. Starts with indices 
-        //  as given
-        SortableList(const List<Type>&, const labelList&);
+        explicit SortableList(const List<Type>&);
 
         //- Construct given size. Sort later on.
-        SortableList(const label size);
+        explicit SortableList(const label size);
 
         //- Construct given size and initial value. Sort later on.
         SortableList(const label size, const Type&);
@@ -102,17 +100,20 @@ public:
 
     // Member Functions
 
-        //- Return the list of sorted point indices
+        //- Return the list of sorted indices. Updated every sort.
         const labelList& indices() const
         {
             return indices_;
         }
 
-        //- Size the list (shrink or grow followed by sort)
+        //- Size the list. If grow can cause undefined indices (until next sort)
         void setSize(const label);
 
         //- Sort the list (if changed after construction time)
         void sort();
+
+        //- Sort the list (if changed after construction time)
+        void stableSort();
 
 
     // Member Operators

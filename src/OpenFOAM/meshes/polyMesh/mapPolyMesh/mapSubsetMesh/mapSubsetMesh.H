@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    mapSubsetMesh
+    Foam::mapSubsetMesh
 
 Description
     Class containing mesh-to-mesh mapping information after a subset operation

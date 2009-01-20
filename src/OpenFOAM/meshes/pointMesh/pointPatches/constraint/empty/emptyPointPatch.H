@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    emptyPointPatch
+    Foam::emptyPointPatch
 
 Description
     Empty plane patch.
@@ -80,6 +80,12 @@ public:
             const label pointi,
             pointConstraint&
         ) const;
+
+
+    // Destructor
+
+        virtual ~emptyPointPatch()
+        {}
 };
 
 

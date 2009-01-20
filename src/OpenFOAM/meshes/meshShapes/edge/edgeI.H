@@ -22,31 +22,55 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+
+// return
+//  -  0: different
+//  - +1: identical
+//  - -1: same edge, but different orientation
+inline int Foam::edge::compare(const edge& a, const edge& b)
 {
+    if (a[0] == b[0] && a[1] == b[1])
+    {
+        return 1;
+    }
+    else if (a[0] == b[1] && a[1] == b[0])
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline edge::edge()
+inline Foam::edge::edge()
 {}
 
 
-inline edge::edge(const label a, const label b)
+inline Foam::edge::edge(const label a, const label b)
 {
     start() = a;
     end() = b;
 }
 
 
-inline edge::edge(Istream& is)
+inline Foam::edge::edge(const FixedList<label, 2>& a)
+{
+    start() = a[0];
+    end() = a[1];
+}
+
+
+inline Foam::edge::edge(Istream& is)
 :
     FixedList<label, 2>(is)
 {}
@@ -54,29 +78,29 @@ inline edge::edge(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline label edge::start() const
+inline Foam::label Foam::edge::start() const
 {
     return operator[](0);
 }
 
-inline label& edge::start()
+inline Foam::label& Foam::edge::start()
 {
     return operator[](0);
 }
 
 
-inline label edge::end() const
+inline Foam::label Foam::edge::end() const
 {
     return operator[](1);
 }
 
-inline label& edge::end()
+inline Foam::label& Foam::edge::end()
 {
     return operator[](1);
 }
 
 
-inline label edge::otherVertex(const label a) const
+inline Foam::label Foam::edge::otherVertex(const label a) const
 {
     if (a == start())
     {
@@ -94,7 +118,7 @@ inline label edge::otherVertex(const label a) const
 }
 
 
-inline label edge::commonVertex(const edge& a) const
+inline Foam::label Foam::edge::commonVertex(const edge& a) const
 {
     if (start() == a.start() || start() == a.end())
     {
@@ -112,31 +136,31 @@ inline label edge::commonVertex(const edge& a) const
 }
 
 
-inline edge edge::reverseEdge() const
+inline Foam::edge Foam::edge::reverseEdge() const
 {
     return edge(end(), start());
 }
 
 
-inline point edge::centre(const pointField& p) const
+inline Foam::point Foam::edge::centre(const pointField& p) const
 {
     return 0.5*(p[start()] + p[end()]);
 }
 
 
-inline vector edge::vec(const pointField& p) const
+inline Foam::vector Foam::edge::vec(const pointField& p) const
 {
     return p[end()] - p[start()];
 }
 
 
-inline scalar edge::mag(const pointField& p) const
+inline Foam::scalar Foam::edge::mag(const pointField& p) const
 {
     return ::Foam::mag(vec(p));
 }
 
 
-inline linePointRef edge::line(const pointField& p) const
+inline Foam::linePointRef Foam::edge::line(const pointField& p) const
 {
     return linePointRef(p[start()], p[end()]);
 }
@@ -144,24 +168,16 @@ inline linePointRef edge::line(const pointField& p) const
 
 // * * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * //
 
-inline bool operator==(const edge& a, const edge& b)
+inline bool Foam::operator==(const edge& a, const edge& b)
 {
-    return
-    (
-        (a[0] == b[0] && a[1] == b[1])
-     || (a[0] == b[1] && a[1] == b[0])
-    );
+    return edge::compare(a,b) != 0;
 }
 
 
-inline bool operator!=(const edge& a, const edge& b)
+inline bool Foam::operator!=(const edge& a, const edge& b)
 {
-    return !(a == b);
+    return edge::compare(a,b) == 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

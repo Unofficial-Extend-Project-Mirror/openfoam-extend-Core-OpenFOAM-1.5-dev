@@ -26,18 +26,27 @@ License
 
 #include "Pstream.H"
 #include "debug.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::Pstream, 0);
 
-
-namespace Foam
+template<>
+const char* Foam::NamedEnum<Foam::Pstream::commsTypes, 3>::names[] =
 {
+    "blocking",
+    "scheduled",
+    "nonBlocking"
+};
+
+const Foam::NamedEnum<Foam::Pstream::commsTypes, 3>
+    Foam::Pstream::commsTypeNames;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Pstream::setParRun()
+void Foam::Pstream::setParRun()
 {
     parRun_ = true;
 
@@ -46,7 +55,7 @@ void Pstream::setParRun()
 }
 
 
-void Pstream::calcLinearComm(const label nProcs)
+void Foam::Pstream::calcLinearComm(const label nProcs)
 {
     linearCommunication_.setSize(nProcs);
 
@@ -82,7 +91,7 @@ void Pstream::calcLinearComm(const label nProcs)
 
 
 // Append my children (and my children children etc.) to allReceives.
-void Pstream::collectReceives
+void Foam::Pstream::collectReceives
 (
     const label procID,
     const List<DynamicList<label> >& receives,
@@ -125,7 +134,7 @@ void Pstream::collectReceives
 //  5       -               4
 //  6       7               4
 //  7       -               6
-void Pstream::calcTreeComm(label nProcs)
+void Foam::Pstream::calcTreeComm(label nProcs)
 {
     label nLevels = 1;
     while((1 << nLevels) < nProcs)
@@ -188,7 +197,7 @@ void Pstream::calcTreeComm(label nProcs)
 
 // Callback from Pstream::init() : initialize linear and tree communication
 // schedules now that nProcs is known.
-void Pstream::initCommunicationSchedule()
+void Foam::Pstream::initCommunicationSchedule()
 {
     calcLinearComm(nProcs());
     calcTreeComm(nProcs());
@@ -198,41 +207,43 @@ void Pstream::initCommunicationSchedule()
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // Initialise my process number to 0 (the master)
-int Pstream::myProcNo_(0);
+int Foam::Pstream::myProcNo_(0);
 
 // By default this is not a parallel run
-bool Pstream::parRun_(false);
+bool Foam::Pstream::parRun_(false);
 
 // List of process IDs
-List<int> Pstream::procIDs_(1, 0);
+Foam::List<int> Foam::Pstream::procIDs_(1, 0);
 
 // Standard transfer message type
-const int Pstream::msgType_(1);
+const int Foam::Pstream::msgType_(1);
 
 // Linear communication schedule
-List<Pstream::commsStruct> Pstream::linearCommunication_(0);
+Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::linearCommunication_(0);
 
 // Multi level communication schedule
-List<Pstream::commsStruct> Pstream::treeCommunication_(0);
+Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::treeCommunication_(0);
 
 // Should compact transfer be used in which floats replace doubles
 // reducing the bandwidth requirement at the expense of some loss
 // in accuracy
-bool Pstream::floatTransfer(debug::optimisationSwitch("floatTransfer", 1));
+bool Foam::Pstream::floatTransfer
+(
+    debug::optimisationSwitch("floatTransfer", 1)
+);
 
 // Number of processors at which the reduce algorithm changes from linear to
 // tree
-int Pstream::nProcsSimpleSum(debug::optimisationSwitch("nProcsSimpleSum", 16));
-
-//- Switch for scheduled vs non-scheduled transfer
-bool Pstream::scheduledTransfer
+int Foam::Pstream::nProcsSimpleSum
 (
-    debug::optimisationSwitch("scheduledTransfer", false)
+    debug::optimisationSwitch("nProcsSimpleSum", 16)
 );
 
+// Default commsType
+Foam::Pstream::commsTypes Foam::Pstream::defaultCommsType
+(
+    commsTypeNames.read(debug::optimisationSwitches().lookup("commsType"))
+);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    displacementComponentLaplacianFvMotionSolver
+    Foam::displacementComponentLaplacianFvMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
@@ -72,8 +72,16 @@ class displacementComponentLaplacianFvMotionSolver
         //- Cell-centre motion field
         mutable volScalarField cellDisplacement_;
 
+        //- Optionally read point-position field. Used only for position
+        //  boundary conditions.
+        mutable autoPtr<pointVectorField> pointLocation_;
+
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
+
+        //- Frozen points (that are not on patches). -1 or points that are
+        //  fixed to be at points0_ location
+        label frozenPointsZone_;
 
 
     // Private Member Functions
@@ -113,6 +121,12 @@ public:
 
     // Member Functions
 
+        //- Return reference to the reference field
+        const scalarField& points0() const
+        {
+            return points0_;
+        }
+
         //- Non-const access to the cellDisplacement in order to allow
         //  changes to the boundary motion
         volScalarField& cellDisplacement()
@@ -125,6 +139,9 @@ public:
 
         //- Solve for motion
         virtual void solve();
+
+        //- Update topology
+        virtual void updateMesh(const mapPolyMesh&);
 };
 
 

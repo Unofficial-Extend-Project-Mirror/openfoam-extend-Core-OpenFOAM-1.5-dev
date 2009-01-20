@@ -23,9 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    JobInfo
+    Foam::JobInfo
 
 Description
+    Helper class for recording information about run/finished jobs.
+
+    Writes the following files:
+      - $FOAM_JOB_DIR/runningJobs
+      - $FOAM_JOB_DIR/finishedJobs
 
 SourceFiles
     JobInfo.C

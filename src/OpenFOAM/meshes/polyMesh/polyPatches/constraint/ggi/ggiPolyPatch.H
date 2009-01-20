@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,9 @@ Description
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
+Contributor
+    Martin Beaudoin, Hydro-Quebec, (2008)
+
 SourceFiles
     ggiPolyPatch.C
 
@@ -39,15 +42,10 @@ SourceFiles
 #ifndef ggiPolyPatch_H
 #define ggiPolyPatch_H
 
-#define TestGGI
-
 #include "coupledPolyPatch.H"
-
-#ifdef TestGGI
 #include "ggiInterpolation.H"
-#else
-#include "patchToPatchInterpolation.H"
-#endif
+#include "transform.H"
+#include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class ggiPolyPatch Declaration
+                           Class ggiPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class ggiPolyPatch
@@ -71,11 +69,7 @@ class ggiPolyPatch
         mutable label shadowIndex_;
 
         //- Patch-to-patch interpolation
-#ifdef TestGGI
         mutable ggiInterpolation* patchToPatchPtr_;
-#else
-        mutable patchToPatchInterpolation* patchToPatchPtr_;
-#endif
 
         //- Reconstructed patch neighbour cell centres
         mutable vectorField* reconFaceCellCentresPtr_;
@@ -84,7 +78,19 @@ class ggiPolyPatch
     // Private member functions
 
         //- Calculate interpolation
-        void calcInterpolation() const;
+       virtual void calcPatchToPatch() const;
+
+        //- Return reference to patch-to-patch interpolation
+        const ggiInterpolation& patchToPatch() const;
+
+        //- Calculate reconstructed cell centres
+        void calcReconFaceCellCentres() const;
+
+        //- Force calculation of transformation tensors
+        virtual void calcTransforms();
+
+        //- Clear out
+        void clearOut();
 
 
 protected:
@@ -110,19 +116,6 @@ protected:
         virtual void updateMesh();
 
 
-        //- Return reference to patch-to-patch interpolation
-#ifdef TestGGI
-        const ggiInterpolation& patchToPatch() const;
-#else
-        const patchToPatchInterpolation& patchToPatch() const;
-#endif
-
-        //- Calculate reconstructed cell centres
-        void calcReconFaceCellCentres() const;
-
-        //- Clear out
-        void clearOut();
-
 public:
 
     //- Runtime type information
@@ -138,16 +131,18 @@ public:
             const label size,
             const label start,
             const label index,
-            const polyBoundaryMesh& bm,
-            const word& shadowName
+            const polyBoundaryMesh& bm
         );
 
-        //- Construct from Istream
+        //- Construct from components
         ggiPolyPatch
         (
-            Istream& is,
+            const word& name,
+            const label size,
+            const label start,
             const label index,
-            const polyBoundaryMesh&
+            const polyBoundaryMesh& bm,
+            const word& shadowName
         );
 
         //- Construct from dictionary
@@ -223,6 +218,9 @@ public:
         //- Return shadow patch index
         int shadowIndex() const;
 
+        //- Return shadow patch
+        const ggiPolyPatch& shadow() const;
+
         //- Is this the master side?
         bool master() const
         {
@@ -235,12 +233,9 @@ public:
             return !master();
         }
 
-        //- Return shadow patch
-        const ggiPolyPatch& shadow() const;
 
         //- Interpolate face field: given field on a the shadow side,
         //  create an interpolated field on this side
-#ifdef TestGGI
         template<class Type>
         tmp<Field<Type> > interpolate(const Field<Type>& pf) const
         {
@@ -266,31 +261,9 @@ public:
                 return patchToPatch().masterToSlave(tpf);
             }
         }
-#else
-        template<class Type>
-        tmp<Field<Type> > interpolate(const Field<Type>& pf) const
-        {
-            return patchToPatch().faceInterpolate(pf);
-        }
-
-        template<class Type>
-        tmp<Field<Type> > interpolate(const tmp<Field<Type> >& tpf) const
-        {
-            return patchToPatch().faceInterpolate(tpf);
-        }
-#endif
 
         //- Return reconstructed cell centres
         const vectorField& reconFaceCellCentres() const;
-
-        //- Force calculation of transformation tensors
-        void calcTransformTensors
-        (
-            const vectorField& Cf,
-            const vectorField& Cr,
-            const vectorField& nf,
-            const vectorField& nr
-        ) const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
@@ -311,9 +284,6 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
-
-        //- Write dictionary
-        virtual void writeDict(Ostream&) const;
 };
 
 

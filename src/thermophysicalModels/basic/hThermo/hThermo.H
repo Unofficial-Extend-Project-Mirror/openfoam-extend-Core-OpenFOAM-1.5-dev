@@ -23,7 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    hThermo
+    Foam::hThermo
+
+Description
+    Enthalpy for a mixture
 
 SourceFiles
     hThermo.C
@@ -78,7 +81,7 @@ public:
 
     // Destructor
 
-        ~hThermo();
+        virtual ~hThermo();
 
 
     // Member functions
@@ -103,13 +106,13 @@ public:
 
             //- Enthalpy [J/kg]
             //  Non-const access allowed for transport equations
-            volScalarField& h()
+            virtual volScalarField& h()
             {
                 return h_;
             }
 
             //- Enthalpy [J/kg]
-            const volScalarField& h() const
+            virtual const volScalarField& h() const
             {
                 return h_;
             }
@@ -118,27 +121,31 @@ public:
         // Fields derived from thermodynamic state variables
 
             //- Enthalpy for cell-set [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
             //- Enthalpy for patch [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const label patchi
             ) const;
 
             //- Heat capacity at constant pressure for patch [J/kg/K]
-            tmp<scalarField> Cp(const scalarField& T, const label patchi) const;
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
 
             //- Heat capacity at constant pressure [J/kg/K]
-            tmp<volScalarField> Cp() const;
+            virtual tmp<volScalarField> Cp() const;
 
             //- Heat capacity at constant volume [J/kg/K]
-            tmp<volScalarField> Cv() const;
+            virtual tmp<volScalarField> Cv() const;
 
 
         //- Read thermophysicalProperties dictionary

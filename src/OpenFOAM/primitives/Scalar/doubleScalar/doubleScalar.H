@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    doubleScalar
+Typedef
+    Foam::doubleScalar
 
 Description
     Double precision floating point scalar type.
@@ -54,8 +54,10 @@ typedef double doubleScalar;
 //  IEEE double precision number.  See limits.h or float.h)
 static const doubleScalar doubleScalarGREAT = 1.0e+15;
 static const doubleScalar doubleScalarVGREAT = 1.0e+300;
+static const doubleScalar doubleScalarROOTVGREAT = 1.0e+150;
 static const doubleScalar doubleScalarSMALL = 1.0e-15;
 static const doubleScalar doubleScalarVSMALL = 1.0e-300;
+static const doubleScalar doubleScalarROOTVSMALL = 1.0e-150;
 
 
 #define Scalar doubleScalar

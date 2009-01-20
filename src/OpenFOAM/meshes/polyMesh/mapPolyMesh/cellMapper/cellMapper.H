@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellMapper
+    Foam::cellMapper
 
 Description
     This object provides mapping and fill-in information for cell data
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class mapPolyMesh;
 

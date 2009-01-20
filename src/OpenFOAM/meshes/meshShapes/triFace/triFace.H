@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    triFace
+    Foam::triFace
 
 Description
-    A tetrahedral cell primitive.
+    A triangle face primitive using a FixedList.
 
 SourceFiles
     triFaceI.H
@@ -49,6 +49,13 @@ namespace Foam
 {
 
 class face;
+
+// Forward declaration of friend functions and operators
+
+class triFace;
+inline bool operator==(const triFace&, const triFace&);
+inline bool operator!=(const triFace&, const triFace&);
+
 
 /*---------------------------------------------------------------------------*\
                            class triFace Declaration
@@ -74,18 +81,32 @@ public:
             const label c
         );
 
+        //- Construct from a UList<label>
+        explicit inline triFace(const UList<label>&);
+
         //- Construct from Istream
         inline triFace(Istream&);
 
 
     // Member Functions
 
+        //- Collapse face by removing duplicate point labels
+        //  return the collapsed size, set collapsed point labels to -1
+        inline label collapse();
+
+        //- Return the edge direction on the face
+        //  - +1: forward (counter-clockwise) on the face
+        //  - -1: reverse (clockwise) on the face
+        //  -  0: edge not found on the face
+        inline int edgeDirection(const edge&) const;
+
+
         // Properties
 
             //- Return the points corresponding to this face
             inline pointField points(const pointField& points) const;
 
-            //- Return triagle as a face
+            //- Return triangle as a face
             inline face triFaceFace() const;
 
             //- Return number of edges
@@ -121,18 +142,23 @@ public:
                 const intersection::direction dir = intersection::VECTOR
             ) const;
 
-            //- Return the tetrahedron
+            //- Return the triangle
             inline triPointRef tri(const pointField&) const;
 
+        //- compare triFaces
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same face, but different orientation
+        static inline int compare(const triFace&, const triFace&);
 
     // Friend Operators
 
-        inline friend bool operator==(const triFace&, const triFace&);
-        inline friend bool operator!=(const triFace&, const triFace&);
+        friend bool operator==(const triFace&, const triFace&);
+        friend bool operator!=(const triFace&, const triFace&);
 };
 
 
-//- Hash<triFace> specialisation 
+//- Hash<triFace> specialisation
 //  Simple commutative hash.
 template<>
 inline label Hash<triFace>::operator()(const triFace& t) const

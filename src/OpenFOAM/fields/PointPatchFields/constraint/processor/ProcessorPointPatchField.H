@@ -77,21 +77,39 @@ class ProcessorPointPatchField
 
         //- Raw field send function
         template<class Type2>
-        void sendField(const tmp<Field<Type2> >&) const;
+        void sendField
+        (
+            const tmp<Field<Type2> >&,
+            const Pstream::commsTypes commsType = Pstream::blocking
+        ) const;
 
         //- Raw field receive function
         template<class Type2>
-        tmp<Field<Type2> > receivePointField() const;
+        tmp<Field<Type2> > receivePointField
+        (
+            const Pstream::commsTypes commsType = Pstream::blocking
+        ) const;
 
         template<class Type2>
-        tmp<Field<Type2> > receiveEdgeField() const;
+        tmp<Field<Type2> > receiveEdgeField
+        (
+            const Pstream::commsTypes commsType = Pstream::blocking
+        ) const;
 
         //- Templated add diagonal/source functions
         template<class Type2>
-        void initAddFieldTempl(const Field<Type2>&) const;
+        void initAddFieldTempl
+        (
+            const Pstream::commsTypes commsType,
+            const Field<Type2>&
+        ) const;
 
         template<class Type2>
-        void addFieldTempl(Field<Type2>&) const;
+        void addFieldTempl
+        (
+            const Pstream::commsTypes commsType,
+            Field<Type2>&
+        ) const;
 
 
 public:
@@ -234,10 +252,16 @@ public:
             }
 
             //- Initialise evaluation of the patch field
-            virtual void initEvaluate(const bool = false);
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Init add field to internal field
             virtual void initAddField() const;
@@ -292,7 +316,7 @@ public:
                 const lduMatrix& m,
                 const scalarField& coeffs,
                 const direction cmpt,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType
             ) const;
 
             //- Update result field based on interface functionality
@@ -302,7 +326,8 @@ public:
                 scalarField& result,
                 const lduMatrix& m,
                 const scalarField& coeffs,
-                const direction cmpt
+                const direction cmpt,
+                const Pstream::commsTypes commsType
             ) const;
 };
 

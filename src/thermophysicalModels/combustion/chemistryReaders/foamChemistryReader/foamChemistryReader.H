@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    foamChemistryReader
+    Foam::foamChemistryReader
 
 Description
+    Chemistry reader for OpenFOAM format
 
 SourceFiles
     foamChemistryReader.C
@@ -59,7 +60,7 @@ class foamChemistryReader
     public chemistryReader
 {
         //- Table of the thermodynamic data given in the foamChemistry file
-        HashPtrTable<reactionThermo> specieThermo_;
+        HashPtrTable<reactionThermo> speciesThermo_;
 
         //- Table of species
         speciesTable speciesTable_;
@@ -114,7 +115,7 @@ public:
         //- Table of the thermodynamic data given in the foamChemistry file
         const HashPtrTable<reactionThermo>& sThermo() const
         {
-            return specieThermo_;
+            return speciesThermo_;
         }
 
         //- List of the reactions

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cloud
+    Foam::cloud
 
 Description
+    A cloud is a collection of lagrangian particles
 
 SourceFiles
     cloud.C
@@ -35,14 +36,14 @@ SourceFiles
 #ifndef cloud_H
 #define cloud_H
 
-#include "regIOobject.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -51,8 +52,9 @@ class mapPolyMesh;
 
 class cloud
 :
-    public regIOobject
+    public objectRegistry
 {
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -65,13 +67,17 @@ class cloud
 public:
 
     //- Runtime type information
-    TypeName("Cloud");
+    TypeName("cloud");
 
 
     // Constructors
 
-        //- Construct for the given objectRegistry
-        cloud(const objectRegistry& obr);
+        //- Construct for the given objectRegistry and named cloud instance
+        cloud
+        (
+            const objectRegistry& obr,
+            const word& cloudName = "defaultCloud"
+        );
 
 
     // Destructor

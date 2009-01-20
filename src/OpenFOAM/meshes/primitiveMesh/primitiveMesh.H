@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    primitiveMesh
+    Foam::primitiveMesh
 
 Description
     Cell-face mesh analysis engine
@@ -65,6 +65,7 @@ SourceFiles
 #include "boolList.H"
 #include "labelHashSet.H"
 #include "Map.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,8 +82,20 @@ class primitiveMesh
 
         // Primitive size data
 
+            //- Number of internal points (or -1 if points not sorted)
+            label nInternalPoints_;
+
             //- Number of points
             label nPoints_;
+
+            //- Number of internal edges using 0 boundary points
+            mutable label nInternal0Edges_;
+
+            //- Number of internal edges using 0 or 1 boundary points
+            mutable label nInternal1Edges_;
+
+            //- Number of internal edges using 0,1 or 2boundary points
+            mutable label nInternalEdges_;
 
             //- Number of edges
             mutable label nEdges_;
@@ -97,37 +110,16 @@ class primitiveMesh
             label nCells_;
 
 
-        // Minimum mesh data
-
-            //- Points
-            pointField::subField points_;
-
-            //- Faces
-            faceList::subList faces_;
-
-            //- Face-owner cells
-            labelList::subList faceOwner_;
-
-            //- Face-neighbour cells
-            labelList::subList faceNeighbour_;
-
-            //- Have the primitives been cleared
-            bool clearedPrimitives_;
-
-
-        // Mesh motion
-
-            //- Old points
-            mutable pointField::subField* oldPointsPtr_;
-
-
         // Shapes
 
             //- Cell shapes
             mutable cellShapeList* cellShapesPtr_;
 
-            //- Edges
+            //- Edges.  Sorted to separate internal and boundary edges
             mutable edgeList* edgesPtr_;
+
+            //- Edges ordered in upper triangular order
+            mutable edgeList* orderedEdgesPtr_;
 
 
         // Connectivity
@@ -190,8 +182,6 @@ class primitiveMesh
         void operator=(const primitiveMesh&);
 
 
-        // Private member functions to calculate demand driven data
-
         // Topological calculations
 
             //- Calculate cell shapes
@@ -200,43 +190,43 @@ class primitiveMesh
             //- Calculate cell-cell addressing
             void calcCellCells() const;
 
-            //- Calculate cell-edge addressing
-            void calcEdgeCells() const;
-
             //- Calculate point-cell addressing
             void calcPointCells() const;
 
             //- Calculate cell-face addressing
             void calcCells() const;
 
-            //- Calculate face-edge addressing
-            void calcEdgeFaces() const;
-
-            //- Calculate point-face addressing
-            void calcPointFaces() const;
-
             //- Calculate edge list
             void calcCellEdges() const;
-
-            //- Calculate point-edge addressing
-            void calcPointEdges() const;
 
             //- Calculate point-point addressing
             void calcPointPoints() const;
 
-            //- Calculate cell-point addressing
-            void calcCellPoints() const;
+            //- Calculate edges, pointEdges and faceEdges (if doFaceEdges=true)
+            //  During edge calculation, a larger set of data is assembled.
+            //  Create and destroy as a set, using clearOutEdges()
+            void calcEdges(const bool doFaceEdges) const;
 
-            //- During edge calculation, a larger set of data is assembled.
-            // Create and destroy as a set, using clearOutEdges()
-            void calcEdges() const;
             void clearOutEdges();
+            //- Helper: return (after optional creation) edge between two points
+            static label getEdge
+            (
+                List<DynamicList<label> >&,
+                DynamicList<edge>&,
+                const label pA,
+                const label pB
+            );
+
+            //- Calculated ordered edges
+            //  HJ, 6/Jan/2009
+            void calcOrderedEdges() const;
 
 
         // Geometrical calculations
 
             //- Calculate face centres and areas
             void calcFaceCentresAndAreas() const;
+
             void makeFaceCentresAndAreas
             (
                 const pointField& p,
@@ -258,7 +248,7 @@ class primitiveMesh
             void calcEdgeVectors() const;
 
 
-    // Helper functions for mesh checking
+        // Helper functions for mesh checking
 
             //- Check if all points on face are shared with another face.
             bool checkDuplicateFaces
@@ -347,11 +337,7 @@ public:
             const label nPoints,
             const label nInternalFaces,
             const label nFaces,
-            const label nCells,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& faceOwner,
-            const labelList& faceNeighbour
+            const label nCells
         );
 
 
@@ -362,30 +348,22 @@ public:
 
     // Member Functions
 
-        //- Reset this primitiveMesh given a complete set of data
+        //- Reset this primitiveMesh given the primitive array sizes
         void reset
         (
             const label nPoints,
             const label nInternalFaces,
             const label nFaces,
-            const label nCells,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& faceOwner,
-            const labelList& faceNeighbour
+            const label nCells
         );
 
-        //- Reset this primitiveMesh given a complete set of data and cells
+        //- Reset this primitiveMesh given the primitive array sizes and cells
         void reset
         (
             const label nPoints,
             const label nInternalFaces,
             const label nFaces,
             const label nCells,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& faceOwner,
-            const labelList& faceNeighbour,
             cellList& cells
         );
 
@@ -400,26 +378,48 @@ public:
                 inline label nFaces() const;
                 inline label nCells() const;
 
+                // If points are ordered (nInternalPoints != -1):
+
+                    //- Points not on boundary
+                    inline label nInternalPoints() const;
+
+                    //- Internal edges (i.e. not on boundary face) using
+                    //  no boundary point
+                    inline label nInternal0Edges() const;
+                    //- Internal edges using 0 or 1 boundary point
+                    inline label nInternal1Edges() const;
+                    //- Internal edges using 0,1 or 2 boundary points
+                    inline label nInternalEdges() const;
+
 
             // Primitive mesh data
 
                 //- Return mesh points
-                const pointField& points() const;
+                virtual const pointField& points() const = 0;
 
                 //- Return faces
-                const faceList& faces() const;
+                virtual const faceList& faces() const = 0;
 
-                //- Face owner addresing
-                inline const labelList& faceOwner() const;
+                //- Face face-owner addresing
+                virtual const labelList& faceOwner() const = 0;
 
-                //- Face neighbour addressing
-                inline const labelList& faceNeighbour() const;
+                //- Face face-neighbour addressing
+                virtual const labelList& faceNeighbour() const = 0;
+
+                //- Return old points for mesh motion
+                virtual const pointField& oldPoints() const = 0;
+
+
+            // Derived mesh data
 
                 //- Return cell shapes
                 const cellShapeList& cellShapes() const;
 
-                //- Return mesh edges
+                //- Return mesh edges. Uses calcEdges.
                 const edgeList& edges() const;
+
+                //- Return mesh edges ordered in upper triangular order
+                const edgeList& orderedEdges() const;
 
                 //- Helper function to calculate cell-face addressing from
                 //  face-cell addressing. If nCells is not provided it will
@@ -432,17 +432,23 @@ public:
                     const label nCells = -1
                 );
 
-
-            // Mesh motion
-
-                //- Return old points
-                const pointField& oldPoints() const;
-
+                //- Helper function to calculate point ordering. Returns true
+                //  if points already ordered, false and fills pointMap (old to
+                //  new). Map splits points into those not used by any boundary
+                //  face and those that are.
+                static bool calcPointOrder
+                (
+                    label& nInternalPoints,
+                    labelList& pointMap,
+                    const faceList&,
+                    const label nInternalFaces,
+                    const label nPoints
+                );
 
             // Return mesh connectivity
 
                 const labelListList& cellCells() const;
-                // faceCells given as faceOwner and faceNeighbour
+                // faceCells given as owner and neighbour
                 const labelListList& edgeCells() const;
                 const labelListList& pointCells() const;
 
@@ -580,6 +586,14 @@ public:
                     labelHashSet* setPtr
                 ) const;
 
+                //- Check edge alignment for 1D/2D cases
+                bool checkEdgeAlignment
+                (
+                    const bool report,
+                    const Vector<label>& directions,
+                    labelHashSet* setPtr = NULL
+                ) const;
+
                 //- Check for unused points
                 bool checkPoints
                 (
@@ -673,13 +687,6 @@ public:
 
             //- Clear all geometry and addressing unnecessary for CFD
             void clearOut();
-
-            //- Clear primitive data.  Access to points and faces
-            //  will be denied
-            void clearPrimitives();
-
-            //- Clear everyting primitive, geometry and addressing
-            void clearAll();
 };
 
 

@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    floatScalar
+Typedef
+    Foam::floatScalar
 
 Description
     Float precision floating point scalar type.
@@ -54,8 +54,10 @@ typedef float floatScalar;
 //  IEEE single precision number.  See limits.h or float.h)
 static const floatScalar floatScalarGREAT = 1.0e+6;
 static const floatScalar floatScalarVGREAT = 1.0e+37;
+static const floatScalar floatScalarROOTVGREAT = 1.0e+18;
 static const floatScalar floatScalarSMALL = 1.0e-6;
 static const floatScalar floatScalarVSMALL = 1.0e-37;
+static const floatScalar floatScalarROOTVSMALL = 1.0e-18;
 
 
 #define Scalar floatScalar

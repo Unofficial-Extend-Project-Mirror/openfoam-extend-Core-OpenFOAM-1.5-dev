@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    FaceCellWave
+    Foam::FaceCellWave
 
 Description
     Wave propagation of information through grid. Every iteration
@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class polyPatch;
 
@@ -104,9 +104,6 @@ class FaceCellWave
 
         //- Contains cyclics
         bool hasCyclicPatches_;
-
-        //- Contains processor patches
-        bool hasProcPatches_;
 
         //- Number of evaluations
         label nEvals_;
@@ -370,6 +367,7 @@ public:
             //- Iterate until no changes or maxIter reached. Returns number of
             //  unset cells (see getUnsetCells)
             label iterate(const label maxIter);
+
 };
 
 

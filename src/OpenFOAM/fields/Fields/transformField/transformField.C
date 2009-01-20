@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,146 +26,103 @@ License
 
 #include "transformField.H"
 #include "FieldM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "diagTensor.H"
 
 // * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
 
-template<class Type>
-void transform
+void Foam::transform
 (
-    Field<Type>& rtf,
-    const tensorField& trf,
-    const Field<Type>& tf
+    vectorField& rtf,
+    const quaternion& q,
+    const vectorField& tf
 )
 {
-    if (trf.size() == 1)
+    tensor t = q.R();
+    TFOR_ALL_F_OP_FUNC_S_F(vector, rtf, =, transform, tensor, t, vector, tf)
+}
+
+
+Foam::tmp<Foam::vectorField> Foam::transform
+(
+    const quaternion& q,
+    const vectorField& tf
+)
+{
+    tmp<vectorField > tranf(new vectorField(tf.size()));
+    transform(tranf(), q, tf);
+    return tranf;
+}
+
+
+Foam::tmp<Foam::vectorField> Foam::transform
+(
+    const quaternion& q,
+    const tmp<vectorField>& ttf
+)
+{
+    tmp<vectorField > tranf = reuseTmp<vector, vector>::New(ttf);
+    transform(tranf(), q, ttf());
+    reuseTmp<vector, vector>::clear(ttf);
+    return tranf;
+}
+
+
+void Foam::transform
+(
+    vectorField& rtf,
+    const septernion& tr,
+    const vectorField& tf
+)
+{
+    vector T = tr.t();
+
+    // Check if any rotation
+    if (mag(tr.r().R() - I) > SMALL)
     {
-        return transform(rtf, trf[0], tf);
+        transform(rtf, tr.r(), tf);
+
+        if (mag(T) > VSMALL)
+        {
+            rtf += T;
+        }
     }
     else
     {
-        TFOR_ALL_F_OP_FUNC_F_F
-        (
-            Type, rtf, =, transform, tensor, trf, Type, tf
-        )
+        if (mag(T) > VSMALL)
+        {
+            TFOR_ALL_F_OP_S_OP_F(vector, rtf, =, vector, T, +, vector, tf);
+        }
+        else
+        {
+            rtf = vector::zero;
+        }
     }
 }
 
 
-template<class Type>
-tmp<Field<Type> > transform
+Foam::tmp<Foam::vectorField> Foam::transform
 (
-    const tensorField& trf,
-    const Field<Type>& tf
+    const septernion& tr,
+    const vectorField& tf
 )
 {
-    tmp<Field<Type> > tranf(new Field<Type> (tf.size()));
-    transform(tranf(), trf, tf);
+    tmp<vectorField > tranf(new vectorField(tf.size()));
+    transform(tranf(), tr, tf);
     return tranf;
 }
 
 
-template<class Type>
-tmp<Field<Type> > transform
+Foam::tmp<Foam::vectorField> Foam::transform
 (
-    const tensorField& trf,
-    const tmp<Field<Type> >& ttf
+    const septernion& tr,
+    const tmp<vectorField>& ttf
 )
 {
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), trf, ttf());
-    reuseTmp<Type, Type>::clear(ttf);
+    tmp<vectorField > tranf = reuseTmp<vector, vector>::New(ttf);
+    transform(tranf(), tr, ttf());
+    reuseTmp<vector, vector>::clear(ttf);
     return tranf;
 }
 
-
-template<class Type>
-tmp<Field<Type> > transform
-(
-    const tmp<tensorField>& ttrf,
-    const Field<Type>& tf
-)
-{
-    tmp<Field<Type> > tranf(new Field<Type> (tf.size()));
-    transform(tranf(), ttrf(), tf);
-    ttrf.clear();
-    return tranf;
-}
-
-
-template<class Type>
-tmp<Field<Type> > transform
-(
-    const tmp<tensorField>& ttrf,
-    const tmp<Field<Type> >& ttf
-)
-{
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), ttrf(), ttf());
-    reuseTmp<Type, Type>::clear(ttf);
-    ttrf.clear();
-    return tranf;
-}
-
-
-template<class Type>
-void transform
-(
-    Field<Type>& rtf,
-    const tensor& t,
-    const Field<Type>& tf
-)
-{
-    TFOR_ALL_F_OP_FUNC_S_F(Type, rtf, =, transform, tensor, t, Type, tf)
-}
-
-
-template<class Type>
-tmp<Field<Type> > transform
-(
-    const tensor& t,
-    const Field<Type>& tf
-)
-{
-    tmp<Field<Type> > tranf(new Field<Type>(tf.size()));
-    transform(tranf(), t, tf);
-    return tranf;
-}
-
-
-template<class Type>
-tmp<Field<Type> > transform
-(
-    const tensor& t,
-    const tmp<Field<Type> >& ttf
-)
-{
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), t, ttf());
-    reuseTmp<Type, Type>::clear(ttf);
-    return tranf;
-}
-
-
-template<class Type1, class Type2>
-tmp<Field<Type1> > transformFieldMask(const Field<Type2>& f)
-{
-    return f;
-}
-
-template<class Type1, class Type2>
-tmp<Field<Type1> > transformFieldMask(const tmp<Field<Type2> >& tf)
-{
-    return tmp<Field<Type1> >(tf.ptr());
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    token
+    Foam::token
 
 Description
     A token holds items read from Istream.
@@ -55,9 +55,17 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class token;
+Istream& operator>>(Istream&, token&);
+Ostream& operator<<(Ostream&, const token&);
+
 /*---------------------------------------------------------------------------*\
                            Class token Declaration
 \*---------------------------------------------------------------------------*/
+
+#include "CintDefs.H"
 
 class token
 {
@@ -196,10 +204,13 @@ public:
 
         // IOstream Operators
 
+            #ifndef __MAKECINT__
             friend Ostream& operator<<(Ostream&, const compound&);
+            #endif
     };
 
 
+    //- A templated class for holding compound tokens
     template<class T>
     class Compound
     :
@@ -265,6 +276,11 @@ private:
 
 
 public:
+
+    // Static data members
+
+        static const char* const typeName;
+
 
     // Constructors
 
@@ -412,6 +428,13 @@ public:
 
         friend ostream& operator<<(ostream&, const InfoProxy<token>&);
 };
+
+#include "CintUndefs.H"
+
+Ostream& operator<<(Ostream&, const token::punctuationToken&);
+ostream& operator<<(ostream&, const token::punctuationToken&);
+ostream& operator<<(ostream&, const InfoProxy<token>&);
+Ostream& operator<<(Ostream&, const token::compound&);
 
 
 #define defineCompoundTypeName(Type, Name)                                    \

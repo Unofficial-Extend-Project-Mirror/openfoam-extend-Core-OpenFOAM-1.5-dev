@@ -23,16 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    UPtrList
+    Foam::UPtrList
 
 Description
-    A UPtrList<class T> is a 1D array of pointers to objects
-    of T 'T', where the size of the array is known and used for
-    subscript bounds checking, etc.
-    The element operator [] returns a reference to the object
-    rather than a pointer.  Storage
-    is not allocated during construction or use but is supplied to the
-    constructor as an argument.
+    A 1D array of pointers to objects of type \<T\>, where the size of the
+    array is known and used for subscript bounds checking, etc.
+
+    The element operator [] returns a reference to the object rather than a
+    pointer.  Storage is not allocated during construction or use but is
+    supplied to the constructor as an argument.
 
 SourceFiles
     UPtrList.C
@@ -50,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class UPtrList;
 
@@ -181,6 +180,7 @@ public:
         class iterator;
         friend class iterator;
 
+        //- An STL iterator
         class iterator
         {
             T** ptr_;

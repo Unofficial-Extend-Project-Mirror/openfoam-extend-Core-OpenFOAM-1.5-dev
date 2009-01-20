@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return a string representation of an uint
 word name(const unsigned int i)
 {
     std::ostringstream osBuffer;
@@ -66,7 +65,7 @@ Istream& operator>>(Istream& is, unsigned int& i)
 
     if (t.isLabel())
     {
-        i = uint(t.labelToken());
+        i = unsigned(t.labelToken());
     }
     else
     {

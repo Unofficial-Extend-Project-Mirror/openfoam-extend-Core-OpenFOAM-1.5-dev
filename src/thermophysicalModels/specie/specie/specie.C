@@ -36,15 +36,15 @@ Description
 namespace Foam
 {
 
-/* * * * * * * * * * * * * Public Constants * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * public constants  * * * * * * * * * * * * */
 
-// Universal gas constant (default in [J/(kmol K)])
+//- Universal gas constant (default in [J/(kmol K)])
 const scalar specie::RR = dimensionedConstant("R", 8314.51);
 
-// Standard pressure (default in [Pa])
+//- Standard pressure (default in [Pa])
 const scalar specie::Pstd = dimensionedConstant("Pstd", 1.0e5);
 
-// Standard temperature (default in [K])
+//- Standard temperature (default in [K])
 const scalar specie::Tstd = dimensionedConstant("Tstd", 298.15);
 
 

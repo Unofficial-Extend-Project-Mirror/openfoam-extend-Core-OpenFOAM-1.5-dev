@@ -33,31 +33,27 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(wedgePolyPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(wedgePolyPatch, 0);
-
-addToRunTimeSelectionTable(polyPatch, wedgePolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, wedgePolyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, wedgePolyPatch, dictionary);
-
+    addToRunTimeSelectionTable(polyPatch, wedgePolyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, wedgePolyPatch, dictionary);
+}
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void wedgePolyPatch::initTransforms()
+void Foam::wedgePolyPatch::initTransforms()
 {
-    const pointField& points = allPoints();
+    const pointField& points = this->points();
 
-    vector n(operator[](0).normal(points));
-    n /= mag(n);
+    patchNormal_ = operator[](0).normal(points);
+    patchNormal_ /= mag(patchNormal_);
 
     centreNormal_ =
         vector
         (
-            sign(n.x())*(::Foam::max(mag(n.x()), 0.5) - 0.5),
-            sign(n.y())*(::Foam::max(mag(n.y()), 0.5) - 0.5),
-            sign(n.z())*(::Foam::max(mag(n.z()), 0.5) - 0.5)
+            sign(patchNormal_.x())*(max(mag(patchNormal_.x()), 0.5) - 0.5),
+            sign(patchNormal_.y())*(max(mag(patchNormal_.y()), 0.5) - 0.5),
+            sign(patchNormal_.z())*(max(mag(patchNormal_.z()), 0.5) - 0.5)
         );
     centreNormal_ /= mag(centreNormal_);
 
@@ -78,7 +74,7 @@ void wedgePolyPatch::initTransforms()
             << exit(FatalError);
     }
 
-    axis_ = centreNormal_ ^ n;
+    axis_ = centreNormal_ ^ patchNormal_;
     scalar magAxis = mag(axis_);
     axis_ /= magAxis;
 
@@ -93,20 +89,19 @@ void wedgePolyPatch::initTransforms()
                " with the coordinate plane" << nl
             << "    and the the pair of wedge planes should be symmetric"
             << " about the coordinate plane." << nl
-            << "    Normal of face " << 0 << " is " << n
+            << "    Normal of face " << 0 << " is " << patchNormal_
             << " , implied coordinate plane direction is " << centreNormal_
             << exit(FatalError);
     }
 
-    faceT_ = rotationTensor(centreNormal_, n);
+    faceT_ = rotationTensor(centreNormal_, patchNormal_);
     cellT_ = faceT_ & faceT_;
 }
 
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-// Construct from components
-wedgePolyPatch::wedgePolyPatch
+Foam::wedgePolyPatch::wedgePolyPatch
 (
     const word& name,
     const label size,
@@ -121,22 +116,7 @@ wedgePolyPatch::wedgePolyPatch
 }
 
 
-// Construct from Istream
-wedgePolyPatch::wedgePolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm)
-{
-    initTransforms();
-}
-
-
-// Construct from dictionary
-wedgePolyPatch::wedgePolyPatch
+Foam::wedgePolyPatch::wedgePolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -150,8 +130,7 @@ wedgePolyPatch::wedgePolyPatch
 }
 
 
-//- Construct as copy, resetting the boundary mesh
-wedgePolyPatch::wedgePolyPatch
+Foam::wedgePolyPatch::wedgePolyPatch
 (
     const wedgePolyPatch& pp,
     const polyBoundaryMesh& bm
@@ -163,8 +142,7 @@ wedgePolyPatch::wedgePolyPatch
 }
 
 
-//- Construct as copy, resetting the face list and boundary mesh data
-wedgePolyPatch::wedgePolyPatch
+Foam::wedgePolyPatch::wedgePolyPatch
 (
     const wedgePolyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -178,9 +156,5 @@ wedgePolyPatch::wedgePolyPatch
     initTransforms();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

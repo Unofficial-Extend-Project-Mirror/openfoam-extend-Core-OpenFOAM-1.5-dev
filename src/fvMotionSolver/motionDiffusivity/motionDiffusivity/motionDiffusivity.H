@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    motionDiffusivity
+    Foam::motionDiffusivity
 
 Description
     Abstract base class for cell-centre mesh motion diffusivity.

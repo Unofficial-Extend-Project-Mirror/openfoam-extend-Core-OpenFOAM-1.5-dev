@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "symmetryPolyPatch.H"
@@ -33,20 +31,15 @@ Description
 
 namespace Foam
 {
+    defineTypeNameAndDebug(symmetryPolyPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(symmetryPolyPatch, 0);
-
-addToRunTimeSelectionTable(polyPatch, symmetryPolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, symmetryPolyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, symmetryPolyPatch, dictionary);
-
+    addToRunTimeSelectionTable(polyPatch, symmetryPolyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, symmetryPolyPatch, dictionary);
+}
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-// Construct from components
-symmetryPolyPatch::symmetryPolyPatch
+Foam::symmetryPolyPatch::symmetryPolyPatch
 (
     const word& name,
     const label size,
@@ -59,20 +52,7 @@ symmetryPolyPatch::symmetryPolyPatch
 {}
 
 
-// Construct from Istream
-symmetryPolyPatch::symmetryPolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm)
-{}
-
-
-// Construct from dictionary
-symmetryPolyPatch::symmetryPolyPatch
+Foam::symmetryPolyPatch::symmetryPolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -84,8 +64,7 @@ symmetryPolyPatch::symmetryPolyPatch
 {}
 
 
-//- Construct as copy, resetting the boundary mesh
-symmetryPolyPatch::symmetryPolyPatch
+Foam::symmetryPolyPatch::symmetryPolyPatch
 (
     const symmetryPolyPatch& pp,
     const polyBoundaryMesh& bm
@@ -95,8 +74,7 @@ symmetryPolyPatch::symmetryPolyPatch
 {}
 
 
-//- Construct as copy, resetting the face list and boundary mesh data
-symmetryPolyPatch::symmetryPolyPatch
+Foam::symmetryPolyPatch::symmetryPolyPatch
 (
     const symmetryPolyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -108,9 +86,5 @@ symmetryPolyPatch::symmetryPolyPatch
     polyPatch(pp, bm, index, newSize, newStart)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

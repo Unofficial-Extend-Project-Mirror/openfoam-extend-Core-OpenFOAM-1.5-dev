@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cell
+    Foam::cell
 
 Description
     A cell is defined as a list of faces with extra functionality
@@ -36,18 +36,20 @@ SourceFiles
 #ifndef cell_H
 #define cell_H
 
-#include "labelList.H"
-#include "pointField.H"
-#include "edgeList.H"
 #include "faceList.H"
-#include "autoPtr.H"
+#include "oppositeFace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class oppositeFace;
+// Forward declaration of friend functions and operators
+
+class cell;
+bool operator==(const cell&, const cell&);
+inline bool operator!=(const cell&, const cell&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class cell Declaration
@@ -59,6 +61,11 @@ class cell
 {
 
 public:
+
+    // Static data members
+
+        static const char* const typeName;
+
 
     // Constructors
 
@@ -122,7 +129,7 @@ public:
     // Friend Operators
 
         friend bool operator==(const cell&, const cell&);
-        inline friend bool operator!=(const cell&, const cell&);
+        friend bool operator!=(const cell&, const cell&);
 };
 
 

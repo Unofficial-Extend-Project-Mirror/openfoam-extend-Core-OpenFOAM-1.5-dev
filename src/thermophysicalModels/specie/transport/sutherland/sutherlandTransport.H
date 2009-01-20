@@ -23,11 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sutherlandTransport
+    Foam::sutherlandTransport
 
 Description
-    Transport package using Sutherland's formula.  Templated ito a given
-    thermodynamics package (needed for thermal conductivity).
+    Transport package using Sutherland's formula.
+
+    Templated into a given thermodynamics package (needed for thermal
+    conductivity).
+
+    Dynamic viscosity [kg/m.s]
+    @f[
+        \mu = A_s \frac{\sqrt{T}}{1 + T_s / T}
+    @f]
 
 SourceFiles
     sutherlandTransportI.H
@@ -43,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class thermo> class sutherlandTransport;
 

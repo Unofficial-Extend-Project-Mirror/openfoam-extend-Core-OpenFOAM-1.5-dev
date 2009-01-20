@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    vectorList
+Typedef
+    Foam::vectorList
 
 Description
     List of vectors.
@@ -41,7 +41,6 @@ Description
 namespace Foam
 {
     typedef List<vector> vectorList;
-    typedef List<vectorList> vectorListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

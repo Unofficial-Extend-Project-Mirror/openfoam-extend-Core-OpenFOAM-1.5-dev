@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    plane
+    Foam::plane
 
 Description
     Geometric class that creates a 2D plane and can return the intersection
@@ -47,6 +47,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class plane;
+bool operator==(const plane&, const plane&);
+bool operator!=(const plane&, const plane&);
+Ostream& operator<<(Ostream&, const plane&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class plane Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,6 +63,7 @@ class plane
 {
 public:
 
+        //- A direction and a reference point
         class ray
         {
             point refPoint_;

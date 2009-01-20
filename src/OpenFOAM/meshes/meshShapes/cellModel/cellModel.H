@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellModel
+    Foam::cellModel
 
 Description
     Maps a geometry to a set of cell primitives, which enables
@@ -50,6 +50,14 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class cellModel;
+inline bool operator==(const cellModel&, const cellModel&);
+inline bool operator!=(const cellModel&, const cellModel&);
+Ostream& operator<<(Ostream&, const cellModel&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class cellModel Declaration
@@ -80,7 +88,7 @@ public:
     // Constructors
 
         //- Construct from Istream
-        explicit cellModel(Istream&);
+        cellModel(Istream&);
 
         //- Return a new cellModel on free-store created from Istream
         static autoPtr<cellModel> New(Istream& is)
@@ -156,10 +164,10 @@ public:
     // Friend operators
 
         //- Equality operator: true => ptr to models are equal !
-        inline friend bool operator==(const cellModel&, const cellModel&);
+        friend bool operator==(const cellModel&, const cellModel&);
 
         //- Inequality operator: true => ptr to models are not equal !
-        inline friend bool operator!=(const cellModel&, const cellModel&);
+        friend bool operator!=(const cellModel&, const cellModel&);
 
 
     // Ostream operator

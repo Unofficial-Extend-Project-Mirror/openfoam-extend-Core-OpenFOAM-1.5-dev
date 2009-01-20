@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    regIOobject
+    Foam::regIOobject
 
 Description
     regIOobject is an abstract class derived from IOobject to handle
@@ -124,20 +124,20 @@ public:
             //- Is this object owned by the registry
             inline bool ownedByRegistry() const;
 
-            //- Transfer ownership of this object to it's registry
+            //- Transfer ownership of this object to its registry
             inline void store();
 
-            //- Transfer ownership of the given object pointer to it's registry
+            //- Transfer ownership of the given object pointer to its registry
             //  and return reference to object.
             template<class Type>
             inline static Type& store(Type* tPtr);
 
-            //- Transfer ownership of the given object pointer to it's registry
+            //- Transfer ownership of the given object pointer to its registry
             //  and return reference to object.
             template<class Type>
             inline static Type& store(autoPtr<Type>& atPtr);
 
-            //- Release ownership of this object from it's registry
+            //- Release ownership of this object from its registry
             inline void release();
 
 
@@ -200,7 +200,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "regIOobjectI.H"
+#include "regIOobjectI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

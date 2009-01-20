@@ -89,14 +89,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        CyclicPointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         CyclicPointPatchField
         (
@@ -192,7 +184,10 @@ public:
 
 
             //- Evaluate the patch field
-            virtual void evaluate()
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            )
             {}
 
             //- Add field to internal field
@@ -240,7 +235,8 @@ public:
                 scalarField&,
                 const lduMatrix&,
                 const scalarField&,
-                const direction
+                const direction,
+                const Pstream::commsTypes commsType
             ) const
             {}
 };

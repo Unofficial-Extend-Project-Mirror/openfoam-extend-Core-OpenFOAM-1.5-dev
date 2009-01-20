@@ -31,35 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class T>
-inline void Foam::lduMatrix::solver::readControl
-(
-    const dictionary& dict,
-    T& control,
-    const word& controlName
-)
-{
-    if (dict.found(controlName))
-    {
-        dict.lookup(controlName) >> control;
-    }
-    else
-    {
-        FatalIOErrorIn
-        (
-            "void lduMatrix::solver::readControl\n"
-            "(\n"
-            "    const dictionary& dict,\n"
-            "    T& control,\n"
-            "    const word& controlName\n"
-            ")",
-            dict
-        )   << "Cannot read control " << controlName
-            << abort(FatalIOError);
-    }
-}
-
-
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::lduMatrix::H(const Field<Type>& psi) const
 {

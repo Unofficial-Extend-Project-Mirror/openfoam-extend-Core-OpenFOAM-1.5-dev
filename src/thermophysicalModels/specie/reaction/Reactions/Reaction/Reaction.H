@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Reaction
+    Foam::Reaction
 
 Description
     Simple extension of ReactionThermo to handle reaction kinetics in addition
@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class ReactionThermo>
 class Reaction;
@@ -72,7 +72,7 @@ public:
 
     // Public data types
 
-        //- Class to hold the specie index and it's coefficients in the
+        //- Class to hold the specie index and its coefficients in the
         //  reaction rate expression
         struct specieCoeffs
         {
@@ -81,6 +81,10 @@ public:
             scalar exponent;
 
             specieCoeffs()
+            :
+                index(-1),
+                stoichCoeff(0),
+                exponent(1)
             {}
 
             specieCoeffs(const speciesTable& species, Istream& is);
@@ -157,7 +161,7 @@ public:
         {
             const speciesTable& species_;
             const HashPtrTable<ReactionThermo>& thermoDatabase_;
-        
+
         public:
 
             iNew
@@ -257,7 +261,7 @@ public:
                 const scalar T,
                 const scalar p,
                 const scalarField& c
-            ) const;            
+            ) const;
 
             //- Reverse rate constant from the given forward rate constant
             virtual scalar kr

@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    mapPolyMesh
+    Foam::mapPolyMesh
 
 Description
     Class containing mesh-to-mesh mapping information after a change
     in polyMesh topology.
-    General: 
-        - pointMap/faceMap/cellMap:
-        from current mesh back to previous mesh.
-        (so to 'pull' the information onto the current mesh)
 
-        - reversePointMap/faceMap/cellMap:
-        from previous mesh to current. (so to 'push' information)
+    General:
+        - pointMap/faceMap/cellMap: \n
+          from current mesh back to previous mesh.
+          (so to 'pull' the information onto the current mesh)
+        - reversePointMap/faceMap/cellMap: \n
+          from previous mesh to current. (so to 'push' information)
 
     In the topology change points/faces/cells
     - can be unchanged. (faces might be renumbered though)
@@ -42,7 +42,7 @@ Description
     - can be removed into/merged with existing same entity
       (so point merged with other point, face with other face, cell with
        other cell. Note that probably only cell with cell is relevant)
-    - can be added from existing same 'master' entity 
+    - can be added from existing same 'master' entity
       (so point from point, face from face and cell from cell)
     - can be inflated: face out of edge or point,
         cell out of face, edge or point.
@@ -50,88 +50,86 @@ Description
 
     All this information is nessecary to correctly map fields.
 
-    points
-    ------
-    unchanged:
-        pointMap[pointI] contains old point label
-        reversePointMap[oldPointI] contains new point label
-    removed:
-        reversePointMap[oldPointI] contains -1
-    merged into point:
+    @par points
+
+    - unchanged:
+        - pointMap[pointI] contains old point label
+        - reversePointMap[oldPointI] contains new point label
+    - removed:
+        - reversePointMap[oldPointI] contains -1
+    - merged into point:
         - reversePointMap[oldPointI] contains <-1 : -newPointI-2
         - pointMap[pointI] contains the old master point label
         - pointsFromPoints gives for pointI all the old point labels
           (including the old master point!)
-    added-from-same:
-        pointMap[pointI] contains the old master point label 
-    appended:
-        pointMap[pointI] contains -1
+    - added-from-same:
+        - pointMap[pointI] contains the old master point label
+    - appended:
+        - pointMap[pointI] contains -1
 
+    @par faces
 
-    faces
-    -----
-    unchanged:
-        faceMap[faceI] contains old face label
-        reverseFaceMap[oldFaceI] contains new face label
-    removed:
-        reverseFaceMap[oldFaceI] contains -1
-    merged into face:
+    - unchanged:
+        - faceMap[faceI] contains old face label
+        - reverseFaceMap[oldFaceI] contains new face label
+    - removed:
+        - reverseFaceMap[oldFaceI] contains -1
+    - merged into face:
         - reverseFaceMap[oldFaceI] contains <-1 : -newFaceI-2
         - faceMap[faceI] contains the old master face label
         - facesFromFaces gives for faceI all the old face labels
           (including the old master face!)
-    added-from-same:
-        faceMap[faceI] contains the old master face label 
-    inflated-from-edge:
-        faceMap[faceI] contains -1
-        facesFromEdges contains an entry with
+    - added-from-same:
+        - faceMap[faceI] contains the old master face label
+    - inflated-from-edge:
+        - faceMap[faceI] contains -1
+        - facesFromEdges contains an entry with
             - faceI
             - list of faces(*) on old mesh that connected to the old edge
-    inflated-from-point:
-        faceMap[faceI] contains -1
-        facesFromPoints contains an entry with
+    - inflated-from-point:
+        - faceMap[faceI] contains -1
+        - facesFromPoints contains an entry with
             - faceI
             - list of faces(*) on old mesh that connected to the old point
-    appended:
-        faceMap[faceI] contains -1
+    - appended:
+        - faceMap[faceI] contains -1
 
-    *) if the newly inflated face is a boundary face the list of faces will
+    Note (*) \n
+       if the newly inflated face is a boundary face the list of faces will
        only be boundary faces; if the new face is an internal face they
        will only be internal faces.
 
+    @par cells
 
-    cells
-    -----
-    unchanged:
-        cellMap[cellI] contains old cell label
-        reverseCellMap[oldCellI] contains new cell label
-    removed:
-        reverseCellMap[oldCellI] contains -1
-    merged into cell:
+    - unchanged:
+        - cellMap[cellI] contains old cell label
+        - reverseCellMap[oldCellI] contains new cell label
+    - removed:
+        - reverseCellMap[oldCellI] contains -1
+    - merged into cell:
         - reverseCellMap[oldCellI] contains <-1 : -newCellI-2
-        - cellMap[cellI] contains the old master cell label 
+        - cellMap[cellI] contains the old master cell label
         - cellsFromCells gives for cellI all the old cell labels
           (including the old master cell!)
-    added-from-same:
-        cellMap[cellI] contains the old master cell label 
-    inflated-from-face:
-        cellMap[cellI] contains -1
-        cellsFromFaces contains an entry with
+    - added-from-same:
+        - cellMap[cellI] contains the old master cell label
+    - inflated-from-face:
+        - cellMap[cellI] contains -1
+        - cellsFromFaces contains an entry with
             - cellI
             - list of cells on old mesh that connected to the old face
-    inflated-from-edge:
-        cellMap[cellI] contains -1
-        cellsFromEdges contains an entry with
+    - inflated-from-edge:
+        - cellMap[cellI] contains -1
+        - cellsFromEdges contains an entry with
             - cellI
             - list of cells on old mesh that connected to the old edge
-    inflated-from-point:
-        cellMap[cellI] contains -1
-        cellsFromPoints contains an entry with
+    - inflated-from-point:
+        - cellMap[cellI] contains -1
+        - cellsFromPoints contains an entry with
             - cellI
             - list of cells on old mesh that connected to the old point
-    appended:
-        cellMap[cellI] contains -1
-
+    - appended:
+        - cellMap[cellI] contains -1
 
 
 SourceFiles
@@ -146,6 +144,7 @@ SourceFiles
 #include "objectMap.H"
 #include "pointField.H"
 #include "labelHashSet.H"
+#include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -604,7 +603,7 @@ public:
             //- Pre-motion point positions.
             //  This specifies the correct way of blowing up
             //  zero-volume objects
-            const pointField& preMotionPoints() const 
+            const pointField& preMotionPoints() const
             {
                 return preMotionPoints_;
             }

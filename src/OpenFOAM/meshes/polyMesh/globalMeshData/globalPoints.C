@@ -328,7 +328,12 @@ void Foam::globalPoints::sendPatchPoints(const labelHashSet& changedPoints)
                         << patchFaces.size() << endl;
                 }
 
-                OPstream toNeighbour(procPatch.neighbProcNo());
+                OPstream toNeighbour
+                (
+                    Pstream::blocking,
+                    procPatch.neighbProcNo()
+                );
+
                 toNeighbour << patchFaces << indexInFace << allInfo;
             }
         }
@@ -362,7 +367,11 @@ void Foam::globalPoints::receivePatchPoints(labelHashSet& changedPoints)
             List<procPointList> nbrInfo;
 
             {
-                IPstream fromNeighbour(procPatch.neighbProcNo());
+                IPstream fromNeighbour
+                (
+                    Pstream::blocking,
+                    procPatch.neighbProcNo()
+                );
                 fromNeighbour >> patchFaces >> indexInFace >> nbrInfo;
             }
 
@@ -636,7 +645,7 @@ void Foam::globalPoints::sendSharedPoints(const labelList& changedIndices) const
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(pp);
 
-            OPstream toNeighbour(procPatch.neighbProcNo());
+            OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
 
             if (debug)
             {
@@ -685,7 +694,11 @@ void Foam::globalPoints::receiveSharedPoints(labelList& changedIndices)
                 labelList nbrSharedPointLabels;
 
                 {
-                    IPstream fromNeighbour(procPatch.neighbProcNo());
+                    IPstream fromNeighbour
+                    (
+                        Pstream::blocking,
+                        procPatch.neighbProcNo()
+                    );
                     fromNeighbour >> nbrSharedPointAddr >> nbrSharedPointLabels;
                 }
 

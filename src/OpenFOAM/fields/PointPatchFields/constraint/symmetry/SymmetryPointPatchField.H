@@ -76,14 +76,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        SymmetryPointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         SymmetryPointPatchField
         (

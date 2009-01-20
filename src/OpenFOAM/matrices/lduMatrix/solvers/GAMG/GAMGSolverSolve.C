@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::lduSolverPerformance Foam::GAMGSolver::solve
+Foam::lduMatrix::solverPerformance Foam::GAMGSolver::solve
 (
     scalarField& x,
     const scalarField& b,
@@ -45,12 +45,12 @@ Foam::lduSolverPerformance Foam::GAMGSolver::solve
     scalarField Ax(x.size());
     matrix_.Amul(Ax, x, coupleBouCoeffs_, interfaces_, cmpt);
 
-    // Create the storage for the fineCorrection which may be used as a
+    // Create the storage for the finestCorrection which may be used as a
     // temporary in normFactor
-    scalarField fineCorrection(x.size());
+    scalarField finestCorrection(x.size());
 
     // Calculate normalisation factor
-    scalar normFactor = this->normFactor(x, b, Ax, fineCorrection, cmpt);
+    scalar normFactor = this->normFactor(x, b, Ax, finestCorrection, cmpt);
 
     if (debug >= 2)
     {
@@ -88,7 +88,7 @@ Foam::lduSolverPerformance Foam::GAMGSolver::solve
                 x,
                 b,
                 Ax,
-                fineCorrection,
+                finestCorrection,
                 finestResidual,
                 coarseCorrX,
                 coarseB,
@@ -119,7 +119,7 @@ void Foam::GAMGSolver::Vcycle
     scalarField& x,
     const scalarField& b,
     scalarField& Ax,
-    scalarField& fineCorrection,
+    scalarField& finestCorrection,
     scalarField& finestResidual,
     PtrList<scalarField>& coarseCorrX,
     PtrList<scalarField>& coarseB,
@@ -168,7 +168,7 @@ void Foam::GAMGSolver::Vcycle
             {
                 scalar sf = scalingFactor
                 (
-                    reinterpret_cast<scalarField&>(ACf),
+                    const_cast<scalarField&>(ACf.operator const scalarField&()),
                     matrixLevels_[leveli],
                     coarseCorrX[leveli],
                     coupleLevelsBouCoeffs_[leveli],
@@ -188,7 +188,7 @@ void Foam::GAMGSolver::Vcycle
             // Correct the residual with the new solution
             matrixLevels_[leveli].Amul
             (
-                reinterpret_cast<scalarField&>(ACf),
+                const_cast<scalarField&>(ACf.operator const scalarField&()),
                 coarseCorrX[leveli],
                 coupleLevelsBouCoeffs_[leveli],
                 interfaceLevels_[leveli],
@@ -231,11 +231,11 @@ void Foam::GAMGSolver::Vcycle
     for (label leveli = coarsestLevel - 1; leveli >= 0; leveli--)
     {
         // Create a field for the pre-smoothed correction field
-        // as a sub-field of the fineCorrection which is not
+        // as a sub-field of the finestCorrection which is not
         // currently being used
         scalarField::subField preSmoothedCoarseCorrField
         (
-            fineCorrection,
+            finestCorrection,
             coarseCorrX[leveli].size()
         );
 
@@ -265,7 +265,7 @@ void Foam::GAMGSolver::Vcycle
 
             scalar sf = scalingFactor
             (
-                reinterpret_cast<scalarField&>(ACf),
+                const_cast<scalarField&>(ACf.operator const scalarField&()),
                 matrixLevels_[leveli],
                 coarseCorrX[leveli],
                 coupleLevelsBouCoeffs_[leveli],
@@ -301,7 +301,7 @@ void Foam::GAMGSolver::Vcycle
     // Prolong the finest level correction
     agglomeration_.prolongField
     (
-        fineCorrection,
+        finestCorrection,
         coarseCorrX[0],
         0
     );
@@ -313,7 +313,7 @@ void Foam::GAMGSolver::Vcycle
         (
             Ax,
             matrix_,
-            fineCorrection,
+            finestCorrection,
             coupleBouCoeffs_,
             interfaces_,
             finestResidual,
@@ -327,14 +327,14 @@ void Foam::GAMGSolver::Vcycle
 
         forAll(x, i)
         {
-            x[i] += fsf*fineCorrection[i];
+            x[i] += fsf*finestCorrection[i];
         }
     }
     else
     {
         forAll(x, i)
         {
-            x[i] += fineCorrection[i];
+            x[i] += finestCorrection[i];
         }
     }
 

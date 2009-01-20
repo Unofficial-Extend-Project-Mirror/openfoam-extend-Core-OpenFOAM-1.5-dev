@@ -23,37 +23,36 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pdf
+    Foam::pdf
 
 Description
+    A library of runtime-selectable pdf's.
 
-    A library of runtime selectable pdf's.
     Returns a sampled value given the expectation (nu) and variance (sigma^2)
 
-    sample of planned pdfs (beta p. 374-375)
-
-    binomial
-    geometric
-    Poisson
-    hypergeometric
-    Pascal
-    uniform
-    exponential
-    normal
-    Gamma
-    chi
-    t?
-    F?
-    beta
-    Weibull
-    Rayleigh
-    Cauchy?
+    Sample of planned pdfs (beta p. 374-375):
+    - binomial
+    - geometric
+    - Poisson
+    - hypergeometric
+    - Pascal
+    - uniform
+    - exponential
+    - normal
+    - Gamma
+    - chi
+    - t?
+    - F?
+    - beta
+    - Weibull
+    - Rayleigh
+    - Cauchy?
 
     The pdf is tabulated in equidistant nPoints, in an interval.
     These values are integrated to obtain the cumulated pdf,
     which is then used to change the distribution from unifrom to
     the actual pdf.
-    
+
 SourceFiles
     pdfI.H
     pdf.C

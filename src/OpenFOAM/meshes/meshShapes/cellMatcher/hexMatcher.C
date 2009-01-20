@@ -22,13 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "hexMatcher.H"
 #include "primitiveMesh.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -64,7 +61,7 @@ bool Foam::hexMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -119,7 +116,7 @@ bool Foam::hexMatcher::matchShape
         (
             face4vert0,
             faceSize_[face4I],
-            !(faceOwner[faceMap_[face4I]] == cellI)
+            !(owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[1] = pointMap_[face4[face4vert1]];
 
@@ -129,7 +126,7 @@ bool Foam::hexMatcher::matchShape
         (
             face4vert1,
             faceSize_[face4I],
-            !(faceOwner[faceMap_[face4I]] == cellI)
+            !(owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[2] = pointMap_[face4[face4vert2]];
 
@@ -139,7 +136,7 @@ bool Foam::hexMatcher::matchShape
         (
             face4vert2,
             faceSize_[face4I],
-            !(faceOwner[faceMap_[face4I]] == cellI)
+            !(owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[3] = pointMap_[face4[face4vert3]];
 
@@ -163,7 +160,7 @@ bool Foam::hexMatcher::matchShape
         (
             face0vert0,
             faceSize_[face0I],
-            (faceOwner[faceMap_[face0I]] == cellI)
+            (owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[4] = pointMap_[face0[face0vert4]];
 
@@ -173,7 +170,7 @@ bool Foam::hexMatcher::matchShape
         (
             face0vert4,
             faceSize_[face0I],
-            (faceOwner[faceMap_[face0I]] == cellI)
+            (owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[7] = pointMap_[face0[face0vert7]];
 
@@ -197,7 +194,7 @@ bool Foam::hexMatcher::matchShape
         (
             face5vert4,
             faceSize_[face5I],
-            (faceOwner[faceMap_[face5I]] == cellI)
+            (owner[faceMap_[face5I]] == cellI)
         );
     vertLabels_[5] = pointMap_[face5[face5vert5]];
 
@@ -207,7 +204,7 @@ bool Foam::hexMatcher::matchShape
         (
             face5vert5,
             faceSize_[face5I],
-            (faceOwner[faceMap_[face5I]] == cellI)
+            (owner[faceMap_[face5I]] == cellI)
         );
     vertLabels_[6] = pointMap_[face5[face5vert6]];
 

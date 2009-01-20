@@ -60,7 +60,7 @@ fixFlagMatrix
           - transform(I - nHat*nHat, pTraits<Type>::one);
 
         Type cmi = cmptMag(implicitnessIndicator);
-        fixFlag = scale(cmi, cmi);
+        fixFlag = cmptMultiply(cmi, cmi);
 
         return fixFlag;
     }
@@ -89,27 +89,6 @@ BasicSymmetryPointPatchField
 )
 :
     ValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-BasicSymmetryPointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
-BasicSymmetryPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    ValuePointPatchField
-        <PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF, f)
 {}
 
 

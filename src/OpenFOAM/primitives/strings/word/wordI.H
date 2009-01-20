@@ -28,21 +28,23 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void word::stripInvalid()
+inline void Foam::word::stripInvalid()
 {
+    // skip stripping unless debug is active to avoid
+    // costly operations
     if (debug && string::stripInvalid<word>(*this))
     {
         std::cerr
-            << "word::stripInvalid() called for string "
+            << "word::stripInvalid() called for word "
             << this->c_str() << std::endl;
 
         if (debug > 1)
         {
+            std::cerr
+                << "    For debug level (= " << debug
+                << ") > 1 this is considered fatal" << std::endl;
             std::abort();
         }
     }
@@ -51,37 +53,44 @@ inline void word::stripInvalid()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline word::word(const word& w)
+inline Foam::word::word(const word& w)
 :
     string(w)
 {}
 
 
-inline word::word()
+inline Foam::word::word()
 :
     string()
 {}
 
 
-inline word::word(const string& str)
+inline Foam::word::word(const string& s)
 :
-    string(str)
+    string(s)
 {
     stripInvalid();
 }
 
 
-inline word::word(const std::string& stdStr)
+inline Foam::word::word(const std::string& s)
 :
-    string(stdStr)
+    string(s)
 {
     stripInvalid();
 }
 
 
-inline word::word(const char* chars)
+inline Foam::word::word(const char* s)
 :
-    string(chars)
+    string(s)
+{
+    stripInvalid();
+}
+
+inline Foam::word::word(const char* s, const size_type n)
+:
+    string(s, n)
 {
     stripInvalid();
 }
@@ -89,7 +98,7 @@ inline word::word(const char* chars)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool word::valid(char c)
+inline bool Foam::word::valid(char c)
 {
     return
     (
@@ -105,27 +114,27 @@ inline bool word::valid(char c)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void word::operator=(const word& q)
+inline void Foam::word::operator=(const word& q)
 {
     string::operator=(q);
 }
 
 
-inline void word::operator=(const string& q)
-{
-    string::operator=(q);
-    stripInvalid();
-}
-
-
-inline void word::operator=(const std::string& q)
+inline void Foam::word::operator=(const string& q)
 {
     string::operator=(q);
     stripInvalid();
 }
 
 
-inline void word::operator=(const char* q)
+inline void Foam::word::operator=(const std::string& q)
+{
+    string::operator=(q);
+    stripInvalid();
+}
+
+
+inline void Foam::word::operator=(const char* q)
 {
     string::operator=(q);
     stripInvalid();
@@ -134,7 +143,7 @@ inline void word::operator=(const char* q)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline word operator&(const word& a, const word& b)
+inline Foam::word Foam::operator&(const word& a, const word& b)
 {
     if (!b.size())
     {
@@ -149,9 +158,6 @@ inline word operator&(const word& a, const word& b)
     }
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

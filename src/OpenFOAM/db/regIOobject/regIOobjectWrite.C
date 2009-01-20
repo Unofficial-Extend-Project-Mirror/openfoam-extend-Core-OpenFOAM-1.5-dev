@@ -84,28 +84,35 @@ bool regIOobject::writeObject
             << "writing file " << objectPath();
     }
 
-    // Try opening an OFstream for object
-    OFstream os(objectPath(), ios_base::out|ios_base::trunc, fmt, ver, cmp);
 
-    // If this has failed, return (leave error handling to  Ostream class)
-    if (!os.good())
+    bool osGood = false;
+
     {
-        return false;
-    }
+        // Try opening an OFstream for object
+        OFstream os(objectPath(), ios_base::out|ios_base::trunc, fmt, ver, cmp);
 
-    if (!writeHeader(os))
-    {
-        return false;
-    }
+        // If this has failed, return (leave error handling to Ostream class)
+        if (!os.good())
+        {
+            return false;
+        }
 
-    // Write the data to the Ostream
-    if (!writeData(os))
-    {
-        return false;
-    }
+        if (!writeHeader(os))
+        {
+            return false;
+        }
 
-    os  << "\n\n// ************************************************************************* //"
-        << endl;
+        // Write the data to the Ostream
+        if (!writeData(os))
+        {
+            return false;
+        }
+
+        os  << "\n\n// ************************************************************************* //"
+            << endl;
+
+        osGood = os.good();
+    }
 
     if (OFstream::debug)
     {
@@ -119,7 +126,7 @@ bool regIOobject::writeObject
         lastModified_ = lastModified(objectPath());
     }
 
-    return os.good();
+    return osGood;
 }
 
 

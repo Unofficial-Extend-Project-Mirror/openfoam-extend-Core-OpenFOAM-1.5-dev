@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    IPstream
+    Foam::IPstream
 
 Description
     Input inter-processor communications stream.
@@ -60,6 +60,7 @@ class IPstream
         int fromProcNo_;
         label messageSize_;
 
+
     // Private member functions
 
         //- Check the bufferPosition_ against messageSize_ for EOF
@@ -81,6 +82,7 @@ public:
         //  read format and IO version
         IPstream
         (
+            const commsTypes commsType,
             const int fromProcNo,
             const label bufSize = 0,
             streamFormat format=BINARY,
@@ -110,10 +112,17 @@ public:
             //  message size
             static label read
             (
+                const commsTypes commsType,
                 const int fromProcNo,
                 char* buf,
                 const std::streamsize bufSize
             );
+
+            //- Non-blocking receives: wait until all have finished.
+            static void waitRequests();
+
+            //- Non-blocking receives: has request i finished?
+            static bool finishedRequest(const label i);
 
             //- Return next token from stream
             Istream& read(token&);

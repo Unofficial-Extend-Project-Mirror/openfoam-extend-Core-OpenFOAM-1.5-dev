@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    OSstream
+    Foam::OSstream
 
 Description
     Generic output stream.
 
 SourceFiles
+    OSstreamI.H
     OSwrite.C
     chkStream.C
 
@@ -38,6 +39,8 @@ SourceFiles
 #define OSstream_H
 
 #include "Ostream.H"
+#include "fileName.H"
+#include <iostream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +58,15 @@ class OSstream
     // Private data
 
         fileName name_;
+        #ifndef __CINT__
         ostream& os_;
+        #endif
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const OSstream&);
 
 
 protected:
@@ -85,23 +96,7 @@ public:
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             compressionType compression=UNCOMPRESSED
-        )
-        :
-            Ostream(format, version, compression),
-            name_(name),
-            os_(os)
-        {
-            if (os_.good())
-            {
-                setOpened();
-                setGood();
-                os_.precision(precision_);
-            }
-            else
-            {
-                setState(os_.rdstate());
-            }
-        }
+        );
 
 
     // Member functions
@@ -193,6 +188,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "OSstreamI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

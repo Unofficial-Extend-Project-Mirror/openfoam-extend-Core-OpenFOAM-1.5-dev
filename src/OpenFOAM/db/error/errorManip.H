@@ -23,17 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    errorManip
+    Foam::errorManip
 
 Description
-    Error stream Manipulators for exit and abort which may terminate the
-    program or throw an exception depending of if the exception
-    handling has beed switched on (off by default).
+    Error stream manipulators for exit and abort which may terminate the
+    program or throw an exception depending if the exception
+    handling has been switched on (off by default).
 
 Usage
-
-    error << "message1" << "message2" << FoamDataType << exit(error, errNo);
-    error << "message1" << "message2" << FoamDataType << abort(error);
+    @code
+        error << "message1" << "message2" << FoamDataType << exit(error, errNo);
+        error << "message1" << "message2" << FoamDataType << abort(error);
+    @endcode
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +48,7 @@ Usage
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Err> class errorManip;
 template<class Err> Ostream& operator<<(Ostream&, errorManip<Err>);
@@ -91,6 +92,7 @@ inline Ostream& operator<<(Ostream& os, errorManip<Err> m)
                            Class errorManipArg Declaration
 \*---------------------------------------------------------------------------*/
 
+//- errorManipArg
 template<class Err, class T>
 class errorManipArg
 {

@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    dimensionedScalar
+Typedef
+    Foam::dimensionedScalar
 
 Description
     Dimensioned scalar obtained from generic dimensioned type.
@@ -59,6 +59,8 @@ dimensionedScalar operator/(const scalar, const dimensionedScalar&);
 dimensionedScalar pow(const dimensionedScalar&, const dimensionedScalar&);
 dimensionedScalar pow3(const dimensionedScalar&);
 dimensionedScalar pow4(const dimensionedScalar&);
+dimensionedScalar pow5(const dimensionedScalar&);
+dimensionedScalar pow6(const dimensionedScalar&);
 
 dimensionedScalar sqrt(const dimensionedScalar&);
 dimensionedScalar cbrt(const dimensionedScalar&);

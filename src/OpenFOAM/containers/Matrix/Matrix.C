@@ -24,35 +24,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "Matrix.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class T>
-void Matrix<T>::allocate()
+void Foam::Matrix<T>::allocate()
 {
-    v_ = new T*[n_];
-    v_[0] = new T[n_*m_];
-
-    for (register label i=1; i<n_; i++)
+    if (n_ && m_)
     {
-        v_[i] = v_[i-1] + m_;
+        v_ = new T*[n_];
+        v_[0] = new T[n_*m_];
+
+        for (register label i=1; i<n_; i++)
+        {
+            v_[i] = v_[i-1] + m_;
+        }
     }
 }
 
 
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
-// Destroy list elements
 template<class T>
-Matrix<T>::~Matrix()
+Foam::Matrix<T>::~Matrix()
 {
     if (v_)
     {
@@ -64,19 +59,18 @@ Matrix<T>::~Matrix()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null Matrix
 template<class T>
-Matrix<T>& Matrix<T>::null()
+const Foam::Matrix<T>& Foam::Matrix<T>::null()
 {
     Matrix<T>* nullPtr = reinterpret_cast<Matrix<T>*>(NULL);
     return *nullPtr;
 }
 
 
-// Construct with length specified
 template<class T>
-Matrix<T>::Matrix(const label n, const label m)
+Foam::Matrix<T>::Matrix(const label n, const label m)
 :
+    v_(NULL),
     n_(n),
     m_(m)
 {
@@ -87,21 +81,14 @@ Matrix<T>::Matrix(const label n, const label m)
             << abort(FatalError);
     }
 
-    if (n_*m_)
-    {
-        allocate();
-    }
-    else
-    {
-        v_ = NULL;
-    }
+    allocate();
 }
 
 
-// Construct with length and single value specified
 template<class T>
-Matrix<T>::Matrix(const label n, const label m, const T& a)
+Foam::Matrix<T>::Matrix(const label n, const label m, const T& a)
 :
+    v_(NULL),
     n_(n),
     m_(m)
 {
@@ -114,29 +101,26 @@ Matrix<T>::Matrix(const label n, const label m, const T& a)
             << abort(FatalError);
     }
 
-    label nm = n_*m_;
+    allocate();
 
-    if (nm)
+    if (v_)
     {
-        allocate();
         T* v = v_[0];
+
+        label nm = n_*m_;
 
         for (register label i=0; i<nm; i++)
         {
             v[i] = a;
         }
     }
-    else
-    {
-        v_ = NULL;
-    }
 }
 
 
-// Construct as copy
 template<class T>
-Matrix<T>::Matrix(const Matrix<T>& a)
+Foam::Matrix<T>::Matrix(const Matrix<T>& a)
 :
+    v_(NULL),
     n_(a.n_),
     m_(a.m_)
 {
@@ -152,15 +136,11 @@ Matrix<T>::Matrix(const Matrix<T>& a)
             v[i] = av[i];
         }
     }
-    else
-    {
-        v_ = NULL;
-    }
 }
 
         
 template<class T>
-void Matrix<T>::clear()
+void Foam::Matrix<T>::clear()
 {
     if (v_)
     {
@@ -174,7 +154,7 @@ void Matrix<T>::clear()
 
 
 template<class T>
-void Matrix<T>::transfer(Matrix<T>& a)
+void Foam::Matrix<T>::transfer(Matrix<T>& a)
 {
     clear();
 
@@ -191,23 +171,25 @@ void Matrix<T>::transfer(Matrix<T>& a)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Assignment of all entries to the given value
 template<class T>
-void Matrix<T>::operator=(const T& t)
+void Foam::Matrix<T>::operator=(const T& t)
 {
-    T* v = v_[0];
-
-    label nm = n_*m_;
-    for (register label i=0; i<nm; i++)
+    if (v_)
     {
-        v[i] = t;
+        T* v = v_[0];
+
+        label nm = n_*m_;
+        for (register label i=0; i<nm; i++)
+        {
+            v[i] = t;
+        }
     }
 }
 
 
 // Assignment operator. Takes linear time.
 template<class T>
-void Matrix<T>::operator=(const Matrix<T>& a)
+void Foam::Matrix<T>::operator=(const Matrix<T>& a)
 {
     if (this == &a)
     {
@@ -216,13 +198,24 @@ void Matrix<T>::operator=(const Matrix<T>& a)
             << abort(FatalError);
     }
 
-    T* v = v_[0];
-    const T* av = a.v_[0];
-
-    label nm = n_*m_;
-    for (register label i=0; i<nm; i++)
+    if (n_ != a.n_ || m_ != a.m_)
     {
-        v[i] = av[i];
+        clear();
+        n_ = a.n_;
+        m_ = a.m_;
+        allocate();
+    } 
+
+    if (v_)
+    {
+        T* v = v_[0];
+        const T* av = a.v_[0];
+
+        label nm = n_*m_;
+        for (register label i=0; i<nm; i++)
+        {
+            v[i] = av[i];
+        }
     }
 }
 
@@ -230,7 +223,7 @@ void Matrix<T>::operator=(const Matrix<T>& a)
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const T& max(const Matrix<T>& a)
+const T& Foam::max(const Matrix<T>& a)
 {
     label nm = a.n_*a.m_;
 
@@ -262,7 +255,7 @@ const T& max(const Matrix<T>& a)
 
 
 template<class T>
-const T& min(const Matrix<T>& a)
+const T& Foam::min(const Matrix<T>& a)
 {
     label nm = a.n_*a.m_;
 
@@ -296,17 +289,20 @@ const T& min(const Matrix<T>& a)
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class T>
-Matrix<T> operator-(const Matrix<T>& a)
+Foam::Matrix<T> Foam::operator-(const Matrix<T>& a)
 {
     Matrix<T> na(a.n_, a.m_);
 
-    T* nav = na.v_[0];
-    const T* av = a.v_[0];
-
-    label nm = a.n_*a.m_;
-    for (register label i=0; i<nm; i++)
+    if (a.n_ && a.m_)
     {
-        nav[i] = -av[i];
+        T* nav = na.v_[0];
+        const T* av = a.v_[0];
+
+        label nm = a.n_*a.m_;
+        for (register label i=0; i<nm; i++)
+        {
+            nav[i] = -av[i];
+        }
     }
 
     return na;
@@ -314,7 +310,7 @@ Matrix<T> operator-(const Matrix<T>& a)
 
 
 template<class T>
-Matrix<T> operator+(const Matrix<T>& a, const Matrix<T>& b)
+Foam::Matrix<T> Foam::operator+(const Matrix<T>& a, const Matrix<T>& b)
 {
     if (a.n_ != b.n_)
     {
@@ -349,7 +345,7 @@ Matrix<T> operator+(const Matrix<T>& a, const Matrix<T>& b)
 
 
 template<class T>
-Matrix<T> operator-(const Matrix<T>& a, const Matrix<T>& b)
+Foam::Matrix<T> Foam::operator-(const Matrix<T>& a, const Matrix<T>& b)
 {
     if (a.n_ != b.n_)
     {
@@ -384,26 +380,25 @@ Matrix<T> operator-(const Matrix<T>& a, const Matrix<T>& b)
 
 
 template<class T>
-Matrix<T> operator*(const scalar s, const Matrix<T>& a)
+Foam::Matrix<T> Foam::operator*(const scalar s, const Matrix<T>& a)
 {
     Matrix<T> sa(a.n_, a.m_);
 
-    T* sav = sa.v_[0];
-    const T* av = a.v_[0];
-
-    label nm = a.n_*a.m_;;
-    for (register label i=0; i<nm; i++)
+    if (a.n_ && a.m_)
     {
-        sav[i] = s*av[i];
+        T* sav = sa.v_[0];
+        const T* av = a.v_[0];
+
+        label nm = a.n_*a.m_;;
+        for (register label i=0; i<nm; i++)
+        {
+            sav[i] = s*av[i];
+        }
     }
 
     return sa;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

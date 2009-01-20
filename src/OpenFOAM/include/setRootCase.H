@@ -1,6 +1,6 @@
-argList args(argc, argv);
+Foam::argList args(argc, argv);
 
 if (!args.checkRootCase())
 {
-    FatalError.exit();
+    Foam::FatalError.exit();
 }

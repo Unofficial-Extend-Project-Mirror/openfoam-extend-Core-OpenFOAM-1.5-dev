@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    instant
+    Foam::instant
 
 Description
     An instant of time. Contains the time value and name.
@@ -43,6 +43,21 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class instant;
+
+// Friend Operators
+
+int operator==(const instant&, const instant&);
+int operator!=(const instant&, const instant&);
+
+// IOstream Operators
+
+Istream& operator>>(Istream&, instant&);
+Ostream& operator<<(Ostream&, const instant&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class instant Declaration
@@ -69,6 +84,11 @@ public:
                 return one.value() < two.value();
             }
         };
+
+
+    // Static data members
+
+        static const char* const typeName;
 
 
     // Constructors

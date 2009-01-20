@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    LindemannFallOffFunction
+    Foam::LindemannFallOffFunction
 
 Description
+    Lindemann fall-off function
 
 SourceFiles
     LindemannFallOffFunctionI.H
@@ -42,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * Forward declaration of friend functions * * * * * * * * * //
+// Forward declaration of friend functions and operators
 
 class LindemannFallOffFunction;
 Ostream& operator<<(Ostream&, const LindemannFallOffFunction&);

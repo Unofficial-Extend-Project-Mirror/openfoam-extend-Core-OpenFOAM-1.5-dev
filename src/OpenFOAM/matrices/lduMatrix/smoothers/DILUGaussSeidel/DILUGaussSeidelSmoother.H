@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DILUGaussSeidelSmoother
+    Foam::DILUGaussSeidelSmoother
 
 Description
     Combined DILU/GaussSeidel smoother for asymmetric
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class DILUGaussSeidelSmoother Declaration
+                           Class DILUGaussSeidelSmoother Declaration
 \*---------------------------------------------------------------------------*/
 
 class DILUGaussSeidelSmoother

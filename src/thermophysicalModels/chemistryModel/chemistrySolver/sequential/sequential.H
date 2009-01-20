@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sequential
+    Foam::sequential
 
 Description
+    Foam::sequential
 
 SourceFiles
     sequentialI.H
@@ -57,7 +58,7 @@ class sequential
         dictionary coeffsDict_;
 
         // model constants
-    
+
             scalar cTauChem_;
             Switch equil_;
 

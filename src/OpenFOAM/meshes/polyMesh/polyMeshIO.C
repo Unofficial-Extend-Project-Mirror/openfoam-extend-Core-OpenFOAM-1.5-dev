@@ -28,15 +28,9 @@ License
 #include "Time.H"
 #include "cellIOList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Set instance for mesh files
-void polyMesh::setInstance(const fileName& inst)
+void Foam::polyMesh::setInstance(const fileName& inst)
 {
     if (debug)
     {
@@ -44,17 +38,17 @@ void polyMesh::setInstance(const fileName& inst)
             << "Resetting file instance to " << inst << endl;
     }
 
-    points_.writeOpt() = IOobject::AUTO_WRITE;
-    points_.instance() = inst;
+    allPoints_.writeOpt() = IOobject::AUTO_WRITE;
+    allPoints_.instance() = inst;
 
-    faces_.writeOpt() = IOobject::AUTO_WRITE;
-    faces_.instance() = inst;
+    allFaces_.writeOpt() = IOobject::AUTO_WRITE;
+    allFaces_.instance() = inst;
 
-    allOwner_.writeOpt() = IOobject::AUTO_WRITE;
-    allOwner_.instance() = inst;
+    owner_.writeOpt() = IOobject::AUTO_WRITE;
+    owner_.instance() = inst;
 
-    allNeighbour_.writeOpt() = IOobject::AUTO_WRITE;
-    allNeighbour_.instance() = inst;
+    neighbour_.writeOpt() = IOobject::AUTO_WRITE;
+    neighbour_.instance() = inst;
 
     boundary_.writeOpt() = IOobject::AUTO_WRITE;
     boundary_.instance() = inst;
@@ -70,7 +64,7 @@ void polyMesh::setInstance(const fileName& inst)
 }
 
 
-polyMesh::readUpdateState polyMesh::readUpdate()
+Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
 {
     if (debug)
     {
@@ -103,9 +97,9 @@ polyMesh::readUpdateState polyMesh::readUpdate()
         // Set instance to new instance. Note that points instance can differ
         // from from faces instance.
         setInstance(facesInst);
-        points_.instance() = pointsInst;
+        allPoints_.instance() = pointsInst;
 
-        points_ = pointIOField
+        allPoints_ = pointIOField
         (
             IOobject
             (
@@ -119,7 +113,7 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             )
         );
 
-        faces_ = faceIOList
+        allFaces_ = faceIOList
         (
             IOobject
             (
@@ -133,7 +127,7 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             )
         );
 
-        allOwner_ = labelIOList
+        owner_ = labelIOList
         (
             IOobject
             (
@@ -147,7 +141,7 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             )
         );
 
-        allNeighbour_ = labelIOList
+        neighbour_ = labelIOList
         (
             IOobject
             (
@@ -239,7 +233,7 @@ polyMesh::readUpdateState polyMesh::readUpdate()
         // Boundary is set so can use initMesh now (uses boundary_ to
         // determine internal and active faces)
 
-        if (exists(allOwner_.objectPath()))
+        if (exists(owner_.objectPath()))
         {
             initMesh();
         }
@@ -290,10 +284,33 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             *this
         );
 
+        label oldSize = pointZones_.size();
+
+        if (newPointZones.size() <= pointZones_.size())
+        {
+            pointZones_.setSize(newPointZones.size());
+        }
+
+        // Reset existing ones
+        forAll (pointZones_, czI)
+        {
+            pointZones_[czI] = newPointZones[czI];
+        }
+
+        // Extend with extra ones
+        pointZones_.setSize(newPointZones.size());
+
+        for (label czI = oldSize; czI < newPointZones.size(); czI++)
+        {
+            pointZones_.set(czI, newPointZones[czI].clone(pointZones_));
+        }
+
+        pointZones_.setSize(newPointZones.size());
         forAll (pointZones_, pzI)
         {
             pointZones_[pzI] = newPointZones[pzI];
         }
+
 
         faceZoneMesh newFaceZones
         (
@@ -310,6 +327,14 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             *this
         );
 
+        oldSize = faceZones_.size();
+
+        if (newFaceZones.size() <= faceZones_.size())
+        {
+            faceZones_.setSize(newFaceZones.size());
+        }
+
+        // Reset existing ones
         forAll (faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
@@ -318,6 +343,15 @@ polyMesh::readUpdateState polyMesh::readUpdate()
                 newFaceZones[fzI].flipMap()
             );
         }
+
+        // Extend with extra ones
+        faceZones_.setSize(newFaceZones.size());
+
+        for (label fzI = oldSize; fzI < newFaceZones.size(); fzI++)
+        {
+            faceZones_.set(fzI, newFaceZones[fzI].clone(faceZones_));
+        }
+
 
         cellZoneMesh newCellZones
         (
@@ -334,10 +368,27 @@ polyMesh::readUpdateState polyMesh::readUpdate()
             *this
         );
 
+        oldSize = cellZones_.size();
+
+        if (newCellZones.size() <= cellZones_.size())
+        {
+            cellZones_.setSize(newCellZones.size());
+        }
+
+        // Reset existing ones
         forAll (cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];
         }
+
+        // Extend with extra ones
+        cellZones_.setSize(newCellZones.size());
+
+        for (label czI = oldSize; czI < newCellZones.size(); czI++)
+        {
+            cellZones_.set(czI, newCellZones[czI].clone(cellZones_));
+        }
+
 
         if (boundaryChanged)
         {
@@ -358,9 +409,9 @@ polyMesh::readUpdateState polyMesh::readUpdate()
 
         clearGeom();
 
-        points_.instance() = pointsInst;
+        allPoints_.instance() = pointsInst;
 
-        points_ = pointIOField
+        allPoints_ = pointIOField
         (
             IOobject
             (
@@ -369,9 +420,13 @@ polyMesh::readUpdateState polyMesh::readUpdate()
                 meshSubDir,
                 *this,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
         );
+
+        // Reset points, mesh is not moved
+        points_ = pointField::subField(allPoints_, nPoints());
         
         return polyMesh::POINTS_MOVED;
     }
@@ -386,9 +441,5 @@ polyMesh::readUpdateState polyMesh::readUpdate()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

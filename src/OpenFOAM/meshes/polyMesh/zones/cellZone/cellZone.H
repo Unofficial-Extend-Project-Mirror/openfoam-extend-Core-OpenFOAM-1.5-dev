@@ -23,14 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellZone
+    Foam::cellZone
 
 Description
-    A subset of mesh cells.  Currently set us as an indirect list but
-    will be extended to use a primitive mesh.  
-    For quick check whether a cell belongs to the zone use the lookup mechanism
-    in cellZoneMesh, where all the zoned cells are registered with their zone
-    number.
+    A subset of mesh cells.
+
+    Currently set up as an indirect list but will be extended to use a
+    primitive mesh.  For quick check whether a cell belongs to the zone use
+    the lookup mechanism in cellZoneMesh, where all the zoned cells are
+    registered with their zone number.
 
 SourceFiles
     cellZone.C
@@ -53,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * Forward declaration of friend functions * * * * * * * * * //
+// Forward declaration of friend functions and operators
 
 class cellZone;
 Ostream& operator<<(Ostream&, const cellZone&);

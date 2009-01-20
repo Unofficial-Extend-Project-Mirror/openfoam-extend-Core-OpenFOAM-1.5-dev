@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    symmTensorFieldField
+InClass
+    Foam::symmTensorFieldField
 
 Description
-    Specialisation of FieldField<T> for symmTensor.
+    Specialisation of FieldField\<T\> for symmTensor.
 
 SourceFiles
     symmTensorFieldField.C
@@ -58,6 +58,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, twoSymm)
 UNARY_FUNCTION(symmTensor, symmTensor, dev)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
+UNARY_FUNCTION(symmTensor, symmTensor, cof)
 UNARY_FUNCTION(symmTensor, symmTensor, inv)
 
 

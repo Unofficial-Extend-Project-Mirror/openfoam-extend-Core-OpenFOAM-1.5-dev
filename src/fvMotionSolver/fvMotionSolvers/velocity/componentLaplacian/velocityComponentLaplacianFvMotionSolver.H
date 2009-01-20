@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    velocityComponentLaplacianFvMotionSolver
+    Foam::velocityComponentLaplacianFvMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
@@ -119,6 +119,9 @@ public:
 
         //- Solve for motion
         virtual void solve();
+
+        //- Update topology
+        virtual void updateMesh(const mapPolyMesh&);
 };
 
 

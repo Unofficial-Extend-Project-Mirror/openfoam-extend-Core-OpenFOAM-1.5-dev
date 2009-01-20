@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Pair
+    Foam::Pair
 
 Description
-    An ordered Pair.
+    An ordered pair of two objects of type \<T\> with first() and second()
+    elements.
 
 \*---------------------------------------------------------------------------*/
 
@@ -133,7 +134,7 @@ public:
 
     // Friend Operators
 
-        inline friend bool operator==(const Pair<Type>& a, const Pair<Type>& b)
+        friend bool operator==(const Pair<Type>& a, const Pair<Type>& b)
         {
             return
             (
@@ -141,7 +142,7 @@ public:
             );
         }
 
-        inline friend bool operator!=(const Pair<Type>& a, const Pair<Type>& b)
+        friend bool operator!=(const Pair<Type>& a, const Pair<Type>& b)
         {
             return (!(a == b));
         }

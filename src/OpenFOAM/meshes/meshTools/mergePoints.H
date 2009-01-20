@@ -45,7 +45,7 @@ namespace Foam
                            Function mergePoints Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Sort & merge points. All points closer than mergeTol get merged.
+//- Sort & merge points. All points closer than/equal mergeTol get merged.
 //  Outputs the new unique points and a map from old to new. Returns
 //  true if anything merged, false otherwise.
 bool mergePoints

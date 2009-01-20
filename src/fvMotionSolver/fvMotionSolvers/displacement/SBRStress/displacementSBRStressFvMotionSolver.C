@@ -32,6 +32,7 @@ License
 #include "fvcGrad.H"
 #include "surfaceInterpolate.H"
 #include "fvcLaplacian.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -119,13 +120,9 @@ Foam::displacementSBRStressFvMotionSolver::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::pointField> 
+Foam::tmp<Foam::pointField>
 Foam::displacementSBRStressFvMotionSolver::curPoints() const
 {
-    // The points have moved so before interpolation update 
-    // volPointInterpolation accordingly
-    vpi_.movePoints();
-
     vpi_.interpolate(cellDisplacement_, pointDisplacement_);
 
     tmp<pointField> tcurPoints
@@ -141,6 +138,10 @@ Foam::displacementSBRStressFvMotionSolver::curPoints() const
 
 void Foam::displacementSBRStressFvMotionSolver::solve()
 {
+    // The points have moved so before interpolation update
+    // the fvMotionSolver accordingly
+    movePoints(fvMesh_.points());
+
     diffusivityPtr_->correct();
     pointDisplacement_.boundaryField().updateCoeffs();
 
@@ -194,6 +195,80 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
         )
         */
     );
+}
+
+
+void Foam::displacementSBRStressFvMotionSolver::updateMesh
+(
+    const mapPolyMesh& mpm
+)
+{
+    fvMotionSolver::updateMesh(mpm);
+
+    // Map points0_
+    // Map points0_. Bit special since we somehow have to come up with
+    // a sensible points0 position for introduced points.
+    // Find out scaling between points0 and current points
+
+    // Get the new points either from the map or the mesh
+    const pointField& points =
+    (
+        mpm.hasMotionPoints()
+      ? mpm.preMotionPoints()
+      : fvMesh_.points()
+    );
+
+    // Note: boundBox does reduce
+    const boundBox bb0(points0_, true);
+    const vector span0(bb0.max()-bb0.min());
+    const boundBox bb(points, true);
+    const vector span(bb.max()-bb.min());
+
+    vector scaleFactors(cmptDivide(span0, span));
+
+    pointField newPoints0(mpm.pointMap().size());
+
+    forAll(newPoints0, pointI)
+    {
+        label oldPointI = mpm.pointMap()[pointI];
+
+        if (oldPointI >= 0)
+        {
+            label masterPointI = mpm.reversePointMap()[oldPointI];
+
+            if (masterPointI == pointI)
+            {
+                newPoints0[pointI] = points0_[oldPointI];
+            }
+            else
+            {
+                // New point. Assume motion is scaling.
+                newPoints0[pointI] =
+                    points0_[oldPointI]
+                  + cmptMultiply
+                    (
+                        scaleFactors,
+                        points[pointI]-points[masterPointI]
+                    );
+            }
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                "displacementSBRStressFvMotionSolver::updateMesh"
+                "(const mapPolyMesh& mpm)"
+            )   << "Cannot work out coordinates of introduced vertices."
+                << " New vertex " << pointI << " at coordinate "
+                << points[pointI] << exit(FatalError);
+        }
+    }
+    points0_.transfer(newPoints0);
+
+    // Update diffusivity. Note two stage to make sure old one is de-registered
+    // before creating/registering new one.
+    diffusivityPtr_.reset(NULL);
+    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
 }
 
 

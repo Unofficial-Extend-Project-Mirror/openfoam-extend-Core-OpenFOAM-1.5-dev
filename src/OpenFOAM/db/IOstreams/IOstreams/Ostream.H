@@ -23,16 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Ostream
+    Foam::Ostream
 
 Description
-    An Ostream is an abstract base class for all output systems;
-    be they streams, files, token lists etc.  The basic operations
-    are construct, close, read token, read primitive and read binary
-    block.  In addition version control and line number counting is
-    incorporated.  Usually one would use the read primitive member
-    functions,  but if one were reading a stream on unknown data
-    sequence one can read token by token, and then analyse.
+    An Ostream is an abstract base class for all output systems
+    (streams, files, token lists, etc).
 
 \*---------------------------------------------------------------------------*/
 
@@ -149,7 +144,7 @@ public:
             //- Decrememt the indent level
             void decrIndent();
 
-            //- Write the keyword to the Ostream followed by 
+            //- Write the keyword to the Ostream followed by
             //  appropriate indentation
             Ostream& writeKeyword(const word& keyword);
 
@@ -159,7 +154,7 @@ public:
             //- Flush stream
             virtual void flush() = 0;
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             virtual void endl() = 0;
 
             //- Get width of output field
@@ -190,6 +185,7 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
+#ifndef __CINT__
 
 typedef Ostream& (*OstreamManip)(Ostream&);
 
@@ -237,12 +233,14 @@ inline Ostream& flush(Ostream& os)
 }
 
 
-//- Add '\n' and flush stream
+//- Add newline and flush stream
 inline Ostream& endl(Ostream& os)
 {
     os.endl();
     return os;
 }
+
+#endif
 
 
 // Useful aliases for tab and newline characters

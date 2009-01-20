@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pTraits
+    Foam::pTraits
 
 Description
     Traits class for primitives.  All primitives need a specialised
@@ -52,6 +52,11 @@ class pTraits
 {
 
 public:
+
+    pTraits(const primitive& p)
+    :
+        primitive(p)
+    {}
 
     pTraits(Istream& is)
     :

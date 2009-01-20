@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C4H10O
+    Foam::C4H10O
 
 Description
     diEthylEther
+
 SourceFiles
     C4H10O.C
 

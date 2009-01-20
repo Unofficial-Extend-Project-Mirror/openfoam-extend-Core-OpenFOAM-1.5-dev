@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    face
+    Foam::face
 
 Description
+    A face is a list of labels corresponding to mesh vertices.
 
 SourceFiles
     faceI.H
@@ -45,13 +46,20 @@ SourceFiles
 #include "vectorField.H"
 #include "faceListFwd.H"
 #include "intersection.H"
+#include "pointHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class pointHit;
+// Forward declaration of friend functions and operators
+
+class face;
+inline bool operator==(const face& a, const face& b);
+inline bool operator!=(const face& a, const face& b);
+inline Istream& operator>>(Istream&, face&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class face Declaration
@@ -114,6 +122,11 @@ class face
 
 public:
 
+    // Static data members
+
+        static const char* const typeName;
+
+
     // Constructors
 
         //- Construct null
@@ -132,7 +145,8 @@ public:
     // Member Functions
 
         //- Collapse face by removing duplicate point labels
-        void collapse();
+        //  return the collapsed size
+        label collapse();
 
         //- Return the points corresponding to this face
         inline pointField points(const pointField& meshPoints) const;
@@ -175,7 +189,7 @@ public:
         //- Return potential intersection with face with a ray starting
         //  at p, direction n (does not need to be normalized)
         //  Does face-center decomposition and returns triangle intersection
-        //  point closest to p.
+        //  point closest to p. Face-center is calculated from point average.
         //  For a hit, the distance is signed.  Positive number
         //  represents the point in front of triangle
         //  In case of miss the point is the nearest point on the face
@@ -193,7 +207,20 @@ public:
             const intersection::direction dir = intersection::VECTOR
         ) const;
 
-        //- Return nearest point to face 
+        //- Fast intersection with a ray.
+        //  For a hit, the pointHit.distance() is the line parameter t :
+        //  intersection=p+t*q. Only defined for FULL_RAY or
+        //  HALF_RAY.
+        pointHit fastIntersection
+        (
+            const point& p,
+            const vector& q,
+            const point& ctr,
+            const pointField& meshPoints,
+            const intersection::algorithm alg
+        ) const;
+
+        //- Return nearest point to face
         pointHit nearestPoint
         (
             const point& p,
@@ -225,13 +252,18 @@ public:
         //- Return n-th face edge
         inline edge faceEdge(const label n) const;
 
+        //- Return the edge direction on the face
+        //  -  0: edge not found on the face
+        //  - +1: forward (counter-clockwise) on the face
+        //  - -1: reverse (clockwise) on the face
+        int edgeDirection(const edge&) const;
 
         // Face splitting utilities
 
             //- Number of triangles after splitting
             label nTriangles(const pointField& points) const;
 
-            //- Split into triangles using existing points. Result in 
+            //- Split into triangles using existing points. Result in
             //  triFaces[triI..triI+nTri]. Splits intelligently to maximize
             //  triangle quality.
             void triangles
@@ -260,16 +292,22 @@ public:
                 faceList& quadFaces
             ) const;
 
+        //- compare faces
+        //   0: different
+        //  +1: identical
+        //  -1: same face, but different orientation
+        static int compare(const face&, const face&);
+
 
     // Friend Operators
 
-        friend bool operator==(const face&, const face&);
-        friend bool operator!=(const face&, const face&);
+        friend bool operator==(const face& a, const face& b);
+        friend bool operator!=(const face& a, const face& b);
 
 
     // Istream Operator
 
-        inline friend Istream& operator>>(Istream&, face&);
+        friend Istream& operator>>(Istream&, face&);
 };
 
 

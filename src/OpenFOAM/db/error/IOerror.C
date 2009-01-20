@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    IOerror
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -36,12 +33,7 @@ Class
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-IOerror::IOerror(const string& title)
+Foam::IOerror::IOerror(const string& title)
 :
     error(title),
     ioFileName_("unknown"),
@@ -50,7 +42,7 @@ IOerror::IOerror(const string& title)
 {}
 
 
-IOerror::IOerror(const dictionary& errDict)
+Foam::IOerror::IOerror(const dictionary& errDict)
 :
     error(errDict),
     ioFileName_(errDict.lookup("ioFileName")),
@@ -59,7 +51,11 @@ IOerror::IOerror(const dictionary& errDict)
 {}
 
 
-OSstream& IOerror::operator()
+Foam::IOerror::~IOerror() throw()
+{}
+
+
+Foam::OSstream& Foam::IOerror::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -78,7 +74,7 @@ OSstream& IOerror::operator()
 }
 
 
-OSstream& IOerror::operator()
+Foam::OSstream& Foam::IOerror::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -98,7 +94,7 @@ OSstream& IOerror::operator()
 }
 
 
-OSstream& IOerror::operator()
+Foam::OSstream& Foam::IOerror::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -118,8 +114,7 @@ OSstream& IOerror::operator()
 }
 
 
-// Create and return a dictionary
-IOerror::operator dictionary() const
+Foam::IOerror::operator Foam::dictionary() const
 {
     dictionary errDict(error::operator dictionary());
 
@@ -134,7 +129,7 @@ IOerror::operator dictionary() const
 }
 
 
-void IOerror::exit(const int)
+void Foam::IOerror::exit(const int)
 {
     if (!throwExceptions_ && JobInfo::constructed)
     {
@@ -172,7 +167,7 @@ void IOerror::exit(const int)
 }
 
 
-void IOerror::abort()
+void Foam::IOerror::abort()
 {
     if (!throwExceptions_ && JobInfo::constructed)
     {
@@ -212,10 +207,9 @@ void IOerror::abort()
 }
 
 
-Ostream& operator<<(Ostream& os, const IOerror& ioErr)
+Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& ioErr)
 {
-    os  << endl << ioErr.title().c_str()
-        << ioErr.message().c_str() << endl << endl;
+    os  << endl << ioErr.message().c_str() << endl << endl;
 
     os  << "file: " << ioErr.ioFileName().c_str();
 
@@ -244,10 +238,6 @@ Ostream& operator<<(Ostream& os, const IOerror& ioErr)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error definitions
 
-IOerror FatalIOError ("--> FOAM FATAL IO ERROR : ");
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+Foam::IOerror Foam::FatalIOError("--> FOAM FATAL IO ERROR : ");
 
 // ************************************************************************* //

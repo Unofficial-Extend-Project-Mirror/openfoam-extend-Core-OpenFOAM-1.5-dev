@@ -22,12 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-    pdf = strength * exp(-0.5*((x - expectation)/variance)^2 )
-
-    strength only has meaning if there's more than one pdf
-
 \*---------------------------------------------------------------------------*/
 
 

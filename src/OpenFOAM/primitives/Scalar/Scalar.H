@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    Scalar
+Typedef
+    Foam::Scalar
 
 Description
     Single floating point number
@@ -137,14 +137,59 @@ inline Scalar sqr(const Scalar s)
     return s*s;
 }
 
+inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
+{
+    Scalar maga = mag(a);
+    Scalar magb = mag(b);
+
+    if (maga > magb)
+    {
+        return maga*sqrt(1.0 + sqr(magb/maga));
+    }
+    else
+    {
+        return magb < ScalarVSMALL ? 0.0 : magb*sqrt(1.0 + sqr(maga/magb));
+    }
+}
+
 inline Scalar pow3(const Scalar s)
 {
-    return s*s*s;
+    return s*sqr(s);
 }
 
 inline Scalar pow4(const Scalar s)
 {
     return sqr(sqr(s));
+}
+
+inline Scalar pow5(const Scalar s)
+{
+    return s*pow4(s);
+}
+
+inline Scalar pow6(const Scalar s)
+{
+    return pow3(sqr(s));
+}
+
+inline Scalar inv(const Scalar s)
+{
+    return 1.0/s;
+}
+
+inline Scalar dot(const Scalar s1, const Scalar s2)
+{
+    return s1*s2;
+}
+
+inline Scalar cmptMultiply(const Scalar s1, const Scalar s2)
+{
+    return s1*s2;
+}
+
+inline Scalar cmptDivide(const Scalar s1, const Scalar s2)
+{
+    return s1/s2;
 }
 
 inline Scalar cmptMax(const Scalar s)
@@ -157,11 +202,6 @@ inline Scalar cmptMin(const Scalar s)
     return s;
 }
 
-inline Scalar cmptSum(const Scalar s)
-{
-    return s;
-}
-
 inline Scalar cmptAv(const Scalar s)
 {
     return s;
@@ -170,22 +210,6 @@ inline Scalar cmptAv(const Scalar s)
 inline Scalar cmptMag(const Scalar s)
 {
     return mag(s);
-}
-
-inline Scalar scale(const Scalar s1, const Scalar s2)
-{
-    return s1*s2;
-}
-
-inline Scalar invScale(const Scalar s1, const Scalar s2)
-{
-    return s1/s2;
-}
-
-
-inline Scalar cmptSumScale(const Scalar s1, const Scalar s2)
-{
-    return s1*s2;
 }
 
 

@@ -78,13 +78,13 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     const lduMatrix&,
     const scalarField&,
     const direction,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType
 ) const
 {
     procInterface_.compressedSend
     (
-        procInterface_.interfaceInternalField(psiInternal)(),
-        bufferedTransfer
+        commsType,
+        procInterface_.interfaceInternalField(psiInternal)()
     );
 }
 
@@ -95,10 +95,14 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf(procInterface_.compressedReceive<scalar>(coeffs.size()));
+    scalarField pnf
+    (
+        procInterface_.compressedReceive<scalar>(commsType, coeffs.size())
+    );
     transformCoupleField(pnf, cmpt);
 
     const unallocLabelList& faceCells = procInterface_.faceCells();

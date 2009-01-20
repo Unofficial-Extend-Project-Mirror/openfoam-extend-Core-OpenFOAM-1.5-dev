@@ -22,11 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    label
+Typedef
+    Foam::label
 
 Description
-    A label is an int if INT_MAX is large enough otherwise a long.
+    A label is an int/long/long long depending on the range wanted.
     A readLabel function is defined so that label can be constructed from
     Istream.
 
@@ -40,7 +40,15 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#if INT_MAX > 2000000000
+
+#if FOAM_LABEL64
+#    define WANTEDRANGE 9000000000000000000
+#else
+#    define WANTEDRANGE 2000000000
+#endif
+
+
+#if INT_MAX > WANTEDRANGE
 
 // Define label as an int
 
@@ -60,10 +68,12 @@ namespace Foam
 
 } // End namespace Foam
 
-#else
+
+#elif LONG_MAX > WANTEDRANGE
 
 // Define label as a long
 
+#include "int.H"
 #include "long.H"
 
 namespace Foam
@@ -80,12 +90,36 @@ namespace Foam
 
 } // End namespace Foam
 
+
+#elif LLONG_MAX > WANTEDRANGE
+
+// Define label as a long long
+
+#include "int.H"
+#include "long.H"
+#include "longLong.H"
+
+namespace Foam
+{
+    typedef long long label;
+
+    static const label labelMax = LLONG_MAX;
+    static const label labelMin = LLONG_MIN;
+
+    inline label readLabel(Istream& is)
+    {
+        return readLongLong(is);
+    }
+
+} // End namespace Foam
+
 #endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "pTraits.H"
+#include "direction.H"
 
 namespace Foam
 {
@@ -157,13 +191,27 @@ MAXMIN(char, char, char)
 MAXMIN(short, short, short)
 MAXMIN(int, int, int)
 MAXMIN(long, long, long)
+MAXMIN(long long, long long, long long)
+
 MAXMIN(unsigned char, unsigned char, unsigned char)
 MAXMIN(unsigned short, unsigned short, unsigned short)
 MAXMIN(unsigned int, unsigned int, unsigned int)
 MAXMIN(unsigned long, unsigned long, unsigned long)
-MAXMIN(long, int, long)
-MAXMIN(long, long, int)
+MAXMIN(unsigned long long, unsigned long long, unsigned long long)
 
+MAXMIN(long, int, long)
+MAXMIN(long long, int, long long)
+MAXMIN(long long, long long, int)
+
+inline label& setComponent(label& l, const direction)
+{
+    return l;
+}
+
+inline label component(const label l, const direction)
+{
+    return l;
+}
 
 inline label mag(const label l)
 {

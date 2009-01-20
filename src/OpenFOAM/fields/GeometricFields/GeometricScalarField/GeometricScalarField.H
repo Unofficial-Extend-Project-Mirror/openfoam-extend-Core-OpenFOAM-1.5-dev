@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    GeometricScalarField
+InClass
+    Foam::GeometricScalarField
 
 Description
     Scalar specific part of the implementation of GeometricField.
@@ -90,6 +90,8 @@ BINARY_TYPE_FUNCTION(scalar, scalar, scalar, pow)
 
 UNARY_FUNCTION(scalar, scalar, pow3, pow3)
 UNARY_FUNCTION(scalar, scalar, pow4, pow4)
+UNARY_FUNCTION(scalar, scalar, pow5, pow5)
+UNARY_FUNCTION(scalar, scalar, pow6, pow6)
 UNARY_FUNCTION(scalar, scalar, sqrt, sqrt)
 UNARY_FUNCTION(scalar, scalar, sign, sign)
 UNARY_FUNCTION(scalar, scalar, pos, pos)

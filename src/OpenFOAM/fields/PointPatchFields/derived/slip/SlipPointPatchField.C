@@ -67,27 +67,6 @@ SlipPointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    BasicSymmetryPointPatchField
-    <PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF, f)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-SlipPointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
-SlipPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary&
 )
 :

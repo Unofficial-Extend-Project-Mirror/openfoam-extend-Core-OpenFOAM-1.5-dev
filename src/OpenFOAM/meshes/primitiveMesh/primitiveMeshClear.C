@@ -38,12 +38,6 @@ void primitiveMesh::printAllocated() const
 {
     Pout<< "primitiveMesh allocated :" << endl;
 
-    // Motion
-    if (oldPointsPtr_)
-    {
-        Pout<< "    Old points" << endl;
-    }
-
     // Topology
     if (cellShapesPtr_)
     {
@@ -183,22 +177,6 @@ void primitiveMesh::clearOut()
 {
     clearGeom();
     clearAddressing();
-}
-
-
-void primitiveMesh::clearPrimitives()
-{
-    deleteDemandDrivenData(oldPointsPtr_);
-
-    clearedPrimitives_ = true;
-}
-
-
-void primitiveMesh::clearAll()
-{
-    clearGeom();
-    clearAddressing();
-    clearPrimitives();
 }
 
 

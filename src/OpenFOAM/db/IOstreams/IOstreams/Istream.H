@@ -23,16 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Istream
+    Foam::Istream
 
 Description
-    An Istream is an abstract base class for all input systems;
-    be they streams, files, token lists etc.  The basic operations
+    An Istream is an abstract base class for all input systems
+    (streams, files, token lists etc).  The basic operations
     are construct, close, read token, read primitive and read binary
-    block.  In addition version control and line number counting is
-    incorporated.  Usually one would use the read primitive member
-    functions,  but if one were reading a stream on unknown data
-    sequence one can read token by token, and then analyse.
+    block.
+
+    In addition, version control and line number counting is incorporated.
+    Usually one would use the read primitive member functions, but if one
+    were reading a stream on unknown data sequence one can read token by
+    token, and then analyse.
 
 \*---------------------------------------------------------------------------*/
 
@@ -147,6 +149,7 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
+#ifndef __CINT__
 
 typedef Istream& (*IstreamManip)(Istream&);
 
@@ -163,6 +166,7 @@ inline Istream& operator>>(Istream& is, IOstreamManip f)
     return is;
 }
 
+#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

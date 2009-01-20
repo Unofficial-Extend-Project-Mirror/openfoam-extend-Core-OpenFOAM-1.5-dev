@@ -34,15 +34,10 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #if defined (__GNUC__)
 template<>
 #endif
-Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
+Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
 {
     const IOobject& io = ip.t_;
 
@@ -54,9 +49,5 @@ Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

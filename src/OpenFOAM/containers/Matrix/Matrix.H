@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Matrix<T>
+    Foam::Matrix
 
 Description
-    Matrix<T> is a 2D matrix of objects of type T, where the n x m size of
-    the matrix is known and used for subscript bounds checking, etc.
+    A templated 2D matrix of objects of \<T\>, where the n x m matrix
+    dimensions are known and used for subscript bounds checking, etc.
 
 SourceFiles
     Matrix.C
@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class Matrix;
 
@@ -117,7 +117,7 @@ public:
     // Member functions
 
         //- Return a null Matrix
-        static Matrix<T>& null();
+        static const Matrix<T>& null();
 
 
         // Access

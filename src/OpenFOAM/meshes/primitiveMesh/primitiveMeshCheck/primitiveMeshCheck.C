@@ -28,6 +28,7 @@ License
 #include "pyramidPointFaceRef.H"
 #include "ListOps.H"
 #include "mathematicalConstants.H"
+#include "SortableList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -402,7 +403,7 @@ bool primitiveMesh::checkCellVolumes
         {
             Info<< "    Min volume = " << minVolume
                 << ". Max volume = " << maxVolume
-                << ".  Total volume = " << sum(vols)
+                << ".  Total volume = " << gSum(vols)
                 << ".  Cell volumes OK." << endl;
         }
 
@@ -654,7 +655,7 @@ bool primitiveMesh::checkFaceSkewness
             Cpf - ((fAreas[faceI] & Cpf)/((fAreas[faceI] & d) + SMALL))*d;
         vector svHat = sv/(mag(sv) + VSMALL);
 
-        // Normalisation distance calculated as the approximate distance 
+        // Normalisation distance calculated as the approximate distance
         // from the face centre to the edge of the face in the direction of
         // the skewness
         scalar fd = 0.2*mag(d) + VSMALL;
@@ -693,16 +694,16 @@ bool primitiveMesh::checkFaceSkewness
     {
         vector Cpf = faceCtrs[faceI] - cellCtrs[own[faceI]];
 
-        vector faceNormal = fAreas[faceI];
-        faceNormal /= mag(faceNormal) + VSMALL;
-        vector d = faceNormal*(faceNormal & Cpf);
+        vector normal = fAreas[faceI];
+        normal /= mag(normal) + VSMALL;
+        vector d = normal*(normal & Cpf);
 
 
         // Skewness vector
-        vector sv = Cpf - ((fAreas[faceI] & Cpf)/(fAreas[faceI] & d))*d;
+        vector sv = Cpf - ((fAreas[faceI]&Cpf)/((fAreas[faceI]&d)+VSMALL))*d;
         vector svHat = sv/(mag(sv) + VSMALL);
 
-        // Normalisation distance calculated as the approximate distance 
+        // Normalisation distance calculated as the approximate distance
         // from the face centre to the edge of the face in the direction of
         // the skewness
         scalar fd = 0.4*mag(d) + VSMALL;
@@ -815,7 +816,7 @@ bool primitiveMesh::checkPoints
     {
         if (debug || report)
         {
-            Info<< " ***Unsed points found in the mesh, "
+            Info<< " ***Unused points found in the mesh, "
                    "number unused by faces: " << nFaceErrors
                 << " number unused by cells: " << nCellErrors
                 << endl;
@@ -935,7 +936,7 @@ bool primitiveMesh::checkFaceAngles
 
     reduce(nConcave, sumOp<label>());
     reduce(maxEdgeSin, maxOp<scalar>());
-    
+
     if (nConcave > 0)
     {
         scalar maxConcaveDegr =
@@ -1091,6 +1092,147 @@ bool primitiveMesh::checkFaceFlatness
 }
 
 
+// Check 1D/2Dness of edges. Gets passed the non-empty directions and
+// checks all edges in the mesh whether they:
+// - have no component in a non-empty direction or
+// - are only in a singe non-empty direction.
+// Empty direction info is passed in as a vector of labels (synchronised)
+// which are 1 if the direction is non-empty, 0 if it is.
+bool primitiveMesh::checkEdgeAlignment
+(
+    const bool report,
+    const Vector<label>& directions,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkEdgeAlignment("
+            << "const bool, const Vector<label>&, labelHashSet*) const: "
+            << "checking edge alignment" << endl;
+    }
+
+    label nDirs = 0;
+    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+    {
+        if (directions[cmpt] == 1)
+        {
+            nDirs++;
+        }
+        else if (directions[cmpt] != 0)
+        {
+            FatalErrorIn
+            (
+                "primitiveMesh::checkEdgeAlignment"
+                "(const bool, const Vector<label>&, labelHashSet*)"
+            )   << "directions should contain 0 or 1 but is now " << directions
+                << exit(FatalError);
+        }
+    }
+
+    if (nDirs == vector::nComponents)
+    {
+        return false;
+    }
+
+
+
+    const pointField& p = points();
+    const faceList& fcs = faces();
+
+    EdgeMap<label> edgesInError;
+
+    forAll(fcs, faceI)
+    {
+        const face& f = fcs[faceI];
+
+        forAll(f, fp)
+        {
+            label p0 = f[fp];
+            label p1 = f.nextLabel(fp);
+            if (p0 < p1)
+            {
+                vector d(p[p1]-p[p0]);
+                scalar magD = mag(d);
+
+                if (magD > ROOTVSMALL)
+                {
+                    d /= magD;
+
+                    // Check how many empty directions are used by the edge.
+                    label nEmptyDirs = 0;
+                    label nNonEmptyDirs = 0;
+                    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+                    {
+                        if (mag(d[cmpt]) > 1e-6)
+                        {
+                            if (directions[cmpt] == 0)
+                            {
+                                nEmptyDirs++;
+                            }
+                            else
+                            {
+                                nNonEmptyDirs++;
+                            }
+                        }
+                    }
+
+                    if (nEmptyDirs == 0)
+                    {
+                        // Purely in ok directions.
+                    }
+                    else if (nEmptyDirs == 1)
+                    {
+                        // Ok if purely in empty directions.
+                        if (nNonEmptyDirs > 0)
+                        {
+                            edgesInError.insert(edge(p0, p1), faceI);
+                        }
+                    }
+                    else if (nEmptyDirs > 1)
+                    {
+                        // Always an error
+                        edgesInError.insert(edge(p0, p1), faceI);
+                    }
+                }
+            }
+        }
+    }
+
+    label nErrorEdges = returnReduce(edgesInError.size(), sumOp<label>());
+
+    if (nErrorEdges > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Number of edges not aligned with or perpendicular to "
+                << "non-empty directions: " << nErrorEdges << endl;
+        }
+
+        if (setPtr)
+        {
+            setPtr->resize(2*edgesInError.size());
+            forAllConstIter(EdgeMap<label>, edgesInError, iter)
+            {
+                setPtr->insert(iter.key()[0]);
+                setPtr->insert(iter.key()[1]);
+            }
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    All edges aligned with or perpendicular to "
+                << "non-empty directions." << endl;
+        }
+        return false;
+    }
+}
+
+
 bool primitiveMesh::checkUpperTriangular
 (
     const bool report,
@@ -1109,15 +1251,12 @@ bool primitiveMesh::checkUpperTriangular
     const labelList& nei = faceNeighbour();
 
     const cellList& c = cells();
-    const labelListList& cc = cellCells();
-
     label internal = nInternalFaces();
 
-    labelList checkInternalFaces(internal, -1);
-
-    label nChecks = 0;
-
+    // Has error occurred?
     bool error = false;
+    // Have multiple faces been detected?
+    label nMultipleCells = false;
 
     // Loop through faceCells once more and make sure that for internal cell
     // the first label is smaller
@@ -1125,12 +1264,12 @@ bool primitiveMesh::checkUpperTriangular
     {
         if (own[faceI] >= nei[faceI])
         {
+            error  = true;
+
             if (setPtr)
             {
                 setPtr->insert(faceI);
             }
-
-            error  = true;
         }
     }
 
@@ -1142,72 +1281,100 @@ bool primitiveMesh::checkUpperTriangular
     {
         const labelList& curFaces = c[cellI];
 
-        // Using the fact that cell neighbour always appear
-        // in the increasing order
-        const labelList& curNbrs = cc[cellI];
+        // Neighbouring cells
+        SortableList<label> nbr(curFaces.size());
 
-        boolList usedNbr(curNbrs.size(), false);
-
-        for (label nSweeps = 0; nSweeps < curNbrs.size(); nSweeps++)
+        forAll(curFaces, i)
         {
-            // Find the lowest neighbour which is still valid
-            label nextNei = -1;
-            label minNei = c.size();
+            label faceI = curFaces[i];
 
-            forAll (curNbrs, nbrI)
+            if (faceI >= nInternalFaces())
             {
-                if
-                (
-                    curNbrs[nbrI] > cellI
-                 && !usedNbr[nbrI]
-                 && curNbrs[nbrI] < minNei
-                )
-                {
-                    nextNei = nbrI;
-                    minNei = curNbrs[nbrI];
-                }
+                // Sort last
+                nbr[i] = labelMax;
             }
-
-            if (nextNei > -1)
+            else
             {
-                // Mark this neighbour as used
-                usedNbr[nextNei] = true;
+                label nbrCellI = nei[faceI];
 
-                forAll (curFaces, faceI)
+                if (nbrCellI == cellI)
                 {
-                    if (curFaces[faceI] < internal)
-                    {
-                        if (nei[curFaces[faceI]] == curNbrs[nextNei])
-                        {
-                            checkInternalFaces[nChecks] = curFaces[faceI];
-                            nChecks++;
+                    nbrCellI = own[faceI];
+                }
 
-                            break;
-                        }
-                    }
+                if (cellI < nbrCellI)
+                {
+                    // cellI is master
+                    nbr[i] = nbrCellI;
+                }
+                else
+                {
+                    // nbrCell is master. Let it handle this face.
+                    nbr[i] = labelMax;
                 }
             }
         }
-    }
 
-    // Check list created. If everything is OK,
-    // the face label is equal to index
-    forAll (checkInternalFaces, faceI)
-    {
-        if (checkInternalFaces[faceI] != faceI)
+        nbr.sort();
+
+        // Now nbr holds the cellCells in incremental order. Check:
+        // - neighbouring cells appear only once. Since nbr is sorted this
+        //   is simple check on consecutive elements
+        // - faces indexed in same order as nbr are incrementing as well.
+
+        label prevCell = nbr[0];
+        label prevFace = curFaces[nbr.indices()[0]];
+
+        bool hasMultipleFaces = false;
+
+        for (label i = 1; i < nbr.size(); i++)
         {
-            error = true;
+            label thisCell = nbr[i];
+            label thisFace = curFaces[nbr.indices()[i]];
 
-            if (setPtr)
+            if (thisCell == labelMax)
             {
-                setPtr->insert(faceI);
+                break;
             }
 
-            break;
+            if (thisCell == prevCell)
+            {
+                hasMultipleFaces = true;
+
+                if (setPtr)
+                {
+                    setPtr->insert(prevFace);
+                    setPtr->insert(thisFace);
+                }
+            }
+            else if (thisFace < prevFace)
+            {
+                error = true;
+
+                if (setPtr)
+                {
+                    setPtr->insert(thisFace);
+                }
+            }
+
+            prevCell = thisCell;
+            prevFace = thisFace;
+        }
+
+        if (hasMultipleFaces)
+        {
+            nMultipleCells++;
         }
     }
 
     reduce(error, orOp<bool>());
+    reduce(nMultipleCells, sumOp<label>());
+
+    if ((debug || report) && nMultipleCells > 0)
+    {
+        Info<< "  <<Found " << nMultipleCells
+            << " neighbouring cells with multiple inbetween faces." << endl;
+    }
 
     if (error)
     {
@@ -1736,7 +1903,7 @@ bool primitiveMesh::checkCellDeterminant
     }
 
     const cellList& c = cells();
-    
+
     label nErrorCells = 0;
 
     scalar minDet = GREAT;
@@ -1791,7 +1958,7 @@ bool primitiveMesh::checkCellDeterminant
             sumDet += determinant;
             nSummed++;
 
-            if (determinant < 1E-3)
+            if (determinant < 1e-3)
             {
                 if (setPtr)
                 {

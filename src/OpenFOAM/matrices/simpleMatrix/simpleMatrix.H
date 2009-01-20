@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    simpleMatrix
+    Foam::simpleMatrix
 
 Description
     Simple dense matrix class with direct solvers.
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T>
 class simpleMatrix;

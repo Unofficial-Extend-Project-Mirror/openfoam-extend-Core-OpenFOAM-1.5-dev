@@ -113,10 +113,9 @@ void Foam::lduMatrix::AmulCore
         const scalar* const __restrict__ lowerPtr = lower().begin();
 
         register const label nFaces = upper().size();
-            #ifdef ICC_IA64_PREFETCH
-            #pragma swp  
-            #endif
-
+        #ifdef ICC_IA64_PREFETCH
+        #pragma swp  
+        #endif
         for (register label face=0; face<nFaces; face++)
         {
             #ifdef ICC_IA64_PREFETCH
@@ -203,12 +202,11 @@ void Foam::lduMatrix::TmulCore
             __builtin_prefetch (&xPtr[cell+96],0,1);
             __builtin_prefetch (&diagPtr[cell+96],0,1);
             __builtin_prefetch (&TxPtr[cell+96],1,1);
-                #endif
+            #endif
 
             // TmulCore must be additive to account for initialisation step
             // in ldu interfaces.  HJ, 6/Nov/2007
             TxPtr[cell] += diagPtr[cell]*xPtr[cell];
-
         }
     }
 

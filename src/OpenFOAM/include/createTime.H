@@ -1,4 +1,4 @@
-    Info<< "Create time\n" << endl;
+    Foam::Info<< "Create time\n" << Foam::endl;
 
     Foam::Time runTime
     (

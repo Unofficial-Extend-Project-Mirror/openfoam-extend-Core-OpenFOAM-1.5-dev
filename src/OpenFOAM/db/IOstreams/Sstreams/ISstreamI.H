@@ -26,14 +26,9 @@ License
 
 #include "ISstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline ISstream& ISstream::get(char& c)
+inline Foam::ISstream& Foam::ISstream::get(char& c)
 {
     is_.get(c);
     setState(is_.rdstate());
@@ -47,7 +42,7 @@ inline ISstream& ISstream::get(char& c)
 }
 
 
-inline ISstream& ISstream::getLine(string& s)
+inline Foam::ISstream& Foam::ISstream::getLine(string& s)
 {
     getline(is_, s);
     setState(is_.rdstate());
@@ -57,7 +52,7 @@ inline ISstream& ISstream::getLine(string& s)
 }
 
 
-inline ISstream& ISstream::putback(const char& c)
+inline Foam::ISstream& Foam::ISstream::putback(const char& c)
 {
     if (c == '\n')
     {
@@ -75,8 +70,31 @@ inline ISstream& ISstream::putback(const char& c)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+inline Foam::ISstream::ISstream
+(
+    istream& is,
+    const string& name,
+    streamFormat format,
+    versionNumber version,
+    compressionType compression
+)
+:
+    Istream(format, version, compression),
+    name_(name),
+    is_(is)
+{
+    if (is_.good())
+    {
+        setOpened();
+        setGood();
+    }
+    else
+    {
+        setState(is_.rdstate());
+    }
+}
+
 
 // ************************************************************************* //

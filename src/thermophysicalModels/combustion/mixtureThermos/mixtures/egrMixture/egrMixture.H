@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    egrMixture
+    Foam::egrMixture
 
 Description
+    Foam::egrMixture
 
 SourceFiles
     egrMixture.C
@@ -69,7 +70,7 @@ class egrMixture
 
         //- Regress variable
         volScalarField& b_;
-        
+
         //- Residual gases
         volScalarField& egr_;
 
@@ -87,6 +88,12 @@ public:
 
         //- Construct from dictionary and mesh
         egrMixture(const dictionary&, const fvMesh&);
+
+
+   // Destructor
+
+        virtual ~egrMixture()
+        {}
 
 
     // Member functions

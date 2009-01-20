@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    UList<T>
+    Foam::UList
 
 Description
-    UList<T> is a 1D vector of objects of type T, where the size of
-    the vector is known and used for subscript bounds checking, etc.  Storage
-    is not allocated during construction or use but is supplied to the
-    constructor as an argument.  This type of list is particularly useful
+    A 1D vector of objects of type \<T\>, where the size of the vector is
+    known and used for subscript bounds checking, etc.
+
+    Storage is not allocated during construction or use but is supplied to
+    the constructor as an argument.  This type of list is particularly useful
     for lists that refer to parts of existing lists such as SubList.
 
 SourceFiles
@@ -58,7 +59,7 @@ class List;
 template<class T>
 class SubList;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class UList;
 
@@ -79,6 +80,14 @@ class UList
 
         //- Number of elements in UList.
         label size_;
+
+protected:
+
+    // Protected member functions
+
+        //- Reset the list without changing the base pointer
+        //  Used in Sublist slicing.  HJ, 19/Oct/2008
+        void reset(T* __restrict__ v, label size);
 
 
 public:
@@ -104,7 +113,7 @@ public:
     // Member functions
 
         //- Return a null UList
-        static UList<T>& null();
+        static const UList<T>& null();
 
 
         // Access
@@ -118,7 +127,7 @@ public:
             inline label rcIndex(const label i) const;
 
             //- Return the binary size in number of characters of the UList
-            //  if the element is a primitive type 
+            //  if the element is a primitive type
             //  i.e. contiguous<T>() == true
             label byteSize() const;
 
@@ -154,7 +163,7 @@ public:
         inline const T& operator[](const label) const;
 
         //- Allow cast to a const List<T>&
-        inline operator const List<T>&() const;
+        inline operator const Foam::List<T>&() const;
 
         //- Assignment of all entries to the given value
         void operator=(const T&);
@@ -276,9 +285,12 @@ public:
     // Ostream operator
 
         // Write UList to Ostream.
-        friend Ostream& operator<< <T>(Ostream&, const UList<T>&);
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T>
+        #endif
+        (Ostream&, const UList<T>&);
 };
-
 
 // Reverse the first n elements of the list
 template<class T>
@@ -299,29 +311,49 @@ inline void reverse(UList<T>& ul);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-/*  Usage of forAll macro :
-
-    forAll(anyList, i)
-    {
-        statements;
-    }
+/**
+ * @def forAll(list, i)
+ * Loop across all elements in @a list
+ * @par Usage
+ * @code
+ * forAll(anyList, i)
+ * {
+ *      statements;
+ * }
+ * @endcode
+ * @sa forAllReverse
 */
-
+/**
+ * @def forAllReverse(list, i)
+ * Reverse loop across all elements in @a list
+ * @par Usage
+ * @code
+ * forAllReverse(anyList, i)
+ * {
+ *      statements;
+ * }
+ * @endcode
+ * @sa forAll
+*/
 #define forAll(list, i) \
     for (Foam::label i=0; i<(list).size(); i++)
 
 #define forAllReverse(list, i) \
     for (Foam::label i=(list).size()-1; i>=0; i--)
 
-
-/*  Usage of forAllIter macro :
-
-    forAll(ContainerType, container, iter)
-    {
-        statements;
-    }
+/**
+ * @def forAllIter(Container, container, iter)
+ * Iterate across all elements in the @a container object of type
+ * @a Container.
+ * @par Usage
+ * @code
+ * forAll(ContainerType, container, iter)
+ * {
+ *     statements;
+ * }
+ * @endcode
+ * @sa forAllConstIter
 */
-
 #define forAllIter(Container,container,iter)                                   \
     for                                                                        \
     (                                                                          \
@@ -330,6 +362,19 @@ inline void reverse(UList<T>& ul);
         ++iter                                                                 \
     )
 
+/**
+ * @def forAllConstIter(Container, container, iter)
+ * Iterate across all elements in the @a container object of type
+ * @a Container with const access.
+ * @par Usage
+ * @code
+ * forAllConstIter(ContainerType, container, iter)
+ * {
+ *     statements;
+ * }
+ * @endcode
+ * @sa forAllIter
+*/
 #define forAllConstIter(Container,container,iter)                              \
     for                                                                        \
     (                                                                          \

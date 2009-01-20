@@ -23,9 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    normal
+    Foam::normal
 
 Description
+    A normal pdf
+
+    @verbatim
+        pdf = strength * exp(-0.5*((x - expectation)/variance)^2 )
+    @endverbatim
+
+    strength only has meaning if there's more than one pdf
 
 SourceFiles
     normalI.H

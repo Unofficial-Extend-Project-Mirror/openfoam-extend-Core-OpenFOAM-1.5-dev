@@ -27,19 +27,14 @@ License
 #include "UList.H"
 #include "SLList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList()
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList()
 {}
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList(const T v[Size])
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
 {
     for (register label i=0; i<Size; i++)
     {
@@ -47,8 +42,8 @@ inline FixedList<T, Size>::FixedList(const T v[Size])
     }
 }
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList(const T& t)
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList(const T& t)
 {
     for (register label i=0; i<Size; i++)
     {
@@ -56,8 +51,8 @@ inline FixedList<T, Size>::FixedList(const T& t)
     }
 }
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList(const UList<T>& ul)
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList(const UList<T>& ul)
 {
     checkSize(ul.size());
 
@@ -67,8 +62,8 @@ inline FixedList<T, Size>::FixedList(const UList<T>& ul)
     }
 }
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList(const SLList<T>& sll)
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& sll)
 {
     checkSize(sll.size());
 
@@ -84,8 +79,8 @@ inline FixedList<T, Size>::FixedList(const SLList<T>& sll)
     }
 }
 
-template<class T, label Size>
-inline FixedList<T, Size>::FixedList(const FixedList<T, Size>& fl)
+template<class T, Foam::label Size>
+inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& fl)
 {
     for (register label i=0; i<Size; i++)
     {
@@ -93,8 +88,9 @@ inline FixedList<T, Size>::FixedList(const FixedList<T, Size>& fl)
     }
 }
 
-template<class T, label Size>
-inline autoPtr<FixedList<T, Size> > FixedList<T, Size>::clone() const
+template<class T, Foam::label Size>
+inline Foam::autoPtr<Foam::FixedList<T, Size> >
+Foam::FixedList<T, Size>::clone() const
 {
     return autoPtr<FixedList<T, Size> >(new FixedList<T, Size>(*this));
 }
@@ -102,23 +98,23 @@ inline autoPtr<FixedList<T, Size> > FixedList<T, Size>::clone() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T, label Size>
-inline label FixedList<T, Size>::fcIndex(const label i) const
+template<class T, Foam::label Size>
+inline Foam::label Foam::FixedList<T, Size>::fcIndex(const label i) const
 {
     return (i == Size-1 ? 0 : i+1); 
 }
 
 
-template<class T, label Size>
-inline label FixedList<T, Size>::rcIndex(const label i) const
+template<class T, Foam::label Size>
+inline Foam::label Foam::FixedList<T, Size>::rcIndex(const label i) const
 {
     return (i == 0 ? Size-1 : i-1); 
 }
 
 
 // Check start is within valid range (0 ... size-1).
-template<class T, label Size>
-inline void FixedList<T, Size>::checkStart(const label start) const
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::checkStart(const label start) const
 {
     if (start<0 || (start && start>=Size))
     {
@@ -130,8 +126,8 @@ inline void FixedList<T, Size>::checkStart(const label start) const
 
 
 // Check size is within valid range (0 ... size).
-template<class T, label Size>
-inline void FixedList<T, Size>::checkSize(const label size) const
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::checkSize(const label size) const
 {
     if (size<0 || size>Size)
     {
@@ -143,8 +139,8 @@ inline void FixedList<T, Size>::checkSize(const label size) const
 
 
 // Check index i is within valid range (0 ... size-1).
-template<class T, label Size>
-inline void FixedList<T, Size>::checkIndex(const label i) const
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::checkIndex(const label i) const
 {
     if (!Size)
     {
@@ -161,8 +157,8 @@ inline void FixedList<T, Size>::checkIndex(const label i) const
 }
 
 
-template<class T, label Size>
-inline void FixedList<T, Size>::setSize(const label s)
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::setSize(const label s)
 {
 #   ifdef FULLDEBUG
     checkSize(s);
@@ -173,8 +169,8 @@ inline void FixedList<T, Size>::setSize(const label s)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 // Return subscript-checked element access
-template<class T, label Size>
-inline T& FixedList<T, Size>::operator[](const label i)
+template<class T, Foam::label Size>
+inline T& Foam::FixedList<T, Size>::operator[](const label i)
 {
 #   ifdef FULLDEBUG
     checkIndex(i);
@@ -184,8 +180,8 @@ inline T& FixedList<T, Size>::operator[](const label i)
 
 
 // Return subscript-checked const element access
-template<class T, label Size>
-inline const T& FixedList<T, Size>::operator[](const label i) const
+template<class T, Foam::label Size>
+inline const T& Foam::FixedList<T, Size>::operator[](const label i) const
 {
 #   ifdef FULLDEBUG
     checkIndex(i);
@@ -194,8 +190,8 @@ inline const T& FixedList<T, Size>::operator[](const label i) const
 }
 
 
-template<class T, label Size>
-inline void FixedList<T, Size>::operator=(const T v[Size])
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::operator=(const T v[Size])
 {
     for (register label i=0; i<Size; i++)
     {
@@ -203,8 +199,8 @@ inline void FixedList<T, Size>::operator=(const T v[Size])
     }
 }
 
-template<class T, label Size>
-inline void FixedList<T, Size>::operator=(const UList<T>& ul)
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::operator=(const UList<T>& ul)
 {
     checkSize(ul.size());
 
@@ -214,8 +210,8 @@ inline void FixedList<T, Size>::operator=(const UList<T>& ul)
     }
 }
 
-template<class T, label Size>
-inline void FixedList<T, Size>::operator=(const SLList<T>& sll)
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& sll)
 {
     checkSize(sll.size());
 
@@ -231,8 +227,8 @@ inline void FixedList<T, Size>::operator=(const SLList<T>& sll)
     }
 }
 
-template<class T, label Size>
-inline void FixedList<T, Size>::operator=(const T& t)
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::operator=(const T& t)
 {
     for (register label i=0; i<Size; i++)
     {
@@ -243,100 +239,100 @@ inline void FixedList<T, Size>::operator=(const T& t)
 
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::iterator
-FixedList<T, Size>::begin()
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::iterator
+Foam::FixedList<T, Size>::begin()
 {
     return v_;
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::const_iterator
-FixedList<T, Size>::begin() const
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::const_iterator
+Foam::FixedList<T, Size>::begin() const
 {
     return v_;
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::iterator
-FixedList<T, Size>::end()
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::iterator
+Foam::FixedList<T, Size>::end()
 {
     return &v_[Size];
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::const_iterator
-FixedList<T, Size>::end() const
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::const_iterator
+Foam::FixedList<T, Size>::end() const
 {
     return &v_[Size];
 }
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::iterator
-FixedList<T, Size>::rbegin()
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::iterator
+Foam::FixedList<T, Size>::rbegin()
 {
     return &v_[Size-1];
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::const_iterator
-FixedList<T, Size>::rbegin() const
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::const_iterator
+Foam::FixedList<T, Size>::rbegin() const
 {
     return &v_[Size-1];
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::iterator
-FixedList<T, Size>::rend()
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::iterator
+Foam::FixedList<T, Size>::rend()
 {
     return &v_[-1];
 }
 
 
-template<class T, label Size>
-inline typename FixedList<T, Size>::const_iterator
-FixedList<T, Size>::rend() const
+template<class T, Foam::label Size>
+inline typename Foam::FixedList<T, Size>::const_iterator
+Foam::FixedList<T, Size>::rend() const
 {
     return &v_[-1];
 }
 
 
-template<class T, label Size>
-inline label FixedList<T, Size>::size() const
+template<class T, Foam::label Size>
+inline Foam::label Foam::FixedList<T, Size>::size() const
 {
     return Size;
 }
 
 
-template<class T, label Size>
-inline label FixedList<T, Size>::max_size() const
+template<class T, Foam::label Size>
+inline Foam::label Foam::FixedList<T, Size>::max_size() const
 {
     return Size;
 }
 
 
-template<class T, label Size>
-inline bool FixedList<T, Size>::empty() const
+template<class T, Foam::label Size>
+inline bool Foam::FixedList<T, Size>::empty() const
 {
     return false;
 }
 
 
-template<class T, label Size>
+#ifndef __CINT__
+template<class T, Foam::label Size>
 template<class HashT>
-inline FixedList<T, Size>::Hash<HashT>::Hash()
+inline Foam::FixedList<T, Size>::Hash<HashT>::Hash()
 {}
 
-
 //- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html.
-template<class T, label Size>
+template<class T, Foam::label Size>
 template<class HashT>
-inline label FixedList<T, Size>::Hash<HashT>::operator()
+inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
     const FixedList<T, Size>& fl
 ) const
@@ -353,10 +349,9 @@ inline label FixedList<T, Size>::Hash<HashT>::operator()
     return val;
 }
 
-
-template<class T, label Size>
+template<class T, Foam::label Size>
 template<class HashT>
-inline label FixedList<T, Size>::Hash<HashT>::operator()
+inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
     const FixedList<T, Size>& fl,
     const label tableSize
@@ -364,10 +359,7 @@ inline label FixedList<T, Size>::Hash<HashT>::operator()
 {
     return mag(operator()(fl)) % tableSize;
 }
+#endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

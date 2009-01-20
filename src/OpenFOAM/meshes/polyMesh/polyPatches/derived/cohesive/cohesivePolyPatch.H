@@ -77,14 +77,6 @@ public:
             const polyBoundaryMesh& bm
         );
 
-        //- Construct from Istream
-        cohesivePolyPatch
-        (
-            Istream&,
-            const label index,
-            const polyBoundaryMesh&
-        );
-
         //- Construct from dictionary
         cohesivePolyPatch
         (

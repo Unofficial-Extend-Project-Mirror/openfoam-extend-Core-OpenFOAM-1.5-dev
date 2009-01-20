@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dictionaryEntry
+    Foam::dictionaryEntry
 
 Description
     A keyword and a list of tokens is a 'dictionaryEntry'.
+
     An dictionaryEntry can be read, written and printed, and the types and
     values of its tokens analysed.  A dictionaryEntry is a high-level building
     block for data description.  It is a front-end for the token parser.
@@ -64,23 +65,43 @@ class dictionaryEntry
 
         void readData(Istream&);
 
+        //- Dissallow bitwise copy
+        dictionaryEntry(const dictionary&);
+
 
 public:
 
     // Constructors
 
-        //- Construct from Istream
-        dictionaryEntry(Istream&);
+        //- Construct from the parent dictionary and Istream
+        dictionaryEntry(const dictionary& parentDict, Istream& is);
 
-        //- Construct from keyword and a Istream
-        dictionaryEntry(const word& keyword, Istream&);
+        //- Construct from the keyword, parent dictionary and a Istream
+        dictionaryEntry
+        (
+            const word& keyword,
+            const dictionary& parentDict,
+            Istream& is
+        );
 
-        //- Construct from keyword and a dictionary
-        dictionaryEntry(const word& keyword, const dictionary&);
+        //- Construct from the keyword, parent dictionary and a dictionary
+        dictionaryEntry
+        (
+            const word& keyword,
+            const dictionary& parentDict,
+            const dictionary& dict
+        );
 
-        autoPtr<entry> clone() const
+        //- Construct as copy for the given parentDict
+        dictionaryEntry
+        (
+            const dictionary& parentDict,
+            const dictionaryEntry& dictEnt
+        );
+
+        autoPtr<entry> clone(const dictionary& parentDict) const
         {
-            return autoPtr<entry>(new dictionaryEntry(*this));
+            return autoPtr<entry>(new dictionaryEntry(parentDict, *this));
         }
 
 
@@ -104,7 +125,8 @@ public:
         //- Return line number of last token in dictionary
         label endLineNumber() const;
 
-        //- Return token stream if this entry is a dictionary entry
+        //- This entry is not a primitive,
+        //  calling this function generates a FatalError
         ITstream& stream() const;
 
         //- Return true because this entry is a dictionary
@@ -113,8 +135,11 @@ public:
             return true;
         }
 
-        //- Return token stream if this entry is a dictionary entry
+        //- Return dictionary
         const dictionary& dict() const;
+
+        //- Return non-const access to dictionary
+        dictionary& dict();
 
         // Write
         void write(Ostream&) const;
@@ -131,6 +156,12 @@ public:
 
         friend Ostream& operator<<(Ostream&, const dictionaryEntry&);
 };
+
+
+#if defined (__GNUC__)
+template<>
+#endif
+Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

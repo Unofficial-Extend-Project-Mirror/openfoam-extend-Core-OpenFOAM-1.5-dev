@@ -22,12 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    HashTable
-
-Description
-    STL conforming hash table.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -61,6 +55,19 @@ inline label HashTable<T, Key, Hash>::size() const
     return nElmts_;
 }
 
+
+template<class T, class Key, class Hash>
+inline bool HashTable<T, Key, Hash>::insert(const Key& key, const T& newEntry)
+{
+    return set(key, newEntry, true);
+}
+
+
+template<class T, class Key, class Hash>
+inline bool HashTable<T, Key, Hash>::set(const Key& key, const T& newEntry)
+{
+    return set(key, newEntry, false);
+}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
@@ -300,7 +307,7 @@ inline HashTable<T, Key, Hash>::const_iterator::const_iterator
 
 template<class T, class Key, class Hash>
 inline HashTable<T, Key, Hash>::const_iterator::const_iterator
-(   
+(
     const iterator& iter
 )
 :
@@ -367,13 +374,13 @@ inline const T& HashTable<T, Key, Hash>::const_iterator::operator*()
     return elmtPtr_->obj_;
 }
 
-
+#ifndef __CINT__
 template<class T, class Key, class Hash>
 inline const T& HashTable<T, Key, Hash>::const_iterator::operator()()
 {
     return operator*();
 }
-
+#endif
 
 template<class T, class Key, class Hash>
 inline

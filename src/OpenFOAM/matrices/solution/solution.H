@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    solution
+    Foam::solution
 
 Description
     Selector class for relaxation factors, solver type and solution.
@@ -53,7 +53,10 @@ class solution
 {
     // Private data
 
+        //- Dictionary of relaxation factors for all the fields
         dictionary relaxationFactors_;
+
+        //- Dictionary of solver parameters for all the fields
         dictionary solvers_;
 
 
@@ -80,17 +83,27 @@ public:
 
         // Access
 
+            //- Return the selected sub-dictionary of solvers if the "select"
+            //  keyword is given othewise return the complete dictionary
             const dictionary& solutionDict() const;
 
+            //- Return true if the relaxation factor is given for the field
             bool relax(const word& name) const;
+
+            //- Return the relaxation factor for the given field
             scalar relaxationFactor(const word& name) const;
 
+            //- Return the dictionary of solver parameters for the given field
+            const dictionary& solverDict(const word& name) const;
+
+            //- Return the stream of solver parameters for the given field
+            //  (Provided for backward compatibility only)
             ITstream& solver(const word& name) const;
 
 
         // Read
 
-            //- Read the solution
+            //- Read the solution dictionary
             bool read();
 };
 

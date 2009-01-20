@@ -56,6 +56,8 @@ void Foam::scalarMatrix::solve
 
         if (i != iMax)
         {
+            //Info<< "Pivoted on " << i << " " << iMax << endl;
+
             for (register label k=i; k<n; k++)
             {
                 Swap(tmpMatrix[i][k], tmpMatrix[iMax][k]);

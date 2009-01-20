@@ -78,37 +78,6 @@ CyclicPointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    CoupledPointPatchField
-    <
-        PatchField,
-        Mesh,
-        PointPatch,
-        typename CyclicPointPatch::CoupledPointPatch,
-        MatrixType,
-        Type
-    >(p, iF, f),
-    cyclicPatch_(refCast<const CyclicPointPatch>(p))
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    class CyclicPointPatch,
-    template<class> class MatrixType,
-    class Type
->
-CyclicPointPatchField
-<PatchField, Mesh, PointPatch, CyclicPointPatch, MatrixType, Type>::
-CyclicPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :

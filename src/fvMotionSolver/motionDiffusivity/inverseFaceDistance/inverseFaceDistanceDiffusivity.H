@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    inverseFaceDistanceDiffusivity
+    Foam::inverseFaceDistanceDiffusivity
 
 Description
     Inverse distance to the given patches motion diffusivity.

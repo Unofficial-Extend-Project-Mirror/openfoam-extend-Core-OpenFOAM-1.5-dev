@@ -8,7 +8,7 @@
 
         if (Vk.value() > SMALL)
         {
-            // Calculate kernel area from it's volume
+            // Calculate kernel area from its volume
             // and the dimensionality of the case
 
             switch(mesh.nGeometricD())

@@ -31,12 +31,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-label readHexLabel(ISstream& is)
+Foam::label Foam::readHexLabel(ISstream& is)
 {
     register label result = 0;
 
@@ -77,9 +72,5 @@ label readHexLabel(ISstream& is)
     return result;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

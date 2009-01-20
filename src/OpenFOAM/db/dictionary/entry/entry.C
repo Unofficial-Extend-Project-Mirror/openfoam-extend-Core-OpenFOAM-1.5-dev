@@ -25,33 +25,33 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "entry.H"
+#include "dictionary.H"
 #include "OStringStream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from keyword
-entry::entry(const word& keyword)
+Foam::entry::entry(const word& keyword)
 :
     keyword_(keyword)
 {}
 
 
-// Construct as copy
-entry::entry(const entry& e)
+Foam::entry::entry(const entry& e)
 :
     IDLList<entry>::link(),
     keyword_(e.keyword_)
 {}
 
 
+Foam::autoPtr<Foam::entry> Foam::entry::clone() const
+{
+    return clone(dictionary::null);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void entry::operator=(const entry& e)
+void Foam::entry::operator=(const entry& e)
 {
     // check for assignment to self
     if (this == &e)
@@ -65,7 +65,7 @@ void entry::operator=(const entry& e)
 }
 
 
-bool entry::operator==(const entry& e) const
+bool Foam::entry::operator==(const entry& e) const
 {
     if (keyword_ != e.keyword_)
     {
@@ -84,14 +84,10 @@ bool entry::operator==(const entry& e) const
 }
 
 
-bool entry::operator!=(const entry& e) const
+bool Foam::entry::operator!=(const entry& e) const
 {
     return !operator==(e);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

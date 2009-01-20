@@ -32,5 +32,4 @@ Description
 
 defineTypeNameAndDebug(Foam::PatchToPatchInterpolationName, 0);
 
-
 // ************************************************************************* //

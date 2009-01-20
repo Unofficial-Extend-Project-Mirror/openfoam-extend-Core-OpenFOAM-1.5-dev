@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Kmesh
+    Foam::Kmesh
 
 Description
     Calculate the wavenumber vector field corresponding to the

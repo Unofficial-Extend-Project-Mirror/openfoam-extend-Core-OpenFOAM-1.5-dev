@@ -23,19 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    error
+    Foam::error
 
 Description
     Class to handle errors and exceptions in a simple, consistent stream-based
-    manner.  The error class is globaly instantiated with a title string.
-    Errors, messages and other data are piped to the messageStream class in the
-    standard manner.   Manipulators are supplied for exit and abort which may
+    manner.
+
+    The error class is globaly instantiated with a title string. Errors,
+    messages and other data are piped to the messageStream class in the
+    standard manner.  Manipulators are supplied for exit and abort which may
     terminate the program or throw an exception depending of if the exception
-     handling has beed switched on (off by default).
+    handling has beed switched on (off by default).
 
 Usage
-    error << "message1" << "message2" << FoamDataType << exit(errNo);
-    error << "message1" << "message2" << FoamDataType << abort();
+    @code
+        error << "message1" << "message2" << FoamDataType << exit(errNo);
+        error << "message1" << "message2" << FoamDataType << abort();
+    @endcode
 
 SourceFiles
     error.C
@@ -52,12 +56,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+class error;
+Ostream& operator<<(Ostream&, const error&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class error Declaration
 \*---------------------------------------------------------------------------*/
 
 class error
 :
+    public std::exception,
     public messageStream
 {
 
@@ -90,7 +100,7 @@ public:
 
     // Destructor
 
-        ~error();
+        virtual ~error() throw();
 
 
     // Member functions
@@ -140,7 +150,16 @@ public:
 
         //- Convert to Ostream
         //  Prints basic message and then returns Ostream for further info.
+        #ifndef __CINT__
         operator OSstream&();
+        #endif
+
+        //- Explicitly convert to Ostream for << operations
+        //  needed in cint
+        OSstream& operator()()
+        {
+            return operator OSstream&();
+        }
 
         //- Create and return a dictionary
         operator dictionary() const;
@@ -164,10 +183,18 @@ public:
 };
 
 
+// Forward declaration of friend functions and operators
+
+class IOerror;
+
+Ostream& operator<<(Ostream&, const IOerror&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class IOerror Declaration
 \*---------------------------------------------------------------------------*/
 
+//- Report an I/O error
 class IOerror
 :
     public error
@@ -188,6 +215,11 @@ public:
 
         //- Construct from dictionary
         IOerror(const dictionary& errDict);
+
+
+    // Destructor
+
+        virtual ~IOerror() throw();
 
 
     // Member functions
@@ -259,8 +291,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error declarations: defined in error.C
 
-extern error         FatalError;
-extern IOerror       FatalIOError;
+extern error FatalError;
+extern IOerror FatalIOError;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Convienient macros to add the file name and line number to the function name
@@ -279,7 +311,9 @@ extern IOerror       FatalIOError;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#ifndef __CINT__
 #include "errorManip.H"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

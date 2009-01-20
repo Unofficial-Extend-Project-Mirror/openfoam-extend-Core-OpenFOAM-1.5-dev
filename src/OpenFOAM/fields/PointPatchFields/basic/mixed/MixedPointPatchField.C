@@ -109,33 +109,6 @@ MixedPointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f,
-    const Field<Type>& v,
-    const scalarField& vf
-)
-:
-    ValuePointPatchField
-        <PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF, f),
-    refValue_(v),
-    valueFraction_(vf)
-{
-    checkFieldSize();
-}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-MixedPointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
-MixedPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :

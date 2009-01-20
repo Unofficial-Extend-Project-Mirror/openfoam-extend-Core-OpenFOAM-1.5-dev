@@ -100,32 +100,6 @@ OscillatingFixedValuePointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    FixedValuePointPatchField
-        <PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF, f),
-    refValue_(p.size()),
-    amplitude_(p.size()),
-    frequency_(0.0),
-    curTimeIndex_(-1)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType,
-    class Type
->
-OscillatingFixedValuePointPatchField
-<PatchField, Mesh, PointPatch, MatrixType, Type>::
-OscillatingFixedValuePointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :
@@ -299,7 +273,10 @@ template
 void
 OscillatingFixedValuePointPatchField
 <PatchField, Mesh, PointPatch, MatrixType, Type>::
-initEvaluate(const bool)
+initEvaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     if (curTimeIndex_ != this->db().time().timeIndex())
     {
@@ -311,7 +288,8 @@ initEvaluate(const bool)
     }
 
     FixedValuePointPatchField
-        <PatchField, Mesh, PointPatch, MatrixType, Type>::initEvaluate();
+        <PatchField, Mesh, PointPatch, MatrixType, Type>::
+        initEvaluate(commsType);
 }
 
 

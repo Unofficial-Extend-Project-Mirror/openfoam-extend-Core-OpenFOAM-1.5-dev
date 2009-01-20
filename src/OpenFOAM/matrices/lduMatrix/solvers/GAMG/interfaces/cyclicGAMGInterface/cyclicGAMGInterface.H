@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cyclicGAMGInterface
+    Foam::cyclicGAMGInterface
 
 Description
     GAMG agglomerated cyclic interface.
@@ -99,12 +99,14 @@ public:
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const;
 
             //- Transfer and return internal field adjacent to the interface
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& iF
             ) const;
 

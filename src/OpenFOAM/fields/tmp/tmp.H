@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    tmp
+    Foam::tmp
 
 Description
+    A class for managing temporary objects
 
 SourceFiles
     tmpI.H
@@ -56,7 +57,7 @@ class tmp
 {
     // Private data
 
-        //- Flag for whether field is a temporary or a constant object
+        //- Flag for whether object is a temporary or a constant object
         bool isTmp_;
 
         //- Pointer to temporary object

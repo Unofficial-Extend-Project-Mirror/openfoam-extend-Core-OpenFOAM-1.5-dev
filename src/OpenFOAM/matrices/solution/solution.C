@@ -29,14 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-int solution::debug(Foam::debug::debugSwitch("solution", false));
+int Foam::solution::debug(Foam::debug::debugSwitch("solution", false));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-solution::solution(const objectRegistry& obr, const fileName& dictName)
+Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
 :
     IOdictionary
     (
@@ -58,7 +55,7 @@ solution::solution(const objectRegistry& obr, const fileName& dictName)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool solution::read()
+bool Foam::solution::read()
 {
     if (regIOobject::read())
     {
@@ -83,7 +80,7 @@ bool solution::read()
 }
 
 
-const dictionary& solution::solutionDict() const
+const Foam::dictionary& Foam::solution::solutionDict() const
 {
     if (found("select"))
     {
@@ -96,7 +93,7 @@ const dictionary& solution::solutionDict() const
 }
 
 
-bool solution::relax(const word& name) const
+bool Foam::solution::relax(const word& name) const
 {
     if (debug)
     {
@@ -106,7 +103,8 @@ bool solution::relax(const word& name) const
     return relaxationFactors_.found(name);
 }
 
-scalar solution::relaxationFactor(const word& name) const
+
+Foam::scalar Foam::solution::relaxationFactor(const word& name) const
 {
     if (debug)
     {
@@ -116,19 +114,29 @@ scalar solution::relaxationFactor(const word& name) const
     return readScalar(relaxationFactors_.lookup(name));
 }
 
-ITstream& solution::solver(const word& name) const
+
+const Foam::dictionary& Foam::solution::solverDict(const word& name) const
 {
     if (debug)
     {
-        Info<< "Lookup solver for " << name << endl;
+        InfoIn("solution::solverDict(const word& name)")
+            << "Lookup solver for " << name << endl;
+    }
+
+    return solvers_.subDict(name);
+}
+
+
+Foam::ITstream& Foam::solution::solver(const word& name) const
+{
+    if (debug)
+    {
+        InfoIn("solution::solver(const word& name)")
+            << "Lookup solver for " << name << endl;
     }
 
     return solvers_.lookup(name);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

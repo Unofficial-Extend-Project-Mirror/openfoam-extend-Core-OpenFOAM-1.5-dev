@@ -23,18 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    CompactListList<T>
+    Foam::CompactListList
 
 Description
-    CompactListList<T> is a packed storage unstructured matrix of objects
-    of type T using an offset table for access.
+    A packed storage unstructured matrix of objects of type \<T\>
+    using an offset table for access.
 
     The offset table is the size of the number of rows whose elements are the
     accumulated sizes of the rows, i.e.
-
-    offset[i] gives the index of first element of row i + 1
-
-    offset[i] - offset[i-1] is the number of elements in row i
+      - offset[i] gives the index of first element of row i + 1
+      - offset[i] - offset[i-1] is the number of elements in row i
 
     and for i = 0, offset[i-1] = 0.
 
@@ -57,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class CompactListList;
 
@@ -118,7 +116,7 @@ public:
     // Member functions
 
         //- Return a null CompactListList
-        static CompactListList<T>& null();
+        static const CompactListList<T>& null();
 
         // Access
 

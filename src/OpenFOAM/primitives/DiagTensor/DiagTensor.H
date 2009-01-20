@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DiagTensor
+    Foam::DiagTensor
 
 Description
     Templated 3D DiagTensor derived from VectorSpace adding construction from
@@ -71,7 +71,6 @@ public:
         static const char* componentNames[];
         static const DiagTensor zero;
         static const DiagTensor one;
-        static const DiagTensor I;
 
 
     //- Component labeling enumeration

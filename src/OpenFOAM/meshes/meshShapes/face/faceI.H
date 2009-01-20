@@ -123,6 +123,20 @@ inline label face::prevLabel(const label i) const
 }
 
 
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+inline bool operator==(const face& a, const face& b)
+{
+    return face::compare(a,b) != 0;
+}
+
+
+inline bool operator!=(const face& a, const face& b)
+{
+    return face::compare(a,b) == 0;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 inline Istream& operator>>(Istream& is, face& f)

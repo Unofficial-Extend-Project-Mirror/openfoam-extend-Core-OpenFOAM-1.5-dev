@@ -72,30 +72,8 @@ Foam::inverseDistanceDiffusivity::~inverseDistanceDiffusivity()
 Foam::tmp<Foam::scalarField> Foam::inverseDistanceDiffusivity::y() const
 {
     const polyMesh& mesh = mSolver().mesh();
-    const polyBoundaryMesh& bdry = mesh.boundaryMesh();
 
-    wordList allPatchNames = bdry.names();
-
-    labelHashSet patchSet(bdry.size());
-
-    forAll(patchNames_, i)
-    {
-        // Treat the given patch names as wild-cards and search the set
-        // of all patch names for matches
-        labelList patchIDs = findStrings(patchNames_[i], allPatchNames);
-
-        if (patchIDs.size() == 0)
-        {
-            WarningIn("inverseDistanceDiffusivity::y()")
-                << "Cannot find any patch names matching " << patchNames_[i]
-                << endl;
-        }
-
-        forAll(patchIDs, j)
-        {
-            patchSet.insert(patchIDs[j]);
-        }
-    }
+    labelHashSet patchSet(mesh.boundaryMesh().patchSet(patchNames_));
 
     if (patchSet.size() > 0)
     {

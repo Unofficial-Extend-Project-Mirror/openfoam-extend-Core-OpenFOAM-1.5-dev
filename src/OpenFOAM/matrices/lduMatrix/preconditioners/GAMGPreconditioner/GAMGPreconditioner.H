@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    GAMGPreconditioner
+    Foam::GAMGPreconditioner
 
 Description
     Geometric agglomerated algebraic multigrid preconditioner.
-    See GAMGSolver.H for more details.
+
+See Also
+    GAMGSolver for more details.
 
 SourceFiles
     GAMGPreconditioner.C

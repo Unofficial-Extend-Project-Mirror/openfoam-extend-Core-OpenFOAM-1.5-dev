@@ -22,39 +22,33 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Member functions for instant class
-
 \*---------------------------------------------------------------------------*/
 
 #include "instantList.H"
 #include "Time.H"
 
-#include <cstdlib>
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+const char* const Foam::instant::typeName = "instant";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-instant::instant()
+Foam::instant::instant()
 {}
 
-instant::instant(const scalar tval, const word& tname)
+Foam::instant::instant(const scalar tval, const word& tname)
 :
     value_(tval),
     name_(tname)
 {}
 
-instant::instant(const scalar tval)
+Foam::instant::instant(const scalar tval)
 :
     value_(tval),
     name_(Time::timeName(tval))
 {}
 
-instant::instant(const word& tname)
+Foam::instant::instant(const word& tname)
 :
     value_(atof(tname.c_str())),
     name_(tname)
@@ -63,7 +57,7 @@ instant::instant(const word& tname)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-int operator==(const instant& I1, const instant& I2)
+int Foam::operator==(const instant& I1, const instant& I2)
 {
     return
     (
@@ -73,7 +67,7 @@ int operator==(const instant& I1, const instant& I2)
 }
 
 
-int operator != (const instant& I1, const instant& I2)
+int Foam::operator != (const instant& I1, const instant& I2)
 {
     // Invert the '==' operator ('0'='false')
     return I1 == I2 ? 0 : 1;
@@ -82,7 +76,7 @@ int operator != (const instant& I1, const instant& I2)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, instant& I)
+Foam::Istream& Foam::operator>>(Istream& is, instant& I)
 {
     is >> I.value_ >> I.name_;
 
@@ -90,16 +84,12 @@ Istream& operator>>(Istream& is, instant& I)
 }
 
 
-Ostream& operator<<(Ostream& os, const instant& I)
+Foam::Ostream& Foam::operator<<(Ostream& os, const instant& I)
 {
    os << I.value_ << tab << I.name_;
 
    return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

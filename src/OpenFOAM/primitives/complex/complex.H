@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    complex
+    Foam::complex
 
 Description
     Extension to the c++ complex library type.
@@ -46,6 +46,30 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class complex;
+
+inline scalar magSqr(const complex& c);
+inline complex sqr(const complex& c);
+inline scalar mag(const complex& c);
+inline const complex& max(const complex& c1, const complex& c2);
+inline const complex& min(const complex& c1, const complex& c2);
+inline complex limit(const complex& c1, const complex& c2);
+inline const complex& sum(const complex& c);
+inline complex operator+(const complex&, const complex&);
+inline complex operator-(const complex&);
+inline complex operator-(const complex&, const complex&);
+inline complex operator*(const complex&, const complex&);
+inline complex operator/(const complex&, const complex&);
+inline complex operator*(const scalar, const complex&);
+inline complex operator*(const complex&, const scalar);
+inline complex operator/(const complex&, const scalar);
+inline complex operator/(const scalar, const complex&);
+Istream& operator>>(Istream& is, complex&);
+Ostream& operator<<(Ostream& os, const complex& C);
+
 
 /*---------------------------------------------------------------------------*\
                            Class complex Declaration
@@ -123,29 +147,29 @@ public:
 
     // Friend functions
 
-        inline friend scalar magSqr(const complex& c);
-        inline friend complex sqr(const complex& c);
-        inline friend scalar mag(const complex& c);
-        inline friend const complex& max(const complex& c1, const complex& c2);
-        inline friend const complex& min(const complex& c1, const complex& c2);
+        friend scalar magSqr(const complex& c);
+        friend complex sqr(const complex& c);
+        friend scalar mag(const complex& c);
+        friend const complex& max(const complex& c1, const complex& c2);
+        friend const complex& min(const complex& c1, const complex& c2);
 
-        inline friend complex limit(const complex& c1, const complex& c2);
+        friend complex limit(const complex& c1, const complex& c2);
 
-        inline friend const complex& sum(const complex& c);
+        friend const complex& sum(const complex& c);
 
 
     // Friend operators
 
-        inline friend complex operator+(const complex&, const complex&);
-        inline friend complex operator-(const complex&);
-        inline friend complex operator-(const complex&, const complex&);
-        inline friend complex operator*(const complex&, const complex&);
-        inline friend complex operator/(const complex&, const complex&);
+        friend complex operator+(const complex&, const complex&);
+        friend complex operator-(const complex&);
+        friend complex operator-(const complex&, const complex&);
+        friend complex operator*(const complex&, const complex&);
+        friend complex operator/(const complex&, const complex&);
 
-        inline friend complex operator*(const scalar, const complex&);
-        inline friend complex operator*(const complex&, const scalar);
-        inline friend complex operator/(const complex&, const scalar);
-        inline friend complex operator/(const scalar, const complex&);
+        friend complex operator*(const scalar, const complex&);
+        friend complex operator*(const complex&, const scalar);
+        friend complex operator/(const complex&, const scalar);
+        friend complex operator/(const scalar, const complex&);
 
 
     // IOstream operators

@@ -27,15 +27,9 @@ License
 #include "primitiveEntry.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from keyword and ITstream
-primitiveEntry::primitiveEntry(const word& key, const ITstream& tokens)
+Foam::primitiveEntry::primitiveEntry(const word& key, const ITstream& tokens)
 :
     entry(key),
     ITstream(tokens)
@@ -44,16 +38,18 @@ primitiveEntry::primitiveEntry(const word& key, const ITstream& tokens)
 }
 
 
-// Construct from keyword and a token
-primitiveEntry::primitiveEntry(const word& keyword, const token& t)
+Foam::primitiveEntry::primitiveEntry(const word& keyword, const token& t)
 :
     entry(keyword),
     ITstream(keyword, tokenList(1, t))
 {}
 
 
-// Construct from keyword and tokenList
-primitiveEntry::primitiveEntry(const word& keyword, const tokenList& tokens)
+Foam::primitiveEntry::primitiveEntry
+(
+    const word& keyword,
+    const tokenList& tokens
+)
 :
     entry(keyword),
     ITstream(keyword, tokens)
@@ -62,8 +58,7 @@ primitiveEntry::primitiveEntry(const word& keyword, const tokenList& tokens)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return line number of first token in dictionary
-label primitiveEntry::startLineNumber() const
+Foam::label Foam::primitiveEntry::startLineNumber() const
 {
     if (size())
     {
@@ -75,8 +70,7 @@ label primitiveEntry::startLineNumber() const
     }
 }
 
-//- Return line number of last token in dictionary
-label primitiveEntry::endLineNumber() const
+Foam::label Foam::primitiveEntry::endLineNumber() const
 {
     if (size())
     {
@@ -89,8 +83,7 @@ label primitiveEntry::endLineNumber() const
 }
 
 
-//- Return token stream if this entry is a primitive entry
-ITstream& primitiveEntry::stream() const
+Foam::ITstream& Foam::primitiveEntry::stream() const
 {
     ITstream& dataStream = const_cast<primitiveEntry&>(*this);
     dataStream.rewind();
@@ -98,8 +91,7 @@ ITstream& primitiveEntry::stream() const
 }
 
 
-//- Return token stream if this entry is a primitive entry
-const dictionary& primitiveEntry::dict() const
+const Foam::dictionary& Foam::primitiveEntry::dict() const
 {
     FatalErrorIn("const dictionary& primitiveEntry::dict() const")
         << "Attempt to return primitive entry " << info()
@@ -110,8 +102,50 @@ const dictionary& primitiveEntry::dict() const
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::dictionary& Foam::primitiveEntry::dict()
+{
+    FatalErrorIn("const dictionary& primitiveEntry::dict()")
+        << "Attempt to return primitive entry " << info()
+        << " as a sub-dictionary"
+        << abort(FatalError);
 
-} // End namespace Foam
+    return const_cast<dictionary&>(dictionary::null);
+}
+
+
+void Foam::primitiveEntry::insert(const tokenList& varTokens, const label i)
+{
+    tokenList& tokens = *this;
+
+    if (!varTokens.size())
+    {
+        label end = tokens.size() - 1;
+
+        for(label j=i; j<end; j++)
+        {
+            tokens[j] = tokens[j+1];
+        }
+
+        tokens.setSize(tokens.size() - 1);
+    }
+    else if (varTokens.size() > 1)
+    {
+        tokens.setSize(tokens.size() + varTokens.size() - 1);
+
+        label end = tokens.size() - 1;
+        label offset = varTokens.size() - 1;
+
+        for(label j=end; j>i; j--)
+        {
+            tokens[j] = tokens[j-offset];
+        }
+    }
+
+    forAll(varTokens, j)
+    {
+        tokens[i + j] = varTokens[j];
+    }
+}
+
 
 // ************************************************************************* //

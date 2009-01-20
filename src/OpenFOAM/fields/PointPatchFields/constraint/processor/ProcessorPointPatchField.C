@@ -53,11 +53,21 @@ void ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 sendField
 (
-    const tmp<Field<Type2> >& tf
+    const tmp<Field<Type2> >& tf,
+    const Pstream::commsTypes commsType
 ) const
 {
+    // Not using non-blocking comms
+    if (commsType == Pstream::nonBlocking)
+    {
+        FatalErrorIn("void ProcessorPointPatchField::sendField")
+            << "Non-blocking comms not implemented"
+            << abort(FatalError);
+    }
+
     OPstream::write
     (
+        commsType,
         procPatch_.neighbProcNo(),
         reinterpret_cast<const char*>(tf().begin()),
         tf().byteSize()
@@ -80,12 +90,16 @@ template<class Type2>
 tmp<Field<Type2> >
 ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
-receivePointField() const
+receivePointField
+(
+    const Pstream::commsTypes commsType
+) const
 {
     tmp<Field<Type2> > tf(new Field<Type2>(this->size()));
 
     IPstream::read
     (
+        commsType,
         procPatch_.neighbProcNo(),
         reinterpret_cast<char*>(tf().begin()),
         tf().byteSize()
@@ -108,7 +122,10 @@ template<class Type2>
 tmp<Field<Type2> >
 ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
-receiveEdgeField() const
+receiveEdgeField
+(
+    const Pstream::commsTypes commsType
+) const
 {
     tmp<Field<Type2> > tf
     (
@@ -117,6 +134,7 @@ receiveEdgeField() const
 
     IPstream::read
     (
+        commsType,
         procPatch_.neighbProcNo(),
         reinterpret_cast<char*>(tf().begin()),
         tf().byteSize()
@@ -141,10 +159,11 @@ void ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 initAddFieldTempl
 (
+    const Pstream::commsTypes commsType,
     const Field<Type2>& pField
 ) const
 {
-    sendField(patchInternalField(pField));
+    sendField(patchInternalField(pField), commsType);
 }
 
 
@@ -163,11 +182,12 @@ void ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 addFieldTempl
 (
+    const Pstream::commsTypes commsType,
     Field<Type2>& pField
 ) const
 {
     // Get the neighbour side values
-    tmp<Field<Type2> > tpNeighbour = receivePointField<Type2>();
+    tmp<Field<Type2> > tpNeighbour = receivePointField<Type2>(commsType);
     addToInternalField(pField, tpNeighbour());
 }
 
@@ -361,11 +381,14 @@ template
 void
 ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
-initEvaluate(const bool)
+initEvaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     if (this->isPointField())
     {
-        initAddFieldTempl(this->internalField());
+        initAddFieldTempl(Pstream::blocking, this->internalField());
     }
 }
 
@@ -383,12 +406,15 @@ template
 void
 ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
-evaluate()
+evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     if (this->isPointField())
     {
         // Get the neighbour side values
-        tmp<Field<Type> > tpNeighbour = receivePointField<Type>();
+        tmp<Field<Type> > tpNeighbour = receivePointField<Type>(commsType);
         Field<Type>& tpn = tpNeighbour();
 
         if (doTransform())
@@ -425,7 +451,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 initAddField() const
 {
-    initAddFieldTempl(this->internalField());
+    initAddFieldTempl(Pstream::blocking, this->internalField());
 }
 
 
@@ -444,7 +470,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 addField(Field<Type>& f) const
 {
-    addFieldTempl(f);
+    addFieldTempl(Pstream::blocking, f);
 }
 
 
@@ -513,6 +539,7 @@ initSwapAdd(Field<Type>& pField) const
 
     OPstream::write
     (
+        Pstream::blocking,
         procPatch_.neighbProcNo(),
         reinterpret_cast<const char*>(pf.begin()),
         pf.byteSize()
@@ -538,6 +565,7 @@ swapAdd(Field<Type>& pField) const
 
     IPstream::read
     (
+        Pstream::blocking,
         procPatch_.neighbProcNo(),
         reinterpret_cast<char*>(pnf.begin()),
         pnf.byteSize()
@@ -588,7 +616,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 initAddDiag(const scalarField& d) const
 {
-    initAddFieldTempl(d);
+    initAddFieldTempl(Pstream::blocking, d);
 }
 
 
@@ -607,7 +635,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 initAddSource(const scalarField& s) const
 {
-    initAddFieldTempl(s);
+    initAddFieldTempl(Pstream::blocking, s);
 }
 
 
@@ -626,7 +654,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 addDiag(scalarField& d) const
 {
-    addFieldTempl(d);
+    addFieldTempl(Pstream::blocking, d);
 }
 
 
@@ -645,7 +673,7 @@ ProcessorPointPatchField
 <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::
 addSource(scalarField& s) const
 {
-    addFieldTempl(s);
+    addFieldTempl(Pstream::blocking, s);
 }
 
 
@@ -927,7 +955,7 @@ initInterfaceMatrixUpdate
     const lduMatrix& m,
     const scalarField& coeffs,
     const direction,
-    const bool
+    const Pstream::commsTypes commsType
 ) const
 {
     tmp<scalarField> tlocalMult(new scalarField(this->size(), 0));
@@ -1041,7 +1069,7 @@ initInterfaceMatrixUpdate
     }
 
     // Send the localMult
-    sendField(tlocalMult);
+    sendField(tlocalMult, commsType);
 }
 
 
@@ -1064,11 +1092,12 @@ updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField&,
-    const direction
+    const direction,
+    const Pstream::commsTypes commsType
 ) const
 {
     // Get the neighbour side multiplication
-    tmp<scalarField> tneiMult = receivePointField<scalar>();
+    tmp<scalarField> tneiMult = receivePointField<scalar>(commsType);
     this->addToInternalField(result, tneiMult());
 }
 

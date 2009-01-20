@@ -23,36 +23,37 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    IOobject
+    Foam::IOobject
 
 Description
     IOobject defines the attributes of an object for which implicit
-    objectRegistry management is supported, and provides the infrastructure for
-    performing stream I/O. An IOobject is constructed with an object name, a
-    class name, an instance path, a reference to a objectRegistry, and
-    parameters determining its storage status.
+    objectRegistry management is supported, and provides the infrastructure
+    for performing stream I/O.
 
-    Read options define what is done on object construction & explicit reads:
+    An IOobject is constructed with an object name, a class name, an instance
+    path, a reference to a objectRegistry, and parameters determining its
+    storage status.
 
-        MUST_READ
-            Object must be read from Istream on construction.
-            Error if Istream does not exist or can't be read.
+    @par Read options
 
-        READ_IF_PRESENT
-            Read object from Istream if Istream exists, otherwise don't.
-            Error only if Istream exists but can't be read.
+    Define what is done on object construction and explicit reads:
+    @param MUST_READ
+        Object must be read from Istream on construction. \n
+        Error if Istream does not exist or can't be read.
+    @param READ_IF_PRESENT
+        Read object from Istream if Istream exists, otherwise don't. \n
+        Error only if Istream exists but can't be read.
+    @param NO_READ
+          Don't read
 
-        NO_READ
-            Don't read
+    @par Write options
 
-    Write options define what is done on object destruction & explicit writes:
-
-        AUTO_WRITE
-            Object is written automatically when requested to by the
-            objectRegistry.
-
-        NO_WRITE
-            No automatic write on destruction but can be written explicitly
+    Define what is done on object destruction and explicit writes:
+    @param AUTO_WRITE
+        Object is written automatically when requested to by the
+        objectRegistry.
+    @param NO_WRITE
+        No automatic write on destruction but can be written explicitly
 
 SourceFiles
     IOobject.C
@@ -81,6 +82,8 @@ class objectRegistry;
 /*---------------------------------------------------------------------------*\
                            Class IOobject Declaration
 \*---------------------------------------------------------------------------*/
+
+#include "CintDefs.H"
 
 class IOobject
 {
@@ -191,7 +194,7 @@ public:
         );
 
         //- Clone
-        autoPtr<IOobject> clone() const
+        Foam::autoPtr<IOobject> clone() const
         {
             return autoPtr<IOobject>(new IOobject(*this));
         }
@@ -199,8 +202,7 @@ public:
 
     // Destructor
 
-        virtual ~IOobject()
-        {}
+        virtual ~IOobject();
 
 
     // Member functions
@@ -310,7 +312,7 @@ public:
                 return path()/name();
             }
 
-            //- Return complete path + object name if the file exists 
+            //- Return complete path + object name if the file exists
             //  either in the case/processor or case otherwise null
             fileName filePath() const;
 
@@ -327,12 +329,9 @@ public:
         // Writing
 
             //- Write the standard OpenFOAM file/dictionary banner
+            //  Optionally without -*- C++ -*- editor hint (eg, for logs)
             template<class Stream>
-            static inline void writeBanner(Stream& os);
-
-            //- Write the standard OpenFOAM log banner
-            template<class Stream>
-            static inline void writeLogBanner(Stream& os);
+            static inline void writeBanner(Stream& os, bool noHint=false);
 
             //- Write the standard file section divider
             template<class Stream>
@@ -369,6 +368,13 @@ public:
 
         void operator=(const IOobject&);
 };
+
+#include "CintUndefs.H"
+
+#if defined (__GNUC__)
+template<>
+#endif
+Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

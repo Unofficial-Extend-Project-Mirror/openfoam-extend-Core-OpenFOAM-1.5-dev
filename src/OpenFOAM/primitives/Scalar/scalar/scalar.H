@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    scalar
+Typedef
+    Foam::scalar
 
 Description
     Single floating point number identical to float or double depending on
@@ -52,8 +52,10 @@ namespace Foam
 
     static const scalar GREAT = floatScalarGREAT;
     static const scalar VGREAT = floatScalarVGREAT;
+    static const scalar ROOTVGREAT = floatScalarROOTVGREAT;
     static const scalar SMALL = floatScalarSMALL;
     static const scalar VSMALL = floatScalarVSMALL;
+    static const scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
 }
@@ -68,8 +70,10 @@ namespace Foam
 
     static const scalar GREAT = doubleScalarGREAT;
     static const scalar VGREAT = doubleScalarVGREAT;
+    static const scalar ROOTVGREAT = doubleScalarROOTVGREAT;
     static const scalar SMALL = doubleScalarSMALL;
     static const scalar VSMALL = doubleScalarVSMALL;
+    static const scalar ROOTVSMALL = doubleScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
 }

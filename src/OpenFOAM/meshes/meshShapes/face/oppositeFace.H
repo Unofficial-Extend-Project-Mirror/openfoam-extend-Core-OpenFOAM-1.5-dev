@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    oppositeFace
+    Foam::oppositeFace
 
 Description
     Class containing opposite face for a prismatic cell with addresing

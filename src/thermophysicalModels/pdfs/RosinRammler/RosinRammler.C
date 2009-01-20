@@ -22,10 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-    pdf = ( x/d )^n * exp( -( x/d )^n )
-
 \*---------------------------------------------------------------------------*/
 
 
@@ -135,12 +131,12 @@ scalar RosinRammler::sample() const
             p += ls_[i]*xx*exp(-xx);
         }
 
-        if (y<p) 
+        if (y<p)
         {
             success = true;
         }
     }
-    
+
     return x;
 }
 

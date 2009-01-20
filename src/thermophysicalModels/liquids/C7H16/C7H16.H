@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C7H16
+    Foam::C7H16
 
 Description
     nHeptane

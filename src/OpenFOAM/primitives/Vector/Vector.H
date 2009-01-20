@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Vector
+    Foam::Vector
 
 Description
     Templated 3D Vector derived from VectorSpace adding construction from
@@ -31,7 +31,7 @@ Description
     the inner-product (dot-product) and cross product operators.
 
     A centre() member function which returns the Vector for which it is called
-    is defined so that point which is a typedef to Vector<scalar> behaves as
+    is defined so that point which is a typedef to Vector\<scalar\> behaves as
     other shapes in the shape hierachy.
 
 SourceFiles
@@ -115,7 +115,10 @@ public:
             inline Cmpt& z();
 
         //- Return *this (used for point which is a typedef to Vector<scalar>.
-        inline const Vector<Cmpt>& centre(const List<Vector<Cmpt> >&) const;
+        inline const Vector<Cmpt>& centre
+        (
+            const Foam::List<Vector<Cmpt> >&
+        ) const;
 };
 
 
@@ -143,7 +146,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Include inline implementations
 #include "VectorI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

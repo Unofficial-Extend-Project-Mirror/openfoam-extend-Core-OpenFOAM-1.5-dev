@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    transformField
+InNamespace
+    Foam
 
 Description
     Spatial transformation functions for primitive fields.
@@ -37,6 +37,9 @@ SourceFiles
 #define transformField_H
 
 #include "transform.H"
+#include "quaternion.H"
+#include "septernion.H"
+#include "vectorField.H"
 #include "tensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -105,6 +108,26 @@ tmp<Field<sphericalTensor> > transformFieldMask<sphericalTensor>
 );
 
 
+//- Rotate given vectorField with the given quaternion
+void transform(vectorField&, const quaternion&, const vectorField&);
+
+//- Rotate given vectorField with the given quaternion
+tmp<vectorField> transform(const quaternion&, const vectorField&);
+
+//- Rotate given tmp<vectorField> with the given quaternion
+tmp<vectorField> transform(const quaternion&, const tmp<vectorField>&);
+
+
+//- Transform given vectorField with the given septernion
+void transform(vectorField&, const septernion&, const vectorField&);
+
+//- Transform given vectorField with the given septernion
+tmp<vectorField> transform(const septernion&, const vectorField&);
+
+//- Transform given tmp<vectorField> with the given septernion
+tmp<vectorField> transform(const septernion&, const tmp<vectorField>&);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -112,7 +135,7 @@ tmp<Field<sphericalTensor> > transformFieldMask<sphericalTensor>
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "transformField.C"
+#   include "transformFieldTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

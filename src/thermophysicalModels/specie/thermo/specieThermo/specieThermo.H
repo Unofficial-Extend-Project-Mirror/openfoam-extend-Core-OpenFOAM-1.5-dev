@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    specieThermo
+    Foam::specieThermo
 
 Description
     Basic thermodynamics type based on the use of fitting functions for
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class thermo> class specieThermo;
 
@@ -207,12 +207,12 @@ public:
             inline scalar Kc(const scalar T) const;
 
             //- Equilibrium constant [] i.t.o. mole-fractions
-            //  For low pressures (where the gas mixture is near perfect) 
+            //  For low pressures (where the gas mixture is near perfect)
             //  Kx = Kp(pstd/p)^nui
             inline scalar Kx(const scalar T, const scalar p) const;
 
             //- Equilibrium constant [] i.t.o. number of moles
-            //  For low pressures (where the gas mixture is near perfect) 
+            //  For low pressures (where the gas mixture is near perfect)
             //  Kn = Kp(n*pstd/p)^nui where n = number of moles in mixture
             inline scalar Kn
             (

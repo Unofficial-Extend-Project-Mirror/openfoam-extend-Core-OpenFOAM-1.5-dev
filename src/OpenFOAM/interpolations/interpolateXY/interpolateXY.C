@@ -22,13 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    interpolateXY
-
-Description
-    Interpolates y values from one curve to another with a different x
-    distribution.
-
 \*---------------------------------------------------------------------------*/
 
 #include "interpolateXY.H"
@@ -71,12 +64,13 @@ Type interpolateXY
     label n = xOld.size();
 
     label lo = 0;
-    for (lo = 0; lo < n && xOld[lo] > x; ++lo);
+    for (lo=0; lo<n && xOld[lo]>x; ++lo)
+    {}
 
     label low = lo;
     if (low < n)
     {
-        for (label i = low; i < n; ++i)
+        for (label i=low; i<n; ++i)
         {
             if (xOld[i] > xOld[lo] && xOld[i] <= x)
             {
@@ -86,12 +80,13 @@ Type interpolateXY
     }
 
     label hi = 0;
-    for (hi = 0; hi < n && xOld[hi] < x; ++hi);
+    for (hi=0; hi<n && xOld[hi]<x; ++hi)
+    {}
 
     label high = hi;
     if (high < n)
     {
-        for (label i = high; i < n; ++i)
+        for (label i=high; i<n; ++i)
         {
             if (xOld[i] < xOld[hi] && xOld[i] >= x)
             {
@@ -101,7 +96,7 @@ Type interpolateXY
     }
 
 
-    if (lo < n && hi < n && lo != hi)
+    if (lo<n && hi<n && lo != hi)
     {
         return yOld[lo]
             + ((x - xOld[lo])/(xOld[hi] - xOld[lo]))*(yOld[hi] - yOld[lo]);

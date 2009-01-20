@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    polyPatch
+    Foam::polyPatch
 
 Description
     A patch is a list of labels, which address the faces in the global face
@@ -61,6 +61,13 @@ namespace Foam
 
 class polyBoundaryMesh;
 
+// Forward declaration of friend functions and operators
+
+class polyPatch;
+
+Ostream& operator<<(Ostream&, const polyPatch&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class polyPatch Declaration
 \*---------------------------------------------------------------------------*/
@@ -94,6 +101,8 @@ class polyPatch
         void calcMeshEdges() const;
 
 
+protected:
+
     // Protected static data
 
         //- Relative tolerance (for geometric matching). Is factor of
@@ -101,12 +110,7 @@ class polyPatch
         static const scalar matchTol_;
 
 
-protected:
-
     // Protected Member Functions
-
-        //- Return the polyMesh allPoints
-        const pointField& allPoints() const;
 
         // The polyPatch geometry initialisation is called by polyBoundaryMesh
         friend class polyBoundaryMesh;
@@ -213,6 +217,9 @@ public:
     //- Runtime type information
     TypeName("patch");
 
+    //- Debug switch to disallow the use of genericPolyPatch
+    static int disallowGenericPolyPatch;
+
 
     // Declare run-time constructor selection tables
 
@@ -229,15 +236,6 @@ public:
                 const polyBoundaryMesh& bm
             ),
             (name, size, start, index, bm)
-        );
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            polyPatch,
-            Istream,
-            (Istream& is, const label index, const polyBoundaryMesh& bm),
-            (is, index, bm)
         );
 
         declareRunTimeSelectionTable
@@ -266,9 +264,6 @@ public:
             const label index,
             const polyBoundaryMesh& bm
         );
-
-        //- Construct from Istream
-        polyPatch(Istream&, const label index, const polyBoundaryMesh&);
 
         //- Construct from dictionary
         polyPatch
@@ -333,14 +328,6 @@ public:
             const polyBoundaryMesh& bm
         );
 
-        //- Return a pointer to a new patch created on freestore from input
-        static autoPtr<polyPatch> New
-        (
-            Istream&,
-            const label index,
-            const polyBoundaryMesh& bm
-        );
-
         //- Return a pointer to a new patch created on freestore from
         //  dictionary
         static autoPtr<polyPatch> New
@@ -395,11 +382,8 @@ public:
         }
 
 
-        //- Write
+        //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;
-
-        //- Write dictionary
-        virtual void writeDict(Ostream&) const;
 
 
         // Geometric data; point list required

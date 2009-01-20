@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    prefixOSstream
+    Foam::prefixOSstream
 
 Description
     Version of OSstream which prints a prefix on each line.
+
     This is useful for running in parallel as it allows the processor number
-    to be automatically preprended to each message line.
+    to be automatically prepended to each message line.
 
 SourceFiles
     prefixOSwrite.C

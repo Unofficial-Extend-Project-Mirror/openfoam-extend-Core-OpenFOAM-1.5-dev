@@ -27,14 +27,13 @@ License
 #include "cell.H"
 #include "pyramidPointFaceRef.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+const char* const Foam::cell::typeName = "cell";
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-labelList cell::labels(const unallocFaceList& f) const
+Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
 {
     // return the unordered list of vertex labels supporting the cell
 
@@ -100,7 +99,7 @@ labelList cell::labels(const unallocFaceList& f) const
 }
 
 
-pointField cell::points
+Foam::pointField Foam::cell::points
 (
     const unallocFaceList& f,
     const pointField& meshPoints
@@ -119,7 +118,7 @@ pointField cell::points
 }
 
 
-edgeList cell::edges(const unallocFaceList& f) const
+Foam::edgeList Foam::cell::edges(const unallocFaceList& f) const
 {
     // return the lisf of cell edges
 
@@ -171,9 +170,12 @@ edgeList cell::edges(const unallocFaceList& f) const
 }
 
 
-point cell::centre(const pointField& p, const unallocFaceList& f) const
+Foam::point Foam::cell::centre
+(
+    const pointField& p,
+    const unallocFaceList& f
+) const
 {
-    // INSTRUCTION FOR USE!
     // When one wants to access the cell centre and magnitude, the
     // functionality on the mesh level should be used in preference to the
     // functions provided here. They do not rely to the functionality
@@ -234,9 +236,12 @@ point cell::centre(const pointField& p, const unallocFaceList& f) const
 }
 
 
-scalar cell::mag(const pointField& p, const unallocFaceList& f) const
+Foam::scalar Foam::cell::mag
+(
+    const pointField& p,
+    const unallocFaceList& f
+) const
 {
-    // INSTRUCTION FOR USE!
     // When one wants to access the cell centre and magnitude, the
     // functionality on the mesh level should be used in preference to the
     // functions provided here. They do not rely to the functionality
@@ -274,7 +279,7 @@ scalar cell::mag(const pointField& p, const unallocFaceList& f) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-bool operator==(const cell& a, const cell& b)
+bool Foam::operator==(const cell& a, const cell& b)
 {
     // Trivial reject: faces are different size
     if (a.size() != b.size())
@@ -317,9 +322,5 @@ bool operator==(const cell& a, const cell& b)
     return result;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

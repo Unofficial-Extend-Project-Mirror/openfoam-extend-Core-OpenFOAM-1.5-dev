@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    refCount
+    Foam::refCount
 
 Description
-    Reference counter for tmp<field>.
+    Reference counter for tmp\<field\>.
 
 \*---------------------------------------------------------------------------*/
 

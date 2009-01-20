@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    directionalDiffusivity
+    Foam::directionalDiffusivity
 
 Description
     Directional finite volume mesh motion diffusivity.

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    UILList
+    Foam::UILList
 
 Description
     Template class for intrusive linked lists.
@@ -46,7 +46,7 @@ namespace Foam
 
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class LListBase, class T>
 class UILList;
@@ -172,6 +172,7 @@ public:
 
         typedef typename LListBase::iterator LListBase_iterator;
 
+        //- An STL-conforming iterator
         class iterator
         :
             public LListBase_iterator
@@ -213,6 +214,7 @@ public:
 
         typedef typename LListBase::const_iterator LListBase_const_iterator;
 
+        //- An STL-conforming const_iterator
         class const_iterator
         :
             public LListBase_const_iterator
@@ -274,7 +276,10 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<< <LListBase, T>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <LListBase, T>
+        #endif
         (
             Ostream&,
             const UILList<LListBase, T>&

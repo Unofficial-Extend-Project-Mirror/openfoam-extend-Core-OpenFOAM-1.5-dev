@@ -88,17 +88,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field patch field
-        // and value fraction
-        MixedPointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&,
-            const Field<Type>&,
-            const scalarField&
-        );
-
         //- Construct from patch, internal field and dictionary
         MixedPointPatchField
         (

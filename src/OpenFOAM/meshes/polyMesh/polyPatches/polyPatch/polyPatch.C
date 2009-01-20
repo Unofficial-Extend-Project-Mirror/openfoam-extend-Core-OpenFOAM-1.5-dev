@@ -35,25 +35,26 @@ License
 #include "pointPatchField.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(polyPatch, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    int polyPatch::disallowGenericPolyPatch
+    (
+        debug::debugSwitch("disallowGenericPolyPatch", 0)
+    );
 
-defineTypeNameAndDebug(polyPatch, 0);
+    defineRunTimeSelectionTable(polyPatch, word);
+    defineRunTimeSelectionTable(polyPatch, dictionary);
 
-defineRunTimeSelectionTable(polyPatch, word);
-defineRunTimeSelectionTable(polyPatch, Istream);
-defineRunTimeSelectionTable(polyPatch, dictionary);
-
-addToRunTimeSelectionTable(polyPatch, polyPatch, word);
-addToRunTimeSelectionTable(polyPatch, polyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, polyPatch, dictionary);
+    addToRunTimeSelectionTable(polyPatch, polyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, polyPatch, dictionary);
+}
 
 
-const scalar polyPatch::matchTol_
+const Foam::scalar Foam::polyPatch::matchTol_
 (
     debug::tolerances("patchFaceMatchTol", 1e-3)
 );
@@ -61,19 +62,19 @@ const scalar polyPatch::matchTol_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void polyPatch::movePoints(const pointField& p)
+void Foam::polyPatch::movePoints(const pointField& p)
 {
     primitivePatch::movePoints(p);
 }
 
-void polyPatch::updateMesh()
+void Foam::polyPatch::updateMesh()
 {
     clearAddressing();
 }
 
 
 // Is old face now in the current patch?
-bool polyPatch::inPatch
+bool Foam::polyPatch::inPatch
 (
     const labelList& oldToNew,
     const label oldFaceI
@@ -85,13 +86,13 @@ bool polyPatch::inPatch
 }
 
 
-void polyPatch::writeOBJ(Ostream& os, const point& pt)
+void Foam::polyPatch::writeOBJ(Ostream& os, const point& pt)
 {
     os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
 }
 
 
-void polyPatch::writeOBJ
+void Foam::polyPatch::writeOBJ
 (
     Ostream& os,
     const pointField& points,
@@ -106,7 +107,7 @@ void polyPatch::writeOBJ
 
 
 // Write edge
-void polyPatch::writeOBJ
+void Foam::polyPatch::writeOBJ
 (
     Ostream& os,
     const point& p0,
@@ -125,7 +126,7 @@ void polyPatch::writeOBJ
 
 
 // Write patch
-void polyPatch::writeOBJ
+void Foam::polyPatch::writeOBJ
 (
     const fileName& fName,
     const faceList& faces,
@@ -164,7 +165,7 @@ void polyPatch::writeOBJ
 // Get face centre with specified points
 // (can't use points() since might not be set yet in morphing; usually called
 //  with mapPolyMesh.premotionPoints())
-tmp<pointField> polyPatch::calcFaceCentres
+Foam::tmp<Foam::pointField> Foam::polyPatch::calcFaceCentres
 (
     const faceList& faces,
     const pointField& points
@@ -184,7 +185,7 @@ tmp<pointField> polyPatch::calcFaceCentres
 
 
 // Get coordinate of f[0] for every face
-tmp<pointField> polyPatch::getAnchorPoints
+Foam::tmp<Foam::pointField> Foam::polyPatch::getAnchorPoints
 (
     const faceList& faces,
     const pointField& points
@@ -204,7 +205,7 @@ tmp<pointField> polyPatch::getAnchorPoints
 
 
 // Given list of starts of patches and a face label determine the patch.
-label polyPatch::whichPatch
+Foam::label Foam::polyPatch::whichPatch
 (
     const labelList& patchStarts,
     const label faceI
@@ -231,7 +232,7 @@ label polyPatch::whichPatch
 
 // Get local typical dimension and tolerance from that. Currently max of
 // distance from centre to any of the face points.
-scalarField polyPatch::calcFaceTol
+Foam::scalarField Foam::polyPatch::calcFaceTol
 (
     const faceList& faces,
     const pointField& points,
@@ -260,7 +261,7 @@ scalarField polyPatch::calcFaceTol
 }
 
 
-label polyPatch::getRotation
+Foam::label Foam::polyPatch::getRotation
 (
     const pointField& points,
     const face& f,
@@ -296,7 +297,7 @@ label polyPatch::getRotation
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-polyPatch::polyPatch
+Foam::polyPatch::polyPatch
 (
     const word& name,
     const label size,
@@ -318,34 +319,7 @@ polyPatch::polyPatch
 {}
 
 
-polyPatch::polyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    patchIdentifier(is, index),
-    primitivePatch
-    (
-        faceSubList(bm.mesh().allFaces(), 0, 0),
-        bm.mesh().allPoints()
-    ),
-    start_(-1),
-    boundaryMesh_(bm),
-    faceCellsPtr_(NULL),
-    mePtr_(NULL)
-{
-    label size = readLabel(is);
-    start_ = readLabel(is);
-    UList<face>::operator=
-    (
-        faceSubList(bm.mesh().allFaces(), size, start_)
-    );
-}
-
-
-polyPatch::polyPatch
+Foam::polyPatch::polyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -371,7 +345,7 @@ polyPatch::polyPatch
 {}
 
 
-polyPatch::polyPatch
+Foam::polyPatch::polyPatch
 (
     const polyPatch& pp,
     const polyBoundaryMesh& bm
@@ -395,7 +369,7 @@ polyPatch::polyPatch
 {}
 
 
-polyPatch::polyPatch
+Foam::polyPatch::polyPatch
 (
     const polyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -422,7 +396,7 @@ polyPatch::polyPatch
 {}
 
 
-polyPatch::polyPatch(const polyPatch& p)
+Foam::polyPatch::polyPatch(const polyPatch& p)
 :
     patchIdentifier(p),
     primitivePatch(p),
@@ -435,7 +409,7 @@ polyPatch::polyPatch(const polyPatch& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-polyPatch::~polyPatch()
+Foam::polyPatch::~polyPatch()
 {
     clearAddressing();
 }
@@ -443,13 +417,13 @@ polyPatch::~polyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool polyPatch::constraintType(const word& pt)
+bool Foam::polyPatch::constraintType(const word& pt)
 {
     return pointPatchField<scalar>::PointPatchConstructorTablePtr_->found(pt);
 }
 
 
-wordList polyPatch::constraintTypes()
+Foam::wordList Foam::polyPatch::constraintTypes()
 {
     wordList cTypes(dictionaryConstructorTablePtr_->size());
 
@@ -475,32 +449,26 @@ wordList polyPatch::constraintTypes()
 }
 
 
-const polyBoundaryMesh& polyPatch::boundaryMesh() const
+const Foam::polyBoundaryMesh& Foam::polyPatch::boundaryMesh() const
 {
     return boundaryMesh_;
 }
 
 
-const pointField& polyPatch::allPoints() const
-{
-    return boundaryMesh_.mesh().allPoints();
-}
-
-
-const vectorField::subField polyPatch::faceCentres() const
+const Foam::vectorField::subField Foam::polyPatch::faceCentres() const
 {
     return patchSlice(boundaryMesh().mesh().faceCentres());
 }
 
 
-const vectorField::subField polyPatch::faceAreas() const
+const Foam::vectorField::subField Foam::polyPatch::faceAreas() const
 {
     return patchSlice(boundaryMesh().mesh().faceAreas());
 }
 
 
 // Return the patch face neighbour cell centres
-tmp<vectorField> polyPatch::faceCellCentres() const
+Foam::tmp<Foam::vectorField> Foam::polyPatch::faceCellCentres() const
 {
     tmp<vectorField> tcc(new vectorField(size()));
     vectorField& cc = tcc();
@@ -519,7 +487,7 @@ tmp<vectorField> polyPatch::faceCellCentres() const
 }
 
 
-const unallocLabelList& polyPatch::faceCells() const
+const Foam::unallocLabelList& Foam::polyPatch::faceCells() const
 {
     if (!faceCellsPtr_)
     {
@@ -533,7 +501,7 @@ const unallocLabelList& polyPatch::faceCells() const
 }
 
 
-const labelList& polyPatch::meshEdges() const
+const Foam::labelList& Foam::polyPatch::meshEdges() const
 {
     if (!mePtr_)
     {
@@ -553,39 +521,27 @@ const labelList& polyPatch::meshEdges() const
 }
 
 
-void polyPatch::clearAddressing()
+void Foam::polyPatch::clearAddressing()
 {
     deleteDemandDrivenData(faceCellsPtr_);
     deleteDemandDrivenData(mePtr_);
 }
 
 
-void polyPatch::write(Ostream& os) const
+void Foam::polyPatch::write(Ostream& os) const
 {
-    os  << nl << type()
-        << static_cast<const patchIdentifier&>(*this) << endl
-        << this->size() << tab << start_;
+    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    patchIdentifier::write(os);
+    os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
+    os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
 }
 
 
-void polyPatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
-
-    patchIdentifier::writeDict(os);
-
-    os  << "    nFaces " << this->size() << token::END_STATEMENT << nl
-        << "    startFace " << start() << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
-}
-
-
-void polyPatch::initOrder(const primitivePatch&) const
+void Foam::polyPatch::initOrder(const primitivePatch&) const
 {}
 
 
-bool polyPatch::order
+bool Foam::polyPatch::order
 (
     const primitivePatch&,
     labelList& faceMap,
@@ -599,7 +555,7 @@ bool polyPatch::order
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void polyPatch::operator=(const polyPatch& p)
+void Foam::polyPatch::operator=(const polyPatch& p)
 {
     clearAddressing();
 
@@ -611,16 +567,12 @@ void polyPatch::operator=(const polyPatch& p)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const polyPatch& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const polyPatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const polyPatch& p");
+    os.check("Ostream& operator<<(Ostream& os, const polyPatch& p");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

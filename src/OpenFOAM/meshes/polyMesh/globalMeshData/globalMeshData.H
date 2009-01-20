@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    globalMeshData
+    Foam::globalMeshData
 
 Description
     Various mesh related information for a parallel run. Upon construction
@@ -84,8 +84,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class globalMeshData;
+Ostream& operator<<(Ostream&, const globalMeshData&);
+
+
 /*---------------------------------------------------------------------------*\
-                        Class globalMeshData Declaration
+                           Class globalMeshData Declaration
 \*---------------------------------------------------------------------------*/
 
 class globalMeshData

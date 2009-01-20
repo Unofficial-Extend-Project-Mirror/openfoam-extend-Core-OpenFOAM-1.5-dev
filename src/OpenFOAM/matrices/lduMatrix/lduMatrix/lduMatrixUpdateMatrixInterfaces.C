@@ -37,20 +37,15 @@ void Foam::lduMatrix::initMatrixInterfaces
     const direction cmpt
 ) const
 {
-    const lduSchedule& patchSchedule = this->patchSchedule();
-
-    // Loop over all the "normal" interfaces relating to standard patches
-    forAll (patchSchedule, i)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        label interfaceI = patchSchedule[i].patch;
-
-        if (interfaces.set(interfaceI))
+        forAll (interfaces, interfaceI)
         {
-            // This is a dangerous and stupid bug: initInterfaceMatrixUpdate
-            // is called only for the patches where bufferedTransfer is set
-            // to true, which in practice means only processor patches
-            // Fixed by HJ, 6/Oct/2007
-            if (patchSchedule[i].init)
+            if (interfaces.set(interfaceI))
             {
                 interfaces[interfaceI].initInterfaceMatrixUpdate
                 (
@@ -59,33 +54,44 @@ void Foam::lduMatrix::initMatrixInterfaces
                     *this,
                     coupleCoeffs[interfaceI],
                     cmpt,
-                    patchSchedule[i].bufferedTransfer
+                    Pstream::defaultCommsType
                 );
             }
         }
     }
-
-    // Loop over the "global" patches are on the list of interfaces but
-    // beyond the end of the schedule which only handles "normal" patches
-    for
-    (
-        label interfaceI = patchSchedule.size()/2;
-        interfaceI < interfaces.size();
-        interfaceI++
-    )
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
     {
-        if (interfaces.set(interfaceI))
+        const lduSchedule& patchSchedule = this->patchSchedule();
+
+        // Loop over the "global" patches are on the list of interfaces but
+        // beyond the end of the schedule which only handles "normal" patches
+        for
+        (
+            label interfaceI=patchSchedule.size()/2;
+            interfaceI<interfaces.size();
+            interfaceI++
+        )
         {
-            interfaces[interfaceI].initInterfaceMatrixUpdate
-            (
-                psiif,
-                result,
-                *this,
-                coupleCoeffs[interfaceI],
-                cmpt,
-                true
-            );
+            if (interfaces.set(interfaceI))
+            {
+                interfaces[interfaceI].initInterfaceMatrixUpdate
+                (
+                    psiif,
+                    result,
+                    *this,
+                    coupleCoeffs[interfaceI],
+                    cmpt,
+                    Pstream::blocking
+                );
+            }
         }
+    }
+    else
+    {
+        FatalErrorIn("lduMatrix::initMatrixInterfaces")
+            << "Unsuported communications type "
+            << Pstream::commsTypeNames[Pstream::defaultCommsType]
+            << exit(FatalError);
     }
 }
 
@@ -99,18 +105,47 @@ void Foam::lduMatrix::updateMatrixInterfaces
     const direction cmpt
 ) const
 {
-    const lduSchedule& patchSchedule = this->patchSchedule();
-
-    // Loop over all the "normal" interfaces relating to standard patches
-    forAll (patchSchedule, i)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        label interfaceI = patchSchedule[i].patch;
-
-        if (interfaces.set(interfaceI))
+        // Block until all sends/receives have been finished
+        if (Pstream::defaultCommsType == Pstream::nonBlocking)
         {
-            if (patchSchedule[i].init)
+            IPstream::waitRequests();
+            OPstream::waitRequests();
+        }
+
+        forAll (interfaces, interfaceI)
+        {
+            if (interfaces.set(interfaceI))
             {
-                if (!patchSchedule[i].bufferedTransfer)
+                interfaces[interfaceI].updateInterfaceMatrix
+                (
+                    psiif,
+                    result,
+                    *this,
+                    coupleCoeffs[interfaceI],
+                    cmpt,
+                    Pstream::defaultCommsType
+                );
+            }
+        }
+    }
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    {
+        const lduSchedule& patchSchedule = this->patchSchedule();
+
+        // Loop over all the "normal" interfaces relating to standard patches
+        forAll (patchSchedule, i)
+        {
+            label interfaceI = patchSchedule[i].patch;
+
+            if (interfaces.set(interfaceI))
+            {
+                if (patchSchedule[i].init)
                 {
                     interfaces[interfaceI].initInterfaceMatrixUpdate
                     (
@@ -119,11 +154,34 @@ void Foam::lduMatrix::updateMatrixInterfaces
                         *this,
                         coupleCoeffs[interfaceI],
                         cmpt,
-                        patchSchedule[i].bufferedTransfer
+                        Pstream::scheduled
+                    );
+                }
+                else
+                {
+                    interfaces[interfaceI].updateInterfaceMatrix
+                    (
+                        psiif,
+                        result,
+                        *this,
+                        coupleCoeffs[interfaceI],
+                        cmpt,
+                        Pstream::scheduled
                     );
                 }
             }
-            else
+        }
+
+        // Loop over the "global" patches are on the list of interfaces but
+        // beyond the end of the schedule which only handles "normal" patches
+        for
+        (
+            label interfaceI=patchSchedule.size()/2;
+            interfaceI<interfaces.size();
+            interfaceI++
+        )
+        {
+            if (interfaces.set(interfaceI))
             {
                 interfaces[interfaceI].updateInterfaceMatrix
                 (
@@ -131,89 +189,20 @@ void Foam::lduMatrix::updateMatrixInterfaces
                     result,
                     *this,
                     coupleCoeffs[interfaceI],
-                    cmpt
+                    cmpt,
+                    Pstream::blocking
                 );
             }
         }
     }
-
-    // Loop over the "global" patches are on the list of interfaces but
-    // beyond the end of the schedule which only handles "normal" patches
-    for
-    (
-        label interfaceI=patchSchedule.size()/2;
-        interfaceI<interfaces.size();
-        interfaceI++
-    )
+    else
     {
-        if (interfaces.set(interfaceI))
-        {
-            interfaces[interfaceI].updateInterfaceMatrix
-            (
-                psiif,
-                result,
-                *this,
-                coupleCoeffs[interfaceI],
-                cmpt
-            );
-        }
+        FatalErrorIn("lduMatrix::updateMatrixInterfaces")
+            << "Unsuported communications type "
+            << Pstream::commsTypeNames[Pstream::defaultCommsType]
+            << exit(FatalError);
     }
 }
-
-
-// Buffered transfer.  Useful for debugging only
-// HJ, 6/Nov/2007
-// void Foam::lduMatrix::initMatrixInterfaces
-// (
-//     const FieldField<Field, scalar>& coupleCoeffs,
-//     const lduInterfaceFieldPtrsList& interfaces,
-//     const scalarField& psiif,
-//     scalarField& result,
-//     const direction cmpt
-// ) const
-// {
-//     forAll (interfaces, interfaceI)
-//     {
-//         if (interfaces.set(interfaceI))
-//         {
-//             interfaces[interfaceI].initInterfaceMatrixUpdate
-//             (
-//                 psiif,
-//                 result,
-//                 *this,
-//                 coupleCoeffs[interfaceI],
-//                 cmpt,
-//                 true
-//             );
-//         }
-//     }
-// }
-
-
-// void Foam::lduMatrix::updateMatrixInterfaces
-// (
-//     const FieldField<Field, scalar>& coupleCoeffs,
-//     const lduInterfaceFieldPtrsList& interfaces,
-//     const scalarField& psiif,
-//     scalarField& result,
-//     const direction cmpt
-// ) const
-// {
-//     forAll (interfaces, interfaceI)
-//     {
-//         if (interfaces.set(interfaceI))
-//         {
-//             interfaces[interfaceI].updateInterfaceMatrix
-//             (
-//                 psiif,
-//                 result,
-//                 *this,
-//                 coupleCoeffs[interfaceI],
-//                 cmpt
-//             );
-//         }
-//     }
-// }
 
 
 // ************************************************************************* //

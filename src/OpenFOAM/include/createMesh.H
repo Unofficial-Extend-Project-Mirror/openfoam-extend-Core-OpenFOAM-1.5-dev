@@ -1,13 +1,13 @@
-    Info<< "Create mesh for time = "
-        << runTime.timeName() << nl << endl;
+    Foam::Info<< "Create mesh for time = "
+        << runTime.timeName() << Foam::nl << Foam::endl;
 
-    fvMesh mesh
+    Foam::fvMesh mesh
     (
-        IOobject
+        Foam::IOobject
         (
-            fvMesh::defaultRegion,
+            Foam::fvMesh::defaultRegion,
             runTime.timeName(),
             runTime,
-            IOobject::MUST_READ
+            Foam::IOobject::MUST_READ
         )
     );

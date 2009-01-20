@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <cstring>
 #include "prefixOSstream.H"
 #include "Pstream.H"
 #include "token.H"

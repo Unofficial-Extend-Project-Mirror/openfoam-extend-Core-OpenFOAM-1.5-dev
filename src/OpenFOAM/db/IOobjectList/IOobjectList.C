@@ -28,22 +28,16 @@ License
 #include "Time.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct given a number of elements
-IOobjectList::IOobjectList(const label nIoObjects)
+Foam::IOobjectList::IOobjectList(const label nIoObjects)
 :
     HashPtrTable<IOobject>(nIoObjects)
 {}
 
 
-// Construct from objectRegistry and instant path
-IOobjectList::IOobjectList
+Foam::IOobjectList::IOobjectList
 (
     const objectRegistry& db,
     const fileName& instance,
@@ -92,8 +86,7 @@ IOobjectList::IOobjectList
 }
 
 
-// Construct as copy
-IOobjectList::IOobjectList(const IOobjectList& ioOL)
+Foam::IOobjectList::IOobjectList(const IOobjectList& ioOL)
 :
     HashPtrTable<IOobject>(ioOL)
 {}
@@ -101,21 +94,19 @@ IOobjectList::IOobjectList(const IOobjectList& ioOL)
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-IOobjectList::~IOobjectList()
+Foam::IOobjectList::~IOobjectList()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Add an IOobject to list
-bool IOobjectList::add(IOobject& io)
+bool Foam::IOobjectList::add(IOobject& io)
 {
     return insert(io.name(), &io);
 }
 
 
-// Remove an IOobject from list
-bool IOobjectList::remove(IOobject& io)
+bool Foam::IOobjectList::remove(IOobject& io)
 {
     HashPtrTable<IOobject>::iterator iter =
         HashPtrTable<IOobject>::find(io.name());
@@ -131,8 +122,7 @@ bool IOobjectList::remove(IOobject& io)
 }
 
 
-// lookup a given name and return IOobject ptr if found else NULL
-IOobject* IOobjectList::lookup(const word& name) const
+Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 {
     HashPtrTable<IOobject>::const_iterator iter = find(name);
 
@@ -159,8 +149,7 @@ IOobject* IOobjectList::lookup(const word& name) const
 }
 
 
-// Return the list for all IOobjects of given class
-IOobjectList IOobjectList::lookupClass(const word& ClassName) const
+Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& ClassName) const
 {
     IOobjectList IOobjectsOfClass(size());
 
@@ -188,8 +177,7 @@ IOobjectList IOobjectList::lookupClass(const word& ClassName) const
 }
 
 
-// Return the list of names of the IOobjects
-wordList IOobjectList::names() const
+Foam::wordList Foam::IOobjectList::names() const
 {
     wordList objectNames(size());
 
@@ -208,8 +196,7 @@ wordList IOobjectList::names() const
 }
 
 
-// Return the list of names of the IOobjects of given class
-wordList IOobjectList::names(const word& ClassName) const
+Foam::wordList Foam::IOobjectList::names(const word& ClassName) const
 {
     wordList objectNames(size());
 
@@ -232,9 +219,5 @@ wordList IOobjectList::names(const word& ClassName) const
     return objectNames;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -24,20 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline List<T>::List()
+inline Foam::List<T>::List()
 {}
 
 
 template<class T>
-inline autoPtr<List<T> > List<T>::clone() const
+inline Foam::autoPtr<Foam::List<T> > Foam::List<T>::clone() const
 {
     return autoPtr<List<T> >(new List<T>(*this));
 }
@@ -46,7 +41,7 @@ inline autoPtr<List<T> > List<T>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline T& List<T>::newElmt(const label i)
+inline T& Foam::List<T>::newElmt(const label i)
 {
     if (i >= this->size())
     {
@@ -60,14 +55,10 @@ inline T& List<T>::newElmt(const label i)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void List<T>::operator=(const T& t)
+inline void Foam::List<T>::operator=(const T& t)
 {
     UList<T>::operator=(t);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

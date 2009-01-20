@@ -262,6 +262,15 @@ operator/(const scalar s, const DiagTensor<Cmpt>& dt)
 }
 
 
+//- Division of a vector by a diagonalTensor
+template <class Cmpt>
+inline Vector<Cmpt>
+operator/(const Vector<Cmpt> v, const DiagTensor<Cmpt>& dt)
+{
+    return Vector<Cmpt>(v.x()/dt.xx(), v.y()/dt.yy(), v.z()/dt.zz());
+}
+
+
 //- Return the trace of a diagonal tensor
 template <class Cmpt>
 inline Cmpt tr(const DiagTensor<Cmpt>& dt)

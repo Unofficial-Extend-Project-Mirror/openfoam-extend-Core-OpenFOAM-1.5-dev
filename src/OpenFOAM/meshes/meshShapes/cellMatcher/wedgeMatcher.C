@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "wedgeMatcher.H"
@@ -64,7 +62,7 @@ bool Foam::wedgeMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -129,7 +127,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face0vert0,
                 faceSize_[face0I],
-                !(faceOwner[faceMap_[face0I]] == cellI)
+                !(owner[faceMap_[face0I]] == cellI)
             );
         vertLabels_[1] = pointMap_[face0[face0vert1]];
         //Info<< "Wedge vertex 1: vertex " <<  face0[face0vert1]
@@ -179,7 +177,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face4vert0,
                 faceSize_[face4I],
-                !(faceOwner[faceMap_[face4I]] == cellI)
+                !(owner[faceMap_[face4I]] == cellI)
             );
         vertLabels_[3] = pointMap_[face4[face4vert3]];
         //Info<< "Wedge vertex 3: vertex " <<  face4[face4vert3]
@@ -227,7 +225,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face2vert3,
                 faceSize_[face2I],
-                (faceOwner[faceMap_[face2I]] == cellI)
+                (owner[faceMap_[face2I]] == cellI)
             );
         vertLabels_[6] = pointMap_[face2[face2vert6]];
 
@@ -255,7 +253,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face1vert6,
                 faceSize_[face1I],
-                !(faceOwner[faceMap_[face1I]] == cellI)
+                !(owner[faceMap_[face1I]] == cellI)
             );
         vertLabels_[5] = pointMap_[face1[face1vert5]];
 
@@ -265,7 +263,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face1vert5,
                 faceSize_[face1I],
-                !(faceOwner[faceMap_[face1I]] == cellI)
+                !(owner[faceMap_[face1I]] == cellI)
             );
         vertLabels_[4] = pointMap_[face1[face1vert4]];
 
@@ -275,7 +273,7 @@ bool Foam::wedgeMatcher::matchShape
             (
                 face0vert1,
                 faceSize_[face0I],
-                !(faceOwner[faceMap_[face0I]] == cellI)
+                !(owner[faceMap_[face0I]] == cellI)
             );
         vertLabels_[2] = pointMap_[face0[face0vert2]];
         //Info<< "Wedge vertex 2: vertex " <<  face0[face0vert2]

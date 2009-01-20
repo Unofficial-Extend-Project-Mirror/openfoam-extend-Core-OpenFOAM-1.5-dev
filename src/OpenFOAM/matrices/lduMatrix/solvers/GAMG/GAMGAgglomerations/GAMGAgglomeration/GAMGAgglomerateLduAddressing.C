@@ -228,7 +228,11 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     {
         if (fineInterfaces.set(inti))
         {
-            fineInterfaces[inti].initInternalFieldTransfer(restrictMap, true);
+            fineInterfaces[inti].initInternalFieldTransfer
+            (
+                Pstream::blocking,
+                restrictMap
+            );
         }
     }
 
@@ -244,7 +248,11 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 (
                     fineInterfaces[inti],
                     fineInterfaces[inti].interfaceInternalField(restrictMap),
-                    fineInterfaces[inti].internalFieldTransfer(restrictMap)
+                    fineInterfaces[inti].internalFieldTransfer
+                    (
+                        Pstream::blocking,
+                        restrictMap
+                    )
                 ).ptr()
             );
             

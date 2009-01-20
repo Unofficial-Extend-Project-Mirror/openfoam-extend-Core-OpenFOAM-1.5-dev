@@ -630,13 +630,13 @@ TMP_UNARY_FUNCTION(Type, gAverage)
 
 BINARY_FUNCTION(Type, Type, Type, max)
 BINARY_FUNCTION(Type, Type, Type, min)
-BINARY_FUNCTION(Type, Type, Type, scale)
-BINARY_FUNCTION(Type, Type, Type, invScale)
+BINARY_FUNCTION(Type, Type, Type, cmptMultiply)
+BINARY_FUNCTION(Type, Type, Type, cmptDivide)
 
 BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
-BINARY_TYPE_FUNCTION(Type, Type, Type, scale)
-BINARY_TYPE_FUNCTION(Type, Type, Type, invScale)
+BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
+BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
 
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */

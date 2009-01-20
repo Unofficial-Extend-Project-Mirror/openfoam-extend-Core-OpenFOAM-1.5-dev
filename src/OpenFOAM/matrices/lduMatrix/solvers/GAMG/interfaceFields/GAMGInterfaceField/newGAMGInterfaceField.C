@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
     const lduInterfaceField& fineInterface
 )
 {
-    word coupleType(fineInterface.type());
+    word coupleType(fineInterface.interfaceFieldType());
 
     lduInterfaceConstructorTable::iterator cstrIter =
         lduInterfaceConstructorTablePtr_->find(coupleType);

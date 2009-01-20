@@ -22,10 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    pointZoneMeshFwd
+Typedef
+    Foam::pointZoneMesh
 
 Description
+    A ZoneMesh with the type pointZone
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,10 +37,11 @@ Description
 
 namespace Foam
 {
-    template<class Zone> class ZoneMesh;
+    template<class Zone, class MeshType> class ZoneMesh;
     class pointZone;
+    class polyMesh;
 
-    typedef ZoneMesh<pointZone> pointZoneMesh;
+    typedef ZoneMesh<pointZone, polyMesh> pointZoneMesh;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

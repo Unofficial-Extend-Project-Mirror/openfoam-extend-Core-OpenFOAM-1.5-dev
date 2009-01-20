@@ -23,26 +23,30 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    globalPoints
+    Foam::globalPoints
 
 Description
     Calculates points shared by more than two processor patches or cyclic
-    patches. Is used in globalMeshData. (this info is needed for point-edge
+    patches.
+
+    Is used in globalMeshData. (this info is needed for point-edge
     communication where you do all but these shared points with patch to
     patch communication but need to do a reduce on these shared points)
 
     Works purely topological and using local communication only. 
     Needs:
-    - domain to be one single domain (i.e. all faces can be reached through
-    face-cell walk).
-    - patch face ordering to be ok
-    - f[0] ordering on patch faces to be ok.
+      - domain to be one single domain (i.e. all faces can be reached through
+        face-cell walk).
+      - patch face ordering to be ok
+      - f[0] ordering on patch faces to be ok.
 
     Works by constructing equivalence lists for all the points on processor
     patches. These list are procPointList and give processor and meshPoint
     label on that processor.
     E.g.
+    @verbatim
           ((7 93)(4 731)(3 114))
+    @endverbatim
 
     means point 93 on proc7 is connected to point 731 on proc4 and 114 on proc3.
     It then gets the lowest numbered processor (the 'master') to request a
@@ -52,20 +56,20 @@ Description
     Algorithm:
         - get meshPoints of all my points on processor patches and initialize
           equivalence lists to this.
-        loop
+     loop
         - send to all neighbours in relative form:
             - patchFace
             - index in face
         - receive and convert into meshPoints. Add to to my equivalence lists.
         - mark meshPoints for which information changed.
         - send data for these meshPoints again
-        endloop until nothing changes
+     endloop until nothing changes
 
     At this point one will have complete point-point connectivity for all
     points on processor patches. Now
 
         - remove point equivalences of size 2. These are just normal points
-        shared between two neighbouring procPatches.
+          shared between two neighbouring procPatches.
         - collect on each processor points for which it is the master
         - request number of sharedPointLabels from the Pstream::master.
 
@@ -73,14 +77,14 @@ Description
     as that in which the equivalence lists were collected:
 
         - initialize the indices of shared points I am the master for
-        loop
+     loop
         - send my known sharedPoints + meshPoints to all neighbours
         - receive from all neighbour. Find which meshPoint on my processor
           the sharedpoint is connected to
         - mark indices for which information has changed
-        endloop until nothing changes.
+     endloop until nothing changes.
 
-
+ 
 SourceFiles
     globalPoints.C
 
@@ -102,7 +106,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class polyBoundaryMesh;
 class cyclicPolyPatch;
@@ -210,7 +214,7 @@ class globalPoints
 
 public:
 
-        //- Declare name of the class and it's debug switch
+        //- Declare name of the class and its debug switch
         ClassName("globalPoints");
 
 

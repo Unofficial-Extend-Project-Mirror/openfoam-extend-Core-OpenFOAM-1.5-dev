@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledFacePointPatch
+    Foam::coupledFacePointPatch
 
 Description
     coupled patch for post-processing.  Used as the base class for processor
@@ -76,23 +76,20 @@ protected:
     // Demand driven private data
 
         //- The set of labels of the pointPatch points which are
-        //  non-global, i.e. present in this coupled patch
-        mutable labelList* nonGlobalPatchPointsPtr_;
+        //  non-global, i.e. present only in this coupledPointPatch.
+        //  MUST be initialised by calcGeometry()!
+        labelList nonGlobalPatchPoints_;
 
-        //- Mesh points
-        mutable labelList* meshPointsPtr_;
+        labelList loneMeshPoints_;
 
 
         // Construction of demand-driven data
 
             //- Calculate mesh points
-            virtual void calcMeshPoints() const = 0;
+            virtual void calcGeometry() = 0;
 
 
 public:
-
-    typedef pointBoundaryMesh BoundaryMesh;
-
 
     //- Runtime type information
     TypeName(coupledPolyPatch::typeName_());
@@ -117,12 +114,6 @@ public:
 
         // Access
 
-            //- Return size
-            virtual label size() const
-            {
-                return meshPoints().size();
-            }
-
             //- Return true because this patch is coupled
             virtual bool coupled() const
             {
@@ -133,14 +124,13 @@ public:
         // Access functions for demand driven data
 
             //- Return the set of labels of the pointPatch points which are
-            //  non-global, i.e. present in this processorPointPatch
+            //  non-global, i.e. present in this coupledFacePointPatch
             virtual const labelList& nonGlobalPatchPoints() const;
 
-            //- Return mesh points
-            virtual const labelList& meshPoints() const;
-
-            //- Return pointField of points in patch.  Not impelemented.
-            virtual const pointField& localPoints() const;
+            //- Return the set of labels of the pointPatch points which are
+            //  lone, i.e. present in this coupledFacePointPatch but not
+            //  associated with any faces
+            virtual const labelList& loneMeshPoints() const;
 
             //- Return point unit normals.  Not impelemented.
             virtual const vectorField& pointNormals() const;

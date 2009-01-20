@@ -22,13 +22,13 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    bandCompression
+InNamespace
+    Foam
 
 Description
-    The function renumbers the addressing such that the band of the
-    matrix is reduced. The algorithm uses a simple search through the
-    neighbour list
+    The bandCompression function renumbers the addressing such that the
+    band of the matrix is reduced. The algorithm uses a simple search
+    through the neighbour list
 
 SourceFiles
     bandCompression.C
@@ -45,6 +45,8 @@ SourceFiles
 namespace Foam
 {
 
+//- Renumbers the addressing to reduce the band of the matrix.
+//  The algorithm uses a simple search through the neighbour list
 labelList bandCompression(const labelListList& addressing);
 
 } // End namespace Foam

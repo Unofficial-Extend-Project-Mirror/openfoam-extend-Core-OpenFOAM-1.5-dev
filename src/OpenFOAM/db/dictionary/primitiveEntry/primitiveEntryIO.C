@@ -28,32 +28,115 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveEntry.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "OSspecific.H"
+#include "functionEntry.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-void primitiveEntry::readData(Istream& is)
+void Foam::primitiveEntry::append
+(
+    const token& currToken,
+    const dictionary& dict,
+    Istream& is
+)
 {
-    is.fatalCheck("primitiveEntry::readData(Istream& is)");
+    if (currToken.isWord())
+    {
+        const word& w = currToken.wordToken();
 
-    label keywordLineNumber = is.lineNumber();
+        if
+        (
+            w.size() == 1
+         || (
+                !(w[0] == '$' && expandVariable(w, dict))
+             && !(w[0] == '#' && expandFunction(w, dict, is))
+            )
+        )
+        {
+            newElmt(tokenIndex()++) = currToken;
+        }
+    }
+    else
+    {
+        newElmt(tokenIndex()++) = currToken;
+    }
+}
 
-    label i = 0;
+
+void Foam::primitiveEntry::append(const tokenList& varTokens)
+{
+    forAll(varTokens, i)
+    {
+        newElmt(tokenIndex()++) = varTokens[i];
+    }
+}
+
+
+bool Foam::primitiveEntry::expandVariable
+(
+    const word& w,
+    const dictionary& dict
+)
+{
+    word varName = w(1, w.size()-1);
+
+    // lookup the variable name in the given dictionary....
+    const entry* ePtr = dict.lookupEntryPtr(varName, true);
+
+    // ...if defined insert its tokens into this 
+    if (ePtr != NULL)
+    {
+        append(ePtr->stream());
+        return true;
+    }
+    else
+    {
+        // if not in the dictionary see if it is an environment 
+        // variable
+
+        string enVarString = getEnv(varName);
+
+        if (enVarString.size())
+        {
+            append(tokenList(IStringStream('(' + enVarString + ')')()));
+            return true;
+        }
+
+        return false;
+    }
+}
+
+
+bool Foam::primitiveEntry::expandFunction
+(
+    const word& keyword,
+    const dictionary& parentDict,
+    Istream& is
+)
+{
+    word functionName = keyword(1, keyword.size()-1);
+    return functionEntry::execute(functionName, parentDict, *this, is);
+}
+
+
+bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
+{
+    is.fatalCheck
+    (
+        "primitiveEntry::readData(const dictionary& dict, Istream& is)"
+    );
+
     label blockCount = 0;
     token currToken;
 
     if
     (
-        is.read(currToken)
+        !is.read(currToken).bad()
      && currToken.good()
      && currToken != token::END_STATEMENT
     )
     {
-        newElmt(i++) = currToken;
+        append(currToken, dict, is);
 
         if
         (
@@ -66,7 +149,7 @@ void primitiveEntry::readData(Istream& is)
 
         while
         (
-            is.read(currToken)
+            !is.read(currToken).bad()
          && currToken.good()
          && !(currToken == token::END_STATEMENT && blockCount == 0)
         )
@@ -88,27 +171,57 @@ void primitiveEntry::readData(Istream& is)
                 blockCount--;
             }
 
-            newElmt(i++) = currToken;
+            append(currToken, dict, is);
         }
     }
 
-    if (!currToken.good())
+    is.fatalCheck
+    (
+        "primitiveEntry::readData(const dictionary& dict, Istream& is)"
+    );
+
+    if (currToken.good())
     {
-        FatalIOErrorIn("primitiveEntry::readData(Istream& is)", is) 
-            << "ill defined primitiveEntry starting at keyword '"
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void Foam::primitiveEntry::readEntry(const dictionary& dict, Istream& is)
+{
+    label keywordLineNumber = is.lineNumber();
+    tokenIndex() = 0;
+
+    if (read(dict, is))
+    {
+        setSize(tokenIndex());
+        tokenIndex() = 0;
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "primitiveEntry::readEntry(const dictionary& dict,Istream& is)",
+            is
+        )   << "ill defined primitiveEntry starting at keyword '"
             << keyword() << '\''
             << " on line " << keywordLineNumber
             << " and ending at line " << is.lineNumber()
             << exit(FatalIOError);
     }
-
-    is.fatalCheck("primitiveEntry::readData(Istream& is)");
-
-    setSize(i);
 }
 
 
-primitiveEntry::primitiveEntry(const word& key, Istream& is)
+Foam::primitiveEntry::primitiveEntry
+(
+    const word& key,
+    const dictionary& dict,
+    Istream& is
+)
 :
     entry(key),
     ITstream
@@ -119,13 +232,28 @@ primitiveEntry::primitiveEntry(const word& key, Istream& is)
         is.version()
     )
 {
-    readData(is);
+    readEntry(dict, is);
+}
+
+
+Foam::primitiveEntry::primitiveEntry(const word& key, Istream& is)
+:
+    entry(key),
+    ITstream
+    (
+        is.name() + "::" + key,
+        tokenList(10),
+        is.format(),
+        is.version()
+    )
+{
+    readEntry(dictionary::null, is);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void primitiveEntry::write(Ostream& os) const
+void Foam::primitiveEntry::write(Ostream& os) const
 {
     os.writeKeyword(keyword());
 
@@ -145,10 +273,12 @@ void primitiveEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
 
-#if defined (__GNUC__)
 template<>
-#endif
-Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<primitiveEntry>& ip
+)
 {
     const primitiveEntry& e = ip.t_;
 
@@ -173,9 +303,5 @@ Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    VectorSpace
+    Foam::VectorSpace
 
 Description
     Templated vector space.
+
     Template arguments are the Form the vector space will be used to create,
     the type of the elements and the number of elements.
 
@@ -48,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Form, class Cmpt, int nCmpt> class VectorSpace;
 
@@ -110,7 +111,7 @@ public:
 
     // Member Functions
 
-        //- Return the number of elements in the FixedList.
+        //- Return the number of elements in the VectorSpace = nCmpt.
         inline label size() const;
 
         inline const Cmpt& component(const direction) const;
@@ -135,13 +136,19 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>> <Form, Cmpt, nCmpt>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <Form, Cmpt, nCmpt>
+        #endif
         (
             Istream&,
             VectorSpace<Form, Cmpt, nCmpt>&
         );
 
-        friend Ostream& operator<< <Form, Cmpt, nCmpt>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <Form, Cmpt, nCmpt>
+        #endif
         (
             Ostream&,
             const VectorSpace<Form, Cmpt, nCmpt>&

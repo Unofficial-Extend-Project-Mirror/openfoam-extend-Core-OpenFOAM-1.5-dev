@@ -23,18 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    commSchedule
+    Foam::commSchedule
 
 Description
-    Given a set of processors that need to talk to one another determines
-    the order in which they should do so to
-    - have maximum overlap
-    - allow blocking communication without deadlock
+    Determines the order in which a set of processors should communicate
+    with one another.
+ 
+    The communication order should 
+      - have maximum overlap
+      - allow blocking communication without deadlock
+ 
     Does a very simple scheduling which assumes same time for all operations.
 
     After construction:
-    - schedule() gives the order in which the input communication should happen
-    - procSchedule()[procI] gives per procI  ,,    ,,
+      - schedule() gives the order in which the input communication should occur
+      - procSchedule()[procI] gives per procI
 
     Does not care whether 'talking' is first send, second receive or maybe
     full swap. This is all responsability of caller. See ProcessorTopology

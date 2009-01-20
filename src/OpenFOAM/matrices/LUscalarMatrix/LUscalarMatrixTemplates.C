@@ -52,6 +52,7 @@ void Foam::LUscalarMatrix::solve(Field<T>& sourceSol) const
             {
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     slave,
                     reinterpret_cast<char*>
                     (
@@ -65,10 +66,10 @@ void Foam::LUscalarMatrix::solve(Field<T>& sourceSol) const
         {
             OPstream::write
             (
+                Pstream::scheduled,
                 Pstream::masterNo(),
                 reinterpret_cast<const char*>(sourceSol.begin()),
-                sourceSol.byteSize(),
-                false                 // Unbuffered transfer
+                sourceSol.byteSize()
             );
         }
 
@@ -91,13 +92,13 @@ void Foam::LUscalarMatrix::solve(Field<T>& sourceSol) const
             {
                 OPstream::write
                 (
+                    Pstream::blocking,
                     slave,
                     reinterpret_cast<const char*>
                     (
                         &(completeSourceSol[procOffsets_[slave]])
                     ),
-                    (procOffsets_[slave + 1] - procOffsets_[slave])*sizeof(T),
-                    true              // Buffered transfer
+                    (procOffsets_[slave + 1] - procOffsets_[slave])*sizeof(T)
                 );
             }
         }
@@ -105,6 +106,7 @@ void Foam::LUscalarMatrix::solve(Field<T>& sourceSol) const
         {
             IPstream::read
             (
+                Pstream::blocking,
                 Pstream::masterNo(),
                 reinterpret_cast<char*>(sourceSol.begin()),
                 sourceSol.byteSize()

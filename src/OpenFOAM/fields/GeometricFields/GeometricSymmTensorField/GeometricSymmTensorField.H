@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    GeometricSymmTensorField
+InClass
+    Foam::GeometricSymmTensorField
 
 Description
     SymmTensor specific part of the implementation of GeometricField.
@@ -58,6 +58,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, twoSymm, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2, transform)
 UNARY_FUNCTION(scalar, symmTensor, det, transform)
+UNARY_FUNCTION(symmTensor, symmTensor, cof, cof)
 UNARY_FUNCTION(symmTensor, symmTensor, inv, inv)
 
 

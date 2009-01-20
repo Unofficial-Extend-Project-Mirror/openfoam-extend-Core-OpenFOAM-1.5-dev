@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wallPointPatch
+    Foam::wallPointPatch
 
 Description
-    Wall patch.
+    Foam::wallPointPatch
 
 SourceFiles
     wallPointPatch.C

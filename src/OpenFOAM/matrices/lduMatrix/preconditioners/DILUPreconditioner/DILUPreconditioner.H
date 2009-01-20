@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DILUPreconditioner
+    Foam::DILUPreconditioner
 
 Description
     Simplified diagonal-based incomplete LU preconditioner for asymmetric
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class DILUPreconditioner Declaration
+                           Class DILUPreconditioner Declaration
 \*---------------------------------------------------------------------------*/
 
 class DILUPreconditioner

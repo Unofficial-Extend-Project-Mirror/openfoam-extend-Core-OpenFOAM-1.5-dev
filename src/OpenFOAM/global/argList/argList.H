@@ -23,10 +23,46 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    argList
+    Foam::argList
 
 Description
-    Make, print and check argList
+    Extract command arguments and options from the supplied
+    @a argc and @a argv parameters.
+
+    Sequences with "(" ... ")" are transformed into a stringList.
+    For example,
+    @verbatim
+        program -listFiles \( *.txt \)
+    @endverbatim
+    would create a stringList:
+    @verbatim
+        ( "file1.txt" "file2.txt" ... "fileN.txt" )
+    @endverbatim
+    The backslash-escaping has been used to avoid shell expansions.
+
+    @par Default command-line options
+    @param -case \<dir\> \n
+        select an case directory instead of the current working directory
+    @param -parallel \n
+        specify case as a parallel job
+    @param -doc \n
+        display the documentation in browser
+    @param -srcDoc \n
+        display the source documentation in browser
+    @param -help \n
+       print the usage
+
+    The environment variable @b FOAM_CASE is set to the path of the
+    global case (same for serial and parallel jobs).
+
+Note
+    - Adjustment of the valid (mandatory) arguments by directly manipulating
+      the static member argList::validArgs.
+    - Adjustment of the valid options by directly manipulating
+      the static member argList::validOptions.
+
+SourceFiles
+    argList.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,6 +76,7 @@ Description
 #include "word.H"
 #include "fileName.H"
 #include "parRun.H"
+
 #include "sigFpe.H"
 #include "sigInt.H"
 #include "sigQuit.H"
@@ -63,7 +100,6 @@ class argList
         fileName rootPath_;
         fileName globalCase_;
         fileName case_;
-        bool parRun_;
 
         ParRunControl parRunControl_;
 
@@ -76,23 +112,34 @@ class argList
 
     // Private member functions
 
-        int findArg(const string& arg) const;
+        void getRootCase();
+
+        //- Transcribe argv into internal args_
+        //  return true if any "(" ... ")" sequences were captured
+        bool regroupArgv(int& argc, char**& argv);
 
 
 public:
 
     // Static data members
 
+        //- A list of valid (mandatory) arguments
         static SLList<string> validArgs;
+
+        //- A list of valid options
         static HashTable<string> validOptions;
+
+        //- A list of valid parallel options
         static HashTable<string> validParOptions;
 
+        //! @cond ignoreDocumentation
         class initValidTables
         {
         public:
 
             initValidTables();
         };
+        //! @endcond ignoreDocumentation
 
 
     // Constructors
@@ -103,8 +150,8 @@ public:
         (
             int& argc,
             char**& argv,
-            bool checkArgs = true,
-            bool checkOpts = true
+            bool checkArgs=true,
+            bool checkOpts=true
         );
 
 
@@ -123,14 +170,12 @@ public:
                 return args_;
             }
 
-            //- Return parameters - ie, arguments without args[0] (executable)
-            stringList::subList params() const
-            {
-                return stringList::subList(args_, args_.size() - 1, 1);
-            }
+            //- Return additionl arguments,
+            //  i.e. those additional to the executable itself
+            stringList::subList additionalArgs() const;
 
             //- Return options
-            const HashTable<string>& options() const
+            const Foam::HashTable<string>& options() const
             {
                 return options_;
             }
@@ -153,23 +198,16 @@ public:
                 return globalCase_;
             }
 
-            //- Return case name
-            //  or parallel processor case name for parallel run
+            //- Return case name (parallel run) or global case (serial run)
             const fileName& caseName() const
             {
                 return case_;
             }
 
-            //- Return path
+            //- Return the path
             fileName path() const
             {
                 return rootPath()/caseName();
-            }
-
-            //- Is this a parallel run
-            bool parRun() const
-            {
-                return parRun_;
             }
 
 
@@ -184,11 +222,15 @@ public:
             //- Print usage
             void printUsage() const;
 
+            //- Display documentation in browser
+            //  Optionally display the application source code
+            void displayDoc(bool source=false) const;
+
 
         // Check
 
             //- Check argument list
-            bool check(bool checkArgs = true, bool checkOpts = true) const;
+            bool check(bool checkArgs=true, bool checkOpts=true) const;
 
             //- Check root path and case path
             bool checkRootCase() const;

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledPointPatch
+    Foam::coupledPointPatch
 
 Description
-    Coupled point patch.  Used as the base class for processor
+    coupled patch for post-processing.  Used as the base class for processor
     and cyclic pointPatches
 
 SourceFiles
@@ -51,8 +51,11 @@ class pointBoundaryMesh;
                       Class coupledPointPatch Declaration
 \*---------------------------------------------------------------------------*/
 
+
 class coupledPointPatch
 :
+    // Bug fix: coupled patch must be derived from lduInterface
+    // HJ, 16/Jan/2009
     public lduInterface
 {
     // Private Member Functions
@@ -64,10 +67,30 @@ class coupledPointPatch
         void operator=(const coupledPointPatch&);
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry() = 0;
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry() = 0;
+
+        //- Initialise the patches for moving points
+        virtual void initMovePoints(const pointField&) = 0;
+
+        //- Correct patches after moving points
+        virtual void movePoints(const pointField&) = 0;
+
+        //- Initialise the update of the patch topology
+        virtual void initUpdateMesh() = 0;
+
+        //- Update of the patch topology
+        virtual void updateMesh() = 0;
+
+
 public:
-
-    typedef pointBoundaryMesh BoundaryMesh;
-
 
     //- Runtime type information
     TypeName(coupledPolyPatch::typeName_());
@@ -96,9 +119,7 @@ public:
 
 
         // Dummy functionality for new lduInteface base class
-        // To be removed.  HJ, 2/Nov/2007
-
-        // Access
+        // To be removed.  HJ, 16/Jan/2009
 
             //- Return faceCell addressing
             virtual const unallocLabelList& faceCells() const
@@ -122,14 +143,15 @@ public:
             //- Initialise interface data transfer
             virtual void initTransfer
             (
-                const unallocLabelList& interfaceData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
             ) const
             {}
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const
             {
@@ -139,14 +161,15 @@ public:
             //- Initialise transfer of internal field adjacent to the interface
             virtual void initInternalFieldTransfer
             (
-                const unallocLabelList& iF,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& iF
             ) const
             {}
 
             //- Transfer and return internal field adjacent to the interface
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& iF
             ) const
             {

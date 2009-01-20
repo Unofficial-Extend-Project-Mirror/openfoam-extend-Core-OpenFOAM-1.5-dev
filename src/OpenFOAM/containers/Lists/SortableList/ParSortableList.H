@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ParSortableList
+    Foam::ParSortableList
 
 Description
     Implementation of PSRS parallel sorting routine.
-    From 'On the Versatility of Parallel Sorting by Regular Sampling'
+
+    From "On the Versatility of Parallel Sorting by Regular Sampling"
     Xiaobo Li et. all.
 
     Construct from list of things to sort (uses SortableList, 'thing' should

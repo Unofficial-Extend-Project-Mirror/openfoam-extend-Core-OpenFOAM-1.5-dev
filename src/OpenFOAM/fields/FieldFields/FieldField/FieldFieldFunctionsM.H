@@ -23,9 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    High performance macro functions for Field<Type> algebra.  These expand
-    using either array element access (for vector machines) or pointer
-    dereferencing for scalar machines as appropriate.
+    High performance macro functions for Field\<Type\> algebra.
+    These expand using either array element access (for vector machines)
+    or pointer dereferencing for scalar machines as appropriate.
 
 \*---------------------------------------------------------------------------*/
 

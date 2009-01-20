@@ -22,10 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    labelHashSet
+Typedef
+    Foam::labelHashSet
 
 Description
+    A HashSet with label keys.
+
+See Also
+    wordHashSet
 
 \*---------------------------------------------------------------------------*/
 

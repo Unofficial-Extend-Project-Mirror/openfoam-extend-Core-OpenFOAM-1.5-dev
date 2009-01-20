@@ -65,7 +65,7 @@ const Foam::NamedEnum<Foam::Time::writeControls, 5>
 Foam::Time::fmtflags Foam::Time::format_(Foam::Time::general);
 int Foam::Time::precision_(6);
 
-Foam::word Foam::Time::controlDictName = "controlDict";
+Foam::word Foam::Time::controlDictName("controlDict");
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -94,372 +94,6 @@ void Foam::Time::adjustDeltaT()
             deltaT_ = max(newDeltaT, 0.2*deltaT_);
         }
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::Time::Time
-(
-    const word& controlDictName,
-    const fileName& rootPath,
-    const fileName& caseName,
-    const word& systemName,
-    const word& constantName
-)
-:
-    TimePaths
-    (
-        rootPath,
-        caseName,
-        systemName,
-        constantName
-    ),
-
-    objectRegistry(*this),
-
-    controlDict_
-    (
-        IOobject
-        (
-            controlDictName,
-            system(),
-            *this,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-
-    startTimeIndex_(0),
-    startTime_(0),
-    endTime_(0),
-
-    stopAt_(saEndTime),
-    writeControl_(wcTimeStep),
-    writeInterval_(GREAT),
-    purgeWrite_(0),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
-    graphFormat_("raw"),
-    runTimeModifiable_(true),
-
-    readLibs_(controlDict_, "libs"),
-    functionObjects_(*this)
-{
-    setControls();
-}
-
-
-Foam::Time::Time
-(
-    const dictionary& dict,
-    const fileName& rootPath,
-    const fileName& caseName,
-    const word& systemName,
-    const word& constantName
-)
-:
-    TimePaths
-    (
-        rootPath,
-        caseName,
-        systemName,
-        constantName
-    ),
-
-    objectRegistry(*this),
-
-    controlDict_
-    (
-        IOobject
-        (
-            controlDictName,
-            system(),
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        dict
-    ),
-
-    startTimeIndex_(0),
-    startTime_(0),
-    endTime_(0),
-
-    stopAt_(saEndTime),
-    writeControl_(wcTimeStep),
-    writeInterval_(GREAT),
-    purgeWrite_(0),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
-    graphFormat_("raw"),
-    runTimeModifiable_(true),
-
-    readLibs_(controlDict_, "libs"),
-    functionObjects_(*this)
-{
-    setControls();
-}
-
-
-Foam::Time::Time
-(
-    const fileName& rootPath,
-    const fileName& caseName,
-    const word& systemName,
-    const word& constantName
-)
-:
-    TimePaths
-    (
-        rootPath,
-        caseName,
-        systemName,
-        constantName
-    ),
-
-    objectRegistry(*this),
-
-    controlDict_
-    (
-        IOobject
-        (
-            controlDictName,
-            system(),
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-
-    startTimeIndex_(0),
-    startTime_(0),
-    endTime_(0),
-
-    stopAt_(saEndTime),
-    writeControl_(wcTimeStep),
-    writeInterval_(GREAT),
-    purgeWrite_(0),
-
-    writeFormat_(IOstream::ASCII),
-    writeVersion_(IOstream::currentVersion),
-    writeCompression_(IOstream::UNCOMPRESSED),
-    graphFormat_("raw"),
-    runTimeModifiable_(true),
-
-    readLibs_(controlDict_, "libs"),
-    functionObjects_(*this)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Time::~Time()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::word Foam::Time::timeName(const scalar t)
-{
-    std::ostringstream osBuffer;
-    osBuffer.setf(ios_base::fmtflags(format_), ios_base::floatfield);
-    osBuffer.precision(precision_);
-    osBuffer << t;
-    return osBuffer.str();
-}
-
-
-Foam::word Foam::Time::timeName() const
-{
-    return dimensionedScalar::name();
-    //return timeName(timeOutputValue());
-}
-
-
-// Search the construction path for times
-Foam::instantList Foam::Time::times() const
-{
-    return findTimes(path());
-}
-
-
-Foam::word Foam::Time::findInstancePath(const instant& t) const
-{
-    instantList times = Time::findTimes(rootPath()/caseName());
-
-    forAllReverse(times, i)
-    {
-        if (times[i] == t)
-        {
-            return times[i].name();
-        }
-    }
-
-    return word::null;
-}
-
-
-Foam::instant Foam::Time::findClosestTime(const scalar t) const
-{
-    instantList times = Time::findTimes(rootPath()/caseName());
-
-    // If there is only one time it's "constant" so return it
-    if (times.size() == 1)
-    {
-        return times[0];
-    }
-
-    if (t < times[1].value())
-    {
-        return times[1];
-    }
-    else if (t > times[times.size() - 1].value())
-    {
-        return times[times.size() - 1];
-    }
-
-    scalar deltaT = GREAT;
-    label closesti = 0;
-
-    for (label i=1; i<times.size(); i++)
-    {
-        if (mag(times[i].value() - t) < deltaT)
-        {
-            deltaT = mag(times[i].value() - t);
-            closesti = i;
-        }
-    }
-
-    return times[closesti];
-}
-
-
-Foam::label Foam::Time::startTimeIndex() const
-{
-    return startTimeIndex_;
-}
-
-
-Foam::dimensionedScalar Foam::Time::startTime() const
-{
-    return dimensionedScalar("startTime", dimTime, startTime_);
-}
-
-
-Foam::dimensionedScalar Foam::Time::endTime() const
-{
-    return dimensionedScalar("endTime", dimTime, endTime_);
-}
-
-
-bool Foam::Time::run() const
-{
-    bool running = value() < (endTime_ - 0.5*deltaT_);
-
-    if (!running && timeIndex_ != startTimeIndex_)
-    {
-        const_cast<functionObjectList&>(functionObjects_).execute();
-    }
-
-    return running;
-}
-
-
-bool Foam::Time::end() const
-{
-    return (value() > (endTime_ + 0.5*deltaT_));
-}
-
-
-void Foam::Time::setTime(const Time& t)
-{
-    value() = t.value();
-    dimensionedScalar::name() = t.dimensionedScalar::name();
-    timeIndex_ = t.timeIndex_;
-}
-
-
-void Foam::Time::setTime(const instant& inst, const label newIndex)
-{
-    value() = inst.value();
-    dimensionedScalar::name() = inst.name();
-    timeIndex_ = newIndex;
-
-    IOdictionary timeDict
-    (
-        IOobject
-        (
-            "time",
-            timeName(),
-            "uniform",
-            *this,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
-    if (timeDict.found("deltaT"))
-    {
-        deltaT_ = readScalar(timeDict.lookup("deltaT"));
-    }
-
-    if (timeDict.found("deltaT0"))
-    {
-        deltaT0_ = readScalar(timeDict.lookup("deltaT0"));
-    }
-
-    if (timeDict.found("index"))
-    {
-        timeIndex_ = readLabel(timeDict.lookup("index"));
-    }
-}
-
-
-void Foam::Time::setTime(const dimensionedScalar& newTime, const label newIndex)
-{
-    setTime(newTime.value(), newIndex);
-}
-
-
-void Foam::Time::setTime(const scalar newTime, const label newIndex)
-{
-    value() = newTime;
-    dimensionedScalar::name() = timeName(timeToUserTime(newTime));
-    timeIndex_ = newIndex;
-}
-
-
-void Foam::Time::setEndTime(const dimensionedScalar& endTime)
-{
-    setEndTime(endTime.value());
-}
-
-
-void Foam::Time::setEndTime(const scalar endTime)
-{
-    endTime_ = endTime;
-}
-
-
-void Foam::Time::setDeltaT(const dimensionedScalar& deltaT)
-{
-    setDeltaT(deltaT.value());
-}
-
-
-void Foam::Time::setDeltaT(const scalar deltaT)
-{
-    deltaT_ = deltaT;
-    deltaTchanged_ = true;
-    adjustDeltaT();
 }
 
 
@@ -537,7 +171,8 @@ void Foam::Time::setControls()
             "uniform",
             *this,
             IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         )
     );
 
@@ -555,15 +190,442 @@ void Foam::Time::setControls()
 }
 
 
-void Foam::Time::increment()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::Time::Time
+(
+    const word& controlDictName,
+    const fileName& rootPath,
+    const fileName& caseName,
+    const word& systemName,
+    const word& constantName
+)
+:
+    TimePaths
+    (
+        rootPath,
+        caseName,
+        systemName,
+        constantName
+    ),
+
+    objectRegistry(*this),
+
+    controlDict_
+    (
+        IOobject
+        (
+            controlDictName,
+            system(),
+            *this,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+
+    startTimeIndex_(0),
+    startTime_(0),
+    endTime_(0),
+
+    stopAt_(saEndTime),
+    writeControl_(wcTimeStep),
+    writeInterval_(GREAT),
+    purgeWrite_(0),
+    subCycling_(false),
+
+    writeFormat_(IOstream::ASCII),
+    writeVersion_(IOstream::currentVersion),
+    writeCompression_(IOstream::UNCOMPRESSED),
+    graphFormat_("raw"),
+    runTimeModifiable_(true),
+
+    readLibs_(controlDict_, "libs"),
+    functionObjects_(*this)
 {
-    if (timeIndex_ == startTimeIndex_)
+    setControls();
+}
+
+
+Foam::Time::Time
+(
+    const dictionary& dict,
+    const fileName& rootPath,
+    const fileName& caseName,
+    const word& systemName,
+    const word& constantName
+)
+:
+    TimePaths
+    (
+        rootPath,
+        caseName,
+        systemName,
+        constantName
+    ),
+
+    objectRegistry(*this),
+
+    controlDict_
+    (
+        IOobject
+        (
+            controlDictName,
+            system(),
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dict
+    ),
+
+    startTimeIndex_(0),
+    startTime_(0),
+    endTime_(0),
+
+    stopAt_(saEndTime),
+    writeControl_(wcTimeStep),
+    writeInterval_(GREAT),
+    purgeWrite_(0),
+    subCycling_(false),
+
+    writeFormat_(IOstream::ASCII),
+    writeVersion_(IOstream::currentVersion),
+    writeCompression_(IOstream::UNCOMPRESSED),
+    graphFormat_("raw"),
+    runTimeModifiable_(true),
+
+    readLibs_(controlDict_, "libs"),
+    functionObjects_(*this)
+{
+    setControls();
+}
+
+
+Foam::Time::Time
+(
+    const fileName& rootPath,
+    const fileName& caseName,
+    const word& systemName,
+    const word& constantName
+)
+:
+    TimePaths
+    (
+        rootPath,
+        caseName,
+        systemName,
+        constantName
+    ),
+
+    objectRegistry(*this),
+
+    controlDict_
+    (
+        IOobject
+        (
+            controlDictName,
+            system(),
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+
+    startTimeIndex_(0),
+    startTime_(0),
+    endTime_(0),
+
+    stopAt_(saEndTime),
+    writeControl_(wcTimeStep),
+    writeInterval_(GREAT),
+    purgeWrite_(0),
+    subCycling_(false),
+
+    writeFormat_(IOstream::ASCII),
+    writeVersion_(IOstream::currentVersion),
+    writeCompression_(IOstream::UNCOMPRESSED),
+    graphFormat_("raw"),
+    runTimeModifiable_(true),
+
+    readLibs_(controlDict_, "libs"),
+    functionObjects_(*this)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::Time::~Time()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::word Foam::Time::timeName(const scalar t)
+{
+    std::ostringstream osBuffer;
+    osBuffer.setf(ios_base::fmtflags(format_), ios_base::floatfield);
+    osBuffer.precision(precision_);
+    osBuffer << t;
+    return osBuffer.str();
+}
+
+
+Foam::word Foam::Time::timeName() const
+{
+    return dimensionedScalar::name();
+    //return timeName(timeOutputValue());
+}
+
+
+// Search the construction path for times
+Foam::instantList Foam::Time::times() const
+{
+    return findTimes(path());
+}
+
+
+Foam::word Foam::Time::findInstancePath(const instant& t) const
+{
+    instantList times = Time::findTimes(path());
+
+    forAllReverse(times, i)
     {
-        functionObjects_.start();
+        if (times[i] == t)
+        {
+            return times[i].name();
+        }
     }
-    else
+
+    return word::null;
+}
+
+
+Foam::instant Foam::Time::findClosestTime(const scalar t) const
+{
+    instantList times = Time::findTimes(path());
+
+    // If there is only one time it is "constant" so return it
+    if (times.size() == 1)
     {
-        functionObjects_.execute();
+        return times[0];
+    }
+
+    if (t < times[1].value())
+    {
+        return times[1];
+    }
+    else if (t > times[times.size() - 1].value())
+    {
+        return times[times.size() - 1];
+    }
+
+    scalar deltaT = GREAT;
+    label closesti = 0;
+
+    for (label i=1; i<times.size(); i++)
+    {
+        if (mag(times[i].value() - t) < deltaT)
+        {
+            deltaT = mag(times[i].value() - t);
+            closesti = i;
+        }
+    }
+
+    return times[closesti];
+}
+
+
+Foam::label Foam::Time::startTimeIndex() const
+{
+    return startTimeIndex_;
+}
+
+
+Foam::dimensionedScalar Foam::Time::startTime() const
+{
+    return dimensionedScalar("startTime", dimTime, startTime_);
+}
+
+
+Foam::dimensionedScalar Foam::Time::endTime() const
+{
+    return dimensionedScalar("endTime", dimTime, endTime_);
+}
+
+
+bool Foam::Time::run() const
+{
+    bool running = value() < (endTime_ - 0.5*deltaT_);
+
+    if (!subCycling_ && !running && timeIndex_ != startTimeIndex_)
+    {
+        const_cast<functionObjectList&>(functionObjects_).execute();
+    }
+
+    return running;
+}
+
+
+bool Foam::Time::end() const
+{
+    return (value() > (endTime_ + 0.5*deltaT_));
+}
+
+
+void Foam::Time::setTime(const Time& t)
+{
+    value() = t.value();
+    dimensionedScalar::name() = t.dimensionedScalar::name();
+    timeIndex_ = t.timeIndex_;
+}
+
+
+void Foam::Time::setTime(const instant& inst, const label newIndex)
+{
+    value() = inst.value();
+    dimensionedScalar::name() = inst.name();
+    timeIndex_ = newIndex;
+
+    IOdictionary timeDict
+    (
+        IOobject
+        (
+            "time",
+            timeName(),
+            "uniform",
+            *this,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    if (timeDict.found("deltaT"))
+    {
+        deltaT_ = readScalar(timeDict.lookup("deltaT"));
+    }
+
+    if (timeDict.found("deltaT0"))
+    {
+        deltaT0_ = readScalar(timeDict.lookup("deltaT0"));
+    }
+
+    if (timeDict.found("index"))
+    {
+        timeIndex_ = readLabel(timeDict.lookup("index"));
+    }
+}
+
+
+void Foam::Time::setTime(const dimensionedScalar& newTime, const label newIndex)
+{
+    setTime(newTime.value(), newIndex);
+}
+
+
+void Foam::Time::setTime(const scalar newTime, const label newIndex)
+{
+    value() = newTime;
+    dimensionedScalar::name() = timeName(timeToUserTime(newTime));
+    timeIndex_ = newIndex;
+}
+
+
+void Foam::Time::setEndTime(const dimensionedScalar& endTime)
+{
+    setEndTime(endTime.value());
+}
+
+
+void Foam::Time::setEndTime(const scalar endTime)
+{
+    endTime_ = endTime;
+}
+
+
+void Foam::Time::setDeltaT(const dimensionedScalar& deltaT)
+{
+    setDeltaT(deltaT.value());
+}
+
+
+void Foam::Time::setDeltaT(const scalar deltaT)
+{
+    deltaT_ = deltaT;
+    deltaTchanged_ = true;
+    adjustDeltaT();
+}
+
+
+Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
+{
+    subCycling_ = true;
+
+    TimeState ts = *this;
+    setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
+    deltaT_ /= nSubCycles;
+    deltaT0_ /= nSubCycles;
+    deltaTSave_ = deltaT0_;
+
+    return ts;
+}
+
+
+void Foam::Time::endSubCycle(const TimeState& ts)
+{
+    subCycling_ = false;
+    TimeState::operator=(ts);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+Foam::Time& Foam::Time::operator+=(const dimensionedScalar& deltaT)
+{
+    return operator+=(deltaT.value());
+}
+
+
+Foam::Time& Foam::Time::operator+=(const scalar deltaT)
+{
+    readModifiedObjects();
+
+    if (!subCycling_)
+    {
+        if (timeIndex_ == startTimeIndex_)
+        {
+            functionObjects_.start();
+        }
+        else
+        {
+            functionObjects_.execute();
+        }
+    }
+
+    setDeltaT(deltaT);
+    operator++();
+
+    return *this;
+}
+
+
+Foam::Time& Foam::Time::operator++()
+{
+    readModifiedObjects();
+
+    if (!subCycling_)
+    {
+        if (timeIndex_ == startTimeIndex_)
+        {
+            functionObjects_.start();
+        }
+        else
+        {
+            functionObjects_.execute();
+        }
     }
 
     deltaT0_ = deltaTSave_;
@@ -571,7 +633,7 @@ void Foam::Time::increment()
     setTime(value() + deltaT_, timeIndex_ + 1);
 
     // If the time is very close to zero reset to zero
-    if (mag(value()) < 10*SMALL)
+    if (mag(value()) < 10*SMALL*deltaT_)
     {
         setTime(0.0, timeIndex_);
     }
@@ -649,59 +711,6 @@ void Foam::Time::increment()
             endTime_ = value();
         }
     }
-}
-
-
-Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
-{
-    TimeState ts = *this;
-    setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
-    deltaT_ /= nSubCycles;
-    deltaT0_ /= nSubCycles;
-    deltaTSave_ = deltaT0_;
-
-    return ts;
-}
-
-
-void Foam::Time::endSubCycle(const TimeState& ts)
-{
-    TimeState::operator=(ts);
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-Foam::Time& Foam::Time::operator+=(const dimensionedScalar& deltaT)
-{
-    return operator+=(deltaT.value());
-}
-
-
-Foam::Time& Foam::Time::operator+=(const scalar deltaT)
-{
-    readModifiedObjects();
-
-    if (timeIndex_ == startTimeIndex_)
-    {
-        functionObjects_.start();
-    }
-    else
-    {
-        functionObjects_.execute();
-    }
-
-    setDeltaT(deltaT);
-    operator++();
-
-    return *this;
-}
-
-
-Foam::Time& Foam::Time::operator++()
-{
-    readModifiedObjects();
-    increment();
 
     return *this;
 }

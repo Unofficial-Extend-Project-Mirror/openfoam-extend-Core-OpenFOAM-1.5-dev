@@ -129,10 +129,6 @@ Foam::velocityComponentLaplacianFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::velocityComponentLaplacianFvMotionSolver::curPoints() const
 {
-    // The points have moved so before interpolation update
-    // volPointInterpolation accordingly
-    vpi_.movePoints();
-
     vpi_.interpolate(cellMotionU_, pointMotionU_);
 
     tmp<pointField> tcurPoints(new pointField(fvMesh_.points()));
@@ -152,6 +148,10 @@ Foam::velocityComponentLaplacianFvMotionSolver::curPoints() const
 
 void Foam::velocityComponentLaplacianFvMotionSolver::solve()
 {
+    // The points have moved so before interpolation update
+    // the fvMotionSolver accordingly
+    movePoints(fvMesh_.points());
+
     diffusivityPtr_->correct();
     pointMotionU_.boundaryField().updateCoeffs();
 
@@ -164,6 +164,20 @@ void Foam::velocityComponentLaplacianFvMotionSolver::solve()
             "laplacian(diffusivity,cellMotionU)"
         )
     );
+}
+
+
+void Foam::velocityComponentLaplacianFvMotionSolver::updateMesh
+(
+    const mapPolyMesh& mpm
+)
+{
+    fvMotionSolver::updateMesh(mpm);
+
+    // Update diffusivity. Note two stage to make sure old one is de-registered
+    // before creating/registering new one.
+    diffusivityPtr_.reset(NULL);
+    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
 }
 
 

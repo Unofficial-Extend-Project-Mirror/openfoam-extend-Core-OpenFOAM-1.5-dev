@@ -270,7 +270,7 @@ void tetrahedron<Point, PointRef>::gradNiSquared(scalarField& buffer) const
 template<class Point, class PointRef>
 void tetrahedron<Point, PointRef>::gradNiDotGradNj(scalarField& buffer) const
 {
-    // Warning: Ordering of edges needs to be the same for a tetrahedron
+    // Warning. Ordering of edges needs to be the same for a tetrahedron
     // class, a tetrahedron cell shape model and a tetCell
 
     // Warning: Added a mag to produce positive coefficients even if
@@ -312,7 +312,7 @@ void tetrahedron<Point, PointRef>::gradNiGradNi(tensorField& buffer) const
 template<class Point, class PointRef>
 void tetrahedron<Point, PointRef>::gradNiGradNj(tensorField& buffer) const
 {
-    // Warning: Ordering of edges needs to be the same for a tetrahedron
+    // Warning. Ordering of edges needs to be the same for a tetrahedron
     // class, a tetrahedron cell shape model and a tetCell
 
     // Double change of sign between face area vector and gradient

@@ -1,15 +1,15 @@
-    word meshName;
+    word regionName;
 
-    if (args.options().found("mesh"))
+    if (args.options().found("region"))
     {
-        meshName = args.options()["mesh"];
+        regionName = args.options()["region"];
 
-        Info<< "Create polyMesh " << meshName << " for time = "
+        Info<< "Create polyMesh " << regionName << " for time = "
             << runTime.timeName() << nl << endl;
     }
     else
     {
-        meshName = polyMesh::defaultRegion;
+        regionName = polyMesh::defaultRegion;
 
         Info<< "Create polyMesh for time = "
             << runTime.timeName() << nl << endl;
@@ -19,7 +19,7 @@
     (
         IOobject
         (
-            meshName,
+            regionName,
             runTime.timeName(),
             runTime,
             IOobject::MUST_READ

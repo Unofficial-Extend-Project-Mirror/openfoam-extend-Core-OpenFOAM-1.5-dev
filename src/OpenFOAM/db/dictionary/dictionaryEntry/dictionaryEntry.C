@@ -26,25 +26,34 @@ License
 
 #include "dictionaryEntry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from keyword and ITstream
-dictionaryEntry::dictionaryEntry(const word& key, const dictionary& dict)
+Foam::dictionaryEntry::dictionaryEntry
+(
+    const word& key,
+    const dictionary& parentDict,
+    const dictionary& dict
+)
 :
     entry(key),
-    dictionary(dict)
+    dictionary(parentDict, dict)
+{}
+
+
+Foam::dictionaryEntry::dictionaryEntry
+(
+    const dictionary& parentDict,
+    const dictionaryEntry& dictEnt
+)
+:
+    entry(dictEnt),
+    dictionary(parentDict, dictEnt)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return line number of first token in dictionary
-label dictionaryEntry::startLineNumber() const
+Foam::label Foam::dictionaryEntry::startLineNumber() const
 {
     if (size())
     {
@@ -56,8 +65,7 @@ label dictionaryEntry::startLineNumber() const
     }
 }
 
-//- Return line number of last token in dictionary
-label dictionaryEntry::endLineNumber() const
+Foam::label Foam::dictionaryEntry::endLineNumber() const
 {
     if (size())
     {
@@ -70,8 +78,7 @@ label dictionaryEntry::endLineNumber() const
 }
 
 
-//- Return token stream if this entry is a dictionary entry
-ITstream& dictionaryEntry::stream() const
+Foam::ITstream& Foam::dictionaryEntry::stream() const
 {
     FatalIOErrorIn("ITstream& primitiveEntry::stream() const", *this)
         << "Attempt to return dictionary entry as a primitive"
@@ -81,15 +88,16 @@ ITstream& dictionaryEntry::stream() const
 }
 
 
-//- Return token stream if this entry is a dictionary entry
-const dictionary& dictionaryEntry::dict() const
+const Foam::dictionary& Foam::dictionaryEntry::dict() const
 {
     return *this;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::dictionary& Foam::dictionaryEntry::dict()
+{
+    return *this;
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

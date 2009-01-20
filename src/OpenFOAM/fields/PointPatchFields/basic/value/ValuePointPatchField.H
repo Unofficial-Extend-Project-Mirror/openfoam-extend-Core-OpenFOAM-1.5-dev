@@ -79,14 +79,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        ValuePointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         ValuePointPatchField
         (
@@ -184,7 +176,10 @@ public:
             virtual void updateCoeffs();
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Update boundary value
             virtual void updateBoundaryField()

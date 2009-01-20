@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    tetrahedron
+    Foam::tetrahedron
 
 Description
     A tetrahedron primitive.
@@ -52,7 +52,7 @@ namespace Foam
 class Istream;
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef> class tetrahedron;
 

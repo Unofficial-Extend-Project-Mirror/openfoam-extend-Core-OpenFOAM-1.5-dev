@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    List<T>
+    Foam::List
 
 Description
-    List<T> is a 1D vector of objects of type T, where the size of the vector
-    is known and used for subscript bounds checking, etc.  Storage is allocated
-    on free-store during construction.
+    A 1D array of objects of type \<T\>, where the size of the vector
+    is known and used for subscript bounds checking, etc.
+
+    Storage is allocated on free-store during construction.
 
 SourceFiles
     List.C
@@ -51,7 +52,7 @@ namespace Foam
 class Istream;
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class List;
 
@@ -62,7 +63,8 @@ template<class T> class PtrList;
 template<class T> class SLList;
 template<class T> class IndirectList;
 template<class T> class BiIndirectList;
-
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+    class DynamicList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -134,7 +136,7 @@ public:
     // Member functions
 
         //- Return a null List
-        static List<T>& null();
+        static const List<T>& null();
 
 
         // Edit
@@ -151,6 +153,11 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list.
             void transfer(List<T>&);
+
+            //- Transfer the contents of the argument List into this List
+            //  and annull the argument list.
+            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+            void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
@@ -180,7 +187,11 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>> <T>(Istream&, List<T>&);
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <T>
+        #endif
+        (Istream&, List<T>&);
 };
 
 
@@ -189,6 +200,12 @@ void sort(List<T>& a);
 
 template<class T, class Cmp>
 void sort(List<T>& a, const Cmp&);
+
+template<class T>
+void stableSort(List<T>& a);
+
+template<class T, class Cmp>
+void stableSort(List<T>& a, const Cmp&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PrimitivePatchInterpolation
+    Foam::PrimitivePatchInterpolation
 
 Description
     Interpolation class within a primitive patch. Allows interpolation from

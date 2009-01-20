@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    chemkinReader
+    Foam::chemkinReader
 
 Description
+    Foam::chemkinReader
 
 SourceFiles
     chemkinReader.C
@@ -74,6 +75,7 @@ public:
             gas
         };
 
+        //- species element
         struct specieElement
         {
             word elementName;
@@ -81,7 +83,7 @@ public:
 
             bool operator==(const specieElement& se) const
             {
-                return 
+                return
                 (
                     nAtoms == se.nAtoms
                  && elementName == se.elementName
@@ -196,7 +198,7 @@ private:
         HashTable<phase> speciePhase_;
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        HashPtrTable<reactionThermo> specieThermo_;
+        HashPtrTable<reactionThermo> speciesThermo_;
 
         //- Table of species composition
         HashTable<List<specieElement> > specieComposition_;
@@ -363,7 +365,7 @@ public:
         //- Table of the thermodynamic data given in the CHEMKIN file
         const HashPtrTable<reactionThermo>& sThermo() const
         {
-            return specieThermo_;
+            return speciesThermo_;
         }
 
         //- Table of species composition

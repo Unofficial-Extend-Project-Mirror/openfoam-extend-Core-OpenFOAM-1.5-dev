@@ -168,9 +168,10 @@ void Foam::faceZone::calcCellLayers() const
     {
         // Go through all the faces in the master zone.  Choose the
         // master or slave cell based on the face flip
+        const polyMesh& mesh = zoneMesh().mesh();
 
-        const labelList& own = zoneMesh().mesh().allOwner();
-        const labelList& nei = zoneMesh().mesh().allNeighbour();
+        const labelList& own = mesh.faceOwner();
+        const labelList& nei = mesh.faceNeighbour();
 
         const labelList& mf = *this;
 
@@ -184,17 +185,36 @@ void Foam::faceZone::calcCellLayers() const
 
         forAll (mf, faceI)
         {
+            label curMc = -1;
+            label curSc = -1;
+
             if (!faceFlip[faceI])
             {
                 // Face is oriented correctly, no flip needed
-                mc[faceI] = nei[mf[faceI]];
-                sc[faceI] = own[mf[faceI]];
+                if (mesh.isInternalFace(mf[faceI]))
+                {
+                    curMc = nei[mf[faceI]];
+                }
+
+                if (mf[faceI] < mesh.nFaces())
+                {
+                    curSc = own[mf[faceI]];
+                }
             }
             else
             {
-                mc[faceI] = own[mf[faceI]];
-                sc[faceI] = nei[mf[faceI]];
+                if (mf[faceI] < mesh.nFaces())
+                {
+                    curMc = own[mf[faceI]];
+                }
+                if (mesh.isInternalFace(mf[faceI]))
+                {
+                    curSc = nei[mf[faceI]];
+                }
             }
+
+            mc[faceI] = curMc;
+            sc[faceI] = curSc;
         }
         //Info << "masterCells: " << mc << endl;
         //Info << "slaveCells: " << sc << endl;

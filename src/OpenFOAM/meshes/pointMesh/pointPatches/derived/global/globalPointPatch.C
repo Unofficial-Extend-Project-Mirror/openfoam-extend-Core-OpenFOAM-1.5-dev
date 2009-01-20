@@ -41,14 +41,13 @@ defineTypeNameAndDebug(globalPointPatch, 0);
 
 globalPointPatch::globalPointPatch
 (
-    const globalMeshData& pi,
     const pointBoundaryMesh& bm,
-    const label
+    const label bi
 )
 :
     pointPatch(bm),
     coupledPointPatch(bm),
-    globalMeshData_(pi)
+    boundaryIndex_(bi)
 {}
 
 
@@ -59,20 +58,6 @@ globalPointPatch::~globalPointPatch()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const pointField& globalPointPatch::localPoints() const
-{
-    notImplemented("globalPointPatch::localPoints() const");
-    return pointField::null();
-}
-
-
-const vectorField& globalPointPatch::pointNormals() const
-{
-    notImplemented("globalPointPatch::pointNormals() const");
-    return vectorField::null();
-}
-
 
 triFaceList globalPointPatch::faceTriangles
 (

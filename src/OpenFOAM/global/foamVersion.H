@@ -22,14 +22,21 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    foamVersion
+Namespace
+    Foam
+
+Description
+    Namespace for OpenFOAM
+
+
+Global
+    Foam::FOAMversion
 
 Description
     OpenFOAM version number static string.
 
 SourceFiles
-    foamVersion.C
+    global.Cver
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,15 +47,8 @@ SourceFiles
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-extern const char* const FOAMversion;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    extern const char* const FOAMversion;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

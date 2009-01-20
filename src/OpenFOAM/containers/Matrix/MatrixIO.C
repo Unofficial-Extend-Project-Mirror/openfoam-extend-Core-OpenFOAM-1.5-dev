@@ -30,18 +30,12 @@ License
 #include "token.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class T>
-Matrix<T>::Matrix(Istream& is)
+Foam::Matrix<T>::Matrix(Istream& is)
 :
-    v_(0),
+    v_(NULL),
     n_(0),
     m_(0)
 {
@@ -50,7 +44,7 @@ Matrix<T>::Matrix(Istream& is)
 
 
 template<class T>
-Istream& operator>>(Istream& is, Matrix<T>& M)
+Foam::Istream& Foam::operator>>(Istream& is, Matrix<T>& M)
 {
     // Anull matrix
     M.clear();
@@ -66,8 +60,7 @@ Istream& operator>>(Istream& is, Matrix<T>& M)
         M.n_ = firstToken.labelToken();
         M.m_ = readLabel(is);
 
-        M.allocate();
-        T* v = M.v_[0];
+        label nm = M.n_*M.m_;
 
         // Read list contents depending on data format
         if (is.format() == IOstream::ASCII || !contiguous<T>())
@@ -75,20 +68,21 @@ Istream& operator>>(Istream& is, Matrix<T>& M)
             // Read beginning of contents
             char listDelimiter = is.readBeginList("Matrix");
 
-            label nm = M.n_*M.m_;
-
             if (nm)
             {
+                M.allocate();
+                T* v = M.v_[0];
+
                 if (listDelimiter == token::BEGIN_LIST)
                 {
                     label k = 0;
 
                     // loop over rows
-                    for (register label i=0; i< M.n(); i++)
+                    for (register label i=0; i<M.n(); i++)
                     {
                         listDelimiter = is.readBeginList("MatrixRow");
 
-                        for (register label j=0; j< M.m(); j++)
+                        for (register label j=0; j<M.m(); j++)
                         {
                             is >> v[k++];
 
@@ -125,12 +119,19 @@ Istream& operator>>(Istream& is, Matrix<T>& M)
         }
         else
         {
-            is.read(reinterpret_cast<char*>(v), M.n_*M.m_*sizeof(T));
+            if (nm)
+            {
+                M.allocate();
+                T* v = M.v_[0];
 
-            is.fatalCheck
-            (
-                "operator>>(Istream&, Matrix<T>&) : reading the binary block"
-            );
+                is.read(reinterpret_cast<char*>(v), nm*sizeof(T));
+
+                is.fatalCheck
+                (
+                    "operator>>(Istream&, Matrix<T>&) : "
+                    "reading the binary block"
+                );
+            }
         }
     }
     else
@@ -146,98 +147,107 @@ Istream& operator>>(Istream& is, Matrix<T>& M)
 
 
 template<class T>
-Ostream& operator<<(Ostream& os, const Matrix<T>& M)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<T>& M)
 {
+    label nm = M.n_*M.m_;
+
+    os  << M.n() << token::SPACE << M.m();
+
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        bool uniform = false;
-
-        label nm = M.n_*M.m_;
-        const T* v = M.v_[0];
-
-        if (nm > 1 && contiguous<T>())
+        if (nm)
         {
-            uniform = true;
+            bool uniform = false;
 
-            for (register label i=0; i< nm; i++)
+            const T* v = M.v_[0];
+
+            if (nm > 1 && contiguous<T>())
             {
-                if (v[i] != v[0])
+                uniform = true;
+
+                for (register label i=0; i< nm; i++)
                 {
-                    uniform = false;
-                    break;
+                    if (v[i] != v[0])
+                    {
+                        uniform = false;
+                        break;
+                    }
                 }
             }
-        }
 
-        if (uniform)
-        {
-            // Write size of list and start contents delimiter
-            os  << M.n() << token::SPACE << M.m() << token::SPACE 
-                << token::BEGIN_BLOCK;
-
-            // Write list contents
-            os << v[0];
-
-            // Write end of contents delimiter
-            os << token::END_BLOCK;
-        }
-        else if (nm < 10 && contiguous<T>())
-        {
-            // Write size of list and start contents delimiter
-            os  << M.n() << token::SPACE << M.m() << token::SPACE 
-                << token::BEGIN_LIST;
-
-            label k = 0;
-
-            // loop over rows
-            for (register label i=0; i< M.n(); i++)
+            if (uniform)
             {
+                // Write size of list and start contents delimiter
+                os  << token::BEGIN_BLOCK;
+
+                // Write list contents
+                os << v[0];
+
+                // Write end of contents delimiter
+                os << token::END_BLOCK;
+            }
+            else if (nm < 10 && contiguous<T>())
+            {
+                // Write size of list and start contents delimiter
                 os  << token::BEGIN_LIST;
 
-                // Write row
-                for (register label j=0; j< M.m(); j++)
+                label k = 0;
+
+                // loop over rows
+                for (register label i=0; i< M.n(); i++)
                 {
-                    if (j > 0) os << token::SPACE;
-                    os << v[k++];
+                    os  << token::BEGIN_LIST;
+
+                    // Write row
+                    for (register label j=0; j< M.m(); j++)
+                    {
+                        if (j > 0) os << token::SPACE;
+                        os << v[k++];
+                    }
+
+                    os << token::END_LIST;
                 }
 
+                // Write end of contents delimiter
                 os << token::END_LIST;
             }
+            else
+            {
+                // Write size of list and start contents delimiter
+                os  << nl << token::BEGIN_LIST;
 
-            // Write end of contents delimiter
-            os << token::END_LIST;
+                label k = 0;
+
+                // loop over rows
+                for (register label i=0; i< M.n(); i++)
+                {
+                    os  << nl << token::BEGIN_LIST;
+
+                    // Write row
+                    for (register label j=0; j< M.m(); j++)
+                    {
+                        os << nl << v[k++];
+                    }
+
+                    os << nl << token::END_LIST;
+                }
+
+                // Write end of contents delimiter
+                os << nl << token::END_LIST << nl;
+            }
         }
         else
         {
-            // Write size of list and start contents delimiter
-            os  << nl << M.n() << token::SPACE << M.m() << nl
-                << token::BEGIN_LIST;
-
-            label k = 0;
-
-            // loop over rows
-            for (register label i=0; i< M.n(); i++)
-            {
-                os  << nl << token::BEGIN_LIST;
-
-                // Write row
-                for (register label j=0; j< M.m(); j++)
-                {
-                    os << nl << v[k++];
-                }
-
-                os << nl << token::END_LIST;
-            }
-
-            // Write end of contents delimiter
-            os << nl << token::END_LIST << nl;
+            os  << token::BEGIN_LIST << token::END_LIST << nl;
         }
     }
     else
     {
-        os << nl << M.n_ << token::SPACE << M.m_ << nl;
-        os.write(reinterpret_cast<const char*>(M.v_[0]), M.n_*M.m_*sizeof(T));
+        if (nm)
+        {
+            os.write(reinterpret_cast<const char*>(M.v_[0]), nm*sizeof(T));
+        }
     }
 
     // Check state of IOstream
@@ -246,9 +256,5 @@ Ostream& operator<<(Ostream& os, const Matrix<T>& M)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -38,16 +38,21 @@ Foam::wordList Foam::ReadFields
 (
     const Mesh& mesh,
     const IOobjectList& objects,
-    PtrList<GeoField>& fields
+    PtrList<GeoField>& fields,
+    const bool syncPar
 )
 {
-    wordList localNames(objects.names(GeoField::typeName));
+    // Search list of objects for wanted type
+    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
 
-    wordList masterNames(localNames);
-    Pstream::scatter(masterNames);
+    wordList masterNames(fieldObjects.names());
 
-    // Check that I have the same fields as the master
+    if (syncPar && Pstream::parRun())
     {
+        // Check that I have the same fields as the master
+        const wordList localNames(masterNames);
+        Pstream::scatter(masterNames);
+
         HashSet<word> localNamesSet(localNames);
 
         forAll(masterNames, i)
@@ -60,12 +65,13 @@ Foam::wordList Foam::ReadFields
             {
                 FatalErrorIn
                 (
-                    "readFields<class GeoField, class Mesh>"
-                    "(const Mesh&, const IOobjectList&, PtrList<GeoField>&)"
+                    "ReadFields<class GeoField, class Mesh>"
+                    "(const Mesh&, const IOobjectList&, PtrList<GeoField>&"
+                    ", const bool)"
                 )   << "Fields not synchronised across processors." << endl
-                    << "Master has field " << masterFld
-                    << " which processor " << Pstream::myProcNo()
-                    << " does not have." << exit(FatalError);
+                    << "Master has fields " << masterNames
+                    << "  processor " << Pstream::myProcNo()
+                    << " has fields " << localNames << exit(FatalError);
             }
             else
             {
@@ -77,24 +83,27 @@ Foam::wordList Foam::ReadFields
         {
             FatalErrorIn
             (
-                "readFields<class GeoField, class Mesh>"
-                "(const Mesh&, const IOobjectList&, PtrList<GeoField>&)"
+                "ReadFields<class GeoField, class Mesh>"
+                "(const Mesh&, const IOobjectList&, PtrList<GeoField>&"
+                ", const bool)"
             )   << "Fields not synchronised across processors." << endl
-                << "Processor " << Pstream::myProcNo()
-                << " has field " << iter.key()
-                << " which the master processor does not have."
-                << exit(FatalError);
+                << "Master has fields " << masterNames
+                << "  processor " << Pstream::myProcNo()
+                << " has fields " << localNames << exit(FatalError);
         }
     }
 
 
     fields.setSize(masterNames.size());
 
+    // Make sure to read in masterNames order.
+
     forAll(masterNames, i)
     {
-        const word& fieldName = masterNames[i];
+        Info<< "Reading " << GeoField::typeName << ' ' << masterNames[i]
+            << endl;
 
-        Info<< "Reading field " << fieldName << endl;
+        const IOobject& io = *fieldObjects[masterNames[i]];
 
         fields.set
         (
@@ -103,11 +112,13 @@ Foam::wordList Foam::ReadFields
             (
                 IOobject
                 (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
+                    io.name(),
+                    io.instance(),
+                    io.local(),
+                    io.db(),
                     IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
+                    IOobject::AUTO_WRITE,
+                    io.registerObject()
                 ),
                 mesh
             )

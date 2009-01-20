@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    constTransport
+    Foam::constTransport
 
 Description
-    Constant properties Transport package.  Templated ito a given
-    thermodynamics package (needed for thermal conductivity).
+    Constant properties Transport package.
+    Templated into a given thermodynamics package (needed for thermal
+    conductivity).
 
 SourceFiles
     constTransportI.H
@@ -43,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class thermo> class constTransport;
 

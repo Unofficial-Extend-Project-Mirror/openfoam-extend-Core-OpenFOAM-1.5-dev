@@ -81,6 +81,7 @@ void Pstream::gatherList
 
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<char*>(receivedValues.begin()),
                     receivedValues.byteSize()
@@ -95,7 +96,7 @@ void Pstream::gatherList
             }
             else
             {
-                IPstream fromBelow(belowID);
+                IPstream fromBelow(Pstream::scheduled, belowID);
                 fromBelow >> Values[belowID];
 
                 if (debug & 2)
@@ -147,6 +148,7 @@ void Pstream::gatherList
 
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(sendingValues.begin()),
                     sendingValues.byteSize()
@@ -154,7 +156,7 @@ void Pstream::gatherList
             }
             else
             {
-                OPstream toAbove(myComm.above(), 0, false);
+                OPstream toAbove(Pstream::scheduled, myComm.above());
                 toAbove << Values[Pstream::myProcNo()];
 
                 forAll(belowLeaves, leafI)
@@ -224,6 +226,7 @@ void Pstream::scatterList
 
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(receivedValues.begin()),
                     receivedValues.byteSize()
@@ -236,7 +239,7 @@ void Pstream::scatterList
             }
             else
             {
-                IPstream fromAbove(myComm.above());
+                IPstream fromAbove(Pstream::scheduled, myComm.above());
 
                 forAll(notBelowLeaves, leafI)
                 {
@@ -270,6 +273,7 @@ void Pstream::scatterList
 
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<const char*>(sendingValues.begin()),
                     sendingValues.byteSize()
@@ -277,7 +281,7 @@ void Pstream::scatterList
             }
             else
             {
-                OPstream toBelow(belowID, 0, false);
+                OPstream toBelow(Pstream::scheduled, belowID);
 
                 // Send data destined for all other processors below belowID
                 forAll(notBelowLeaves, leafI)

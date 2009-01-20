@@ -37,6 +37,21 @@ Foam::functionObjectList::functionObjectList
 :
     HashPtrTable<functionObject>(),
     time_(t),
+    foDict_(t.controlDict()),
+    execution_(execution)
+{}
+
+
+Foam::functionObjectList::functionObjectList
+(
+    const Time& t,
+    const dictionary& foDict,
+    const bool execution
+)
+:
+    HashPtrTable<functionObject>(),
+    time_(t),
+    foDict_(foDict),
     execution_(execution)
 {}
 
@@ -55,14 +70,14 @@ bool Foam::functionObjectList::start()
     {
         bool ok = false;
 
-        if (time_.controlDict().found("functions"))
+        if (foDict_.found("functions"))
         {
             HashPtrTable<functionObject> functions
             (
-                time_.controlDict().lookup("functions"),
+                foDict_.lookup("functions"),
                 functionObject::iNew(time_)
             );
-        
+
             transfer(functions);
 
             forAllIter(HashPtrTable<functionObject>, *this, iter)
@@ -116,12 +131,9 @@ bool Foam::functionObjectList::read()
 {
     bool read = false;
 
-    if (time_.controlDict().found("functions"))
+    if (foDict_.found("functions"))
     {
-        HashPtrTable<dictionary> functionDicts
-        (
-            time_.controlDict().lookup("functions")
-        );
+        HashPtrTable<dictionary> functionDicts(foDict_.lookup("functions"));
 
         // Update existing and add new functionObjects
         forAllConstIter(HashPtrTable<dictionary>, functionDicts, iter)
@@ -132,8 +144,8 @@ bool Foam::functionObjectList::read()
             }
             else
             {
-                functionObject* functionObjectPtr = 
-                    functionObject::New(time_, *iter()).ptr();
+                functionObject* functionObjectPtr =
+                    functionObject::New(iter.key(), time_, *iter()).ptr();
 
                 functionObjectPtr->start();
 

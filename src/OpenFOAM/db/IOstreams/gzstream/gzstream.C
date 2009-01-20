@@ -18,15 +18,15 @@
 // ============================================================================
 //
 // File          : gzstream.C
-// Revision      : $Revision: 1.7 $
-// Revision_date : $Date: 2003/01/08 14:41:27 $
+// Revision      : $Revision: 1.8 $
+// Revision_date : $Date: 2005/12/07 18:03:25 $
 // Author(s)     : Deepak Bandyopadhyay, Lutz Kettner
 // 
 // Standard streambuf implementation following Nicolai Josuttis, "The 
 // Standard C++ Library".
 // ============================================================================
 
-#include <gzstream.h>
+#include "gzstream.h"
 #include <iostream>
 #include <string.h>  // for memcpy
 
@@ -42,14 +42,14 @@ namespace GZSTREAM_NAMESPACE {
 // class gzstreambuf:
 // --------------------------------------
 
-gzstreambuf* gzstreambuf::open( const char* name, int open_mode) {
+gzstreambuf* gzstreambuf::open( const char* _name, int _open_mode) {
     if ( is_open())
-        return reinterpret_cast<gzstreambuf*>(0);
-    mode = open_mode;
+        return 0;
+    mode = _open_mode;
     // no append nor read/write mode
     if ((mode & std::ios::ate) || (mode & std::ios::app)
         || ((mode & std::ios::in) && (mode & std::ios::out)))
-        return reinterpret_cast<gzstreambuf*>(0);
+        return 0;
     char  fmode[10];
     char* fmodeptr = fmode;
     if ( mode & std::ios::in)
@@ -58,9 +58,9 @@ gzstreambuf* gzstreambuf::open( const char* name, int open_mode) {
         *fmodeptr++ = 'w';
     *fmodeptr++ = 'b';
     *fmodeptr = '\0';
-    file = gzopen( name, fmode);
+    file = gzopen( _name, fmode);
     if (file == 0)
-        return reinterpret_cast<gzstreambuf*>(0);
+        return 0;
     opened = 1;
     return this;
 }
@@ -72,7 +72,7 @@ gzstreambuf * gzstreambuf::close() {
         if ( gzclose( file) == Z_OK)
             return this;
     }
-    return reinterpret_cast<gzstreambuf*>(0);
+    return 0;
 }
 
 int gzstreambuf::underflow() { // used for input buffer only
@@ -146,15 +146,17 @@ gzstreambase::~gzstreambase() {
     buf.close();
 }
 
-void gzstreambase::open( const char* name, int open_mode) {
-    if ( ! buf.open( name, open_mode))
-        clear( rdstate() | std::ios::badbit);
+void gzstreambase::open( const char* _name, int _open_mode) {
+    if ( ! buf.open( _name, _open_mode))
+        setstate(std::ios::badbit);
+    // clear( rdstate() | std::ios::badbit);
 }
 
 void gzstreambase::close() {
     if ( buf.is_open())
         if ( ! buf.close())
-            clear( rdstate() | std::ios::badbit);
+           setstate(std::ios::badbit);
+    // clear( rdstate() | std::ios::badbit);
 }
 
 #ifdef GZSTREAM_NAMESPACE

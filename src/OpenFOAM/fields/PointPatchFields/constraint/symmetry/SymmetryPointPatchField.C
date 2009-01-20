@@ -71,29 +71,6 @@ SymmetryPointPatchField
 (
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
-    const Field<Type>& f
-)
-:
-    BasicSymmetryPointPatchField
-        <PatchField, Mesh, PointPatch, MatrixType, Type>(p, iF, f)
-{}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    class SymmetryPointPatch,
-    template<class> class MatrixType,
-    class Type
->
-SymmetryPointPatchField
-<PatchField, Mesh, PointPatch, SymmetryPointPatch, MatrixType, Type>::
-SymmetryPointPatchField
-(
-    const PointPatch& p,
-    const DimensionedField<Type, Mesh>& iF,
     const dictionary& dict
 )
 :

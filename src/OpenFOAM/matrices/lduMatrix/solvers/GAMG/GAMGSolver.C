@@ -40,6 +40,8 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 void Foam::GAMGSolver::makeAgglomeration()
 {
     forAll(agglomeration_, fineLevelIndex)
@@ -74,6 +76,7 @@ void Foam::GAMGSolver::makeAgglomeration()
             << exit(FatalError);
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -188,13 +191,12 @@ void Foam::GAMGSolver::readControls()
 {
     lduMatrix::solver::readControls();
 
-    readControl(dict(), cacheAgglomeration_, "cacheAgglomeration");
-
-    readControl(dict(), nPreSweeps_, "nPreSweeps");
-    readControl(dict(), nPostSweeps_, "nPostSweeps");
-    readControl(dict(), nFinestSweeps_, "nFinestSweeps");
-    readControl(dict(), scaleCorrection_, "scaleCorrection");
-    readControl(dict(), directSolveCoarsest_, "directSolveCoarsest");
+    dict().readIfPresent("cacheAgglomeration", cacheAgglomeration_);
+    dict().readIfPresent("nPreSweeps", nPreSweeps_);
+    dict().readIfPresent("nPostSweeps", nPostSweeps_);
+    dict().readIfPresent("nFinestSweeps", nFinestSweeps_);
+    dict().readIfPresent("scaleCorrection", scaleCorrection_);
+    dict().readIfPresent("directSolveCoarsest", directSolveCoarsest_);
 }
 
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    symmetryPointPatch
+    Foam::symmetryPointPatch
 
 Description
     Symmetry-plane patch.
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class symmetryPointPatch Declaration
+               Class symmetryPointPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class symmetryPointPatch

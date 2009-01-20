@@ -103,7 +103,7 @@ CompactListList<T>::CompactListList(CompactListList<T>& cll, bool reUse)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-CompactListList<T>& CompactListList<T>::null()
+const CompactListList<T>& CompactListList<T>::null()
 {
     CompactListList<T>* nullPtr = reinterpret_cast<CompactListList<T>*>(NULL);
     return *nullPtr;

@@ -22,29 +22,21 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    messageStream
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
 #include "dictionary.H"
 #include "Pstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int messageStream::level(debug::debugSwitch("level", 2));
+int Foam::messageStream::level(Foam::debug::debugSwitch("level", 2));
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Construct from components
-messageStream::messageStream
+Foam::messageStream::messageStream
 (
     const string& title,
     errorSeverity sev,
@@ -59,7 +51,7 @@ messageStream::messageStream
 
 
 //- Construct from dictionary
-messageStream::messageStream(const dictionary& dict)
+Foam::messageStream::messageStream(const dictionary& dict)
 :
     title_(dict.lookup("title")),
     severity_(FATAL),
@@ -68,7 +60,7 @@ messageStream::messageStream(const dictionary& dict)
 {}
 
 
-OSstream& messageStream::operator()
+Foam::OSstream& Foam::messageStream::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -87,7 +79,7 @@ OSstream& messageStream::operator()
 }
 
 
-OSstream& messageStream::operator()
+Foam::OSstream& Foam::messageStream::operator()
 (
     const string& functionName,
     const char* sourceFileName,
@@ -103,7 +95,7 @@ OSstream& messageStream::operator()
 }
 
 
-OSstream& messageStream::operator()
+Foam::OSstream& Foam::messageStream::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -137,7 +129,7 @@ OSstream& messageStream::operator()
 }
 
 
-OSstream& messageStream::operator()
+Foam::OSstream& Foam::messageStream::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -157,7 +149,7 @@ OSstream& messageStream::operator()
 }
 
 
-OSstream& messageStream::operator()
+Foam::OSstream& Foam::messageStream::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -177,12 +169,14 @@ OSstream& messageStream::operator()
 }
 
 
-messageStream::operator OSstream&()
+Foam::messageStream::operator Foam::OSstream&()
 {
     if (level)
     {
+        bool collect = (severity_ == INFO || severity_ == WARNING);
+
         // Report the error
-        if (severity_ == INFO && !Pstream::master())
+        if (!Pstream::master() && collect)
         {
             return Snull;
         }
@@ -190,7 +184,7 @@ messageStream::operator OSstream&()
         {
             if (title().size())
             {
-                if (Pstream::parRun() && severity_ != INFO)
+                if (Pstream::parRun() && !collect)
                 {
                     Pout<< title().c_str();
                 }
@@ -199,11 +193,11 @@ messageStream::operator OSstream&()
                     Sout<< title().c_str();
                 }
             }
-        
+
             if (maxErrors_)
             {
                 errorCount_++;
-        
+
                 if (errorCount_ >= maxErrors_)
                 {
                     FatalErrorIn("messageStream::operator OSstream&()")
@@ -212,7 +206,7 @@ messageStream::operator OSstream&()
                 }
             }
 
-            if (Pstream::parRun() && severity_ != INFO)
+            if (Pstream::parRun() && !collect)
             {
                 return Pout;
             }
@@ -230,16 +224,20 @@ messageStream::operator OSstream&()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global messageStream definitions
 
-messageStream SeriousError 
+Foam::messageStream Foam::SeriousError
 (
-    "--> FOAM Serious Error : ", messageStream::SERIOUS, 100
+    "--> FOAM Serious Error : ",
+    messageStream::SERIOUS,
+    100
 );
 
-messageStream Warning("--> FOAM Warning : ", messageStream::WARNING);
-messageStream Info("", messageStream::INFO);
+Foam::messageStream Foam::Warning
+(
+    "--> FOAM Warning : ",
+    messageStream::WARNING
+);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::messageStream Foam::Info("", messageStream::INFO);
 
-} // End namespace Foam
 
 // ************************************************************************* //

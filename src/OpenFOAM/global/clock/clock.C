@@ -32,12 +32,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char *clock::monthnames[] =
+const char *Foam::clock::monthNames[] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -46,13 +43,13 @@ const char *clock::monthnames[] =
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-time_t clock::getTime()
+time_t Foam::clock::getTime()
 {
     return ::time(reinterpret_cast<time_t*>(0));
 }
 
 
-const struct tm clock::rawDate()
+const struct tm Foam::clock::rawDate()
 {
     time_t t = getTime();
     struct tm *timeStruct = localtime(&t);
@@ -60,7 +57,7 @@ const struct tm clock::rawDate()
 }
 
 
-string clock::date()
+Foam::string Foam::clock::dateTime()
 {
     std::ostringstream osBuffer;
 
@@ -68,7 +65,27 @@ string clock::date()
     struct tm *timeStruct = localtime(&t);
 
     osBuffer
-        << monthnames[timeStruct->tm_mon]
+        << std::setfill('0')
+        << std::setw(4) << timeStruct->tm_year + 1900
+        << '-' << std::setw(2) << timeStruct->tm_mon + 1
+        << '-' << std::setw(2) << timeStruct->tm_mday
+        << 'T'
+        << std::setw(2) << timeStruct->tm_hour
+        << ':' << std::setw(2) << timeStruct->tm_min
+        << ':' << std::setw(2) << timeStruct->tm_sec;
+
+    return osBuffer.str();
+}
+
+Foam::string Foam::clock::date()
+{
+    std::ostringstream osBuffer;
+
+    time_t t = getTime();
+    struct tm *timeStruct = localtime(&t);
+
+    osBuffer
+        << monthNames[timeStruct->tm_mon]
         << ' ' << std::setw(2) << std::setfill('0') << timeStruct->tm_mday
         << ' ' << std::setw(4) << timeStruct->tm_year + 1900;
 
@@ -76,7 +93,7 @@ string clock::date()
 }
 
 
-string clock::clockTime()
+Foam::string Foam::clock::clockTime()
 {
     std::ostringstream osBuffer;
 
@@ -95,7 +112,7 @@ string clock::clockTime()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-clock::clock()
+Foam::clock::clock()
 :
     startTime_(getTime()),
     lastTime_(startTime_),
@@ -105,14 +122,14 @@ clock::clock()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-time_t clock::elapsedClockTime() const
+time_t Foam::clock::elapsedClockTime() const
 {
     newTime_ = getTime();
     return newTime_ - startTime_;
 }
 
 
-time_t clock::clockTimeIncrement() const
+time_t Foam::clock::clockTimeIncrement() const
 {
     lastTime_ = newTime_;
     newTime_ = getTime();
@@ -121,7 +138,5 @@ time_t clock::clockTimeIncrement() const
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

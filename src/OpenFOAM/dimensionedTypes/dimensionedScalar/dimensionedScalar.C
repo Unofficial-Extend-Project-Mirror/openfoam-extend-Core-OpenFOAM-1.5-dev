@@ -98,6 +98,26 @@ dimensionedScalar pow4(const dimensionedScalar& ds)
     );
 }
 
+dimensionedScalar pow5(const dimensionedScalar& ds)
+{
+    return dimensionedScalar
+    (
+        "pow5(" + ds.name() + ')',
+        pow5(ds.dimensions()),
+        pow5(ds.value())
+    );
+}
+
+dimensionedScalar pow6(const dimensionedScalar& ds)
+{
+    return dimensionedScalar
+    (
+        "pow6(" + ds.name() + ')',
+        pow6(ds.dimensions()),
+        pow6(ds.value())
+    );
+}
+
 dimensionedScalar sqrt(const dimensionedScalar& ds)
 {
     return dimensionedScalar

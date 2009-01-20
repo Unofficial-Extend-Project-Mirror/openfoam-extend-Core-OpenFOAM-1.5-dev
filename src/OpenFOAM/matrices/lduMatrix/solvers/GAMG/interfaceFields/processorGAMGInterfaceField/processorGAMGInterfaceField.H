@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    processorGAMGInterfaceField
+    Foam::processorGAMGInterfaceField
 
 Description
     GAMG agglomerated processor interface field.
@@ -117,7 +117,7 @@ public:
                 const lduMatrix& m,
                 const scalarField& coeffs,
                 const direction cmpt,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType
             ) const;
 
             //- Update result field based on interface functionality
@@ -127,7 +127,8 @@ public:
                 scalarField& result,
                 const lduMatrix&,
                 const scalarField& coeffs,
-                const direction cmpt
+                const direction cmpt,
+                const Pstream::commsTypes commsType
             ) const;
 
 

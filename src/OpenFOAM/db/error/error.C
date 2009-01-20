@@ -34,13 +34,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-error::error(const string& title)
+Foam::error::error(const string& title)
 :
+    std::exception(),
     messageStream(title, messageStream::FATAL),
     functionName_("unknown"),
     sourceFileName_("unknown"),
@@ -54,13 +50,14 @@ error::error(const string& title)
         Perr<< endl
             << "error::error(const string& title) : cannot open error stream"
             << endl;
-        ::exit(1);
+        exit(1);
     }
 }
 
 
-error::error(const dictionary& errDict)
+Foam::error::error(const dictionary& errDict)
 :
+    std::exception(),
     messageStream(errDict),
     functionName_(errDict.lookup("functionName")),
     sourceFileName_(errDict.lookup("sourceFileName")),
@@ -75,13 +72,14 @@ error::error(const dictionary& errDict)
             << "error::error(const dictionary& errDict) : "
                "cannot open error stream"
             << endl;
-        ::exit(1);
+        exit(1);
     }
 }
 
 
-error::error(const error& err)
+Foam::error::error(const error& err)
 :
+    std::exception(),
     messageStream(err),
     functionName_(err.functionName_),
     sourceFileName_(err.sourceFileName_),
@@ -89,16 +87,18 @@ error::error(const error& err)
     abort_(err.abort_),
     throwExceptions_(err.throwExceptions_),
     messageStreamPtr_(new OStringStream(*err.messageStreamPtr_))
-{}
+{
+    //*messageStreamPtr_ << err.message();
+}
 
 
-error::~error()
+Foam::error::~error() throw()
 {
     delete messageStreamPtr_;
 }
 
 
-OSstream& error::operator()
+Foam::OSstream& Foam::error::operator()
 (
     const char* functionName,
     const char* sourceFileName,
@@ -114,7 +114,7 @@ OSstream& error::operator()
 }
 
 
-OSstream& error::operator()
+Foam::OSstream& Foam::error::operator()
 (
     const string& functionName,
     const char* sourceFileName,
@@ -130,7 +130,7 @@ OSstream& error::operator()
 }
 
 
-error::operator OSstream&()
+Foam::error::operator OSstream&()
 {
     if (!messageStreamPtr_->good())
     {
@@ -138,15 +138,14 @@ error::operator OSstream&()
             << "error::operator OSstream&() : error stream has failed"
             << endl;
         printStack(Perr);
-        ::abort();
+        abort();
     }
 
     return *messageStreamPtr_;
 }
 
 
-// Create and return a dictionary
-error::operator dictionary() const
+Foam::error::operator dictionary() const
 {
     dictionary errDict;
 
@@ -163,13 +162,13 @@ error::operator dictionary() const
 }
 
 
-string error::message() const
+Foam::string Foam::error::message() const
 {
     return messageStreamPtr_->str();
 }
 
 
-void error::exit(const int errNo)
+void Foam::error::exit(const int errNo)
 {
     if (!throwExceptions_ && JobInfo::constructed)
     {
@@ -182,7 +181,7 @@ void error::exit(const int errNo)
         printStack(*this);
         Perr<< endl << *this << endl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
-        ::abort();
+        abort();
     }
 
     if (Pstream::parRun())
@@ -207,7 +206,7 @@ void error::exit(const int errNo)
 }
 
 
-void error::abort()
+void Foam::error::abort()
 {
     if (!throwExceptions_ && JobInfo::constructed)
     {
@@ -247,10 +246,9 @@ void error::abort()
 }
 
 
-Ostream& operator<<(Ostream& os, const error& fErr)
+Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
 {
-    os  << endl << fErr.title().c_str()
-        << fErr.message().c_str();
+    os  << endl << fErr.message().c_str();
 
     if (error::level >= 2 && fErr.sourceFileLineNumber())
     {
@@ -267,10 +265,6 @@ Ostream& operator<<(Ostream& os, const error& fErr)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error definitions
 
-error FatalError("--> FOAM FATAL ERROR : ");
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+Foam::error Foam::FatalError("--> FOAM FATAL ERROR : ");
 
 // ************************************************************************* //

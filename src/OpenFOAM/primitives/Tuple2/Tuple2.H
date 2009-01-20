@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Tuple2
+    Foam::Tuple2
 
 Description
     A 2-tuple.
@@ -40,16 +40,30 @@ Description
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type1, class Type2>
 class Tuple2;
 
 template<class Type1, class Type2>
-Istream& operator>>(Istream&, Tuple2<Type1, Type2>&);
+inline bool operator==
+(
+    const Tuple2<Type1, Type2>&,
+    const Tuple2<Type1, Type2>&
+);
 
 template<class Type1, class Type2>
-Ostream& operator<<(Ostream&, const Tuple2<Type1, Type2>&);
+inline bool operator!=
+(
+    const Tuple2<Type1, Type2>&,
+    const Tuple2<Type1, Type2>&
+);
+
+template<class Type1, class Type2>
+inline Istream& operator>>(Istream&, Tuple2<Type1, Type2>&);
+
+template<class Type1, class Type2>
+inline Ostream& operator<<(Ostream&, const Tuple2<Type1, Type2>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -122,44 +136,72 @@ public:
 
     // Friend Operators
 
-        inline friend bool operator==
+        friend bool operator==
+        #ifndef __CINT__
+        <Type1, Type2>
+        #endif
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
-        )
-        {
-            return
-            (
-                (a.first() == b.first()) && (a.second() == b.second())
-            );
-        }
+        );
 
-        inline friend bool operator!=
+        friend bool operator!=
+        #ifndef __CINT__
+        <Type1, Type2>
+        #endif
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
-        )
-        {
-            return (!(a == b));
-        }
+        );
 
 
     // IOstream operators
 
         //- Read Tuple2 from Istream, discarding contents of existing Tuple2.
-        friend Istream& operator>> <Type1, Type2>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <Type1, Type2>
+        #endif
         (
             Istream& is,
             Tuple2<Type1, Type2>& t2
         );
 
         // Write Tuple2 to Ostream.
-        friend Ostream& operator<< <Type1, Type2>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <Type1, Type2>
+        #endif
         (
             Ostream& os,
             const Tuple2<Type1, Type2>& t2
         );
 };
+
+
+template<class Type1, class Type2>
+inline bool operator==
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return
+    (
+        (a.first() == b.first()) && (a.second() == b.second())
+    );
+}
+
+
+template<class Type1, class Type2>
+inline bool operator!=
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return (!(a == b));
+}
 
 
 template<class Type1, class Type2>

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    functionObjectList
+    Foam::functionObjectList
 
 Description
     List of function objects with execute function which is called for
@@ -57,6 +57,9 @@ class functionObjectList
 
         const Time& time_;
 
+        //- Dictionary containing the list of function object specifications
+        const dictionary& foDict_;
+
         //- Switch for the execultion of the functionObjects
         bool execution_;
 
@@ -75,10 +78,21 @@ public:
     // Constructors
 
         //- Construct from Time and the execution setting
+        //  The functionObject specifications are read from the controlDict
         functionObjectList
         (
             const Time& t,
-            const bool execution=true
+            const bool execution = true
+        );
+
+
+        //- Construct from Time, functionObject dictionary and the execution
+        //  setting
+        functionObjectList
+        (
+            const Time& t,
+            const dictionary& foDict,
+            const bool execution = true
         );
 
 

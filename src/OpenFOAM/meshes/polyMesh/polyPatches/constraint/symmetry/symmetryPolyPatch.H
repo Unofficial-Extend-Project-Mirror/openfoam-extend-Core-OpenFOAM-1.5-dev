@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    symmetryPolyPatch
+    Foam::symmetryPolyPatch
 
 Description
-    Symmetry plane patch.
+    Symmetry-plane patch.
 
 SourceFiles
     symmetryPolyPatch.C
@@ -67,13 +67,6 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm
-        );
-
-        //- Construct from Istream
-        symmetryPolyPatch
-        (
-            Istream&,
-            const label index, const polyBoundaryMesh&
         );
 
         //- Construct from dictionary

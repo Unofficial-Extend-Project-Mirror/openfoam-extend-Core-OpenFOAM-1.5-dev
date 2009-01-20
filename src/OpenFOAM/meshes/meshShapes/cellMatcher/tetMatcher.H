@@ -23,10 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    tetMatcher
+    Foam::tetMatcher
 
 Description
-    See cellMatcher.H
+    A cellMatcher for tet cells
+
+See Also
+    cellMatcher
 
 SourceFiles
     tetMatcher.C

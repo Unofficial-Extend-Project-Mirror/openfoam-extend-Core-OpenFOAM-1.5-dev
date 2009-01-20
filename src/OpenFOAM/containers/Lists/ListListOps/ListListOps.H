@@ -22,22 +22,23 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    ListListOps
+Namespace
+    Foam::ListListOps
 
 Description
     Various utility functions to work on Lists of Lists (usually resulting
     from 'gather'ing and combining information from individual processors)
 
-    combine: takes (elements of) sublists and appends them into one big
-             list.
-    combineOffset: similar and also adds offset.
+    - combine : \n
+        takes (elements of) sublists and appends them into one big list.
+    - combineOffset : \n
+        similar and also adds offset.
 
     The access of data is through an AccessOp so that data can be 'gather'ed
     in one go, minimizing communication, and then picked apart and recombined.
 
     Example:
-
+    @code
         // Assuming myContainer defined which holds all the data I want to
         // transfer (say a pointField and a faceList). myContainer also defines
         // access operators to
@@ -76,6 +77,7 @@ Description
                 gatheredData, sizes, myContainerFaces(), offsetOp<face>()
             )
         );
+    @endcode
 
 SourceFiles
     ListListOps.C
@@ -130,7 +132,7 @@ namespace ListListOps
     template <class AccessType, class T, class AccessOp>
     AccessType combine(const List<T>&, AccessOp aop = accessOp<T>());
 
-    //- Gets sizes of sublists        
+    //- Gets sizes of sublists
     template <class T, class AccessOp>
     labelList subSizes(const List<T>&, AccessOp aop = accessOp<T>());
 
@@ -144,9 +146,6 @@ namespace ListListOps
         OffsetOp oop = offsetOp<T>()
     );
 };
-
-
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

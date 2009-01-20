@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ISstream
+    Foam::ISstream
 
 Description
     Generic input stream.
@@ -39,6 +39,8 @@ SourceFiles
 #define ISstream_H
 
 #include "Istream.H"
+#include "fileName.H"
+#include <iostream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,12 +58,20 @@ class ISstream
     // Private data
 
         fileName name_;
+        #ifndef __CINT__
         istream& is_;
+        #endif
 
 
     // Private member functions
 
         char nextValid();
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const ISstream&);
 
 
 protected:
@@ -86,29 +96,14 @@ public:
     // Constructors
 
         //- Construct as wrapper around istream
-        ISstream
+        inline ISstream
         (
             istream& is,
             const string& name,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             compressionType compression=UNCOMPRESSED
-        )
-        :
-            Istream(format, version, compression),
-            name_(name),
-            is_(is)
-        {
-            if (is_.good())
-            {
-                setOpened();
-                setGood();
-            }
-            else
-            {
-                setState(is_.rdstate());
-            }
-        }
+        );
 
 
     // Destructor

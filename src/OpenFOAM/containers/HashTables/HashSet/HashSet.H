@@ -23,10 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    HashSet
+    Foam::HashSet
 
 Description
-    HashSet
+    A HashTable with word keys but without contents.
+
+Typedef
+    Foam::wordHashSet
+
+Description
+    A HashSet with (the default) word keys.
 
 \*---------------------------------------------------------------------------*/
 

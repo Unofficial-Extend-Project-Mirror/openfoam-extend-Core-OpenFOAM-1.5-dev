@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    homogeneousMixture
+    Foam::homogeneousMixture
 
 Description
+    Foam::homogeneousMixture
 
 SourceFiles
     homogeneousMixture.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class homogeneousMixture Declaration
+                     Class homogeneousMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoType>
@@ -78,6 +79,12 @@ public:
 
         //- Construct from dictionary and mesh
         homogeneousMixture(const dictionary&, const fvMesh&);
+
+
+    // Destructor
+
+        virtual ~homogeneousMixture()
+        {}
 
 
     // Member functions

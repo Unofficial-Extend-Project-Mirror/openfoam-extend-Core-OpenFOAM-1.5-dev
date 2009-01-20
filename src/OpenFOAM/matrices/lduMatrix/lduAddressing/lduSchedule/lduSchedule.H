@@ -23,9 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    lduSchedule
+    Foam::lduScheduleEntry
 
 Description
+    Struct to hold the patch index and the initialisation flag for
+    the patch schedule
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,17 +41,20 @@ Description
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class lduScheduleEntry;
+Ostream& operator<<(Ostream& os, const lduScheduleEntry& lb);
+
+
 /*---------------------------------------------------------------------------*\
                       Class lduSchedule Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Struct to hold the patch index
-//  and the initialisation flag for the patch schedule
 struct lduScheduleEntry
 {
     label patch;
     bool init;
-    bool bufferedTransfer;
 
     friend bool operator!=
     (
@@ -62,9 +67,7 @@ struct lduScheduleEntry
 
     friend Ostream& operator<<(Ostream& os, const lduScheduleEntry& lb)
     {
-        os  << lb.patch << token::SPACE
-            << lb.init << token::SPACE
-            << lb.bufferedTransfer;
+        os  << lb.patch << token::SPACE << lb.init;
         return os;
     }
 };

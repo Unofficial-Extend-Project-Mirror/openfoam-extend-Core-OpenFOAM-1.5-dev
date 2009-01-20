@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    triangle
+    Foam::triangle
 
 Description
     A triangle primitive used to calculate face normals and swept volumes.
@@ -38,18 +38,18 @@ SourceFiles
 
 #include "intersection.H"
 #include "vector.H"
+#include "pointHit.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class pointHit;
-
 class Istream;
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef> class triangle;
 
@@ -181,6 +181,17 @@ public:
                 const vector& q,
                 const intersection::algorithm = intersection::FULL_RAY,
                 const intersection::direction dir = intersection::VECTOR
+            ) const;
+
+            //- Fast intersection with a ray.
+            //  For a hit, the pointHit.distance() is the line parameter t :
+            //  intersection=p+t*q. Only defined for VISIBLE, FULL_RAY or
+            //  HALF_RAY.
+            inline pointHit fastIntersection
+            (
+                const Point& p,
+                const vector& q,
+                const intersection::algorithm alg
             ) const;
 
             //- Return nearest point to p on triangle

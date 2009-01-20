@@ -23,14 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PtrList
+    Foam::PtrList
 
 Description
-    A PtrList<class T> is a 1D array of pointers to objects
-    of T 'T', where the size of the array is known and used for
-    subscript bounds checking, etc.
+    A templated 1D list of pointers to objects of type \<T\>, where the
+    size of the array is known and used for subscript bounds checking, etc.
+
     The element operator [] returns a reference to the object
-    rather than a pointer.
+    rather than to the pointer.
 
 SourceFiles
     PtrList.C
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T> class PtrList;
 template<class T> class SLPtrList;
@@ -172,6 +172,9 @@ public:
             //  and annull the argument list.
             void transfer(PtrList<T>&);
 
+            //- Is element set
+            inline bool set(const label) const;
+
             //- Set element. Return old element (can be NULL).
             //  No checks on new element.
             inline autoPtr<T> set(const label, T*);
@@ -219,6 +222,7 @@ public:
         class iterator;
         friend class iterator;
 
+        //- An STL-conforming iterator
         class iterator
         {
             T** ptr_;
@@ -233,8 +237,9 @@ public:
                 inline bool operator==(const iterator&) const;
                 inline bool operator!=(const iterator&) const;
 
-                inline T& operator*();
-                inline T& operator()();
+                typedef T& Tref;
+                inline Tref operator*();
+                inline Tref operator()();
 
                 inline iterator operator++();
                 inline iterator operator++(int);

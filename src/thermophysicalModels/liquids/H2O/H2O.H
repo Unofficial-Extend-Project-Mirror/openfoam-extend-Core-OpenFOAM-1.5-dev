@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    H2O
+    Foam::H2O
 
 Description
     water
@@ -171,9 +171,6 @@ public:
         //- Vapour pressure [Pa]
         scalar pv(scalar p, scalar T) const
         {
-            // Note:
-            // Limit the temperature for maximum 647K: liquid water does not
-            // exist on higher temperature.  HJ, 2/Apr/2008
             return pv_.f(p, T);
         }
 

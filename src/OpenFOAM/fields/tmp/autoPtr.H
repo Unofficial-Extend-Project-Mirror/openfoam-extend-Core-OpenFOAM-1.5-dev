@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    autoPtr
+    Foam::autoPtr
 
 Description
-    An auto-pointer not unlike the STL auto_ptr but with automatic casting to
-    a reference to the type and with pointer allocation checking on access.
+    An auto-pointer similar to the STL auto_ptr but with automatic casting
+    to a reference to the type and with pointer allocation checking on access.
 
 SourceFiles
     autoPtrI.H
@@ -106,8 +106,8 @@ public:
         inline T& operator()();
         inline const T& operator()() const;
 
-        //inline T& operator*();
-        //inline const T& operator*() const;
+        //inline Tref operator*();
+        //inline const Tref operator*() const;
 
         inline operator const T&() const;
 

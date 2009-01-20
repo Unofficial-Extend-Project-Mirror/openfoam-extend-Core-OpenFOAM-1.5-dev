@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,14 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::label Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::allocSize()
+const
+{
+    return List<T>::size();
+}
+
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::label Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::size()
@@ -150,8 +158,10 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
     DynamicList<T, SizeInc, SizeMult, SizeDiv>& l
 )
 {
+    nextFree_ = l.nextFree_;    // take over used size
+    // this should disable shrink() in List<T>::transfer - but somehow doesn't
+    l.nextFree_ = l.allocSize();
     List<T>::transfer(l);       // take over storage
-    nextFree_ = l.size();       // take over used size
     l.clear();                  // set nextFree of l to 0
 }
 
@@ -162,7 +172,21 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     const T& e
 )
 {
-    operator()(size()) = e;
+    nextFree_++;
+
+    if (nextFree_ > List<T>::size())
+    {
+        List<T>::setSize
+        (
+            max
+            (
+                nextFree_,
+                label(SizeMult*List<T>::size()/SizeDiv + SizeInc)
+            )
+        );
+    }
+
+    this->operator[](nextFree_ - 1) = e;
 }
 
 
@@ -186,7 +210,7 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 (
-    const Foam::label i
+    const label i
 )
 {
     nextFree_ = max(nextFree_, i + 1);

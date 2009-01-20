@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    tensorFieldField
+InClass
+    Foam::tensorFieldField
 
 Description
-    Specialisation of FieldField<T> for tensor.
+    Specialisation of FieldField\<T\> for tensor.
 
 SourceFiles
     tensorFieldField.C
@@ -58,6 +58,7 @@ UNARY_FUNCTION(tensor, tensor, skew)
 UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
+UNARY_FUNCTION(tensor, tensor, cof)
 UNARY_FUNCTION(tensor, tensor, inv)
 UNARY_FUNCTION(vector, tensor, eigenValues)
 UNARY_FUNCTION(tensor, tensor, eigenVectors)
@@ -69,6 +70,9 @@ UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors)
 
 UNARY_OPERATOR(vector, tensor, *, hdual)
 UNARY_OPERATOR(tensor, vector, *, hdual)
+
+BINARY_OPERATOR(vector, vector, tensor, /, divide)
+BINARY_TYPE_OPERATOR(vector, vector, tensor, /, divide)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

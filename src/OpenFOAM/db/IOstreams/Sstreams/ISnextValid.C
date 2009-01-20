@@ -34,14 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//  Get next 'valid character': i.e. not white space or comment.
-
-char ISstream::nextValid()
+char Foam::ISstream::nextValid()
 {
     char c = 0;
 
@@ -106,9 +99,5 @@ char ISstream::nextValid()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

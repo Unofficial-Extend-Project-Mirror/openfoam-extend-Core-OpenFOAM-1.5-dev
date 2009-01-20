@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    lduPrimitiveMesh
+    Foam::lduPrimitiveMesh
 
 Description
     Simplest contrete lduMesh which stores the addressing needed bu lduMatrix.

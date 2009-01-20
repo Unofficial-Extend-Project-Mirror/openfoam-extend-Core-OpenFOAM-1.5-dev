@@ -22,10 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    preservePatchTypes
+Global
+    Foam::preservePatchTypes
 
 Description
+    preservePatchTypes
 
 SourceFiles
     preservePatchTypes.C
@@ -45,6 +46,7 @@ namespace Foam
 
 class objectRegistry;
 
+//- preserve patch types
 void preservePatchTypes
 (
     const objectRegistry& obr,
@@ -52,6 +54,7 @@ void preservePatchTypes
     const fileName& meshDir,
     const wordList& patchNames,
     wordList& patchTypes,
+    const word& defaultFacesName,
     word& defaultFacesType,
     wordList& patchPhysicalTypes
 );

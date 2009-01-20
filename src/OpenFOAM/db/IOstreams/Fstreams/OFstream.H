@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    OFstream
+    Foam::OFstream
 
 Description
     Output to file stream.
@@ -54,6 +54,7 @@ class OFstream;
                        Class OFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
+//- A std::ostream with ability to handle compressed files
 class OFstreamAllocator
 {
     friend class OFstream;
@@ -100,7 +101,7 @@ class OFstream
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("OFstream");
 
 
@@ -149,7 +150,9 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global predefined null output stream
 
+#ifndef __CINT__
 extern OFstream Snull;
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

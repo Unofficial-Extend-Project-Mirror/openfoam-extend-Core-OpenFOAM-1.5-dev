@@ -70,7 +70,7 @@ void Foam::directionalDiffusivity::correct()
     const fvMesh& mesh = mSolver().mesh();
 
     surfaceVectorField n = mesh.Sf()/mesh.magSf();
-    faceDiffusivity_ == (n & scale(diffusivityVector_, n));
+    faceDiffusivity_ == (n & cmptMultiply(diffusivityVector_, n));
 }
 
 

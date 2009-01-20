@@ -76,13 +76,13 @@ Foam::LUscalarMatrix::LUscalarMatrix
                 lduMatrices.set
                 (
                     lduMatrixi++,
-                    new procLduMatrix(IPstream(slave)())
+                    new procLduMatrix(IPstream(Pstream::scheduled, slave)())
                 );
             }
         }
         else
         {
-            OPstream toMaster(Pstream::masterNo(), 0, false);
+            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
             procLduMatrix cldum
             (
                 ldum,

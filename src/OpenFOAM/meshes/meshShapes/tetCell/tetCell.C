@@ -48,7 +48,7 @@ cellShape tetCell::tetCellShape() const
 
     const cellModel& tet = *tetModelPtr_;
 
-    return cellShape(tet, labelList(*this));
+    return cellShape(tet, *this);
 }
 
 

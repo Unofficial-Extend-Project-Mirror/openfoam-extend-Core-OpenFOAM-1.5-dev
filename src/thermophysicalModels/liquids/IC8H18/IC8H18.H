@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    IC8H18
+    Foam::IC8H18
 
 Description
     iso-Octane

@@ -26,15 +26,11 @@ License
 
 #include "primitiveMesh.H"
 #include "DynamicList.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void primitiveMesh::calcCellEdges() const
+void Foam::primitiveMesh::calcCellEdges() const
 {
     // Loop through all faces and mark up cells with edges of the face.
     // Check for duplicates
@@ -68,25 +64,13 @@ void primitiveMesh::calcCellEdges() const
         // loop through the list again and add edges; checking for duplicates
         forAll (own, faceI)
         {
+            DynamicList<label, edgesPerCell_>& curCellEdges = ce[own[faceI]];
+
             const labelList& curEdges = fe[faceI];
 
             forAll (curEdges, edgeI)
             {
-                bool found = false;
-
-                DynamicList<label, edgesPerCell_>& curCellEdges =
-                    ce[own[faceI]];
-
-                forAll (curCellEdges, edgeOfCellI)
-                {
-                    if (curCellEdges[edgeOfCellI] == curEdges[edgeI])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
+                if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // Add the edge
                     curCellEdges.append(curEdges[edgeI]);
@@ -96,25 +80,13 @@ void primitiveMesh::calcCellEdges() const
 
         forAll (nei, faceI)
         {
+            DynamicList<label, edgesPerCell_>& curCellEdges = ce[nei[faceI]];
+
             const labelList& curEdges = fe[faceI];
 
             forAll (curEdges, edgeI)
             {
-                bool found = false;
-
-                DynamicList<label, edgesPerCell_>& curCellEdges =
-                    ce[nei[faceI]];
-
-                forAll (curCellEdges, edgeOfCellI)
-                {
-                    if (curCellEdges[edgeOfCellI] == curEdges[edgeI])
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
+                if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // add the edge
                     curCellEdges.append(curEdges[edgeI]);
@@ -136,7 +108,7 @@ void primitiveMesh::calcCellEdges() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::cellEdges() const
+const Foam::labelListList& Foam::primitiveMesh::cellEdges() const
 {
     if (!cePtr_)
     {
@@ -146,9 +118,5 @@ const labelListList& primitiveMesh::cellEdges() const
     return *cePtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

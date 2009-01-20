@@ -28,14 +28,14 @@ License
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+const char* const Foam::face::typeName = "face";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-tmp<vectorField> face::calcEdges(const pointField& points) const
+Foam::tmp<Foam::vectorField>
+Foam::face::calcEdges(const pointField& points) const
 {
     tmp<vectorField> tedges(new vectorField(size()));
     vectorField& edges = tedges();
@@ -57,7 +57,7 @@ tmp<vectorField> face::calcEdges(const pointField& points) const
 }
 
 
-scalar face::edgeCos
+Foam::scalar Foam::face::edgeCos
 (
     const vectorField& edges,
     const label index
@@ -71,7 +71,7 @@ scalar face::edgeCos
 }
 
 
-label face::mostConcaveAngle
+Foam::label Foam::face::mostConcaveAngle
 (
     const pointField& points,
     const vectorField& edges,
@@ -118,7 +118,7 @@ label face::mostConcaveAngle
 }
 
 
-void face::split
+void Foam::face::split
 (
     const face::splitMode mode,
     const pointField& points,
@@ -168,7 +168,7 @@ void face::split
 
             scalar minAngle;
             label startIndex = mostConcaveAngle(points, edges, minAngle);
-  
+
             label nextIndex = fcIndex(startIndex);
             label splitIndex = fcIndex(nextIndex);
 
@@ -225,7 +225,7 @@ void face::split
             const scalar splitCos = splitEdge & rightEdge;
             const scalar splitAngle = acos(max(-1.0, min(1.0, splitCos)));
             const scalar angleDiff = fabs(splitAngle - bisectAngle);
-            
+
             if (angleDiff < minDiff)
             {
                 minDiff = angleDiff;
@@ -283,29 +283,187 @@ void face::split
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void face::collapse()
+
+// return
+//   0: no match
+//  +1: identical
+//  -1: same face, but different orientation
+int Foam::face::compare(const face& a, const face& b)
 {
-    label ci = 0;
-    for (label i=1; i<size(); i++)
+    // Basic rule: we assume that the sequence of labels in each list
+    // will be circular in the same order (but not necessarily in the
+    // same direction or from the same starting point).
+
+    // Trivial reject: faces are different size
+    label sizeA = a.size();
+    label sizeB = b.size();
+
+    if (sizeA != sizeB)
     {
-        if (operator[](i) != operator[](ci))
+        return 0;
+    }
+
+
+    // Full list comparison
+    const label firstA = a[0];
+    label Bptr = -1;
+
+    forAll (b, i)
+    {
+        if (b[i] == firstA)
         {
-            operator[](++ci) = operator[](i);
+            Bptr = i;        // 'found match' at element 'i'
+            break;
         }
     }
 
-    if (operator[](ci) != operator[](0))
+    // If no match was found, return 0
+    if (Bptr < 0)
     {
-        ci++;
+        return 0;
     }
 
-    setSize(ci);
+    // Now we must look for the direction, if any
+    label secondA = a[1];
+
+    if (sizeA > 1 && (secondA == firstA || firstA == a[sizeA - 1]))
+    {
+        face ca = a;
+        ca.collapse();
+
+        face cb = b;
+        cb.collapse();
+
+        return face::compare(ca, cb);
+    }
+
+    int dir = 0;
+
+    // Check whether at top of list
+    Bptr++;
+    if (Bptr == b.size())
+    {
+        Bptr = 0;
+    }
+
+    // Test whether upward label matches second A label
+    if (b[Bptr] == secondA)
+    {
+        // Yes - direction is 'up'
+        dir = 1;
+    }
+    else
+    {
+        // No - so look downwards, checking whether at bottom of list
+        Bptr -= 2;
+
+        if (Bptr < 0)
+        {
+            // wraparound
+            Bptr += b.size();
+        }
+
+        // Test whether downward label matches second A label
+        if (b[Bptr] == secondA)
+        {
+            // Yes - direction is 'down'
+            dir = -1;
+        }
+    }
+
+    // Check whether a match was made at all, and exit 0 if not
+    if (dir == 0)
+    {
+        return 0;
+    }
+
+    // Decrement size by 2 to account for first searches
+    sizeA -= 2;
+
+    // We now have both direction of search and next element
+    // to search, so we can continue search until no more points.
+    label Aptr = 1;
+    if (dir > 0)
+    {
+        while (sizeA--)
+        {
+            Aptr++;
+            if (Aptr >= a.size())
+            {
+                Aptr = 0;
+            }
+
+            Bptr++;
+            if (Bptr >= b.size())
+            {
+                Bptr = 0;
+            }
+
+            if (a[Aptr] != b[Bptr])
+            {
+                return 0;
+            }
+        }
+    }
+    else
+    {
+        while (sizeA--)
+        {
+            Aptr++;
+            if (Aptr >= a.size())
+            {
+                Aptr = 0;
+            }
+
+            Bptr--;
+            if (Bptr < 0)
+            {
+                Bptr = b.size() - 1;
+            }
+
+            if (a[Aptr] != b[Bptr])
+            {
+                return 0;
+            }
+        }
+    }
+
+    // They must be equal - return direction
+    return dir;
 }
 
 
-point face::centre(const pointField& meshPoints) const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+Foam::label Foam::face::collapse()
+{
+    if (size() > 1)
+    {
+        label ci = 0;
+        for (label i=1; i<size(); i++)
+        {
+            if (operator[](i) != operator[](ci))
+            {
+                operator[](++ci) = operator[](i);
+            }
+        }
+
+        if (operator[](ci) != operator[](0))
+        {
+            ci++;
+        }
+
+        setSize(ci);
+    }
+
+    return size();
+}
+
+
+Foam::point Foam::face::centre(const pointField& meshPoints) const
 {
     // Calculate the centre by breaking the face into triangles and
     // area-weighted averaging their centres
@@ -313,7 +471,7 @@ point face::centre(const pointField& meshPoints) const
     // If the face is a triangle, do a direct calculation
     if (size() == 3)
     {
-        return 
+        return
             (1.0/3.0)
            *(
                meshPoints[operator[](0)]
@@ -368,15 +526,15 @@ point face::centre(const pointField& meshPoints) const
 }
 
 
-vector face::normal(const pointField& meshPoints) const
+Foam::vector Foam::face::normal(const pointField& meshPoints) const
 {
     // Calculate the normal by summing the face triangle normals.
     // Changed to deal with small concavity by using a central decomposition
-    // 
+    //
 
     // If the face is a triangle, do a direct calculation to avoid round-off
     // error-related problems
-    // 
+    //
     if (size() == 3)
     {
         return triPointRef
@@ -409,7 +567,7 @@ vector face::normal(const pointField& meshPoints) const
         }
 
         // Note: for best accuracy, centre point always comes last
-        // 
+        //
         n += triPointRef
         (
             meshPoints[operator[](pI)],
@@ -422,12 +580,12 @@ vector face::normal(const pointField& meshPoints) const
 }
 
 
-face face::reverseFace() const
+Foam::face Foam::face::reverseFace() const
 {
     // reverse the label list and return
     // Changed to make sure that the starting point of the original
     // and the reverse face is identical.
-    // 
+    //
 
     const labelList& myList = *this;
 
@@ -444,7 +602,7 @@ face face::reverseFace() const
 }
 
 
-label face::which(const label globalIndex) const
+Foam::label Foam::face::which(const label globalIndex) const
 {
     label pointInFace = -1;
     const labelList& f = *this;
@@ -462,7 +620,7 @@ label face::which(const label globalIndex) const
 }
 
 
-scalar face::sweptVol
+Foam::scalar Foam::face::sweptVol
 (
     const pointField& oldPoints,
     const pointField& newPoints
@@ -474,7 +632,6 @@ scalar face::sweptVol
     // summing their swept volumes.
     // Changed to deal with small concavity by using a central decomposition
 
-    // Note: to be consistent with the appriximate centre for the cell volume
     point centreOldPoint = centre(oldPoints);
     point centreNewPoint = centre(newPoints);
 
@@ -520,7 +677,7 @@ scalar face::sweptVol
 }
 
 
-edgeList face::edges() const
+Foam::edgeList Foam::face::edges() const
 {
     const labelList& points = *this;
 
@@ -540,8 +697,49 @@ edgeList face::edges() const
 }
 
 
+int Foam::face::edgeDirection(const edge& e) const
+{
+    if (size() > 2)
+    {
+        edge found(-1,-1);
+
+        // find start/end points - this breaks down for degenerate faces
+        forAll (*this, i)
+        {
+            if (operator[](i) == e.start())
+            {
+                found.start() = i;
+            }
+            else if (operator[](i) == e.end())
+            {
+                found.end() = i;
+            }
+        }
+
+        label diff = found.end() - found.start();
+        if (!diff || found.start() < 0 || found.end() < 0)
+        {
+            return 0;
+        }
+
+        // forward direction
+        if (diff == 1 || diff == 1 - size())
+        {
+            return 1;
+        }
+        // reverse direction
+        if (diff ==  -1 || diff == -1 + size())
+        {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
 // Number of triangles directly known from number of vertices
-label face::nTriangles
+Foam::label Foam::face::nTriangles
 (
     const pointField&
 ) const
@@ -550,7 +748,7 @@ label face::nTriangles
 }
 
 
-void face::triangles
+void Foam::face::triangles
 (
     const pointField& points,
     label& triI,
@@ -564,7 +762,7 @@ void face::triangles
 }
 
 
-void face::nTrianglesQuads
+void Foam::face::nTrianglesQuads
 (
     const pointField& points,
     label& triI,
@@ -578,7 +776,7 @@ void face::nTrianglesQuads
 }
 
 
-void face::trianglesQuads
+void Foam::face::trianglesQuads
 (
     const pointField& points,
     label& triI,
@@ -593,165 +791,8 @@ void face::trianglesQuads
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-bool operator==(const face& a, const face& b)
-{
-    // Basic rule: we assume that the sequence of labels in each list
-    // will be circular in the same order (but not necessarily in the
-    // same direction or from the same starting point).
-
-    // Trivial reject: faces are different size
-    label sizeA = a.size();
-    label sizeB = b.size();
-
-    if (sizeA != sizeB)
-    {
-        return false;
-    }
-
-
-    // Full list comparison
-    const label firstA = a[0];
-    label Bptr = -1;
-
-    forAll (b, i)
-    {
-        if (b[i] == firstA)
-        {
-            Bptr = i;        // 'found match' at element 'i'
-            break;
-        }
-    }
-
-    // If no match was found, exit false
-    if (Bptr < 0)
-    {
-        return false;
-    }
-
-    // Now we must look for the direction, if any
-    label secondA = a[1];
-
-    if (secondA == firstA || firstA == a[sizeA - 1])
-    {
-        face ca = a;
-        ca.collapse();
-
-        face cb = b;
-        cb.collapse();
-
-        return operator==(ca, cb);
-    }
-
-    label dir = 0;
-
-    // Check whether at top of list
-    Bptr++;
-    if (Bptr == b.size())
-    {
-        Bptr = 0;
-    }
-
-    // Test whether upward label matches second A label
-    if (b[Bptr] == secondA)
-    {
-        // Yes - direction is 'up'
-        dir = 1;
-    }
-    else
-    {
-        // No - so look downwards, checking whether at bottom of list
-        Bptr -= 2;
-        if (Bptr < 0)
-        {
-            // Case (1) Bptr=-1
-            if (Bptr == -1)
-            {
-                Bptr = b.size() - 1;
-            }
-
-            // Case (2) Bptr = -2
-            else
-            {
-                Bptr = b.size() - 2;
-            }
-        }
-
-        // Test whether downward label matches second A label
-        if (b[Bptr] == secondA)
-        {
-            // Yes - direction is 'down'
-            dir = -1;
-        }
-    }
-
-    // Check whether a match was made at all, and exit false if not
-    if (dir == 0)
-    {
-        return false;
-    }
-
-    // Decrement size by 2 to account for first searches
-    sizeA -= 2;
-
-    // We now have both direction of search and next element
-    // to search, so we can continue search until no more points.
-    label Aptr = 1;
-    if (dir > 0)
-    {
-        while (sizeA--)
-        {
-            Aptr++;
-            if (Aptr >= a.size())
-            {
-                Aptr = 0;
-            }
-
-            Bptr++;
-            if (Bptr >= b.size())
-            {
-                Bptr = 0;
-            }
-            if (a[Aptr] != b[Bptr])
-            {
-                return false;
-            }
-        }
-    }
-    else
-    {
-        while (sizeA--)
-        {
-            Aptr++;
-            if (Aptr >= a.size())
-            {
-                Aptr = 0;
-            }
-
-            Bptr--;
-            if (Bptr < 0)
-            {
-                Bptr = b.size() - 1;
-            }
-            if (a[Aptr] != b[Bptr])
-            {
-                return false;
-            }
-        }
-    }
-
-    // They must be equal
-    return true;
-}
-
-
-bool operator!=(const face& a, const face& b)
-{
-    return (!(a == b));
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
 // ************************************************************************* //
+

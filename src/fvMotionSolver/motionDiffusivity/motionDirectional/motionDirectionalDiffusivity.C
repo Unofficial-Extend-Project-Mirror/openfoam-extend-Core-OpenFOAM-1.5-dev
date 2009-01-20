@@ -92,7 +92,7 @@ void Foam::motionDirectionalDiffusivity::correct()
         D.correctBoundaryConditions();
 
         surfaceVectorField n = mesh.Sf()/mesh.magSf();
-        faceDiffusivity_ == (n & scale(fvc::interpolate(D), n));
+        faceDiffusivity_ == (n & cmptMultiply(fvc::interpolate(D), n));
     }
     else
     {

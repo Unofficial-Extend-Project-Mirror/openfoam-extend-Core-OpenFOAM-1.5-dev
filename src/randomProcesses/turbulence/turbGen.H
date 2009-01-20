@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    turbGen
+    Foam::turbGen
 
 Description
     Generate a turbulent velocity field conforming to a given

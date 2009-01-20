@@ -53,8 +53,17 @@ Foam::fvMotionSolver::~fvMotionSolver()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fvMotionSolver::updateMesh(const mapPolyMesh&)
+void Foam::fvMotionSolver::movePoints(const pointField& p)
 {
+    pointMesh_.movePoints(p);
+    vpi_.movePoints();
+}
+
+
+void Foam::fvMotionSolver::updateMesh(const mapPolyMesh& mpm)
+{
+    motionSolver::updateMesh(mpm);
+    pointMesh_.updateMesh(mpm);
     vpi_.updateMesh();
 }
 

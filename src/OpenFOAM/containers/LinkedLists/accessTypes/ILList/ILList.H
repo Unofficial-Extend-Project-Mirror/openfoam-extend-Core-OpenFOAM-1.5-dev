@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ILList
+    Foam::ILList
 
 Description
     Template class for intrusive linked lists.
@@ -47,7 +47,7 @@ namespace Foam
 class Istream;
 class Ostream;
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class LListBase, class T> class ILList;
 
@@ -94,6 +94,28 @@ public:
         //- Construct as copy
         ILList(const ILList<LListBase, T>&);
 
+        //- Copy constructor with additional argument for clone
+        template<class CloneArg>
+        ILList(const ILList<LListBase, T>& slpl, const CloneArg& cloneArg)
+        #ifdef __INTEL_COMPILER
+        :
+            UILList<LListBase, T>()
+        {
+            for
+            (
+                typename UILList<LListBase, T>::const_iterator iter =
+                    slpl.begin();
+                iter != slpl.end();
+                ++iter
+            )
+            {
+                append(iter().clone(cloneArg).ptr());
+            }
+        }
+        #else
+        ;
+        #endif
+
         //- Construct from Istream using given Istream constructor class
         template<class INew>
         ILList(Istream&, const INew& inewt);
@@ -126,7 +148,10 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>> <LListBase, T>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <LListBase, T>
+        #endif
         (
             Istream&,
             ILList<LListBase, T>&

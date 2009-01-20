@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Pstream
+InClass
+    Foam::Pstream
 
 Description
     Combination-Reduction operation for a parallel run.  The

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cyclicPolyPatch
+    Foam::cyclicPolyPatch
 
 Description
     Cyclic plane patch.
@@ -70,6 +70,19 @@ class cyclicPolyPatch
 :
     public coupledPolyPatch
 {
+public:
+
+    enum transformType
+    {
+        UNKNOWN,
+        ROTATIONAL,
+        TRANSLATIONAL
+    };
+    static const NamedEnum<transformType, 3> transformTypeNames;
+
+
+private:
+
     // Private data
 
         //- List of edges formed from connected points. e[0] is the point on
@@ -81,13 +94,75 @@ class cyclicPolyPatch
         //  patch, e[1] the corresponding edge on the second half.
         mutable edgeList* coupledEdgesPtr_;
 
+        //- Morph:angle between normals of neighbouring faces.
+        //  Used to split cyclic into halves.
+        scalar featureCos_;
+
+        //- Index of largest cell face
+        label maxI_;
+
+        //- Type of transformation - rotational or translational
+        transformType transform_;
+
+        //- Axis of rotation for rotational cyclics
+        vector rotationAxis_;
+
+        //- point on axis of rotation for rotational cyclics
+        point rotationCentre_;
+
 
     // Private member functions
 
         void calcTransforms();
 
+        // Face ordering
 
-    // Private static data
+            //- Find the two parts of the faces of pp using feature edges.
+            //  Returns true if successfull.
+            bool getGeometricHalves
+            (
+                const primitivePatch&,
+                labelList&,
+                labelList&
+            ) const;
+
+            //- Calculate geometric factors of the two halves.
+            void getCentresAndAnchors
+            (
+                const primitivePatch&,
+                const faceList& half0Faces,
+                const faceList& half1Faces,
+
+                pointField& half0Ctrs,
+                pointField& half1Ctrs,
+                pointField& anchors0,
+                scalarField& tols
+            ) const;
+
+            //- Given matched faces matches the anchor point. Sets faceMap,
+            //  rotation. Returns true if all matched.
+            bool matchAnchors
+            (
+                const bool report,
+                const primitivePatch&,
+                const labelList&,
+                const pointField&,
+                const labelList&,
+                const faceList&,
+                const labelList&,
+                const scalarField&,
+
+                labelList& faceMap,
+                labelList& rotation
+            ) const;
+
+            //- For rotational cases, try to find a unique face on each side
+            //  of the cyclic.
+            label getConsistentRotationFace
+            (
+                const pointField& faceCentres
+            ) const;
+
 
 protected:
 
@@ -111,7 +186,6 @@ protected:
         //- Update of the patch topology
         virtual void updateMesh();
 
-
 public:
 
     //- Runtime type information
@@ -119,10 +193,6 @@ public:
 
 
     // Static data
-
-        //- Morph:angle between normals of neighbouring faces.
-        //  Used to split cyclic into halves.
-        static const scalar featureCos;
 
         //- Relative tolerance (for geometric matching only).
         //  Calculated as a factor of maximum edge length per face.
@@ -140,13 +210,6 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm
-        );
-
-        //- Construct from Istream
-        cyclicPolyPatch
-        (
-            Istream&,
-            const label index, const polyBoundaryMesh&
         );
 
         //- Construct from dictionary
@@ -202,10 +265,12 @@ public:
 
     // Member Functions
 
-        //- Return connected points (in patch local point indexing)
+        //- Return connected points (in patch local point indexing). Demand
+        //  driven calculation. Does primitivePatch::clearOut after calculation!
         const edgeList& coupledPoints() const;
 
-        //- Return connected edges (in patch local edge indexing)
+        //- Return connected edges (in patch local edge indexing). Demand
+        //  driven calculation. Does primitivePatch::clearOut after calculation!
         const edgeList& coupledEdges() const;
 
 
@@ -286,6 +351,10 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const;
+
+
+        //- Write the polyPatch data as a dictionary
+        virtual void write(Ostream&) const;
 };
 
 

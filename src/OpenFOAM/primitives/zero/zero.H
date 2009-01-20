@@ -23,21 +23,46 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    zero
+    Foam::zero
 
 Description
-    Instance of the Zero class actually declared in Zero.H because it is
-    used as the return value from some Zero operators.
+    A class representing the concept of 0 used to avoid unnecessary
+    manipulations for objects that are known to be zero at compile-time.
 
 SourceFiles
-    zero.C
+    zeroI.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef zero_H
 #define zero_H
 
-#include "Zero.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                           Class zero Declaration
+\*---------------------------------------------------------------------------*/
+
+class zero
+{
+public:
+
+    zero()
+    {}
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#   include "zeroI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

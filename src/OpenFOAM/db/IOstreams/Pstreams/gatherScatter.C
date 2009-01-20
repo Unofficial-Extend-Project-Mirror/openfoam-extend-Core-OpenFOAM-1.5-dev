@@ -63,6 +63,7 @@ void Pstream::gather
             {
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     myComm.below()[belowI],
                     reinterpret_cast<char*>(&value),
                     sizeof(T)
@@ -70,7 +71,7 @@ void Pstream::gather
             }
             else
             {
-                IPstream fromBelow(myComm.below()[belowI]);
+                IPstream fromBelow(Pstream::scheduled, myComm.below()[belowI]);
                 fromBelow >> value;
             }
 
@@ -84,6 +85,7 @@ void Pstream::gather
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T)
@@ -91,7 +93,7 @@ void Pstream::gather
             }
             else
             {
-                OPstream toAbove(myComm.above(), 0, false);
+                OPstream toAbove(Pstream::scheduled, myComm.above());
                 toAbove << Value;
             }
         }
@@ -128,6 +130,7 @@ void Pstream::scatter(const List<Pstream::commsStruct>& comms, T& Value)
             {
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(&Value),
                     sizeof(T)
@@ -135,7 +138,7 @@ void Pstream::scatter(const List<Pstream::commsStruct>& comms, T& Value)
             }
             else
             {
-                IPstream fromAbove(myComm.above());
+                IPstream fromAbove(Pstream::scheduled, myComm.above());
                 fromAbove >> Value;
             }
         }
@@ -147,6 +150,7 @@ void Pstream::scatter(const List<Pstream::commsStruct>& comms, T& Value)
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     myComm.below()[belowI],
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T)
@@ -154,7 +158,7 @@ void Pstream::scatter(const List<Pstream::commsStruct>& comms, T& Value)
             }
             else
             {
-                OPstream toBelow(myComm.below()[belowI], 0, false);
+                OPstream toBelow(Pstream::scheduled,myComm.below()[belowI]);
                 toBelow << Value;
             }
         }

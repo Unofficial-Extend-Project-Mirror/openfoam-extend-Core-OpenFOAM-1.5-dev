@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    BICCG
+    Foam::BICCG
 
 Description
     Diagonal incomplete LU preconditioned BiCG solver derived from the general
     preconditioned BiCG solver PBiCG but with the choice of preconditioner
     pre-selected.
 
+Deprecated
     This solver is present for backward-compatibility and the PBiCG solver
     should be used for preference.
 

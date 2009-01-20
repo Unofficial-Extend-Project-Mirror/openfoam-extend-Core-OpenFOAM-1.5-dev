@@ -32,17 +32,15 @@ Description
 #include "primitiveMesh.H"
 #include "DynamicList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-labelListList polyMesh::cellShapePointCells(const cellShapeList& c) const
+Foam::labelListList Foam::polyMesh::cellShapePointCells
+(
+    const cellShapeList& c
+) const
 {
     List<DynamicList<label, primitiveMesh::cellsPerPoint_> > 
-        pc(allPoints().size());
+        pc(points().size());
 
     // For each cell
     forAll(c, i)
@@ -73,7 +71,7 @@ labelListList polyMesh::cellShapePointCells(const cellShapeList& c) const
 }
 
 
-labelList polyMesh::facePatchFaceCells
+Foam::labelList Foam::polyMesh::facePatchFaceCells
 (
     const faceList& patchFaces,
     const labelListList& pointCells,
@@ -135,8 +133,7 @@ labelList polyMesh::facePatchFaceCells
 }
 
 
-// Construct from cell shapes
-polyMesh::polyMesh
+Foam::polyMesh::polyMesh
 (
     const IOobject& io,
     const pointField& points,
@@ -144,6 +141,7 @@ polyMesh::polyMesh
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
     const wordList& boundaryPatchTypes,
+    const word& defaultBoundaryPatchName,
     const word& defaultBoundaryPatchType,
     const wordList& boundaryPatchPhysicalTypes,
     const bool syncPar
@@ -151,7 +149,7 @@ polyMesh::polyMesh
 :
     objectRegistry(io),
     primitiveMesh(),
-    points_
+    allPoints_
     (
         IOobject
         (
@@ -164,7 +162,9 @@ polyMesh::polyMesh
         ),
         points
     ),
-    faces_
+    // To be re-sliced later.  HJ, 19/oct/2008
+    points_(allPoints_, allPoints_.size()),
+    allFaces_
     (
         IOobject
         (
@@ -177,7 +177,8 @@ polyMesh::polyMesh
         ),
         0
     ),
-    allOwner_
+    faces_(allFaces_, allFaces_.size()),
+    owner_
     (
         IOobject
         (
@@ -190,7 +191,7 @@ polyMesh::polyMesh
         ),
         0
     ),
-    allNeighbour_
+    neighbour_
     (
         IOobject
         (
@@ -203,6 +204,7 @@ polyMesh::polyMesh
         ),
         0
     ),
+    clearedPrimitives_(false),
     boundary_
     (
         IOobject
@@ -217,7 +219,7 @@ polyMesh::polyMesh
         *this,
         boundaryFaces.size() + 1    // add room for a default patch
     ),
-    bounds_(points_, syncPar),
+    bounds_(allPoints_, syncPar),
     directions_(Vector<label>::zero),
     pointZones_
     (
@@ -264,6 +266,7 @@ polyMesh::polyMesh
     globalMeshDataPtr_(NULL),
     moving_(false),
     curMotionTimeIndex_(time().timeIndex()),
+    oldAllPointsPtr_(NULL),
     oldPointsPtr_(NULL)
 {
     if (debug)
@@ -296,7 +299,7 @@ polyMesh::polyMesh
     }
 
     // Set size of faces array to maximum possible number of mesh faces
-    faces_.setSize(maxFaces);
+    allFaces_.setSize(maxFaces);
 
     // Initialise number of faces to 0
     label nFaces = 0;
@@ -340,7 +343,7 @@ polyMesh::polyMesh
             // For all points
             forAll(curPoints, pointI)
             {
-                // dGget the list of cells sharing this point
+                // Gget the list of cells sharing this point
                 const labelList& curNeighbours =
                     PointCells[curPoints[pointI]];
 
@@ -372,7 +375,7 @@ polyMesh::polyMesh
                         }
                         if (found) break;
                     }
-                    if (found) break;
+//                     if (found) break; HJ, not needed.  Never true
                 }
                 if (found) break;
             } // End of current points
@@ -397,7 +400,7 @@ polyMesh::polyMesh
             if (nextNei > -1)
             {
                 // Add the face to the list of faces
-                faces_[nFaces] = curFaces[nextNei];
+               allFaces_[nFaces] = curFaces[nextNei];
 
                 // Set cell-face and cell-neighbour-face to current face label
                 cells[cellI][nextNei] = nFaces;
@@ -456,7 +459,7 @@ polyMesh::polyMesh
 
             const label cellInside = curPatchFaceCells[faceI];
 
-            faces_[nFaces] = curFace;
+            allFaces_[nFaces] = curFace;
 
             // get faces of the cell inside
             const faceList& facesOfCellInside = cellsFaceShapes[cellInside];
@@ -530,7 +533,7 @@ polyMesh::polyMesh
             if (curCellFaces[faceI] == -1) // "non-existent" face
             {
                 curCellFaces[faceI] = nFaces;
-                faces_[nFaces] = cellsFaceShapes[cellI][faceI];
+                allFaces_[nFaces] = cellsFaceShapes[cellI][faceI];
 
                 nFaces++;
             }
@@ -538,7 +541,8 @@ polyMesh::polyMesh
     }
 
     // Reset the size of the face list
-    faces_.setSize(nFaces);
+    allFaces_.setSize(nFaces);
+    faces_.reset(allFaces_, nFaces);
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
@@ -584,7 +588,7 @@ polyMesh::polyMesh
             polyPatch::New
             (
                 defaultBoundaryPatchType,
-                "defaultFaces",
+                defaultBoundaryPatchName,
                 nFaces - defaultPatchStart,
                 defaultPatchStart,
                 boundary_.size() - 1,
@@ -619,9 +623,5 @@ polyMesh::polyMesh
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

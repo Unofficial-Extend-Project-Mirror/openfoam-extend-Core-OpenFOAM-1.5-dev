@@ -39,8 +39,7 @@ SourceFiles
 #ifndef regionCouplePointPatch_H
 #define regionCouplePointPatch_H
 
-#include "facePointPatch.H"
-#include "faceList.H"
+#include "coupledFacePointPatch.H"
 #include "regionCouplePolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,8 +53,14 @@ namespace Foam
 
 class regionCouplePointPatch
 :
-    public facePointPatch
+    public coupledFacePointPatch
 {
+    // Private data
+
+        //- Local reference cast into the cyclic patch
+        const regionCouplePolyPatch& regionCouplePolyPatch_;
+
+
     // Private Member Functions
 
         //- Disallow default construct as copy
@@ -63,6 +68,25 @@ class regionCouplePointPatch
 
         //- Disallow default assignment
         void operator=(const regionCouplePointPatch&);
+
+
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry();
+
+        //- Calculate mesh points
+        virtual void calcGeometry();
+
+        //- Initialise the patches for moving points
+        virtual void initMovePoints(const pointField&);
+
+        //- Correct patches after moving points
+        virtual void movePoints(const pointField&);
+
+        //- Initialise the update of the patch topology
+        virtual void initUpdateMesh();
+
+        //- Update of the patch topology
+        virtual void updateMesh();
 
 
 public:

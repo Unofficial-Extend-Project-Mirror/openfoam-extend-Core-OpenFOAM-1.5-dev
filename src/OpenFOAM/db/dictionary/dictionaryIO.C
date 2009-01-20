@@ -22,23 +22,15 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-    Reads the data description and data portions of a dictionary File.
-
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
 #include "IFstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "inputModeEntry.H"
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * //
 
-bool dictionary::read(Istream& is, const word& lastEntry)
+bool Foam::dictionary::read(Istream& is)
 {
     if (!is.good())
     {
@@ -55,72 +47,11 @@ bool dictionary::read(Istream& is, const word& lastEntry)
         is.putBack(currToken);
     }
 
-    entry* entryPtr;
+    while (!is.eof() && entry::New(*this, is))
+    {}
 
-    while (!is.eof() && (entryPtr = entry::New(is).ptr()))
-    {
-        if (entryPtr->keyword() == "FoamFile")
-        {
-            delete entryPtr;
-        }
-        else if (entryPtr->keyword() == "include")
-        {
-            fileName fName(entryPtr->stream());
-            fName.expand();
-
-            if (fName.size() && fName[0] != '/')
-            {
-                fName = fileName(is.name()).path()/fName;
-            }
-
-            IFstream fileStream(fName);
-
-            if (fileStream)
-            {
-                read(fileStream, lastEntry);
-            }
-            else
-            {
-                FatalIOErrorIn("dictionary::read(Istream&, const word&)", is)
-                    << "Cannot open included file " << fileStream.name()
-                    << " while reading dictionary"
-                    << exit(FatalIOError);
-            }
-        }
-        else if (!hashedEntries_.insert(entryPtr->keyword(), entryPtr))
-        {
-            IOWarningIn("dictionary::read(Istream&, const word&)", is)
-                << "could not add entry" << endl
-                << "    " << *entryPtr
-                << "    on line " << is.lineNumber()
-                << " of dictionary " << name()
-                << endl;
-
-            if (found(entryPtr->keyword()))
-            {
-                Info<< "    entry already in dictionary : " << endl
-                    << lookup(entryPtr->keyword()).info() << endl;
-            }
-
-            delete entryPtr;
-        }
-        else
-        {
-            append(entryPtr);
-        }
-
-        if (debug)
-        {
-            Info<< "dictionary::read(Istream&, const word&) : "
-                << entryPtr->keyword()
-                << endl;
-        }
-
-        if (&lastEntry != &word::null && entryPtr->keyword() == lastEntry)
-        {
-            break;
-        }
-    }
+    // Remove the FoamFile header entry if it exists
+    remove("FoamFile");
 
     if (is.bad())
     {
@@ -135,19 +66,63 @@ bool dictionary::read(Istream& is, const word& lastEntry)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-dictionary::dictionary(Istream& is, const word& lastEntry)
-:
-    name_(is.name())
+bool Foam::dictionary::substituteKeyword(const word& keyword)
 {
-    clear();
-    hashedEntries_.clear();
-    read(is, lastEntry);
+    word varName = keyword(1, keyword.size()-1);
+
+    // lookup the variable name in the given dictionary....
+    const entry* ePtr = lookupEntryPtr(varName, true);
+
+    // ...if defined insert its entries into this dictionary...
+    if (ePtr != NULL)
+    {
+        const dictionary& addDict = ePtr->dict();
+
+        for
+        (
+            IDLList<entry>::const_iterator addIter = addDict.begin();
+            addIter != addDict.end();
+            ++addIter
+        )
+        {
+            add(addIter());
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 
-autoPtr<dictionary> dictionary::New(Istream& is)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dictionary::dictionary
+(
+    const dictionary& parentDict,
+    Istream& is
+)
+:
+    name_(is.name()),
+    parent_(parentDict)
+{
+    read(is);
+}
+
+
+Foam::dictionary::dictionary(Istream& is)
+:
+    name_(is.name()),
+    parent_(dictionary::null)
+{
+    // Reset input mode as this is a "top-level" dictionary
+    functionEntries::inputModeEntry::clear();
+
+    read(is);
+}
+
+
+Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
 {
     return autoPtr<dictionary>(new dictionary(is));
 }
@@ -155,19 +130,22 @@ autoPtr<dictionary> dictionary::New(Istream& is)
 
 // * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, dictionary& dict)
+Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
 {
+    // Reset input mode assuming this is a "top-level" dictionary
+    functionEntries::inputModeEntry::clear();
+
     dict.clear();
     dict.hashedEntries_.clear();
-
     dict.read(is);
+
     return is;
 }
 
 
 // * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * //
 
-void dictionary::write(Ostream& os, bool subDict) const
+void Foam::dictionary::write(Ostream& os, bool subDict) const
 {
     if (subDict)
     {
@@ -188,7 +166,7 @@ void dictionary::write(Ostream& os, bool subDict) const
         if (!os.good())
         {
             WarningIn("dictionary::write(Ostream& os, bool subDict)")
-                << "Can't write entry " << (*iter).keyword()
+                << "Can't write entry " << iter().keyword()
                 << " for dictionary " << name()
                 << endl;
         }
@@ -201,15 +179,11 @@ void dictionary::write(Ostream& os, bool subDict) const
 }
 
 
-Ostream& operator<<(Ostream& os, const dictionary& dict)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dictionary& dict)
 {
     dict.write(os, true);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

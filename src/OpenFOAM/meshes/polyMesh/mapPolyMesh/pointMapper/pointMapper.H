@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointMapper
+    Foam::pointMapper
 
 Description
     This object provides mapping and fill-in information for point data
@@ -39,15 +39,16 @@ SourceFiles
 #define pointMapper_H
 
 #include "morphFieldMapper.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
-class polyMesh;
+// Forward declaration of classes
 class mapPolyMesh;
+class polyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class pointMapper Declaration
@@ -68,11 +69,20 @@ class pointMapper
         //- Are there any inserted (unmapped) points
         bool insertedPoints_;
 
+        //- Is the mapping direct
+        bool direct_;
+
 
     // Demand-driven private data
 
-        //- Direct addressing (only one for of addressing is used)
+        //- Direct addressing (only one form of addressing is used)
         mutable labelList* directAddrPtr_;
+
+        //- Interpolated addressing (only one for of addressing is used)
+        mutable labelListList* interpolationAddrPtr_;
+
+        //- Interpolation weights
+        mutable scalarListList* weightsPtr_;
 
         //- Inserted points
         mutable labelList* insertedPointLabelsPtr_;
@@ -96,8 +106,6 @@ class pointMapper
 
 public:
 
-    // Static data members
-
     // Constructors
 
         //- Construct from mapPolyMesh
@@ -114,30 +122,32 @@ public:
         //- Return size
         virtual label size() const;
 
-        //- Return size of field before mapping
+        //- Return size before mapping
         virtual label sizeBeforeMapping() const;
 
-        //- Is the mapping direct  (points can only be added from points)
+        //- Is the mapping direct
         virtual bool direct() const
         {
-            return true;
+            return direct_;
         }
 
-        //- Return direct addressing.
-        //  For inserted points, the master point is set to zero to
-        //  avoid checking during the mapping.  The values should be
-        //  over-ridden later using insertedPointLabels.
-        //  
+        //- Return direct addressing
         virtual const unallocLabelList& directAddressing() const;
 
-        //- Are there any inserted objects
-        virtual bool insertedObjects() const
+        //- Return interpolated addressing
+        virtual const labelListList& addressing() const;
+
+        //- Return interpolaion weights
+        virtual const scalarListList& weights() const;
+
+        //- Are there any inserted points
+        bool insertedObjects() const
         {
             return insertedPoints_;
         }
 
-        //- Return list of inserted objects
-        virtual const labelList& insertedObjectLabels() const;
+        //- Return list of inserted points
+        const labelList& insertedObjectLabels() const;
 };
 
 

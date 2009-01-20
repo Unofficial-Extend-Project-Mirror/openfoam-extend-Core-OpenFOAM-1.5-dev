@@ -22,12 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    StaticHashTable
-
-Description
-    STL conforming hash table.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef StaticHashTable_C

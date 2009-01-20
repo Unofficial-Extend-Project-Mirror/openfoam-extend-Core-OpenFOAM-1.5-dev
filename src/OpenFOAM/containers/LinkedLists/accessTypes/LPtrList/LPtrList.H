@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    LPtrList
+    Foam::LPtrList
 
 Description
     Template class for non-intrusive linked PtrLists.
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class LListBase, class T> class LPtrList;
 
@@ -177,6 +177,7 @@ public:
 
         typedef typename LListBase::iterator LListBase_iterator;
 
+        //- An STL-conforming iterator
         class iterator
         :
             public LList<LListBase, T*>::iterator
@@ -212,6 +213,7 @@ public:
 
         typedef typename LListBase::const_iterator LListBase_const_iterator;
 
+        //- An STL-conforming const_iterator
         class const_iterator
         :
             public LList<LListBase, T*>::const_iterator
@@ -254,13 +256,19 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>> <LListBase, T>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <LListBase, T>
+        #endif
         (
             Istream&,
             LPtrList<LListBase, T>&
         );
 
-        friend Ostream& operator<< <LListBase, T>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <LListBase, T>
+        #endif
         (
             Ostream&,
             const LPtrList<LListBase, T>&

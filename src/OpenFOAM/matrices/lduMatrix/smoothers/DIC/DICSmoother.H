@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DICSmoother
+    Foam::DICSmoother
 
 Description
     Simplified diagonal-based incomplete Cholesky smoother for symmetric

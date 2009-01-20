@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "ILList.H"
@@ -51,6 +49,32 @@ ILList<LListBase, T>::ILList(const ILList<LListBase, T>& slpl)
     }
 }
 
+
+#ifndef __INTEL_COMPILER
+template<class LListBase, class T>
+template<class CloneArg>
+ILList<LListBase, T>::ILList
+(
+    const ILList<LListBase, T>& slpl,
+    const CloneArg& cloneArg
+)
+:
+    UILList<LListBase, T>()
+{
+    for
+    (
+        typename UILList<LListBase, T>::const_iterator iter = slpl.begin();
+        iter != slpl.end();
+        ++iter
+    )
+    {
+        append(iter().clone(cloneArg).ptr());
+    }
+}
+#endif
+
+
+// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
 ILList<LListBase, T>::~ILList()

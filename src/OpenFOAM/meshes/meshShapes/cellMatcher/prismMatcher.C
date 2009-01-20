@@ -22,13 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "prismMatcher.H"
 #include "primitiveMesh.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,7 +59,7 @@ bool Foam::prismMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -126,7 +123,7 @@ bool Foam::prismMatcher::matchShape
         (
             face0vert0,
             faceSize_[face0I],
-            !(faceOwner[faceMap_[face0I]] == cellI)
+            !(owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[1] = pointMap_[face0[face0vert1]];
     //Info<< "Prism vertex 1: vertex " <<  face0[face0vert1]
@@ -168,7 +165,7 @@ bool Foam::prismMatcher::matchShape
         (
             face4vert1,
             faceSize_[face4I],
-            (faceOwner[faceMap_[face4I]] == cellI)
+            (owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[4] = pointMap_[face4[face4vert4]];
     //Info<< "Prism vertex 4: vertex " <<  face4[face4vert4]
@@ -181,7 +178,7 @@ bool Foam::prismMatcher::matchShape
         (
             face4vert4,
             faceSize_[face4I],
-            (faceOwner[faceMap_[face4I]] == cellI)
+            (owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[3] = pointMap_[face4[face4vert3]];
     //Info<< "Prism vertex 3: vertex " <<  face4[face4vert3]
@@ -230,7 +227,7 @@ bool Foam::prismMatcher::matchShape
         (
             face0vert1,
             faceSize_[face0I],
-            !(faceOwner[faceMap_[face0I]] == cellI)
+            !(owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[2] = pointMap_[face0[face0vert2]];
     //Info<< "Prism vertex 2: vertex " <<  face0[face0vert2]
@@ -264,7 +261,7 @@ bool Foam::prismMatcher::matchShape
         (
             face3vert2,
             faceSize_[face3I],
-            (faceOwner[faceMap_[face3I]] == cellI)
+            (owner[faceMap_[face3I]] == cellI)
         );
     vertLabels_[5] = pointMap_[face3[face3vert5]];
     //Info<< "Prism vertex 5: vertex " <<  face3[face3vert5]

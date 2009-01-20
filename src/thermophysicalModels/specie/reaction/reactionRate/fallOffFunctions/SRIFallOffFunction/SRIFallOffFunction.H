@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SRIFallOffFunction
+    Foam::SRIFallOffFunction
 
 Description
+    The SRI fall-off function
 
 SourceFiles
     SRIFallOffFunctionI.H
@@ -42,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * Forward declaration of friend functions * * * * * * * * * //
+// Forward declaration of friend functions and operators
 
 class SRIFallOffFunction;
 Ostream& operator<<(Ostream&, const SRIFallOffFunction&);

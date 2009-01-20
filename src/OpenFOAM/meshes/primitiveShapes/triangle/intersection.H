@@ -23,7 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    intersection
+    Foam::intersection
+
+Description
+    Foam::intersection
+
+SourceFiles
+   intersection.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,14 +54,24 @@ public:
 
     // Static data
 
-        //- Projection direction
+        //- Relative tolerance for point in a plane.
+        //  The tolerance is relative to the object size.
+        //  Used to determine if a half-ray from a point in plane of triangle
+        //  intersects the triangle or not.
+        //  Adjusting the tolerance from the code does not allow it to be const
+        //  HJ, 5/Jan/2008
+        static const scalar planarTol_;
+
+        //- Intersection miss tolerance, of the order of 1e-15
+        static const scalar missTol_;
+
+
         enum direction
         {
             VECTOR,
             CONTACT_SPHERE
         };
 
-        // Projection algorithm
         enum algorithm
         {
             FULL_RAY,        // Intersecting with full ray
@@ -63,22 +79,14 @@ public:
             VISIBLE          // Intersecting with the visible side
         };
 
+
+    // Static member functions
+
         //- Direction names
         static const NamedEnum<direction, 2> directionNames_;
 
         //- Projection algorithm names
         static const NamedEnum<algorithm, 3> algorithmNames_;
-
-        //- Relative tolerance for point in a plane.
-        //  The tolerance is relative to the object size.
-        //  Used to determine if a half-ray from a point in plane of triangle
-        //  intersects the triangle or not.
-        //  Adjusting the tolerance from the code does not allow it to be const
-        //  HJ, 5/Jan/2008
-        static scalar planarTol_;
-
-        //- Intersection miss tolerance, of the order of 1e-15
-        static const scalar missTol_;
 
         //- Set the planar tolerance, returning the previous value
         static scalar setPlanarTol(const scalar t)
@@ -92,10 +100,11 @@ public:
                     << abort(FatalError);
             }
 
+            // Ugly violence to allow tolerance to remain a scalar
+            // HJ, 7/Sep/2008
             scalar oldTol = planarTol_;
-
-            // Forced reassignment from code level
-            planarTol_ = t;
+            scalar* ptPtr = const_cast<scalar*>(&planarTol_);
+            (*ptPtr) = t;
 
             return oldTol;
         }

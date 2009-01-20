@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    GAMGInterfaceField
+    Foam::GAMGInterfaceField
 
 Description
      Abstract base class for GAMG agglomerated interface fields.

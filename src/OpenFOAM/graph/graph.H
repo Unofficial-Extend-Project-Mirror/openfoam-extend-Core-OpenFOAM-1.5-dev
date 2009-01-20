@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    graph
+    Foam::graph
 
 Description
     Class to create, store and output qgraph files.
@@ -46,6 +46,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class graph;
+
+Ostream& operator<<(Ostream&, const graph&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class graph Declaration
 \*---------------------------------------------------------------------------*/
@@ -54,7 +61,7 @@ class graph
 :
     public HashPtrTable<curve>
 {
-    // Private data
+    // private data
 
         string title_;
         string xName_;
@@ -70,7 +77,7 @@ class graph
             xy()
             {}
 
-            // Friend Operators
+        // Friend Operators
 
             friend bool operator==(const xy& a, const xy& b)
             {
@@ -96,7 +103,7 @@ class graph
         };
 
 
-    // Private Member Functions
+    // private member functions
 
         void readCurves(Istream&);
 
@@ -175,6 +182,7 @@ public:
 
         // Write
 
+            //- Abstract base class for a graph writer
             class writer
             {
 

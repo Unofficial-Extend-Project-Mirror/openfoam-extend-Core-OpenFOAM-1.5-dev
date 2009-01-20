@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DLListBase
+    Foam::DLListBase
 
 Description
     Base doubly-linked list.
@@ -158,12 +158,19 @@ public:
             // Remove and return element specified by iterator
             inline link* remove(iterator&);
 
+            //- Replace oldLink with newLink and return element
+            link* replace(link* oldLink, link* newLink);
+
+            //- Replace oldIter with newLink and return element
+            inline link* replace(iterator& oldIter, link* newLink);
+
             //- Clear the list
             inline void clear();
 
 
     // STL iterator
 
+        //- An STL iterator
         class iterator
         {
             friend class DLListBase;
@@ -213,6 +220,7 @@ public:
 
     // STL const_iterator
 
+        //- An STL const_iterator
         class const_iterator
         {
             // Private data

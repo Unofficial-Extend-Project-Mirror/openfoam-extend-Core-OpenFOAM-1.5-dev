@@ -22,12 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "degenerateMatcher.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -42,34 +39,34 @@ Foam::tetMatcher Foam::degenerateMatcher::tet;
 Foam::cellShape Foam::degenerateMatcher::match
 (
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& cellFaces
 )
 {
     // Recognize in order of assumed occurrence.
 
-    if (hex.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    if (hex.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(hex.model(), hex.vertLabels());
     }
-    else if (tet.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    else if (tet.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(tet.model(), tet.vertLabels());
     }
-    else if (prism.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    else if (prism.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(prism.model(), prism.vertLabels());
     }
-    else if (pyr.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    else if (pyr.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(pyr.model(), pyr.vertLabels());
     }
-    else if (wedge.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    else if (wedge.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(wedge.model(), wedge.vertLabels());
     }
-    else if (tetWedge.matchShape(false, faces, faceOwner, cellI, cellFaces))
+    else if (tetWedge.matchShape(false, faces, owner, cellI, cellFaces))
     {
         return cellShape(tetWedge.model(), tetWedge.vertLabels());
     }

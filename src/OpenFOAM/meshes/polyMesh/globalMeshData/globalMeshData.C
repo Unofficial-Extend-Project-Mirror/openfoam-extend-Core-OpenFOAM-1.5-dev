@@ -86,6 +86,7 @@ void Foam::globalMeshData::initProcAddr()
 
             OPstream toNeighbour
             (
+                Pstream::blocking,
                 refCast<const processorPolyPatch>
                 (
                     mesh_.boundaryMesh()[patchi]
@@ -101,6 +102,7 @@ void Foam::globalMeshData::initProcAddr()
             
             IPstream fromNeighbour
             (
+                Pstream::blocking,
                 refCast<const processorPolyPatch>
                 (
                     mesh_.boundaryMesh()[patchi]
@@ -275,7 +277,7 @@ void Foam::globalMeshData::calcSharedEdges() const
             )
             {
                 // Receive the edges using shared points from the slave.
-                IPstream fromSlave(slave);
+                IPstream fromSlave(Pstream::blocking, slave);
                 HashTable<labelList, edge, Hash<edge> > procSharedEdges
                 (
                     fromSlave
@@ -333,7 +335,7 @@ void Foam::globalMeshData::calcSharedEdges() const
             )
             {
                 // Receive the edges using shared points from the slave.
-                OPstream toSlave(slave);
+                OPstream toSlave(Pstream::blocking, slave);
                 toSlave << globalShared;
             }
         }
@@ -342,13 +344,13 @@ void Foam::globalMeshData::calcSharedEdges() const
     {
         // Send local edges to master
         {
-            OPstream toMaster(Pstream::masterNo());
+            OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             toMaster << localShared;
         }
         // Receive merged edges from master.
         {
-            IPstream fromMaster(Pstream::masterNo());
+            IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
 
             fromMaster >> globalShared;
         }
@@ -593,7 +595,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             slave++
         )
         {
-            IPstream fromSlave(slave);
+            IPstream fromSlave(Pstream::blocking, slave);
 
             labelList nbrSharedPointAddr;
             pointField nbrSharedPoints;
@@ -615,7 +617,12 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             slave++
         )
         {
-            OPstream toSlave(slave, sharedPoints.size()*sizeof(vector::zero));
+            OPstream toSlave
+            (
+                Pstream::blocking,
+                slave,
+                sharedPoints.size()*sizeof(vector::zero)
+            );
             toSlave << sharedPoints;
         }
     }
@@ -624,7 +631,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
         // Slave:
         // send points
         {
-            OPstream toMaster(Pstream::masterNo());
+            OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             toMaster
                 << sharedPointAddr_ 
@@ -633,7 +640,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 
         // Receive sharedPoints
         {
-            IPstream fromMaster(Pstream::masterNo());
+            IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
             fromMaster >> sharedPoints;
         }
     }
@@ -839,7 +846,7 @@ void Foam::globalMeshData::updateMesh()
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
-            OPstream toNeighbour(procPatch.neighbProcNo());
+            OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
 
             toNeighbour << procPatch.localPoints();
         }
@@ -852,7 +859,7 @@ void Foam::globalMeshData::updateMesh()
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
-            IPstream fromNeighbour(procPatch.neighbProcNo());
+            IPstream fromNeighbour(Pstream::blocking, procPatch.neighbProcNo());
 
             pointField nbrPoints(fromNeighbour);
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DICGaussSeidelSmoother
+    Foam::DICGaussSeidelSmoother
 
 Description
     Combined DIC/GaussSeidel smoother for symmetric
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class DICGaussSeidelSmoother Declaration
+                           Class DICGaussSeidelSmoother Declaration
 \*---------------------------------------------------------------------------*/
 
 class DICGaussSeidelSmoother

@@ -47,10 +47,10 @@ bool Foam::lduMatrix::solverPerformance::checkConvergence
 
     if
     (
-        finalResidual_ < Tolerance
+        finalResidual_ < Tolerance   // Abs. tolerance
      || (
             RelTolerance > SMALL
-         && finalResidual_ <= RelTolerance*initialResidual_
+         && finalResidual_ <= RelTolerance*initialResidual_ // Rel. tolerance
         )
   // || (solverName == "symSolve" && iter == 0)
     )

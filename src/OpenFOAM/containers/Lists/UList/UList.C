@@ -30,15 +30,10 @@ License
 #include "ListLoopM.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-UList<T>& UList<T>::null()
+const Foam::UList<T>& Foam::UList<T>::null()
 {
     UList<T>* nullPtr = reinterpret_cast<UList<T>*>(NULL);
     return *nullPtr;
@@ -46,7 +41,7 @@ UList<T>& UList<T>::null()
 
 
 template<class T>
-void UList<T>::assign(const UList<T>& a)
+void Foam::UList<T>::assign(const UList<T>& a)
 {
     if (a.size_ != this->size_)
     {
@@ -79,7 +74,7 @@ void UList<T>::assign(const UList<T>& a)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-void UList<T>::operator=(const T& t)
+void Foam::UList<T>::operator=(const T& t)
 {
     List_ACCESS(T, (*this), vp);
     List_FOR_ALL((*this), i)
@@ -91,7 +86,7 @@ void UList<T>::operator=(const T& t)
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
 template<class T>
-void UList<T>::swap(UList<T>& a)
+void Foam::UList<T>::swap(UList<T>& a)
 {
     if (a.size_ != this->size_)
     {
@@ -115,7 +110,7 @@ void UList<T>::swap(UList<T>& a)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-label UList<T>::byteSize() const
+Foam::label Foam::UList<T>::byteSize() const
 {
     if (!contiguous<T>())
     {
@@ -132,7 +127,7 @@ label UList<T>::byteSize() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-bool UList<T>::operator==(const UList<T>& a) const
+bool Foam::UList<T>::operator==(const UList<T>& a) const
 {
     if (this->size_ != a.size_)
     {
@@ -153,14 +148,14 @@ bool UList<T>::operator==(const UList<T>& a) const
 
 
 template<class T>
-bool UList<T>::operator!=(const UList<T>& a) const
+bool Foam::UList<T>::operator!=(const UList<T>& a) const
 {
     return !operator==(a);
 }
 
 
 template<class T>
-bool UList<T>::operator<(const UList<T>& a) const
+bool Foam::UList<T>::operator<(const UList<T>& a) const
 {
     for
     (
@@ -191,29 +186,25 @@ bool UList<T>::operator<(const UList<T>& a) const
 
 
 template<class T>
-bool UList<T>::operator>(const UList<T>& a) const
+bool Foam::UList<T>::operator>(const UList<T>& a) const
 {
     return a.operator<(*this);
 }
 
 
 template<class T>
-bool UList<T>::operator<=(const UList<T>& a) const
+bool Foam::UList<T>::operator<=(const UList<T>& a) const
 {
     return !operator>(a);
 }
 
 
 template<class T>
-bool UList<T>::operator>=(const UList<T>& a) const
+bool Foam::UList<T>::operator>=(const UList<T>& a) const
 {
     return !operator<(a);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

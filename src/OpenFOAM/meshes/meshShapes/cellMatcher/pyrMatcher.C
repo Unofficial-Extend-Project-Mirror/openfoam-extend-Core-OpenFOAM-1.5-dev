@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "pyrMatcher.H"
@@ -31,7 +29,6 @@ Description
 #include "primitiveMesh.H"
 #include "primitiveMesh.H"
 #include "cellModeller.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -66,7 +63,7 @@ bool Foam::pyrMatcher::matchShape
 (
     const bool checkOnly,
     const faceList& faces,
-    const labelList& faceOwner,
+    const labelList& owner,
     const label cellI,
     const labelList& myFaces
 )
@@ -131,7 +128,7 @@ bool Foam::pyrMatcher::matchShape
         (
             face0vert0,
             faceSize_[face0I],
-            !(faceOwner[faceMap_[face0I]] == cellI)
+            !(owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[1] = pointMap_[face0[face0vert1]];
 
@@ -141,7 +138,7 @@ bool Foam::pyrMatcher::matchShape
         (
             face0vert1,
             faceSize_[face0I],
-            !(faceOwner[faceMap_[face0I]] == cellI)
+            !(owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[2] = pointMap_[face0[face0vert2]];
 
@@ -151,7 +148,7 @@ bool Foam::pyrMatcher::matchShape
         (
             face0vert2,
             faceSize_[face0I],
-            !(faceOwner[faceMap_[face0I]] == cellI)
+            !(owner[faceMap_[face0I]] == cellI)
         );
     vertLabels_[3] = pointMap_[face0[face0vert3]];
 
@@ -210,7 +207,7 @@ bool Foam::pyrMatcher::matchShape
         (
             face4vert0,
             faceSize_[face4I],
-            !(faceOwner[faceMap_[face4I]] == cellI)
+            !(owner[faceMap_[face4I]] == cellI)
         );
     vertLabels_[4] = pointMap_[face4[face4vert4]];
 

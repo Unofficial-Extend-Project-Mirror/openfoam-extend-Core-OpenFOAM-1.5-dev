@@ -263,14 +263,14 @@ inline const Cmpt& component
 
 // Powers of a Form
 // Equivalent to outer-products between the Form and itself
-
+#ifndef __CINT__
 // Form^0 = 1.0
 template<class Form, class Cmpt, int nCmpt>
 inline typename powProduct<Form, 0>::type pow
 (
     const VectorSpace<Form, Cmpt, nCmpt>&,
     typename powProduct<Form, 0>::type
-  = pTraits<typename powProduct<Form, 0>::type>::zero
+    = pTraits<typename powProduct<Form, 0>::type>::zero
 )
 {
     return 1.0;
@@ -300,7 +300,7 @@ inline typename powProduct<Form, 2>::type pow
 {
     return sqr(static_cast<const Form&>(v));
 }
-
+#endif
 
 template<class Form, class Cmpt, int nCmpt>
 inline scalar magSqr
@@ -321,6 +321,45 @@ inline scalar mag
 )
 {
     return ::sqrt(magSqr(static_cast<const Form&>(vs)));
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline VectorSpace<Form, Cmpt, nCmpt> cmptMultiply
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    Form v;
+    VectorSpaceOps<nCmpt,0>::op(v, vs1, vs2, cmptMultiplyOp<Cmpt>());
+    return v;
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline VectorSpace<Form, Cmpt, nCmpt> cmptDivide
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    Form v;
+    VectorSpaceOps<nCmpt,0>::op(v, vs1, vs2, cmptDivideOp<Cmpt>());
+    return v;
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline VectorSpace<Form, Cmpt, nCmpt> stabilise
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs,
+    const Cmpt& small
+)
+{
+    Form v;
+    VectorSpaceOps<nCmpt,0>::opVS(v, vs, small, stabiliseOp<Cmpt>());
+    return v;
 }
 
 
@@ -441,40 +480,32 @@ inline Form minMod
 }
 
 
-template<class Form, class Cmpt, int nCmpt>
-inline VectorSpace<Form, Cmpt, nCmpt> scale
-(
-    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
-    const VectorSpace<Form, Cmpt, nCmpt>& vs2
-)
+template<class Type>
+inline Type dot(const scalar s, const Type& t)
 {
-    Form v;
-    VectorSpaceOps<nCmpt,0>::op(v, vs1, vs2, scaleOp<Cmpt>());
-    return v;
+    return s * t;
 }
 
 
-template<class Form, class Cmpt, int nCmpt>
-inline Cmpt cmptSumScale
-(
-    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
-    const VectorSpace<Form, Cmpt, nCmpt>& vs2
-)
+template<class Type>
+inline Type dot(const Type& t, const scalar s)
 {
-    return cmptSum(scale(vs1, vs2));
+    return t * s;
 }
 
 
-template<class Form, class Cmpt, int nCmpt>
-inline VectorSpace<Form, Cmpt, nCmpt> invScale
+template
+<
+    class Form1, class Cmpt1, int nCmpt1,
+    class Form2, class Cmpt2, int nCmpt2
+>
+inline typename innerProduct<Form1, Form2>::type dot
 (
-    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
-    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+    const VectorSpace<Form1, Cmpt1, nCmpt1>& t1,
+    const VectorSpace<Form2, Cmpt2, nCmpt2>& t2
 )
 {
-    Form v;
-    VectorSpaceOps<nCmpt,0>::op(v, vs1, vs2, invScaleOp<Cmpt>());
-    return v;
+    return static_cast<const Form1&>(t1) & static_cast<const Form2&>(t2);
 }
 
 
@@ -583,6 +614,7 @@ inline Form operator/
 }
 */
 
+
 template<class Form, class Cmpt, int nCmpt>
 inline Cmpt operator&&
 (
@@ -623,6 +655,60 @@ inline bool operator!=
 )
 {
     return !(vs1 == vs2);
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline bool operator>
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    bool gt = true;
+    for (int i=0; i<nCmpt; ++i)
+    {
+        if (!(gt &= vs1.v_[i] > vs2.v_[i])) break;
+    }
+    return gt;
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline bool operator<
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    bool lt = true;
+    for (int i=0; i<nCmpt; ++i)
+    {
+        if (!(lt &= vs1.v_[i] < vs2.v_[i])) break;
+    }
+    return lt;
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline bool operator>=
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    return !(vs1 < vs2);
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
+inline bool operator<=
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    return !(vs1 > vs2);
 }
 
 

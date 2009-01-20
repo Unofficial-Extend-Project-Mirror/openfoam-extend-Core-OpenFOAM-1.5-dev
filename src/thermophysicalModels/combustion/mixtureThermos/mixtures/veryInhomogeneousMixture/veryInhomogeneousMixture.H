@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    veryInhomogeneousMixture
+    Foam::veryInhomogeneousMixture
 
 Description
+    Foam::veryInhomogeneousMixture
 
 SourceFiles
     veryInhomogeneousMixture.C
@@ -87,6 +88,12 @@ public:
 
         //- Construct from dictionary and mesh
         veryInhomogeneousMixture(const dictionary&, const fvMesh&);
+
+
+    // Destructor
+
+        virtual ~veryInhomogeneousMixture()
+        {}
 
 
     // Member functions

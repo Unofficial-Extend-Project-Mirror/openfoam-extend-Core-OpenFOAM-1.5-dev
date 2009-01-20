@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,8 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-Description
     Dimensioned tensor obtained from generic dimensioned type.
 
 \*---------------------------------------------------------------------------*/
@@ -94,6 +92,17 @@ dimensionedScalar det(const dimensionedTensor& dt)
 }
 
 
+dimensionedTensor cof(const dimensionedTensor& dt)
+{
+    return dimensionedTensor
+    (
+        "cof("+dt.name()+')',
+        dt.dimensions(),
+        cof(dt.value())
+    );
+}
+
+
 dimensionedTensor inv(const dimensionedTensor& dt)
 {
     return dimensionedTensor
@@ -124,7 +133,6 @@ dimensionedSymmTensor twoSymm(const dimensionedTensor& dt)
         twoSymm(dt.value())
     );
 }
-
 
 dimensionedTensor skew(const dimensionedTensor& dt)
 {

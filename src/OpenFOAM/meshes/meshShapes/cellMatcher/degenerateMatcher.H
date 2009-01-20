@@ -23,13 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    degenerateMatcher
+    Foam::degenerateMatcher
 
 Description
     Collection of all hex degenerate matchers (hex, wedge, prism etc.)
     Has static member function to match a shape.
 
+See Also
+    cellMatcher
+
 SourceFiles
+    degenerateMatcher.C
 
 \*---------------------------------------------------------------------------*/
 

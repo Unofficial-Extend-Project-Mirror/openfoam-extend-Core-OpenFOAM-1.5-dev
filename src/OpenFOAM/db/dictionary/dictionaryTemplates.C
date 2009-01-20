@@ -27,25 +27,84 @@ License
 #include "dictionary.H"
 #include "primitiveEntry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Add a T entry
-template <class T>
-void dictionary::add(const word& keyword, const T& t)
+template<class T>
+T Foam::dictionary::lookupOrDefault
+(
+    const word& keyword,
+    const T& deflt,
+    bool recursive
+) const
 {
-    entry* ePtr = new primitiveEntry(keyword, t);
-    append(ePtr);
-    hashedEntries_.insert(ePtr->keyword(), ePtr);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
+
+    if (entryPtr == NULL)
+    {
+        return deflt;
+    }
+    else
+    {
+        return pTraits<T>(entryPtr->stream());
+    }
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class T>
+T Foam::dictionary::lookupOrAddDefault
+(
+    const word& keyword,
+    const T& deflt,
+    bool recursive
+)
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
 
-} // End namespace Foam
+    if (entryPtr == NULL)
+    {
+        add(new primitiveEntry(keyword, deflt));
+        return deflt;
+    }
+    else
+    {
+        return pTraits<T>(entryPtr->stream());
+    }
+}
+
+
+template<class T>
+bool Foam::dictionary::readIfPresent
+(
+    const word& k,
+    T& val,
+    bool recursive
+) const
+{
+    const entry* entryPtr = lookupEntryPtr(k, recursive);
+
+    if (entryPtr == NULL)
+    {
+        return false;
+    }
+    else
+    {
+        entryPtr->stream() >> val;
+        return true;
+    }
+}
+
+
+template<class T>
+void Foam::dictionary::add(const word& k, const T& t, bool overwrite)
+{
+    add(new primitiveEntry(k, t), overwrite);
+}
+
+
+template<class T>
+void Foam::dictionary::set(const word& k, const T& t)
+{
+    set(new primitiveEntry(k, t));
+}
 
 // ************************************************************************* //

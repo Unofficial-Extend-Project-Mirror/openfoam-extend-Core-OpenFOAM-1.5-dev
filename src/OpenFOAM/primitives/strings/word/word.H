@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    word
+    Foam::word
 
 Description
     A class for handling words, derived from string.
-    A word is a string of characters containing no white space and
-    may be constructed from a string by removing white space.
-    Words are delimited by white space.
+
+    A word is a string of characters containing no whitespace and may be
+    constructed from a string by removing whitespace. Words are delimited
+    by whitespace.
 
 SourceFiles
     word.C
@@ -47,6 +48,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+class word;
+inline word operator&(const word&, const word&);
+Istream& operator>>(Istream&, word&);
+Ostream& operator<<(Ostream&, const word&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class word Declaration
 \*---------------------------------------------------------------------------*/
@@ -63,11 +71,11 @@ class word
 
 public:
 
-    //- Debug switch
-    static int debug;
+    // Static data members
 
-    //- Null word
-    static const word null;
+        static const char* const typeName;
+        static int debug;
+        static const word null;
 
 
     // Constructors
@@ -76,10 +84,13 @@ public:
         inline word();
 
         //- Construct as copy
-        inline word(const word& w);
+        inline word(const word&);
 
         //- Construct as copy of character array
         inline word(const char*);
+
+        //- Construct as copy with a maximum number of characters
+        inline word(const char*, const size_type);
 
         //- Construct as copy of string
         inline word(const string&);
@@ -88,7 +99,7 @@ public:
         inline word(const std::string&);
 
         //- Construct from Istream
-        word(Istream& is);
+        word(Istream&);
 
 
     // Member functions
@@ -109,7 +120,7 @@ public:
 
     // Friend Operators
 
-        inline friend word operator&(const word&, const word&);
+        friend word operator&(const word&, const word&);
 
 
     // IOstream operators

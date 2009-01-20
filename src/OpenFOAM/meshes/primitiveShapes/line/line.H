@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    line
+    Foam::line
 
 Description
     A line primitive.
@@ -37,34 +37,30 @@ SourceFiles
 #define line_H
 
 #include "vector.H"
-#include "pointHit.H"
+#include "PointHit.H"
+#include "point2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of classes
 
-template<class Point, class PointRef> class line;
-
-class pointHit;
 class Istream;
 class Ostream;
 
-template<class Point, class PointRef>
-inline Istream& operator>>
-(
-    Istream&,
-    line<Point, PointRef>&
-);
+
+// Forward declaration of friend functions and operators
+
+template<class Point, class PointRef> class line;
 
 template<class Point, class PointRef>
-inline Ostream& operator<<
-(
-    Ostream&,
-    const line<Point, PointRef>&
-);
+inline Istream& operator>>(Istream&, line<Point, PointRef>&);
+
+template<class Point, class PointRef>
+inline Ostream& operator<<(Ostream&, const line<Point, PointRef>&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class line Declaration
@@ -109,37 +105,53 @@ public:
             inline scalar mag() const;
 
             //- Return start-end vector
-            inline vector vec() const;
+            inline Point vec() const;
 
             //- Return nearest distance to line from a given point
             //  If the nearest point is on the line, return a hit
-            pointHit nearestDist(const point& p) const;
+            PointHit<Point> nearestDist(const Point& p) const;
 
             //- Return nearest distance from line to line. Returns distance
             //  and sets both points (one on *this, one on the provided
-            //  linePointRef
+            //  linePointRef.
             scalar nearestDist
             (
-                const line<point, const point&>& edge,
-                point& thisPoint,
-                point& edgePoint
+                const line<Point, const Point&>& edge,
+                Point& thisPoint,
+                Point& edgePoint
             ) const;
 
 
     // Ostream operator
 
-        friend Istream& operator>> <Point, PointRef>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <Point, PointRef>
+        #endif
         (
             Istream&,
             line&
         );
 
-        friend Ostream& operator<< <Point, PointRef>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <Point, PointRef>
+        #endif
         (
             Ostream&,
             const line&
         );
 };
+
+
+//- 2D specialisation
+template<>
+scalar line<point2D, const point2D&>::nearestDist
+(
+    const line<point2D, const point2D&>& edge,
+    point2D& thisPoint,
+    point2D& edgePoint
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

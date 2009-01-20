@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ UNARY_FUNCTION(tensor, tensor, skew)
 UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
+UNARY_FUNCTION(tensor, tensor, cof)
 
 void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 {
@@ -153,6 +154,9 @@ tmp<Field<tensor> > transformFieldMask<tensor>
 
 UNARY_OPERATOR(vector, tensor, *, hdual)
 UNARY_OPERATOR(tensor, vector, *, hdual)
+
+BINARY_OPERATOR(vector, vector, tensor, /, divide)
+BINARY_TYPE_OPERATOR(vector, vector, tensor, /, divide)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

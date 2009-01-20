@@ -97,14 +97,6 @@ public:
             const DimensionedField<Type, Mesh>&
         );
 
-        //- Construct from patch and internal field and patch field
-        OscillatingFixedValuePointPatchField
-        (
-            const PointPatch&,
-            const DimensionedField<Type, Mesh>&,
-            const Field<Type>&
-        );
-
         //- Construct from patch, internal field and dictionary
         OscillatingFixedValuePointPatchField
         (
@@ -222,7 +214,10 @@ public:
         //- Insert boundary value into the internal field
         //  Fixed values need to be inserted first. In the second go,
         //  there's nothing to do
-        virtual void initEvaluate(const bool = false);
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        );
 
         //- Write
         virtual void write(Ostream&) const;

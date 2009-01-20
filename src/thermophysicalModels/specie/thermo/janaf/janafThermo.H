@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    janafThermo
+    Foam::janafThermo
 
 Description
-    JANAF tables based thermodynamics package
-    templated ito the equationOfState.
+    JANAF tables based thermodynamics package templated
+    into the equationOfState.
 
 SourceFiles
     janafThermoI.H
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class equationOfState> class janafThermo;
 

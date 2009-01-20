@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SphericalTensor2D
+    Foam::SphericalTensor2D
 
 Description
     Templated 2D sphericalTensor derived from VectorSpace adding construction

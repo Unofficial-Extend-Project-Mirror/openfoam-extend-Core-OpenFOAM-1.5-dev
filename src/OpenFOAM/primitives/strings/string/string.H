@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    string
+    Foam::string
 
 Description
     A class for handling character strings derived from std::string.
@@ -32,6 +32,10 @@ Description
     for IO : "any list of characters".
 
     Used as a base class for word and fileName.
+
+See Also
+    Foam::dotFoam() for information about the site/user OpenFOAM
+    configuration directory
 
 SourceFiles
     string.C
@@ -45,14 +49,24 @@ SourceFiles
 #include "char.H"
 
 #include <string>
+#include <cstring>
+#include <cstdlib>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
 class Istream;
 class Ostream;
+
+// Forward declaration of friend functions and operators
+class string;
+Istream& operator>>(Istream&, string&);
+Ostream& operator<<(Ostream&, const string&);
+Ostream& operator<<(Ostream&, const std::string&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class string Declaration
@@ -62,18 +76,14 @@ class string
 :
     public std::string
 {
-
-protected:
-
-    // Protected member functions
-
 public:
 
-    //- Debug switch
-    static int debug;
+    // Static data members
 
-    //- Null string
-    static const string null;
+        static const char* const typeName;
+        static int debug;
+        static const string null;
+
 
     //- Hashing function class
     class hash
@@ -154,7 +164,19 @@ public:
                 size_type start = 0
             );
 
-            //- Expand all occurences of environment variables and ~
+            //- Expand initial tildes and all occurences of environment variables
+            //  Expansion includes:
+            //  -# environment variables
+            //     - "$VAR", "${VAR}"
+            //  -# current directory
+            //     - leading "./" : the current directory
+            //  -# tilde expansion
+            //     - leading "~/" : home directory
+            //     - leading "~user" : home directory for specified user
+            //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+            //
+            //  @sa
+            //  Foam::dotFoam
             string& expand();
 
             //- Remove repeated characters returning true if string changed
@@ -162,7 +184,7 @@ public:
 
             //- Return string with repeated characters removed
             string removeRepeated(const char character) const;
-   
+
             //- Remove trailing character returning true if string changed
             bool removeTrailing(const char character);
 
@@ -172,14 +194,14 @@ public:
 
     // Member Operators
 
-        // Return the sub-string from the ith character for l characters
+        //- Return the sub-string from the i-th character for @a n characters
         inline string operator()
         (
             const size_type i,
             const size_type n
         ) const;
 
-        // Return the sub-string from the first character for l characters
+        //- Return the sub-string from the first character for @a n characters
         inline string operator()
         (
             const size_type n
@@ -191,9 +213,6 @@ public:
         friend Istream& operator>>(Istream&, string&);
         friend Ostream& operator<<(Ostream&, const string&);
 };
-
-
-Ostream& operator<<(Ostream&, const std::string&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

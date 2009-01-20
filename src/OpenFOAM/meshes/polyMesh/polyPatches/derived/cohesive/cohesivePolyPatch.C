@@ -44,7 +44,6 @@ namespace Foam
 defineTypeNameAndDebug(cohesivePolyPatch, 0);
 
 addToRunTimeSelectionTable(polyPatch, cohesivePolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, cohesivePolyPatch, Istream);
 addToRunTimeSelectionTable(polyPatch, cohesivePolyPatch, dictionary);
 
 
@@ -60,17 +59,6 @@ cohesivePolyPatch::cohesivePolyPatch
 )
 :
     polyPatch(name, size, start, index, bm)
-{}
-
-
-cohesivePolyPatch::cohesivePolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm)
 {}
 
 
@@ -173,6 +161,16 @@ bool cohesivePolyPatch::order
     labelList half1ToPatch(pp.size());
 
     {
+        // Calculate normals
+        vectorField normals(pp.size());
+
+        forAll(pp, faceI)
+        {
+            normals[faceI] = pp[faceI].normal(pp.points());
+        }
+
+        normals /= mag(normals) + VSMALL;
+
         label n0Faces = 0;
         label n1Faces = 0;
 

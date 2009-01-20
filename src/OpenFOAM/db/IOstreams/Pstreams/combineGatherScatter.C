@@ -69,6 +69,7 @@ void Pstream::combineGather
                 T value;
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<char*>(&value),
                     sizeof(T)
@@ -84,7 +85,7 @@ void Pstream::combineGather
             }
             else
             {
-                IPstream fromBelow(belowID);
+                IPstream fromBelow(Pstream::scheduled, belowID);
                 T value(fromBelow);
 
                 if (debug & 2)
@@ -110,6 +111,7 @@ void Pstream::combineGather
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T)
@@ -117,7 +119,7 @@ void Pstream::combineGather
             }
             else
             {
-                OPstream toAbove(myComm.above(), 0, false);
+                OPstream toAbove(Pstream::scheduled, myComm.above());
                 toAbove << Value;
             }
         }
@@ -154,6 +156,7 @@ void Pstream::combineScatter(const List<Pstream::commsStruct>& comms, T& Value)
             {
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(&Value),
                     sizeof(T)
@@ -161,7 +164,7 @@ void Pstream::combineScatter(const List<Pstream::commsStruct>& comms, T& Value)
             }
             else
             {
-                IPstream fromAbove(myComm.above());
+                IPstream fromAbove(Pstream::scheduled, myComm.above());
                 Value = T(fromAbove);
             }
 
@@ -186,6 +189,7 @@ void Pstream::combineScatter(const List<Pstream::commsStruct>& comms, T& Value)
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T)
@@ -193,7 +197,7 @@ void Pstream::combineScatter(const List<Pstream::commsStruct>& comms, T& Value)
             }
             else
             {
-                OPstream toBelow(belowID, 0, false);
+                OPstream toBelow(Pstream::scheduled, belowID);
                 toBelow << Value;
             }
         }
@@ -243,6 +247,7 @@ void Pstream::listCombineGather
 
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<char*>(receivedValues.begin()),
                     receivedValues.byteSize()
@@ -261,7 +266,7 @@ void Pstream::listCombineGather
             }
             else
             {
-                IPstream fromBelow(belowID);
+                IPstream fromBelow(Pstream::scheduled, belowID);
                 List<T> receivedValues(fromBelow);
 
                 if (debug & 2)
@@ -290,6 +295,7 @@ void Pstream::listCombineGather
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(Values.begin()),
                     Values.byteSize()
@@ -297,7 +303,7 @@ void Pstream::listCombineGather
             }
             else
             {
-                OPstream toAbove(myComm.above(), 0, false);
+                OPstream toAbove(Pstream::scheduled, myComm.above());
                 toAbove << Values;
             }
         }
@@ -338,6 +344,7 @@ void Pstream::listCombineScatter
             {
                 IPstream::read
                 (
+                    Pstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(Values.begin()),
                     Values.byteSize()
@@ -345,7 +352,7 @@ void Pstream::listCombineScatter
             }
             else
             {
-                IPstream fromAbove(myComm.above());
+                IPstream fromAbove(Pstream::scheduled, myComm.above());
                 fromAbove >> Values;
             }
 
@@ -370,6 +377,7 @@ void Pstream::listCombineScatter
             {
                 OPstream::write
                 (
+                    Pstream::scheduled,
                     belowID,
                     reinterpret_cast<const char*>(Values.begin()),
                     Values.byteSize()
@@ -377,7 +385,7 @@ void Pstream::listCombineScatter
             }
             else
             {
-                OPstream toBelow(belowID, 0, false);
+                OPstream toBelow(Pstream::scheduled, belowID);
                 toBelow << Values;
             }
         }
@@ -395,6 +403,147 @@ void Pstream::listCombineScatter(List<T>& Values)
     else
     {
         listCombineScatter(Pstream::treeCommunication(), Values);
+    }
+}
+
+
+
+
+// Same thing but for sparse list (map)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+template <class Container, class CombineOp>
+void Pstream::mapCombineGather
+(
+    const List<Pstream::commsStruct>& comms,
+    Container& Values,
+    const CombineOp& cop
+)
+{
+    if (Pstream::parRun())
+    {
+        // Get my communication order
+        const commsStruct& myComm = comms[Pstream::myProcNo()];
+
+        // Receive from my downstairs neighbours
+        forAll(myComm.below(), belowI)
+        {
+            label belowID = myComm.below()[belowI];
+
+            IPstream fromBelow(Pstream::scheduled, belowID);
+            Container receivedValues(fromBelow);
+
+            if (debug & 2)
+            {
+                Pout<< " received from "
+                    << belowID << " data:" << receivedValues << endl;
+            }
+
+            for
+            (
+                typename Container::const_iterator slaveIter =
+                    receivedValues.begin();
+                slaveIter != receivedValues.end();
+                ++slaveIter
+            )
+            {
+                typename Container::iterator
+                    masterIter = Values.find(slaveIter.key());
+
+                if (masterIter != Values.end())
+                {
+                    cop(masterIter(), slaveIter());
+                }
+                else
+                {
+                    Values.insert(slaveIter.key(), slaveIter());
+                }
+            }
+        }
+
+        // Send up Value
+        if (myComm.above() != -1)
+        {
+            if (debug & 2)
+            {
+                Pout<< " sending to " << myComm.above()
+                    << " data:" << Values << endl;
+            }
+
+            OPstream toAbove(Pstream::scheduled, myComm.above());
+            toAbove << Values;
+        }
+    }
+}
+
+
+template <class Container, class CombineOp>
+void Pstream::mapCombineGather(Container& Values, const CombineOp& cop)
+{
+    if (Pstream::nProcs() < Pstream::nProcsSimpleSum)
+    {
+        mapCombineGather(Pstream::linearCommunication(), Values, cop);
+    }
+    else
+    {
+        mapCombineGather(Pstream::treeCommunication(), Values, cop);
+    }
+}
+
+
+template <class Container>
+void Pstream::mapCombineScatter
+(
+    const List<Pstream::commsStruct>& comms,
+    Container& Values
+)
+{
+    if (Pstream::parRun())
+    {
+        // Get my communication order
+        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
+
+        // Reveive from up
+        if (myComm.above() != -1)
+        {
+            IPstream fromAbove(Pstream::scheduled, myComm.above());
+            fromAbove >> Values;
+
+            if (debug & 2)
+            {
+                Pout<< " received from "
+                    << myComm.above() << " data:" << Values << endl;
+            }
+        }
+
+        // Send to my downstairs neighbours
+        forAll(myComm.below(), belowI)
+        {
+            label belowID = myComm.below()[belowI];
+
+            if (debug & 2)
+            {
+                Pout<< " sending to " << belowID << " data:" << Values << endl;
+            }
+
+            OPstream toBelow(Pstream::scheduled, belowID);
+            toBelow << Values;
+        }
+    }
+}
+
+
+template <class Container>
+void Pstream::mapCombineScatter(Container& Values)
+{
+    if (Pstream::nProcs() < Pstream::nProcsSimpleSum)
+    {
+        mapCombineScatter(Pstream::linearCommunication(), Values);
+    }
+    else
+    {
+        mapCombineScatter(Pstream::treeCommunication(), Values);
     }
 }
 

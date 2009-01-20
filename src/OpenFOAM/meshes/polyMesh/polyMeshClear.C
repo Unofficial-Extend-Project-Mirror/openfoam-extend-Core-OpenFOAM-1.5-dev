@@ -29,14 +29,9 @@ License
 #include "globalMeshData.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void polyMesh::removeBoundary()
+void Foam::polyMesh::removeBoundary()
 {
     if (debug)
     {
@@ -55,7 +50,7 @@ void polyMesh::removeBoundary()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void polyMesh::clearGeom()
+void Foam::polyMesh::clearGeom()
 {
     if (debug)
     {
@@ -73,7 +68,7 @@ void polyMesh::clearGeom()
 }
 
 
-void polyMesh::clearAddressing()
+void Foam::polyMesh::clearAddressing()
 {
     if (debug)
     {
@@ -90,27 +85,24 @@ void polyMesh::clearAddressing()
 }
 
 
-// Clear primitive data (points and cells)
-void polyMesh::clearPrimitives()
+void Foam::polyMesh::clearPrimitives()
 {
     resetMotion();
 
-    points_.setSize(0);
-    faces_.setSize(0);
-    allOwner_.setSize(0);
-    allNeighbour_.setSize(0);
+    allPoints_.setSize(0);
+    allFaces_.setSize(0);
+    owner_.setSize(0);
+    neighbour_.setSize(0);
+
+    clearedPrimitives_ = true;
 }
 
 
-void polyMesh::clearOut()
+void Foam::polyMesh::clearOut()
 {
     clearGeom();
     clearAddressing();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

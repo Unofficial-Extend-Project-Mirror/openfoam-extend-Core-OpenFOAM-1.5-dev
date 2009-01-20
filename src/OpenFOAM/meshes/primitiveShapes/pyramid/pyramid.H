@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pyramid
+    Foam::pyramid
 
 Description
     A geometric pyramid primitive with a base of 'n' sides:
@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef, class polygonRef>
 class pyramid;

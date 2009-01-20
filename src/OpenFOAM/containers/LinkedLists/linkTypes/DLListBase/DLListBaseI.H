@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Base singly-linked list.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -148,6 +145,16 @@ inline void DLListBase::clear()
 inline DLListBase::link* DLListBase::remove(DLListBase::iterator& it)
 {
     return remove(it.curElmt_);
+}
+
+
+inline DLListBase::link* DLListBase::replace
+(
+    DLListBase::iterator& oldIter,
+    DLListBase::link* newLink
+)
+{
+    return replace(oldIter.curElmt_, newLink);
 }
 
 

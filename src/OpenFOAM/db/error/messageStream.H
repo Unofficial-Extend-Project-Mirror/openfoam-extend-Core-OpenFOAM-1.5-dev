@@ -23,17 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    messageStream
+    Foam::messageStream
 
 Description
     Class to handle messaging in a simple, consistent stream-based
-    manner.  The messageStream class is globaly instantiated with a title string
-    a given severity, which controls the program termination, and a number
-    of errors before termination.  Errors, messages and other data are piped
-    to the messageStream class in the standard manner.
+    manner.
+
+    The messageStream class is globaly instantiated with a title string a
+    given severity, which controls the program termination, and a number of
+    errors before termination.  Errors, messages and other data are piped to
+    the messageStream class in the standard manner.
 
 Usage
-    messageStream << "message1" << "message2" << FoamDataType << endl;
+    @code
+        messageStream << "message1" << "message2" << FoamDataType << endl;
+    @endcode
 
 SourceFiles
     messageStream.C
@@ -122,7 +126,7 @@ public:
             return maxErrors_;
         }
 
-        //- Return non-const access to the maximum number of errors before 
+        //- Return non-const access to the maximum number of errors before
         //  program termination to enable user to reset it
         int& maxErrors()
         {
@@ -177,9 +181,17 @@ public:
             const dictionary&
         );
 
-        //- Convert to Ostream
-        //  Prints basic message and then returns Ostream for further info.
+        //- Convert to Ostream for << operations
+        #ifndef __CINT__
         operator OSstream&();
+        #endif
+
+        //- Explicitly convert to Ostream for << operations
+        //  needed in cint
+        OSstream& operator()()
+        {
+            return operator OSstream&();
+        }
 };
 
 

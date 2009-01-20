@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,15 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DynamicList
+    Foam::DynamicList
 
 Description
-    A dynamic list is a 1-D vector of objects of type T which resizes
-    itself as necessary to accept the new objects.  Internal storage
-    is a compact array and the list can be shrunk to compact storage.
-    The increase of list size is controlled by three template parameters,
-    which allows the list storage to either increase by the given increment
-    or the given multiplier and divider (allowing non-integer multiples).
+    A 1D vector of objects of type \<T\> which resizes itself as necessary to
+    accept the new objects.
+
+    Internal storage is a compact array and the list can be shrunk to compact
+    storage. The increase of list size is controlled by three template
+    parameters, which allows the list storage to either increase by the given
+    increment or the given multiplier and divider (allowing non-integer
+    multiples).
 
 SourceFiles
     DynamicListI.H
@@ -49,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 class DynamicList;
@@ -85,6 +87,11 @@ class DynamicList
 
 public:
 
+    // Related types
+
+        //- Declare friendship with the List class
+        friend class List<T>;
+
     // Constructors
 
         //- Construct null
@@ -103,6 +110,9 @@ public:
     // Member Functions
 
         // Access
+
+            //- Size of the underlying storage.
+            inline label allocSize() const;
 
             //- Size of the active part of the list.
             //  Direct over-ride of list size member function
@@ -157,14 +167,20 @@ public:
     // IOstream operators
 
         // Write DynamicList to Ostream.
-        friend Ostream& operator<< <T, SizeInc, SizeMult, SizeDiv>
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T, SizeInc, SizeMult, SizeDiv>
+        #endif
         (
             Ostream&,
             const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
         );
 
         //- Read from Istream, discarding contents of existing DynamicList.
-        friend Istream& operator>> <T, SizeInc, SizeMult, SizeDiv>
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <T, SizeInc, SizeMult, SizeDiv>
+        #endif
         (
             Istream&,
             DynamicList<T, SizeInc, SizeMult, SizeDiv>&

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    TimeState
+    Foam::TimeState
 
 Description
+    The time value with time-stepping information, user-defined remapping, etc.
 
 SourceFiles
     TimeState.C

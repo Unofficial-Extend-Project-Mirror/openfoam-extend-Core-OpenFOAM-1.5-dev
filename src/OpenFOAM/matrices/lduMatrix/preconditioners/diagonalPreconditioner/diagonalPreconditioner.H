@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    diagonalPreconditioner
+    Foam::diagonalPreconditioner
 
 Description
     Diagonal preconditioner for both symmetric and asymmetric matrices.
-    The reciprocal of the diagonal is calculated and stored for reuse because on
-    most systems * is faster than /.
+
+    The reciprocal of the diagonal is calculated and stored for reuse
+    because on most systems '*' is faster than '/'.
 
 SourceFiles
     diagonalPreconditioner.C

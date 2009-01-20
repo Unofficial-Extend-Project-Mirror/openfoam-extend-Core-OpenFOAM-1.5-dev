@@ -23,8 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    List<T> is a 1D vector of objects of type T, where the size of the vector
-    is known and used for subscript bounds checking, etc.
+    List\<T\> is a 1D vector of objects of type T, where the size of the
+    vector is known and used for subscript bounds checking, etc.
 
 \*---------------------------------------------------------------------------*/
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    C16H34
+    Foam::C16H34
 
 Description
     nHexaDecane

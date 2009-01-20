@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PackedList
+    Foam::PackedList
 
 Description
     List of packed unsigned ints. Gets given the number of bits per item.
@@ -57,6 +57,7 @@ TemplateName(PackedList);
                            Class PackedList Declaration
 \*---------------------------------------------------------------------------*/
 
+//- For PackedList
 class reference
 {
     // private data
@@ -163,9 +164,8 @@ public:
             //- Get value at index I
             inline unsigned int get(const label i) const;
 
-
-            //- Set value at index I
-            inline void set(const label i, const unsigned int val);
+            //- Set value at index I. Return true if value changed.
+            inline bool set(const label i, const unsigned int val);
 
 
     // Member operators

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    bC10H7CH3
+    Foam::bC10H7CH3
 
 Description
     betaMethylNaphthalene

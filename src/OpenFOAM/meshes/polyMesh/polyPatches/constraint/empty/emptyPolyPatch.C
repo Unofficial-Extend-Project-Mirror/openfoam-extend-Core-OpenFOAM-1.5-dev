@@ -31,20 +31,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(emptyPolyPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(emptyPolyPatch, 0);
-
-addToRunTimeSelectionTable(polyPatch, emptyPolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, emptyPolyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, emptyPolyPatch, dictionary);
-
+    addToRunTimeSelectionTable(polyPatch, emptyPolyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, emptyPolyPatch, dictionary);
+}
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-// Construct from components
-emptyPolyPatch::emptyPolyPatch
+Foam::emptyPolyPatch::emptyPolyPatch
 (
     const word& name,
     const label size,
@@ -57,20 +52,7 @@ emptyPolyPatch::emptyPolyPatch
 {}
 
 
-// Construct from Istream
-emptyPolyPatch::emptyPolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm)
-{}
-
-
-// Construct from dictionary
-emptyPolyPatch::emptyPolyPatch
+Foam::emptyPolyPatch::emptyPolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -82,8 +64,7 @@ emptyPolyPatch::emptyPolyPatch
 {}
 
 
-//- Construct as copy, resetting the boundary mesh
-emptyPolyPatch::emptyPolyPatch
+Foam::emptyPolyPatch::emptyPolyPatch
 (
     const emptyPolyPatch& pp,
     const polyBoundaryMesh& bm
@@ -93,8 +74,7 @@ emptyPolyPatch::emptyPolyPatch
 {}
 
 
-//- Construct as copy, resetting the face list and boundary mesh data
-emptyPolyPatch::emptyPolyPatch
+Foam::emptyPolyPatch::emptyPolyPatch
 (
     const emptyPolyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -106,9 +86,5 @@ emptyPolyPatch::emptyPolyPatch
     polyPatch(pp, bm, index, newSize, newStart)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,14 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    APIdiffCoefFunc
+    Foam::APIdiffCoefFunc
 
 Description
     API function for vapour mass diffusivity
 
     Source:
+    @verbatim
             API (American Petroleum Institute)
                     Technical Data Book
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 

@@ -81,4 +81,3 @@ public:
     static inline void op(V& vs, const V1&, const V1&, Op)
     {}
 };
-

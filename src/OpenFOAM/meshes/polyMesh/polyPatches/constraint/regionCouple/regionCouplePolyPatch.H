@@ -142,14 +142,6 @@ public:
             const bool attached
         );
 
-        //- Construct from Istream
-        regionCouplePolyPatch
-        (
-            Istream& is,
-            const label index,
-            const polyBoundaryMesh&
-        );
-
         //- Construct from dictionary
         regionCouplePolyPatch
         (
@@ -303,9 +295,6 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
-
-        //- Write dictionary
-        virtual void writeDict(Ostream&) const;
 };
 
 

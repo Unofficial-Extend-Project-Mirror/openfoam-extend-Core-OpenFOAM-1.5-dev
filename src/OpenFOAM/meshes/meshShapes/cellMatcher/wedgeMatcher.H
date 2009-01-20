@@ -23,10 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wedgeMatcher
+    Foam::wedgeMatcher
 
 Description
-    See cellMatcher.H
+    A cellMatcher for wedge cells
+
+See Also
+    cellMatcher
 
 SourceFiles
     wedgeMatcher.C

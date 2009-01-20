@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    INew
+    Foam::INew
 
 Description
+    A helper class when constructing from an Istream
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,7 +40,7 @@ Description
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class Istream;
 
 /*---------------------------------------------------------------------------*\
@@ -56,6 +57,11 @@ public:
     {}
 
     autoPtr<T> operator()(Istream& is) const
+    {
+        return T::New(is);
+    }
+
+    autoPtr<T> operator()(const word&, Istream& is) const
     {
         return T::New(is);
     }

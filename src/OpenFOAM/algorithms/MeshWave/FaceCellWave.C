@@ -476,7 +476,7 @@ void Foam::FaceCellWave<Type>::sendPatchInfo
     const List<Type>& faceInfo
 ) const
 {
-    OPstream toNeighbour(neighbour);
+    OPstream toNeighbour(Pstream::blocking, neighbour);
 
     writeFaces(nFaces, faceLabels, faceInfo, toNeighbour);
 }
@@ -491,7 +491,7 @@ Foam::label Foam::FaceCellWave<Type>::receivePatchInfo
     List<Type>& faceInfo
 ) const
 {
-    IPstream fromNeighbour(neighbour);
+    IPstream fromNeighbour(Pstream::blocking, neighbour);
 
     label nFaces = 0;
     readFaces(nFaces, faceLabels, faceInfo, fromNeighbour);
@@ -527,7 +527,7 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
-        if (Pstream::parRun() && isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(patch))
         {
             // Allocate buffers
             label nSendFaces;
@@ -580,7 +580,7 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
-        if (Pstream::parRun() && isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(patch))
         {
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patch);
@@ -812,7 +812,6 @@ Foam::FaceCellWave<Type>::FaceCellWave
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
     hasCyclicPatches_(hasPatchType(cyclicPolyPatch::typeName)),
-    hasProcPatches_(hasPatchType(processorPolyPatch::typeName)),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
@@ -843,7 +842,6 @@ Foam::FaceCellWave<Type>::FaceCellWave
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
     hasCyclicPatches_(hasPatchType(cyclicPolyPatch::typeName)),
-    hasProcPatches_(hasPatchType(processorPolyPatch::typeName)),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
@@ -894,8 +892,8 @@ Foam::label Foam::FaceCellWave<Type>::getUnsetFaces() const
 template <class Type>
 Foam::label Foam::FaceCellWave<Type>::faceToCell()
 {
-    const labelList& faceOwner = mesh_.faceOwner();
-    const labelList& faceNeighbour = mesh_.faceNeighbour();
+    const labelList& owner = mesh_.faceOwner();
+    const labelList& neighbour = mesh_.faceNeighbour();
     label nInternalFaces = mesh_.nInternalFaces();
 
     for
@@ -920,7 +918,7 @@ Foam::label Foam::FaceCellWave<Type>::faceToCell()
         // Evaluate all connected cells
 
         // Owner
-        label cellI = faceOwner[faceI];
+        label cellI = owner[faceI];
         Type& currentWallInfo = allCellInfo_[cellI];
 
         if (currentWallInfo != neighbourWallInfo)
@@ -935,10 +933,10 @@ Foam::label Foam::FaceCellWave<Type>::faceToCell()
             );
         }
 
-        // Neighbour. Hack for check if face has faceNeighbour.
+        // Neighbour. Hack for check if face has neighbour.
         if (faceI < nInternalFaces)
         {
-            cellI = faceNeighbour[faceI];
+            cellI = neighbour[faceI];
             Type& currentWallInfo2 = allCellInfo_[cellI];
 
             if (currentWallInfo2 != neighbourWallInfo)
@@ -1031,7 +1029,7 @@ Foam::label Foam::FaceCellWave<Type>::cellToFace()
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.
         handleProcPatches();
@@ -1060,7 +1058,7 @@ Foam::label Foam::FaceCellWave<Type>::iterate(const label maxIter)
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.
         handleProcPatches();

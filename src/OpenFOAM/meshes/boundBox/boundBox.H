@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    boundBox
+    Foam::boundBox
 
 Description
-    A bounding box defined in terms of the points at it's extremities.
+    A bounding box defined in terms of the points at its extremities.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,13 @@ Description
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class boundBox;
+
+Ostream& operator<<(Ostream& os, const boundBox& b);
+
 
 /*---------------------------------------------------------------------------*\
                            Class boundBox Declaration

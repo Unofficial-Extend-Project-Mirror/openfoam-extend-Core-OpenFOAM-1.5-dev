@@ -26,15 +26,9 @@ License
 
 #include "subCycleTime.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from original time and number of sub-cycles
-subCycleTime::subCycleTime(Time& t, const label nSubCycles)
+Foam::subCycleTime::subCycleTime(Time& t, const label nSubCycles)
 :
     time_(t),
     nSubCycles_(nSubCycles),
@@ -45,7 +39,7 @@ subCycleTime::subCycleTime(Time& t, const label nSubCycles)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-subCycleTime::~subCycleTime()
+Foam::subCycleTime::~subCycleTime()
 {
     endSubCycle();
 }
@@ -53,13 +47,13 @@ subCycleTime::~subCycleTime()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool subCycleTime::end() const
+bool Foam::subCycleTime::end() const
 {
     return subCycleIndex_ > nSubCycles_;
 }
 
 
-void subCycleTime::endSubCycle()
+void Foam::subCycleTime::endSubCycle()
 {
     time_.endSubCycle(initialTimeState_);
 }
@@ -67,8 +61,7 @@ void subCycleTime::endSubCycle()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-//- Prefix increment
-subCycleTime& subCycleTime::operator++()
+Foam::subCycleTime& Foam::subCycleTime::operator++()
 {
     time_++;
     subCycleIndex_++;
@@ -76,15 +69,10 @@ subCycleTime& subCycleTime::operator++()
 }
 
 
-//- Postfix increment
-subCycleTime& subCycleTime::operator++(int)
+Foam::subCycleTime& Foam::subCycleTime::operator++(int)
 {
     return operator++();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    noiseFFT
+    Foam::noiseFFT
 
 Description
+    FFT of the pressure field
 
 SourceFiles
     noiseFFT.C

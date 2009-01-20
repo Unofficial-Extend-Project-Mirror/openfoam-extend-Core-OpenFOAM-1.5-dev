@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-   MB
+    Foam::MB
 
 Description
-    nC3H7COOCH3 or (MB) methyl butyrate (used for biodiesel surrogate)
+    Liquid nC3H7COOCH3 or (MB) methyl butyrate (used for biodiesel surrogate)
 
 SourceFiles
     MB.C

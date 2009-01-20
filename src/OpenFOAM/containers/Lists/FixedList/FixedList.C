@@ -27,16 +27,10 @@ License
 #include "FixedList.H"
 #include "ListLoopM.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null FixedList
-template<class T, label Size>
-FixedList<T, Size>& FixedList<T, Size>::null()
+template<class T, Foam::label Size>
+const Foam::FixedList<T, Size>& Foam::FixedList<T, Size>::null()
 {
     FixedList<T, Size>* nullPtr = reinterpret_cast<FixedList<T, Size>*>(NULL);
     return *nullPtr;
@@ -45,8 +39,8 @@ FixedList<T, Size>& FixedList<T, Size>::null()
 
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
-template<class T, label Size>
-void FixedList<T, Size>::swap(FixedList<T, Size>& a)
+template<class T, Foam::label Size>
+void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& a)
 {
     List_ACCESS(T, (*this), vp);
     List_ACCESS(T, a, ap);
@@ -61,9 +55,8 @@ void FixedList<T, Size>::swap(FixedList<T, Size>& a)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Comparison for equality
-template<class T, label Size>
-bool FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
 {
     bool equal = true;
 
@@ -78,17 +71,15 @@ bool FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
 }
 
 
-// Comparison for inequality
-template<class T, label Size>
-bool FixedList<T, Size>::operator!=(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& a) const
 {
     return !operator==(a);
 }
 
 
-// Compare FixedLists lexicographically
-template<class T, label Size>
-bool FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
 {
     for
     (
@@ -118,33 +109,26 @@ bool FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
 }
 
 
-// Compare FixedLists lexicographically
-template<class T, label Size>
-bool FixedList<T, Size>::operator>(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator>(const FixedList<T, Size>& a) const
 {
     return a.operator<(*this);
 }
 
 
-//- Return true if !(a > b). Takes linear time.
-template<class T, label Size>
-bool FixedList<T, Size>::operator<=(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator<=(const FixedList<T, Size>& a) const
 {
     return !operator>(a);
 }
 
 
-//- Return true if !(a < b). Takes linear time.
-template<class T, label Size>
-bool FixedList<T, Size>::operator>=(const FixedList<T, Size>& a) const
+template<class T, Foam::label Size>
+bool Foam::FixedList<T, Size>::operator>=(const FixedList<T, Size>& a) const
 {
     return !operator<(a);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

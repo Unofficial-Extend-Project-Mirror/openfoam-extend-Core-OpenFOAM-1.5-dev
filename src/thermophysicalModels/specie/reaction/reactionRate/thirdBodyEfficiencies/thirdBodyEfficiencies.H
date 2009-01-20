@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    thirdBodyEfficiencies
+    Foam::thirdBodyEfficiencies
 
 Description
+    Third body efficiencies
 
 SourceFiles
     thirdBodyEfficienciesI.H
@@ -43,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * Forward declaration of friend functions * * * * * * * * * //
+// Forward declaration of friend functions and operators
 
 class thirdBodyEfficiencies;
 Ostream& operator<<(Ostream&, const thirdBodyEfficiencies&);

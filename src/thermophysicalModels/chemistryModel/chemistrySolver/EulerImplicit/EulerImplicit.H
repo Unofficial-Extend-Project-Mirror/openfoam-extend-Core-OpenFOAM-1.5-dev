@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    EulerImplicit
+    Foam::EulerImplicit
 
 Description
+    An Euler implicit solver for chemistry
 
 SourceFiles
     EulerImplicit.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class EulerImplicit Declaration
+                       Class EulerImplicit Declaration
 \*---------------------------------------------------------------------------*/
 
 class EulerImplicit

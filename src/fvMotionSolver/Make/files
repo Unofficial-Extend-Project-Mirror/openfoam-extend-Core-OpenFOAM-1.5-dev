@@ -1,5 +1,6 @@
 fvMotionSolvers/fvMotionSolver/fvMotionSolver.C
 fvMotionSolvers/velocity/laplacian/velocityLaplacianFvMotionSolver.C
+fvMotionSolvers/displacement/interpolation/displacementInterpolationFvMotionSolver.C
 fvMotionSolvers/displacement/laplacian/displacementLaplacianFvMotionSolver.C
 fvMotionSolvers/displacement/SBRStress/displacementSBRStressFvMotionSolver.C
 
@@ -20,11 +21,13 @@ motionDiffusivity/manipulators/quadratic/quadraticDiffusivity.C
 motionDiffusivity/manipulators/exponential/exponentialDiffusivity.C
 
 fvPatchFields/derived/cellMotion/cellMotionFvPatchFields.C
+fvPatchFields/derived/surfaceSlipDisplacement/surfaceSlipDisplacementFvPatchFields.C
 
 pointPatchFields/derived/oscillatingVelocity/oscillatingVelocityPointPatchVectorField.C
 pointPatchFields/derived/angularOscillatingVelocity/angularOscillatingVelocityPointPatchVectorField.C
 
 pointPatchFields/derived/oscillatingDisplacement/oscillatingDisplacementPointPatchVectorField.C
 pointPatchFields/derived/angularOscillatingDisplacement/angularOscillatingDisplacementPointPatchVectorField.C
+pointPatchFields/derived/surfaceSlipDisplacement/surfaceSlipDisplacementPointPatchVectorField.C
 
 LIB = $(FOAM_LIBBIN)/libfvMotionSolver

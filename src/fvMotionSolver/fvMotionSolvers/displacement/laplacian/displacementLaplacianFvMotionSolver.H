@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    displacementLaplacianFvMotionSolver
+    Foam::displacementLaplacianFvMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
@@ -66,8 +66,16 @@ class displacementLaplacianFvMotionSolver
         //- Cell-centre motion field
         mutable volVectorField cellDisplacement_;
 
+        //- Optionally read point-position field. Used only for position
+        //  boundary conditions.
+        mutable autoPtr<pointVectorField> pointLocation_;
+
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
+
+        //- Frozen points (that are not on patches). -1 or points that are
+        //  fixed to be at points0_ location
+        label frozenPointsZone_;
 
 
     // Private Member Functions
@@ -105,25 +113,32 @@ public:
 
     // Member Functions
 
-        //- Return reference to the point motion velocity field
+
+        //- Return reference to the reference field
+        const pointField& points0() const
+        {
+            return points0_;
+        }
+
+        //- Return reference to the point motion displacement field
         pointVectorField& pointDisplacement()
         {
             return pointDisplacement_;
         }
 
-        //- Return const reference to the point motion velocity field
+        //- Return const reference to the point motion displacement field
         const pointVectorField& pointDisplacement() const
         {
             return pointDisplacement_;
         }
 
-        //- Return reference to the cell motion velocity field
+        //- Return reference to the cell motion displacement field
         volVectorField& cellDisplacement()
         {
             return cellDisplacement_;
         }
 
-        //- Return const reference to the cell motion velocity field
+        //- Return const reference to the cell motion displacement field
         const volVectorField& cellDisplacement() const
         {
             return cellDisplacement_;
@@ -134,6 +149,9 @@ public:
 
         //- Solve for motion
         virtual void solve();
+
+        //- Update topology
+        virtual void updateMesh(const mapPolyMesh&);
 };
 
 

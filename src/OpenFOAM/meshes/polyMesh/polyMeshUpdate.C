@@ -53,18 +53,24 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     setInstance(time().timeName());
 
     // Map the old motion points if present
-    if (oldPointsPtr_)
+    if (oldAllPointsPtr_)
     {
         // Make a copy of the original points
-        pointField oldMotionPoints = *oldPointsPtr_;
+        pointField oldMotionPoints = *oldAllPointsPtr_;
 
-        pointField& newMotionPoints = *oldPointsPtr_;
+        pointField& newMotionPoints = *oldAllPointsPtr_;
 
         // Resize the list to new size
-        newMotionPoints.setSize(points_.size());
+        newMotionPoints.setSize(allPoints_.size());
 
         // Map the list
         newMotionPoints.map(oldMotionPoints, mpm.pointMap());
+
+        // Reset old points if present
+        if (oldPointsPtr_)
+        {
+            oldPointsPtr_->reset(*oldAllPointsPtr_, nPoints());
+        }
     }
 }
 

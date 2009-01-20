@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    basicThermo
+    Foam::basicThermo
 
 Description
+    Basic thermodynamic properties
 
 SourceFiles
     basicThermo.C
@@ -137,7 +138,7 @@ public:
             virtual volScalarField& h()
             {
                 notImplemented("basicThermo::h()");
-                return volScalarField::null();
+                return const_cast<volScalarField&>(volScalarField::null());
             }
 
             //- Enthalpy [J/kg]
@@ -182,7 +183,7 @@ public:
             virtual volScalarField& e()
             {
                 notImplemented("basicThermo::e()");
-                return volScalarField::null();
+                return const_cast<volScalarField&>(volScalarField::null());
             }
 
             //- Internal energy [J/kg]
@@ -202,7 +203,7 @@ public:
             }
 
             //- Density [kg/m^3]
-            tmp<volScalarField> rho() const
+            virtual tmp<volScalarField> rho() const
             {
                 return p_*psi();
             }
@@ -251,7 +252,7 @@ public:
                 return mu_;
             }
 
-            //- Thermal diffusivity for enthalpy of mixture [W/mK]
+            //- Thermal diffusivity for enthalpy of mixture [kg/ms]
             const volScalarField& alpha() const
             {
                 return alpha_;

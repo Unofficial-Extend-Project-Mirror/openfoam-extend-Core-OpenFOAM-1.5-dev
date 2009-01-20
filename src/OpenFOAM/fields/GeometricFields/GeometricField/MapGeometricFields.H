@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    MapGeometricFields
+    Foam::MapInternalField
 
 Description
-    Generic Geometric field mapper.  For "real" mapping, add template
+    Generic internal field mapper.  For "real" mapping, add template
     specialisations for mapping of internal fields depending on mesh
     type.
 
@@ -58,6 +58,9 @@ public:
 };
 
 
+//- Generic Geometric field mapper.
+//  For "real" mapping, add template specialisations
+//  for mapping of internal fields depending on mesh type.
 template
 <
     class Type,
@@ -72,7 +75,7 @@ void MapGeometricFields
 {
     HashTable<const GeometricField<Type, PatchField, GeoMesh>*> fields
     (
-        mapper.mesh().objectRegistry::lookupClass
+        mapper.db().objectRegistry::lookupClass
             <GeometricField<Type, PatchField, GeoMesh> >()
     );
 
@@ -89,8 +92,16 @@ void MapGeometricFields
         ++fieldIter
     )
     {
-        const_cast<GeometricField<Type, PatchField, GeoMesh>*>(fieldIter())
-            ->storeOldTimes();
+        GeometricField<Type, PatchField, GeoMesh>& field = 
+            const_cast<GeometricField<Type, PatchField, GeoMesh>&>
+            (*fieldIter());
+
+        //Note: check can be removed once pointFields are actually stored on
+        //      the pointMesh instead of now on the polyMesh!
+        if (field.mesh() == mapper.mesh())
+        {
+            field.storeOldTimes();
+        }
     }
 
     for
@@ -105,30 +116,42 @@ void MapGeometricFields
             const_cast<GeometricField<Type, PatchField, GeoMesh>&>
             (*fieldIter());
 
-        if (polyMesh::debug)
+        if (field.mesh() == mapper.mesh())
         {
-            Info<< "Mapping field " << field.name() << endl;
-        }
+            if (polyMesh::debug)
+            {
+                Info<< "Mapping " << field.typeName << ' ' << field.name()
+                    << endl;
+            }
 
-        // Map the internal field
-        MapInternalField<Type, MeshMapper, GeoMesh>()
-        (
-            field.internalField(),
-            mapper
-        );
-
-        // Map the patch fields
-        forAll(field.boundaryField(), patchi)
-        {
-            // Cannot check sizes for patch fields because of
-            // empty fields in FV and because point fields get their size
-            // from the patch which has already been resized
-            // 
-
-            field.boundaryField()[patchi].autoMap
+            // Map the internal field
+            MapInternalField<Type, MeshMapper, GeoMesh>()
             (
-                mapper.boundaryMap()[patchi]
+                field.internalField(),
+                mapper
             );
+
+            // Map the patch fields
+            forAll(field.boundaryField(), patchi)
+            {
+                // Cannot check sizes for patch fields because of
+                // empty fields in FV and because point fields get their size
+                // from the patch which has already been resized
+                // 
+
+                field.boundaryField()[patchi].autoMap
+                (
+                    mapper.boundaryMap()[patchi]
+                );
+            }
+
+            field.instance() = field.mesh().db().time().timeName();
+        }
+        else if (polyMesh::debug)
+        {
+            Info<< "Not mapping " << field.typeName << ' ' << field.name()
+                << " since originating mesh differs from that of mapper."
+                << endl;
         }
     }
 }

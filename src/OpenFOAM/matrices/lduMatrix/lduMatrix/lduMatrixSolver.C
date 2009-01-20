@@ -167,8 +167,7 @@ Foam::scalar Foam::lduMatrix::solver::normFactor
 //     tmpField *= gAverage(x);
 
     // Calculate normalisation factor using full multiplication
-    // with mean value
-    // HJ, 5/Nov/2007
+    // with mean value.  HJ, 5/Nov/2007
     scalar xRef = gAverage(x);
     matrix_.Amul
     (
@@ -283,10 +282,10 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    readControl(dict_, minIter_, "minIter");
-    readControl(dict_, maxIter_, "maxIter");
-    readControl(dict_, tolerance_, "tolerance");
-    readControl(dict_, relTolerance_, "relTol");
+    dict_.readIfPresent("minIter", minIter_);
+    dict_.readIfPresent("maxIter", maxIter_);
+    dict_.readIfPresent("tolerance", tolerance_);
+    dict_.readIfPresent("relTol", relTolerance_);
 }
 
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    High performance macro functions for Field<Type> algebra.  These expand
+    High performance macro functions for Field\<Type\> algebra.  These expand
     using either array element access (for vector machines) or pointer
     dereferencing for scalar machines as appropriate.
 
@@ -165,6 +165,23 @@ void checkFields
     List_FOR_ALL(f1, i)                                                     \
         List_ELEM(f1, f1P, i)                                               \
         OP FUNC(List_ELEM(f2, f2P, i), List_ELEM(f3, f3P, i));              \
+    List_END_FOR_ALL                                                        \
+
+
+// member function : this field f1 OP fUNC f2, f3
+
+#define TFOR_ALL_S_OP_FUNC_F_F(typeS, s, OP, FUNC, typeF1, f1, typeF2, f2)  \
+                                                                            \
+    /* check the two fields have same Field<Type> mesh */                   \
+    checkFields(f1, f2, "s " #OP " " #FUNC "(f1, f2)");                     \
+                                                                            \
+    /* set access to f1 and f2 at end of each field */                      \
+    List_CONST_ACCESS(typeF1, f1, f1P);                                     \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                     \
+                                                                            \
+    /* loop through fields performing s OP FUNC(f1, f2) */                  \
+    List_FOR_ALL(f1, i)                                                     \
+        (s) OP FUNC(List_ELEM(f1, f1P, i), List_ELEM(f2, f2P, i));          \
     List_END_FOR_ALL                                                        \
 
 
@@ -375,20 +392,6 @@ void checkFields
     /* loop through field performing s OP f */                              \
     List_FOR_ALL(f1, i)                                                     \
         (s) OP1 List_ELEM(f1, f1P, i) OP2 List_ELEM(f2, f2P, i);            \
-    List_END_FOR_ALL
-
-
-// friend operator function : s OP1 FUNC(f1, f2), allocates storage for s
-
-#define TFOR_ALL_S_OP_FUNC_F_F(typeS, s, OP1, FUNC, typeF1, f1, typeF2, f2) \
-                                                                            \
-    /* set access to f1 and f2 at end of each field */                      \
-    List_CONST_ACCESS(typeF1, f1, f1P);                                     \
-    List_CONST_ACCESS(typeF2, f2, f2P);                                     \
-                                                                            \
-    /* loop through field performing s OP f */                              \
-    List_FOR_ALL(f1, i)                                                     \
-        (s) OP1 FUNC(List_ELEM(f1, f1P, i), List_ELEM(f2, f2P, i));         \
     List_END_FOR_ALL
 
 

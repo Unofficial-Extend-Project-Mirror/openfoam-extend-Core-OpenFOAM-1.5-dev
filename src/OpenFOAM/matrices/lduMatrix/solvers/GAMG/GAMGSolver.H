@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    GAMGSolver
+    Foam::GAMGSolver
 
 Description
     Geometric agglomerated algebraic multigrid solver.
@@ -120,7 +120,7 @@ class GAMGSolver
         //- Read control parameters from the control dictionary
         virtual void readControls();
 
-        //- Make agglomeration
+        //- Make agglomeration.  Constructor helper.  HJ, 21/Oct/2008
         void makeAgglomeration();
 
         //- Simplified access to interface level

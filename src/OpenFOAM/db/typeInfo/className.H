@@ -22,10 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    className
-
 Description
+    Macro definitions for declaring ClassName()
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,17 +35,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Adds typeName information from its argument @a TypeNameString to a class
 #define ClassName(TypeNameString)                                             \
     static const char* typeName_() { return TypeNameString; }                 \
     static const ::Foam::word typeName;                                       \
     static int debug
 
-
 #define NamespaceName(TypeNameString)                                         \
     inline const char* typeName_() { return TypeNameString; }                 \
     extern const ::Foam::word typeName;                                       \
     extern int debug
-
 
 #define TemplateName(template)                                                \
 class template##Name                                                          \

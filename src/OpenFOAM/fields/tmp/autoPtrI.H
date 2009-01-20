@@ -21,29 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Store object pointer
 template<class T>
-inline autoPtr<T>::autoPtr(T* tPtr)
+inline Foam::autoPtr<T>::autoPtr(T* tPtr)
 :
     ptr_(tPtr)
 {}
 
 
-// Construct copy (increment reference count if object is temporary)
 template<class T>
-inline autoPtr<T>::autoPtr(const autoPtr<T>& ap)
+inline Foam::autoPtr<T>::autoPtr(const autoPtr<T>& ap)
 :
     ptr_(ap.ptr_)
 {
@@ -51,9 +44,8 @@ inline autoPtr<T>::autoPtr(const autoPtr<T>& ap)
 }
 
 
-// Delete object
 template<class T>
-inline autoPtr<T>::~autoPtr()
+inline Foam::autoPtr<T>::~autoPtr()
 {
     clear();
 }
@@ -61,16 +53,15 @@ inline autoPtr<T>::~autoPtr()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Is the autoPtr valid, i.e. is the pointer set
 template<class T>
-inline bool autoPtr<T>::valid() const
+inline bool Foam::autoPtr<T>::valid() const
 {
     return ptr_;
 }
 
-// Return object pointer for reuse
+
 template<class T>
-inline T* autoPtr<T>::ptr()
+inline T* Foam::autoPtr<T>::ptr()
 {
     T* ptr = ptr_;
     ptr_ = NULL;
@@ -78,10 +69,8 @@ inline T* autoPtr<T>::ptr()
 }
 
 
-// Set pointer to that given.
-// If object pointer already set issue a FatalError.
 template<class T>
-inline void autoPtr<T>::set(T* p)
+inline void Foam::autoPtr<T>::set(T* p)
 {
     if (ptr_)
     {
@@ -94,10 +83,8 @@ inline void autoPtr<T>::set(T* p)
 }
 
 
-// If object pointer already set delete object and
-// set pointer to that given
 template<class T>
-inline void autoPtr<T>::reset(T* p)
+inline void Foam::autoPtr<T>::reset(T* p)
 {
     if (ptr_)
     {
@@ -108,10 +95,8 @@ inline void autoPtr<T>::reset(T* p)
 }
 
 
-// If object pointer points to valid object:
-// delete object and set pointer to NULL
 template<class T>
-inline void autoPtr<T>::clear()
+inline void Foam::autoPtr<T>::clear()
 {
     reset(NULL);
 }
@@ -120,7 +105,7 @@ inline void autoPtr<T>::clear()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline T& autoPtr<T>::operator()()
+inline T& Foam::autoPtr<T>::operator()()
 {
     if (!ptr_)
     {
@@ -134,7 +119,7 @@ inline T& autoPtr<T>::operator()()
 
 
 template<class T>
-inline const T& autoPtr<T>::operator()() const
+inline const T& Foam::autoPtr<T>::operator()() const
 {
     if (!ptr_)
     {
@@ -149,14 +134,14 @@ inline const T& autoPtr<T>::operator()() const
 
 /*
 template<class T>
-inline T& autoPtr<T>::operator*()
+inline T& Foam::autoPtr<T>::operator*()
 {
     return operator()();
 }
 
 
 template<class T>
-inline const T& autoPtr<T>::operator*() const
+inline const T& Foam::autoPtr<T>::operator*() const
 {
     return operator()();
 }
@@ -164,15 +149,14 @@ inline const T& autoPtr<T>::operator*() const
 
 
 template<class T>
-inline autoPtr<T>::operator const T&() const
+inline Foam::autoPtr<T>::operator const T&() const
 {
     return operator()();
 }
 
 
-// Return object pointer
 template<class T>
-inline T* autoPtr<T>::operator->()
+inline T* Foam::autoPtr<T>::operator->()
 {
     if (!ptr_)
     {
@@ -185,16 +169,15 @@ inline T* autoPtr<T>::operator->()
 }
 
 
-// Return object pointer
 template<class T>
-inline const T* autoPtr<T>::operator->() const
+inline const T* Foam::autoPtr<T>::operator->() const
 {
     return const_cast<autoPtr<T>&>(*this).operator->();
 }
 
 
 template<class T>
-inline void autoPtr<T>::operator=(const autoPtr<T>& ap)
+inline void Foam::autoPtr<T>::operator=(const autoPtr<T>& ap)
 {
     if (this != &ap)
     {
@@ -205,9 +188,5 @@ inline void autoPtr<T>::operator=(const autoPtr<T>& ap)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

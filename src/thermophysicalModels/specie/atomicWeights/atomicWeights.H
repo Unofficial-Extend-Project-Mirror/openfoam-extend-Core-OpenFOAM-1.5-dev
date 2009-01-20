@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright 2007 Hrvoje Jasak.  All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    atomicWeight
+    Foam::atomicWeightTable
 
 Description
-    Elemental atomic weights lookup table.  Use the following lookup syntax:
-    atomicWeights["H"]
+    A table of atomic weights for all the elements
 
 SourceFiles
     atomicWeights.C
@@ -73,14 +72,14 @@ public:
 
     // Constructors
 
-        //- Construct null, filling the table
+        //- Construct from atomicWeights_
         atomicWeightTable();
 };
 
 
 // * * * * * * * * * * * * * * * * Global data  * * * * * * * * * * * * * * //
 
-// Atomic weighs table for every element in the periodic table
+// Atomic weights table for every element in the periodic table
 extern atomicWeightTable atomicWeights;
 
 

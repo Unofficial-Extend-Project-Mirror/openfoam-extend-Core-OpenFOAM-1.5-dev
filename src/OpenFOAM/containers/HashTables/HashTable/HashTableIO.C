@@ -22,27 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    HashTable
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "HashTable.H"
 #include "Istream.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class T, class Key, class Hash>
-HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
+Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 :
     tableSize_(size),
     table_(new hashedEntry*[tableSize_]),
@@ -62,7 +51,7 @@ HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
 {
     is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
 
@@ -177,7 +166,7 @@ Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L)
 
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
+Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
 {
     // Write size of HashTable
     os << nl << L.size();
@@ -205,9 +194,5 @@ Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

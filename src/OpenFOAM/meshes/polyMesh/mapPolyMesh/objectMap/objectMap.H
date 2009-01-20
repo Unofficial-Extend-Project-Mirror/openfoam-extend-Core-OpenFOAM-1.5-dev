@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    objectMap
+    Foam::objectMap
 
 Description
     An objectMap is a pair of labels defining the mapping of an object from
@@ -43,6 +43,14 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class objectMap;
+inline bool operator==(const objectMap& a, const objectMap& b);
+inline bool operator!=(const objectMap& a, const objectMap& b);
+inline Ostream& operator<<(Ostream&, const objectMap&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class objectMap Declaration
@@ -86,13 +94,13 @@ public:
 
     // Friend Operators
 
-        inline friend bool operator==(const objectMap& a, const objectMap& b);
-        inline friend bool operator!=(const objectMap& a, const objectMap& b);
+        friend bool operator==(const objectMap& a, const objectMap& b);
+        friend bool operator!=(const objectMap& a, const objectMap& b);
 
 
     // IOstream Operators
 
-        inline friend Ostream& operator<<(Ostream&, const objectMap&);
+        friend Ostream& operator<<(Ostream&, const objectMap&);
 };
 
 

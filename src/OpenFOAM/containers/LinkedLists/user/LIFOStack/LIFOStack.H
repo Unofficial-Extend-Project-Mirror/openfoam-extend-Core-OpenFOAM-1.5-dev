@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    LIFOStack
+    Foam::LIFOStack
 
 Description
-    LIFO LIFOStack based on a singly-linked list.
-    Operations are push, pop, top and empty.
+    A LIFO stack based on a singly-linked list.
+    Operations are push(), pop(), top(), bottom() and empty().
 
 SourceFiles
     LIFOStack.C
@@ -85,6 +85,12 @@ public:
                 return this->first();
             }
 
+            //- Return a copy of the bottom element
+            T bottom() const
+            {
+                return this->last();
+            }
+
 
         // Check
 
@@ -103,7 +109,7 @@ public:
                 this->insert(a);
             }
 
-            //- Pop the top element
+            //- Pop the top element off the stack
             T pop()
             {
                 return this->removeHead();

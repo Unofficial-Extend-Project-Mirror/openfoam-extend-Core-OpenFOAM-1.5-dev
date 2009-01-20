@@ -29,19 +29,16 @@ License
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(polyBoundaryMesh, 0);
-
+    defineTypeNameAndDebug(polyBoundaryMesh, 0);
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-labelList polyBoundaryMesh::ident(const label len)
+Foam::labelList Foam::polyBoundaryMesh::ident(const label len)
 {
     labelList elems(len);
     forAll(elems, elemI)
@@ -54,7 +51,7 @@ labelList polyBoundaryMesh::ident(const label len)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-polyBoundaryMesh::polyBoundaryMesh
+Foam::polyBoundaryMesh::polyBoundaryMesh
 (
     const IOobject& io,
     const polyMesh& mesh
@@ -102,7 +99,7 @@ polyBoundaryMesh::polyBoundaryMesh
 }
 
 
-polyBoundaryMesh::polyBoundaryMesh
+Foam::polyBoundaryMesh::polyBoundaryMesh
 (
     const IOobject& io,
     const polyMesh& pm,
@@ -136,7 +133,7 @@ void Foam::polyBoundaryMesh::clearGeom()
 void Foam::polyBoundaryMesh::clearAddressing()
 {
     deleteDemandDrivenData(neighbourEdgesPtr_);
-    
+
     forAll (*this, patchi)
     {
         operator[](patchi).clearAddressing();
@@ -146,7 +143,7 @@ void Foam::polyBoundaryMesh::clearAddressing()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void polyBoundaryMesh::calcGeometry()
+void Foam::polyBoundaryMesh::calcGeometry()
 {
     forAll(*this, patchi)
     {
@@ -160,7 +157,8 @@ void polyBoundaryMesh::calcGeometry()
 }
 
 
-const List<labelPairList>& polyBoundaryMesh::neighbourEdges() const
+const Foam::List<Foam::labelPairList>&
+Foam::polyBoundaryMesh::neighbourEdges() const
 {
     if (Pstream::parRun())
     {
@@ -292,7 +290,7 @@ const List<labelPairList>& polyBoundaryMesh::neighbourEdges() const
 }
 
 
-wordList polyBoundaryMesh::names() const
+Foam::wordList Foam::polyBoundaryMesh::names() const
 {
     const polyPatchList& patches = *this;
 
@@ -307,7 +305,7 @@ wordList polyBoundaryMesh::names() const
 }
 
 
-wordList polyBoundaryMesh::types() const
+Foam::wordList Foam::polyBoundaryMesh::types() const
 {
     const polyPatchList& patches = *this;
 
@@ -322,7 +320,7 @@ wordList polyBoundaryMesh::types() const
 }
 
 
-wordList polyBoundaryMesh::physicalTypes() const
+Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 {
     const polyPatchList& patches = *this;
 
@@ -337,7 +335,7 @@ wordList polyBoundaryMesh::physicalTypes() const
 }
 
 
-label polyBoundaryMesh::findPatchID(const word& patchName) const
+Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
 {
     const polyPatchList& patches = *this;
 
@@ -363,7 +361,7 @@ label polyBoundaryMesh::findPatchID(const word& patchName) const
 }
 
 
-label polyBoundaryMesh::whichPatch(const label faceIndex) const
+Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
 {
     // Find out which patch the current face belongs to by comparing label
     // with patch start labels.
@@ -397,7 +395,7 @@ label polyBoundaryMesh::whichPatch(const label faceIndex) const
         }
     }
 
-    // If not in any of above, it's trouble!
+    // If not in any of above, it is trouble!
     FatalErrorIn
     (
         "label polyBoundaryMesh::whichPatch(const label faceIndex) const"
@@ -412,7 +410,38 @@ label polyBoundaryMesh::whichPatch(const label faceIndex) const
 }
 
 
-bool polyBoundaryMesh::checkParallelSync(const bool report) const
+Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
+(
+    const wordList& patchNames
+) const
+{
+    wordList allPatchNames = names();
+    labelHashSet ps(size());
+
+    forAll(patchNames, i)
+    {
+        // Treat the diven patch names as wild-cards and search the set
+        // of all patch names for matches
+        labelList patchIDs = findStrings(patchNames[i], allPatchNames);
+
+        if (patchIDs.size() == 0)
+        {
+            WarningIn("polyBoundaryMesh::patchSet(const wordList& patchNames)")
+                << "Cannot find any patch names matching " << patchNames[i]
+                << endl;
+        }
+
+        forAll(patchIDs, j)
+        {
+            ps.insert(patchIDs[j]);
+        }
+    }
+
+    return ps;
+}
+
+
+bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 {
     if (!Pstream::parRun())
     {
@@ -482,7 +511,7 @@ bool polyBoundaryMesh::checkParallelSync(const bool report) const
         {
             boundaryError = true;
 
-            if (debug || report && Pstream::master())
+            if (debug || (report && Pstream::master()))
             {
                 Info<< " ***Inconsistent patches across processors, "
                        "processor 0 has patch names:" << allNames[0]
@@ -499,7 +528,7 @@ bool polyBoundaryMesh::checkParallelSync(const bool report) const
 }
 
 
-bool polyBoundaryMesh::checkDefinition(const bool report) const
+bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 {
     label nextPatchStart = mesh().nInternalFaces();
     const polyBoundaryMesh& bm = *this;
@@ -544,7 +573,7 @@ bool polyBoundaryMesh::checkDefinition(const bool report) const
 }
 
 
-void polyBoundaryMesh::movePoints(const pointField& p)
+void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 {
     polyPatchList& patches = *this;
 
@@ -560,7 +589,7 @@ void polyBoundaryMesh::movePoints(const pointField& p)
 }
 
 
-void polyBoundaryMesh::updateMesh()
+void Foam::polyBoundaryMesh::updateMesh()
 {
     deleteDemandDrivenData(neighbourEdgesPtr_);
 
@@ -578,7 +607,7 @@ void polyBoundaryMesh::updateMesh()
 }
 
 
-void polyBoundaryMesh::reorder(const UList<label>& oldToNew)
+void Foam::polyBoundaryMesh::reorder(const UList<label>& oldToNew)
 {
     // Change order of patches
     polyPatchList::reorder(oldToNew);
@@ -595,14 +624,30 @@ void polyBoundaryMesh::reorder(const UList<label>& oldToNew)
 }
 
 
-bool polyBoundaryMesh::writeData(Ostream& os) const
+bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 {
-    os << *this;
+    const polyPatchList& patches = *this;
+
+    os  << patches.size() << nl << token::BEGIN_LIST << incrIndent << nl;
+
+    forAll(patches, patchi)
+    {
+        os  << indent << patches[patchi].name() << nl
+            << indent << token::BEGIN_BLOCK << nl
+            << incrIndent << patches[patchi] << decrIndent
+            << indent << token::END_BLOCK << endl;
+    }
+
+    os  << decrIndent << token::END_LIST;
+
+    // Check state of IOstream
+    os.check("polyBoundaryMesh::writeData(Ostream& os) const");
+
     return os.good();
 }
 
 
-bool polyBoundaryMesh::writeObject
+bool Foam::polyBoundaryMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -615,23 +660,11 @@ bool polyBoundaryMesh::writeObject
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const polyBoundaryMesh& patches)
+Foam::Ostream& Foam::operator<<(Ostream& os, const polyBoundaryMesh& pbm)
 {
-    os  << patches.size() << nl << token::BEGIN_LIST;
-
-    forAll(patches, patchI)
-    {
-        patches[patchI].writeDict(os);
-    }
-
-    os  << token::END_LIST;
-
+    pbm.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

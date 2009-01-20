@@ -27,17 +27,19 @@ License
 #include "coupledFacePointPatch.H"
 #include "pointBoundaryMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(coupledFacePointPatch, 0);
-}
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(coupledFacePointPatch, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::coupledFacePointPatch::coupledFacePointPatch
+coupledFacePointPatch::coupledFacePointPatch
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
@@ -45,57 +47,37 @@ Foam::coupledFacePointPatch::coupledFacePointPatch
 :
     facePointPatch(patch, bm),
     coupledPointPatch(bm),
-    coupledPolyPatch_(refCast<const coupledPolyPatch>(patch)),
-    nonGlobalPatchPointsPtr_(NULL),
-    meshPointsPtr_(NULL)
+    coupledPolyPatch_(refCast<const coupledPolyPatch>(patch))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::coupledFacePointPatch::~coupledFacePointPatch()
-{
-    deleteDemandDrivenData(nonGlobalPatchPointsPtr_);
-    deleteDemandDrivenData(meshPointsPtr_);
-}
+coupledFacePointPatch::~coupledFacePointPatch()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::labelList& Foam::coupledFacePointPatch::nonGlobalPatchPoints() const
+const labelList& coupledFacePointPatch::nonGlobalPatchPoints() const
 {
-    if (!nonGlobalPatchPointsPtr_)
-    {
-        calcMeshPoints();
-    }
-
-    return *nonGlobalPatchPointsPtr_;
+    return nonGlobalPatchPoints_;
 }
 
-
-const Foam::labelList& Foam::coupledFacePointPatch::meshPoints() const
+const labelList& coupledFacePointPatch::loneMeshPoints() const
 {
-    if (!meshPointsPtr_)
-    {
-        calcMeshPoints();
-    }
-
-    return *meshPointsPtr_;
+    return loneMeshPoints_;
 }
 
-
-const Foam::pointField& Foam::coupledFacePointPatch::localPoints() const
-{
-    notImplemented("coupledFacePointPatch::localPoints() const");
-    return Field<point>::null();
-}
-
-
-const Foam::vectorField& Foam::coupledFacePointPatch::pointNormals() const
+const vectorField& coupledFacePointPatch::pointNormals() const
 {
     notImplemented("coupledFacePointPatch::pointNormals() const");
     return Field<vector>::null();
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

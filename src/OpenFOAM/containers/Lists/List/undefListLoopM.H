@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    A List<type> is a 1D array of objects of type 'type',
+    A List\<Type\> is a 1D array of objects of type 'Type',
     where the size of the array is known and used for subscript
     bounds checking, etc.
 

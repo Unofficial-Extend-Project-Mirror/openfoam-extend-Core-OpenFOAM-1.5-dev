@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "polyPatch.H"
@@ -76,53 +74,6 @@ autoPtr<polyPatch> polyPatch::New
 
 autoPtr<polyPatch> polyPatch::New
 (
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-{
-    if (debug)
-    {
-        Info<< "polyPatch::New(Istream&, const label, const polyBoundaryMesh&)"
-            << " : constructing polyPatch"
-            << endl;
-    }
-
-    if (is.eof())
-    {
-        FatalIOErrorIn
-        (
-            "polyPatch::New(Istream&, const label, const polyBoundaryMesh&)",
-            is
-        )   << "PolyPatch type not specified" << endl << endl
-            << "Valid polyPatch types are :" << endl
-            << IstreamConstructorTablePtr_->toc()
-            << exit(FatalIOError);
-    }
-
-    word patchType(is);
-
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(patchType);
-
-    if (cstrIter == IstreamConstructorTablePtr_->end())
-    {
-        FatalIOErrorIn
-        (
-            "polyPatch::New(Istream&, const label, const polyBoundaryMesh&)",
-            is
-        )   << "Unknown polyPatch type " << patchType << endl << endl
-            << "Valid polyPatch types are :" << endl
-            << IstreamConstructorTablePtr_->toc()
-            << exit(FatalIOError);
-    }
-
-    return autoPtr<polyPatch>(cstrIter()(is, index, bm));
-}
-
-
-autoPtr<polyPatch> polyPatch::New
-(
     const word& name,
     const dictionary& dict,
     const label index,
@@ -148,16 +99,25 @@ autoPtr<polyPatch> polyPatch::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalIOErrorIn
-        (
-            "polyPatch::New(const word&, const dictionary&, "
-            "const label, const polyBoundaryMesh&)",
-            dict
-        )   << "Unknown polyPatch type " << patchType << " for patch " << name
-            << endl << endl
-            << "Valid polyPatch types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalIOError);
+        if (!disallowGenericPolyPatch)
+        {
+            cstrIter = dictionaryConstructorTablePtr_->find("genericPatch");
+        }
+
+        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        {
+            FatalIOErrorIn
+            (
+                "polyPatch::New(const word&, const dictionary&, "
+                "const label, const polyBoundaryMesh&)",
+                dict
+            )   << "Unknown polyPatch type " << patchType
+                << " for patch " << name
+                << endl << endl
+                << "Valid polyPatch types are :" << endl
+                << dictionaryConstructorTablePtr_->toc()
+                << exit(FatalIOError);
+        }
     }
 
     return autoPtr<polyPatch>(cstrIter()(name, dict, index, bm));

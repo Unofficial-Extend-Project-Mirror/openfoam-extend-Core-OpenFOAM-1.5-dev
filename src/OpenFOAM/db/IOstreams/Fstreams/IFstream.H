@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    IFstream
+    Foam::IFstream
 
 Description
     Input from file stream.
@@ -54,6 +54,7 @@ class IFstream;
                        Class IFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
+//- A std::istream with ability to handle compressed files
 class IFstreamAllocator
 {
     friend class IFstream;
@@ -99,7 +100,7 @@ class IFstream
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("IFstream");
 
 

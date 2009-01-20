@@ -44,17 +44,16 @@ namespace Foam
 
 OPstream::OPstream
 (
+    const commsTypes commsType,
     const int toProcNo,
     const label bufSize,
-    const bool bufferedTransfer,
     streamFormat format,
     versionNumber version
 )
 :
-    Pstream(bufSize),
+    Pstream(commsType, bufSize),
     Ostream(format, version),
-    toProcNo_(toProcNo),
-    bufferedTransfer_(bufferedTransfer)
+    toProcNo_(toProcNo)
 {
     setOpened();
     setGood();

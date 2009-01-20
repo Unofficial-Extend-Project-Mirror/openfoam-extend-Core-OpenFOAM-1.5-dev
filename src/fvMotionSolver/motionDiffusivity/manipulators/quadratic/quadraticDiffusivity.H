@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticDiffusivity
+    Foam::quadraticDiffusivity
 
 Description
     Mesh motion diffusivity maipulator which returns the sqr of the given

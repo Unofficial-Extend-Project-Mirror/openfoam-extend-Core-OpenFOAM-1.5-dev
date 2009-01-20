@@ -86,7 +86,7 @@ Foam::GAMGPreconditioner::~GAMGPreconditioner()
 void Foam::GAMGPreconditioner::readControls()
 {
     GAMG_.readControls();
-    GAMG_.readControl(GAMG_.dict(), nVcycles_, "nVcycles");
+    GAMG_.dict().readIfPresent("nVcycles", nVcycles_);
 }
 
 

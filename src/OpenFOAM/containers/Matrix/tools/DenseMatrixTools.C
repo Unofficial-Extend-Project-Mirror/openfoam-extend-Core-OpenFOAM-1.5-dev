@@ -75,16 +75,16 @@ static void Foam::DenseMatrixTools::solve
             label pk = p[k];
 
 //             T r = A[pi][k]/A[pk][k];
-            T r = invScale(A[pi][k], A[pk][k]);
+            T r = cmptDivide(A[pi][k], A[pk][k]);
 
             for (label j = k + 1; j < nRows; j++)
             {
 //                 A[pi][j] -= A[pk][j]*r;
-                A[pi][j] -= scale(A[pk][j], r);
+                A[pi][j] -= cmptMultiply(A[pk][j], r);
             }
 
 //             b[pi] -= b[pk]*r;
-            b[pi] -= scale(b[pk], r);
+            b[pi] -= cmptMultiply(b[pk], r);
         }
     }
 
@@ -98,11 +98,11 @@ static void Foam::DenseMatrixTools::solve
         for (label j = i + 1; j < nRows; j++)
         {
 //             sum -= A[pi][j]*x[j];
-            sum -= scale(A[pi][j], x[j]);
+            sum -= cmptMultiply(A[pi][j], x[j]);
         }
 
 //         x[i] = sum/A[pi][i];
-        x[i] = invScale(sum, A[pi][i]);
+        x[i] = cmptDivide(sum, A[pi][i]);
     }
 }
 

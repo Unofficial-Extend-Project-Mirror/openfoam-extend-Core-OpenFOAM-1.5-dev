@@ -107,30 +107,6 @@ ComponentMixedPointPatchVectorField
 (
     const PointPatch& p,
     const DimensionedField<vector, Mesh>& iF,
-    const vectorField& v,
-    const vectorField& vf
-)
-:
-    PatchField<vector>(p, iF),
-    refValue_(v),
-    valueFraction_(vf)
-{
-    checkFieldSize();
-}
-
-
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType
->
-ComponentMixedPointPatchVectorField<PatchField, Mesh, PointPatch, MatrixType>::
-ComponentMixedPointPatchVectorField
-(
-    const PointPatch& p,
-    const DimensionedField<vector, Mesh>& iF,
     const dictionary& dict
 )
 :
@@ -263,7 +239,10 @@ template
 >
 void ComponentMixedPointPatchVectorField
 <PatchField, Mesh, PointPatch, MatrixType>::
-evaluate()
+evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
     tmp<vectorField> internalValues = this->patchInternalField();
 
@@ -271,8 +250,8 @@ evaluate()
     vectorField& iF = const_cast<vectorField&>(this->internalField());
 
     vectorField values =
-        scale(refValue_, valueFraction_)
-      + scale(internalValues, vector::one - valueFraction_);
+        cmptMultiply(refValue_, valueFraction_)
+      + cmptMultiply(internalValues, vector::one - valueFraction_);
 
     this->setInInternalField(iF, values);
 }

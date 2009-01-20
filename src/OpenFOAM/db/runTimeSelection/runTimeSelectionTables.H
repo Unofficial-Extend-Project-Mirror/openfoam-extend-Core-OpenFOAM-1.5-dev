@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    runTimeSelectionTables
+    Foam::runTimeSelectionTables
 
 Description
+    Macros to enable the easy declaration of run-time selection tables.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,12 +40,8 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define declareRunTimeSelectionTable(autoPtr,baseType,argNames,argList,parList)\
+#define declareRunTimeSelectionTable\
+(autoPtr,baseType,argNames,argList,parList)                             \
                                                                         \
     /* Construct from argList function pointer type */                  \
     typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;       \
@@ -144,10 +141,6 @@ namespace Foam
     template<>                                                          \
     defineRunTimeSelectionTableDestructor(baseType,argNames)
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

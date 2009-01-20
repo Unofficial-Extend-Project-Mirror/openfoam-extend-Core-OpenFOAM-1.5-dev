@@ -22,13 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    contiguous
+InClass
+    Foam::contiguous
 
 Description
-    Template fuction which specifies if the data of the type is contiguous
-    or not.  The default function specifies not and this is specialised for
-    the types (e.g. primitives) for which their data is contiguous.
+    Template function which specifies if the data of the type is contiguous
+    or not.
+
+    The default function specifies that data are not contiguous.
+    This is specialised for the types (e.g. primitives) for which their
+    data are contiguous.
 
 \*---------------------------------------------------------------------------*/
 

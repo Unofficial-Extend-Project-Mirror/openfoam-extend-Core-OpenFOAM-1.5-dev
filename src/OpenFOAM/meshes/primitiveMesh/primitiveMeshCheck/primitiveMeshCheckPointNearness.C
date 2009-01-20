@@ -22,13 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    primitiveMesh
-
-Description
-    Check for point-point-nearness, e.g. colocated points which may be part of
-    baffles.
-
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
@@ -100,7 +93,8 @@ bool Foam::primitiveMesh::checkPointNearness
     {
         if (report)
         {
-            Info<< "   *Points too close together found, number: " << nClose
+            Info<< "  <<Points closer than " << Foam::sqrt(reportDistSqr)
+                << " together found, number: " << nClose
                 << endl;
         }
 

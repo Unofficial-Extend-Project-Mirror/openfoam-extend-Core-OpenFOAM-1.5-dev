@@ -29,55 +29,41 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
-#include "token.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-bool IOobject::writeHeader(Ostream& os) const
+bool Foam::IOobject::writeHeader(Ostream& os) const
 {
     if (!os.good())
     {
         Info<< "IOobject::writeHeader(Ostream&) : "
-            << "no stream open for write"
-            << endl << os.info() << endl;
+            << "no stream open for write" << nl
+            << os.info() << endl;
 
         return false;
     }
 
     writeBanner(os);
-    os  << endl;
-    os  << "FoamFile\n{\n";
-    os  << "    version " << os.version() << ";\n";
-    os  << "    format " << os.format() << ";\n\n";
+    os  << "FoamFile\n{\n"
+        << "    version     " << os.version() << ";\n"
+        << "    format      " << os.format() << ";\n"
+        << "    class       " << type() << ";\n";
 
-    os  << "    root " << rootPath() << ";\n";
-    os  << "    case " << caseName() << ";\n";
-    os  << "    instance " << instance() << ";\n";
-    os  << "    local " << local() << ";\n\n";
-
-    os  << "    class " << type() << ";\n";
-
+    // outdent for visibility and more space
     if (note().size())
     {
-        os << "\n    note " << note() << ";\n\n";
+        os  << "    note        " << note() << ";\n";
     }
 
-    os  << "    object " << name() << ";\n";
-    os  << "}\n\n";
+    os  << "    location    " << instance()/local() << ";\n"
+        << "    object      " << name() << ";\n"
+        << "}" << nl;
+
     writeDivider(os);
     os  << endl;
 
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

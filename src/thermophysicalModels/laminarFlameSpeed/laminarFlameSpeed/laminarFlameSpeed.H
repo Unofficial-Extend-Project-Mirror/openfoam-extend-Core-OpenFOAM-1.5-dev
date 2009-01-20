@@ -22,10 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    laminarFlameSpeed
+Namespace
+    Foam::laminarFlameSpeedModels
 
 Description
+    Namespace for laminar flame speed models
+
+
+Class
+    Foam::laminarFlameSpeed
+
+Description
+    Abstract class for laminar flame speed
 
 SourceFiles
     laminarFlameSpeed.C

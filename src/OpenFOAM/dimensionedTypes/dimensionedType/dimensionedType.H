@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dimensionedType
+    Foam::dimensioned
 
 Description
     Generic dimensioned Type class
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend functions  * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type> class dimensioned;
 
@@ -56,6 +56,7 @@ Istream& operator>>(Istream&, dimensioned<Type>&);
 template<class Type>
 Ostream& operator<<(Ostream&, const dimensioned<Type>&);
 
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class dimensioned Declaration
@@ -107,6 +108,16 @@ public:
         //- Construct from an Istream with a given name and dimensions
         dimensioned(const word&, const dimensionSet&, Istream&);
 
+        //- Construct from dictionary, supplying default value so that if the
+        //  value is not found, it is added into the dictionary.
+        static dimensioned<Type> lookupOrAddToDict
+        (
+            const word&,
+            dictionary&,
+            const Type& defaultValue = pTraits<Type>::zero,
+            const dimensionSet& dims = dimless
+        );
+
 
     // Member functions
 
@@ -137,6 +148,10 @@ public:
         //- Return transpose.
         dimensioned<Type> T() const;
 
+        //- Update the value of the dimensioned<Type> if it is found in the
+        //  dictionary
+        bool readIfPresent(const dictionary&);
+
 
     // Member operators
 
@@ -151,8 +166,17 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>> <Type>(Istream&, dimensioned<Type>&);
-        friend Ostream& operator<< <Type>(Ostream&, const dimensioned<Type>&);
+        friend Istream& operator>>
+        #ifndef __CINT__
+        <Type>
+        #endif
+        (Istream&, dimensioned<Type>&);
+
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <Type>
+        #endif
+        (Ostream&, const dimensioned<Type>&);
 };
 
 
@@ -178,10 +202,18 @@ template<class Type>
 dimensioned<scalar> mag(const dimensioned<Type>&);
 
 template<class Type>
-dimensioned<Type> scale(const dimensioned<Type>&, const dimensioned<Type>&);
+dimensioned<Type> cmptMultiply
+(
+    const dimensioned<Type>&,
+    const dimensioned<Type>&
+);
 
 template<class Type>
-dimensioned<Type> invScale(const dimensioned<Type>&, const dimensioned<Type>&);
+dimensioned<Type> cmptDivide
+(
+    const dimensioned<Type>&,
+    const dimensioned<Type>&
+);
 
 template<class Type>
 dimensioned<Type> max(const dimensioned<Type>&, const dimensioned<Type>&);

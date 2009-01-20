@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    double and float
+Typedef
+    Foam::double and float
 
 \*---------------------------------------------------------------------------*/
 
@@ -34,15 +34,6 @@ Type
 #include "label.H"
 
 #include <cmath>
-#ifndef DUMMY_SCALAR_FUNCTIONS
-#define DUMMY_SCALAR_FUNCTIONS
-inline float j0f(float x) { return float(j0(double(x)));}
-inline float j1f(float x) { return float(j1(double(x)));}
-inline float y0f(float x) { return float(y0(double(x)));}
-inline float y1f(float x) { return float(y1(double(x)));}
-inline float jnf(const int n, const float s) { return float(jn(n, double(s))); }
-inline float ynf(const int n, const float s) { return float(yn(n, double(s))); }
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

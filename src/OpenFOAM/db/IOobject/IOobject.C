@@ -22,27 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Constructors & destructor for IOobject.
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
 #include "Time.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(IOobject, 0);
+    defineTypeNameAndDebug(IOobject, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-IOobject::IOobject
+Foam::IOobject::IOobject
 (
     const word& name,
     const fileName& instance,
@@ -72,7 +67,7 @@ IOobject::IOobject
 }
 
 
-IOobject::IOobject
+Foam::IOobject::IOobject
 (
     const word& name,
     const fileName& instance,
@@ -103,77 +98,100 @@ IOobject::IOobject
 }
 
 
+// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
+
+Foam::IOobject::~IOobject()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const objectRegistry& IOobject::db() const
+const Foam::objectRegistry& Foam::IOobject::db() const
 {
     return db_;
 }
 
 
-const Time& IOobject::time() const
+const Foam::Time& Foam::IOobject::time() const
 {
     return db_.time();
 }
 
 
-const fileName& IOobject::caseName() const
+const Foam::fileName& Foam::IOobject::caseName() const
 {
     return time().caseName();
 }
 
 
-const fileName& IOobject::rootPath() const
+const Foam::fileName& Foam::IOobject::rootPath() const
 {
     return time().rootPath();
 }
 
 
-fileName IOobject::path() const
+Foam::fileName Foam::IOobject::path() const
 {
     return rootPath()/caseName()/instance()/db_.dbDir()/local();
 }
 
 
-fileName IOobject::path(const word& instance, const fileName& local) const
+Foam::fileName Foam::IOobject::path
+(
+    const word& instance,
+    const fileName& local
+) const
 {
     return rootPath()/caseName()/instance/db_.dbDir()/local;
 }
 
 
-fileName IOobject::filePath() const
+Foam::fileName Foam::IOobject::filePath() const
 {
-    if (file(objectPath()))
+    fileName path = this->path();
+    fileName objectPath = path/name();
+
+    if (file(objectPath))
     {
-        return objectPath();
+        return objectPath;
     }
-    else if
-    (
-        time().processorCase()
-     && (
-            instance() == time().system()
-         || instance() == time().constant()
+    else
+    {
+        if
+        (
+            time().processorCase()
+         && (
+                instance() == time().system()
+             || instance() == time().constant()
+            )
         )
-     && !db_.dbDir().size()
-     && file(rootPath()/caseName()/".."/instance()/local()/name())
-    )
-    {
-        return rootPath()/caseName()/".."/instance()/local()/name();
-    }
-    else if (!dir(path()))
-    {
-        word newInstancePath = time().findInstancePath(instant(instance()));
-
-        if (newInstancePath.size())
         {
-            fileName fName
-            (
-                rootPath()/caseName()/newInstancePath/db_.dbDir()/local()/name()
-            );
+            fileName parentObjectPath =
+                rootPath()/caseName()
+               /".."/instance()/db_.dbDir()/local()/name();
 
-            if (file(fName))
+            if (file(parentObjectPath))
             {
-                return fName;
+                return parentObjectPath;
+            }
+        }
+
+        if (!dir(path))
+        {
+            word newInstancePath = time().findInstancePath(instant(instance()));
+
+            if (newInstancePath.size())
+            {
+                fileName fName
+                (
+                    rootPath()/caseName()
+                   /newInstancePath/db_.dbDir()/local()/name()
+                );
+
+                if (file(fName))
+                {
+                    return fName;
+                }
             }
         }
     }
@@ -182,14 +200,14 @@ fileName IOobject::filePath() const
 }
 
 
-Istream* IOobject::objectStream()
+Foam::Istream* Foam::IOobject::objectStream()
 {
     fileName fName = filePath();
 
     if (fName != fileName::null)
     {
         IFstream* isPtr = new IFstream(fName);
-    
+
         if (isPtr->good())
         {
             return isPtr;
@@ -207,7 +225,7 @@ Istream* IOobject::objectStream()
 }
 
 
-bool IOobject::headerOk()
+bool Foam::IOobject::headerOk()
 {
     bool ok = true;
 
@@ -248,8 +266,7 @@ bool IOobject::headerOk()
 }
 
 
-// Set the IOobject to bad: say why
-void IOobject::setBad(const string& s)
+void Foam::IOobject::setBad(const string& s)
 {
     if (objState_ != GOOD)
     {
@@ -268,8 +285,7 @@ void IOobject::setBad(const string& s)
 }
 
 
-// Assign to IOobject
-void IOobject::operator=(const IOobject& io)
+void Foam::IOobject::operator=(const IOobject& io)
 {
     name_ = io.name_;
     headerClassName_ = io.headerClassName_;
@@ -281,9 +297,5 @@ void IOobject::operator=(const IOobject& io)
     objState_ = io.objState_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

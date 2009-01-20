@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "foamChemistryReader.H"
@@ -47,12 +45,12 @@ Foam::foamChemistryReader::foamChemistryReader
     const fileName& thermoFileName
 )
 :
-    specieThermo_(IFstream(thermoFileName)()),
+    speciesThermo_(IFstream(thermoFileName)()),
     speciesTable_(dictionary(IFstream(reactionsFileName)()).lookup("species")),
     reactions_
     (
         dictionary(IFstream(reactionsFileName)()).lookup("reactions"),
-        reaction::iNew(speciesTable_, specieThermo_)
+        reaction::iNew(speciesTable_, speciesThermo_)
     )
 {}
 
@@ -60,7 +58,7 @@ Foam::foamChemistryReader::foamChemistryReader
 // Construct from components
 Foam::foamChemistryReader::foamChemistryReader(const dictionary& thermoDict)
 :
-    specieThermo_
+    speciesThermo_
     (
         IFstream
         (
@@ -86,7 +84,7 @@ Foam::foamChemistryReader::foamChemistryReader(const dictionary& thermoDict)
                 fileName(thermoDict.lookup("foamChemistryFile")).expand()
             )()
         ).lookup("reactions"),
-        reaction::iNew(speciesTable_, specieThermo_)
+        reaction::iNew(speciesTable_, speciesThermo_)
     )
 {}
 

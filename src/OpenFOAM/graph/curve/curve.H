@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    curve
+    Foam::curve
 
 Description
     A single curve in a graph.
@@ -45,6 +45,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+class curve;
+Ostream& operator<<(Ostream&, const curve&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class curve Declaration
 \*---------------------------------------------------------------------------*/
@@ -56,6 +62,7 @@ class curve
 
 public:
 
+    //- The style (line, symbol, etc) of a curve
     class curveStyle
     {
 

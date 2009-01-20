@@ -23,15 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    DictionaryBase
+    Foam::DictionaryBase
 
 Description
     Base dictionary class templated on both the form of doubly-linked list
-    it uses as well as the type it holds.  This allows for the instantiation
-    of forms with and without storage management.  The IDLListType parameter
-    should itself be a template but this confused gcc 2.95.2 so it has to 
-    be instantiated for T when an intantiation of DictionaryBase is requested
-    See Dictionary.H and UDictionary.H
+    it uses as well as the type it holds.
+
+    The double templating allows for the instantiation of forms with and
+    without storage management.
+
+Note
+    The IDLListType parameter should itself be a template but this confused
+    gcc 2.95.2 so it has to be instantiated for T when an intantiation of
+    DictionaryBase is requested
+
+See Also
+    Dictionary and UDictionary
 
 SourceFiles
     DictionaryBase.C
@@ -50,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class IDLListType, class T>
 class DictionaryBase;

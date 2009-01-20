@@ -42,7 +42,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(regionCouplePolyPatch, 0);
 
-    addToRunTimeSelectionTable(polyPatch, regionCouplePolyPatch, Istream);
     addToRunTimeSelectionTable(polyPatch, regionCouplePolyPatch, dictionary);
 }
 
@@ -180,24 +179,6 @@ Foam::regionCouplePolyPatch::regionCouplePolyPatch
     shadowRegionName_(shadowRegionName),
     shadowPatchName_(shadowPatchName),
     attached_(attached),
-    shadowIndex_(-1),
-    patchToPatchPtr_(NULL),
-    reconFaceCellCentresPtr_(NULL)
-{}
-
-
-// Construct from Istream
-Foam::regionCouplePolyPatch::regionCouplePolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    coupledPolyPatch(is, index, bm),
-    shadowRegionName_(is),
-    shadowPatchName_(is),
-    attached_(is),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -441,22 +422,10 @@ bool Foam::regionCouplePolyPatch::order
 void Foam::regionCouplePolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
-
-    os  << nl << shadowPatchName_ << endl;
-}
-
-
-void Foam::regionCouplePolyPatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
-    patchIdentifier::writeDict(os);
-    os  << "    nFaces " << size() << token::END_STATEMENT << nl
-        << "    startFace " << start() << token::END_STATEMENT << nl
-        << "    shadowRegion " << shadowRegionName_
-        << token::END_STATEMENT << nl
-        << "    shadowPatch " << shadowPatchName_ << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
+    os.writeKeyword("shadowRegion") 
+        << shadowPatchName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("shadowPatch") 
+        << shadowPatchName_ << token::END_STATEMENT << nl;
 }
 
 

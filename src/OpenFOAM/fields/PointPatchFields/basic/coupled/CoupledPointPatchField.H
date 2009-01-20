@@ -145,7 +145,10 @@ public:
             }
 
             //- Evaluate the patch field
-            virtual void evaluate() = 0;
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            ) = 0;
 
             //- Add field to internal field
             virtual void addField(Field<Type>&) const = 0;
@@ -196,7 +199,8 @@ public:
                 scalarField&,
                 const lduMatrix&,
                 const scalarField&,
-                const direction
+                const direction,
+                const Pstream::commsTypes commsType
             ) const = 0;
 };
 

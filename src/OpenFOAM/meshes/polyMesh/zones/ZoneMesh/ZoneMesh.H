@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ZoneMesh
+    Foam::ZoneMesh
 
 Description
     List of mesh zones
+
 SourceFiles
     ZoneMesh.C
 
@@ -48,20 +49,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class polyMesh;
+// Forward declaration of friend functions and operators
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+template<class ZoneType, class MeshType> class ZoneMesh;
 
-template<class ZoneType> class ZoneMesh;
-
-template<class ZoneType>
-Ostream& operator<<(Ostream&, const ZoneMesh<ZoneType>&);
+template<class ZoneType, class MeshType>
+Ostream& operator<<(Ostream&, const ZoneMesh<ZoneType, MeshType>&);
 
 /*---------------------------------------------------------------------------*\
                            Class ZoneMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ZoneType>
+template<class ZoneType, class MeshType>
 class ZoneMesh
 :
     public PtrList<ZoneType>,
@@ -70,7 +69,7 @@ class ZoneMesh
     // Private data
 
         //- Reference to mesh
-        const polyMesh& mesh_;
+        const MeshType& mesh_;
 
         //- Map of zone labels for given element
         mutable Map<label>* zoneMapPtr_;
@@ -82,7 +81,7 @@ class ZoneMesh
         ZoneMesh(const ZoneMesh&);
 
         //- Disallow assignment
-        void operator=(const ZoneMesh<ZoneType>&);
+        void operator=(const ZoneMesh<ZoneType, MeshType>&);
 
 
         //- Create zone map
@@ -93,18 +92,18 @@ public:
 
     // Constructors
 
-        //- Read constructor given IOobject and a polyMesh reference
+        //- Read constructor given IOobject and a MeshType reference
         ZoneMesh
         (
             const IOobject&,
-            const polyMesh&
+            const MeshType&
         );
 
         //- Construct given size
         ZoneMesh
         (
             const IOobject&,
-            const polyMesh&,
+            const MeshType&,
             const label size
         );
 
@@ -116,7 +115,7 @@ public:
     // Member functions
 
         //- Return the mesh reference
-        const polyMesh& mesh() const
+        const MeshType& mesh() const
         {
             return mesh_;
         }
@@ -154,18 +153,12 @@ public:
         bool writeData(Ostream&) const;
 
 
-    // Member Operators
-
-        bool operator!=(const ZoneMesh&) const;
-        bool operator==(const ZoneMesh&) const;
-
-
     // Ostream operator
 
-        friend Ostream& operator<< <ZoneType>
+        friend Ostream& operator<< <ZoneType, MeshType>
         (
             Ostream&,
-            const ZoneMesh<ZoneType>&
+            const ZoneMesh<ZoneType, MeshType>&
         );
 };
 
