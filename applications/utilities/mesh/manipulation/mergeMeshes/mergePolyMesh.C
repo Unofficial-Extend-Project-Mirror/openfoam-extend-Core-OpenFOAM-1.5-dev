@@ -26,8 +26,11 @@ License
 
 #include "mergePolyMesh.H"
 #include "Time.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
 #include "mapPolyMesh.H"
+#include "polyAddPoint.H"
+#include "polyAddCell.H"
+#include "polyAddFace.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -188,7 +191,7 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
 
     label zoneID = -1;
 
-    const pointField& p = m.allPoints();
+    const pointField& p = m.points();
     labelList renumberPoints(p.size());
 
     const pointZoneMesh& pz = m.pointZones();
@@ -272,6 +275,12 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         patchIndices[patchI] = patchIndex(bm[patchI]);
     }
 
+    // Temporary: update number of allowable patches. This should be
+    // determined at the top - before adding anything.
+    meshMod_.setNumPatches(patchNames_.size());
+
+
+
     const faceZoneMesh& fz = m.faceZones();
     labelList faceZoneIndices(fz.size());
 
@@ -280,11 +289,11 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         faceZoneIndices[zoneI] = zoneIndex(faceZoneNames_, fz[zoneI].name());
     }
 
-    const faceList& f = m.allFaces();
+    const faceList& f = m.faces();
     labelList renumberFaces(f.size());
 
-    const labelList& own = m.allOwner();
-    const labelList& nei = m.allNeighbour();
+    const labelList& own = m.faceOwner();
+    const labelList& nei = m.faceNeighbour();
 
     label newOwn, newNei, newPatch, newZone;
     bool newZoneFlip;
@@ -312,12 +321,6 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
             }
         }
 
-        newOwn = own[faceI];
-        if (newOwn > -1) newOwn = renumberCells[newOwn];
-
-        newNei = nei[faceI];
-        if (newNei > -1) newNei = renumberCells[newNei];
-
         if (faceI < m.nInternalFaces() || faceI >= m.nFaces())
         {
             newPatch = -1;
@@ -326,6 +329,20 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         {
             newPatch = patchIndices[bm.whichPatch(faceI)];
         }
+
+        newOwn = own[faceI];
+        if (newOwn > -1) newOwn = renumberCells[newOwn];
+
+        if (newPatch > -1) 
+        {
+            newNei = -1;
+        } 
+        else 
+        {
+            newNei = nei[faceI];
+            newNei = renumberCells[newNei];
+        }
+
 
         newZone = fz.whichZone(faceI);
         newZoneFlip = false;
@@ -422,7 +439,8 @@ void Foam::mergePolyMesh::merge()
 
     }
 
-    polyTopoChanger::changeMesh(*this, meshMod_);
+    // Change mesh. No inflation
+    meshMod_.changeMesh(*this, false);
 
     // Clear topo change for the next operation
     meshMod_.clear();

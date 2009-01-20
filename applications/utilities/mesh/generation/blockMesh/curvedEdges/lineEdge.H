@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    lineEdge
+    Foam::lineEdge
 
 Description
     lineEdge class : defines a straight line between the start point and the

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,7 @@ Description
 #include "pointToCell.H"
 #include "cellToCell.H"
 #include "surfaceSets.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
 #include "mapPolyMesh.H"
 #include "labelIOList.H"
 #include "emptyPolyPatch.H"
@@ -451,7 +450,7 @@ void doRefinement
     const labelHashSet& refCells,
     labelList& refLevel
 )
-{ 
+{
     label oldCells = mesh.nCells();
 
     // Multi-iteration, multi-direction topology modifier.
@@ -515,7 +514,7 @@ void subsetMesh
     // exposed faces
     labelList exposedFaces(cellRemover.getExposedFaces(cellLabels));
 
-    polyTopoChange meshMod(mesh);
+    directTopoChange meshMod(mesh);
     cellRemover.setRefinement
     (
         cellLabels,
@@ -529,8 +528,7 @@ void subsetMesh
 
     const Time& runTime = mesh.time();
 
-    autoPtr<mapPolyMesh> morphMap =
-        polyTopoChanger::changeMesh(mesh, meshMod);
+    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
     if (morphMap().hasMotionPoints())
     {
@@ -566,7 +564,7 @@ void subsetMesh
     // Update cutCells for removed cells.
     cutCells.updateMesh(morphMap());
 }
-    
+
 
 // Divide the cells according to status compared to surface. Constructs sets:
 // - cutCells : all cells cut by surface
@@ -652,14 +650,14 @@ int main(int argc, char *argv[])
 
 
     //
-    // Read meshMotionDict dictionary
+    // Read motionProperties dictionary
     //
 
-    Info<< "Checking for meshMotionDict\n" << endl;
+    Info<< "Checking for motionProperties\n" << endl;
 
     IOobject motionObj
     (
-        "meshMotionDict",
+        "motionProperties",
         runTime.constant(),
         mesh,
         IOobject::MUST_READ,
@@ -671,12 +669,12 @@ int main(int argc, char *argv[])
 
     if (motionObj.headerOk())
     {
-        Info<< "Reading " << runTime.constant() / "meshMotionDict"
+        Info<< "Reading " << runTime.constant() / "motionProperties"
             << endl << endl;
 
-        IOdictionary meshMotionDict(motionObj);
+        IOdictionary motionProperties(motionObj);
 
-        Switch twoDMotion(meshMotionDict.lookup("twoDMotion"));
+        Switch twoDMotion(motionProperties.lookup("twoDMotion"));
 
         if (twoDMotion)
         {
@@ -878,7 +876,7 @@ int main(int argc, char *argv[])
 
 
         // Added cells from 2:1 refinement level restriction.
-        while 
+        while
         (
             limitRefinementLevel
             (
@@ -888,7 +886,8 @@ int main(int argc, char *argv[])
                 refLevel,
                 cutCells
             )
-        );
+        )
+        {}
 
 
         Info<< "    Current cells           : " << mesh.nCells() << nl
@@ -989,7 +988,8 @@ int main(int argc, char *argv[])
                 refLevel,
                 hanging
             )
-        );
+        )
+        {}
 
         doRefinement(mesh, refineDict, hanging, refLevel);
 

@@ -110,14 +110,14 @@ autoPtr<fvMesh> createMesh
             slave++
         )
         {
-            OPstream toSlave(slave);
+            OPstream toSlave(Pstream::blocking, slave);
             toSlave << mesh.boundaryMesh();
         }
     }
     else
     {
         // Receive patches
-        IPstream fromMaster(Pstream::masterNo());
+        IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
         PtrList<entry> patchEntries(fromMaster);
 
         if (haveMesh)
@@ -390,7 +390,7 @@ void readFields
                 {
                     if (!haveMesh[procI])
                     {
-                        OPstream toProc(procI);
+                        OPstream toProc(Pstream::blocking, procI);
                         toProc<< tsubfld();
                     }
                 }
@@ -406,7 +406,7 @@ void readFields
             const word& name = masterNames[i];
 
             // Receive field
-            IPstream fromMaster(Pstream::masterNo());
+            IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
 
             fields.set
             (

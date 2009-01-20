@@ -54,11 +54,11 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("scale", "vector");
     argList args(argc, argv);
 
-    fileName surfFileName(args.args()[1]);
+    fileName surfFileName(args.additionalArgs()[0]);
 
     Info<< "Reading surf from " << surfFileName << " ..." << endl;
 
-    fileName outFileName(args.args()[2]);
+    fileName outFileName(args.additionalArgs()[1]);
 
     Info<< "Writing surf to " << outFileName << " ..." << endl;
 

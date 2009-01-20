@@ -32,20 +32,22 @@ License
 template<class Type>
 Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 (
+    const word& cloudName,
     const polyMesh& mesh,
-    PtrList<polyMesh>& meshes,
-    const IOobject& fieldIoObject
+    const PtrList<fvMesh>& meshes,
+    const word& fieldName
 )
 {
+    // Construct empty field on mesh
     tmp<IOField<Type> > tfield
     (
         new IOField<Type>
         (
             IOobject
             (
-                fieldIoObject.name(),
+                fieldName,
                 mesh.time().timeName(),
-                "lagrangian",
+                "lagrangian"/cloudName,
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -57,23 +59,24 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 
     forAll(meshes, i)
     {
-        IOobject fieldIOobject
+        // Check object on local mesh
+        IOobject localIOobject
         ( 
-            fieldIoObject.name(),
+            fieldName,
             meshes[i].time().timeName(),
-            "lagrangian",
+            "lagrangian"/cloudName,
             meshes[i],
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
 
-        if (fieldIOobject.headerOk())
+        if (localIOobject.headerOk())
         {
-            IOField<Type> fieldi(fieldIOobject);
+            IOField<Type> fieldi(localIOobject);
 
             label offset = field.size();
             field.setSize(offset + fieldi.size());
-            
+
             forAll(fieldi, j)
             {
                 field[offset + j] = fieldi[j];
@@ -88,8 +91,9 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 template<class Type>
 void Foam::reconstructLagrangianFields
 (
+    const word& cloudName,
     const polyMesh& mesh,
-    PtrList<polyMesh>& meshes,
+    const PtrList<fvMesh>& meshes,
     const IOobjectList& objects
 )
 {
@@ -102,19 +106,15 @@ void Foam::reconstructLagrangianFields
         Info<< "    Reconstructing lagrangian "
             << fieldClassName << "s\n" << endl;
 
-        for
-        (
-            IOobjectList::iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
+        forAllIter(IOobjectList, fields, fieldIter)
         {
             Info<< "        " << fieldIter()->name() << endl;
             reconstructLagrangianField<Type>
             (
+                cloudName,
                 mesh,
                 meshes,
-                *fieldIter()
+                fieldIter()->name()
             )().write();
         }
 

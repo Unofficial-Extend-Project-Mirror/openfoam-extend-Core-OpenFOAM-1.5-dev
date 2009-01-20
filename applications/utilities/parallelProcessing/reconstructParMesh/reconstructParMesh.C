@@ -31,7 +31,6 @@ Description
     reconstruct fields.
 
     Note:
-    - does not write parallelData.
     - uses geometric matching tolerance (set with -mergeTol option)
 
     If the parallel case does not have correct procBoundaries use the
@@ -211,20 +210,34 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("fullMatch", "");
 
 #   include "addTimeOptions.H"
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    Pout<< "This is an experimental tool which tries to merge individual"
-        << " processor meshes back into one master mesh" << nl
-        << "Use it if the original master mesh has been deleted or if the"
-        << " processor meshes have been modified (topology change)" << nl
-        << "This tool will write the resulting mesh to a new time step and"
-        << " construct xxxxProcAddressing files in the processor meshes so"
-        << " reconstructPar can be used to regenerate the fields on the master"
-        << " mesh" << nl
-        << "Not tested & use at your own risk" << nl << endl;
+    Pout<< "This is an experimental tool which tries to merge"
+        << " individual processor" << nl
+        << "meshes back into one master mesh. Use it if the original"
+        << " master mesh has" << nl
+        << "been deleted or if the processor meshes have been modified"
+        << " (topology change)." << nl
+        << "This tool will write the resulting mesh to a new time step"
+        << " and construct" << nl
+        << "xxxxProcAddressing files in the processor meshes so"
+        << " reconstructPar can be" << nl
+        << "used to regenerate the fields on the master mesh." << nl
+        << nl
+        << "Not well tested & use at your own risk!" << nl
+        << endl;
 
 
+    word regionName = polyMesh::defaultRegion;
+    fileName regionPrefix = "";
+    if (args.options().found("region"))
+    {
+        regionName = args.options()["region"];
+        regionPrefix = regionName;
+        Info<< "Operating on region " << regionName << nl << endl;
+    }
 
     scalar mergeTol = defaultMergeTol;
     if (args.options().found("mergeTol"))
@@ -339,6 +352,27 @@ int main(int argc, char *argv[])
 
     for (label procI = 0; procI < nProcs; procI++)
     {
+        fileName pointsInstance
+        (
+            databases[procI].findInstance
+            (
+                regionPrefix/polyMesh::meshSubDir,
+                "points"
+            )
+        );
+
+        if (pointsInstance != databases[procI].timeName())
+        {
+            FatalErrorIn(args.executable())
+                << "Your time was specified as " << databases[procI].timeName()
+                << " but there is no polyMesh/points in that time." << endl
+                << "(there is a points file in " << pointsInstance
+                << ")" << endl
+                << "Please rerun with the correct time specified"
+                << " (through the -constant, -time or -latestTime option)."
+                << endl << exit(FatalError);
+        }
+
         Pout<< "Reading points from "
             << databases[procI].caseName()
             << " for time = " << databases[procI].timeName()
@@ -349,8 +383,12 @@ int main(int argc, char *argv[])
             IOobject
             (
                 "points",
-                databases[procI].findInstance(polyMesh::meshSubDir, "points"),
-                polyMesh::meshSubDir,
+                databases[procI].findInstance
+                (
+                    regionPrefix/polyMesh::meshSubDir,
+                    "points"
+                ),
+                regionPrefix/polyMesh::meshSubDir,
                 databases[procI],
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
@@ -389,7 +427,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                polyMesh::defaultRegion,
+                regionName,
                 runTime.timeName(),
                 runTime,
                 IOobject::NO_READ
@@ -410,7 +448,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    polyMesh::defaultRegion,
+                    regionName,
                     databases[procI].timeName(),
                     databases[procI]
                 )
@@ -501,7 +539,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                polyMesh::defaultRegion,
+                regionName,
                 databases[procI].timeName(),
                 databases[procI]
             )

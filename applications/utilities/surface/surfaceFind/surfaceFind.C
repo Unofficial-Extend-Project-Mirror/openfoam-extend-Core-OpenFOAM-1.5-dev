@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
 
     Info<< "Reading surf1 ..." << endl;
-    triSurface surf1(args.args()[1]);
+    triSurface surf1(args.additionalArgs()[0]);
 
     //
     // Nearest vertex

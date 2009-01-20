@@ -38,129 +38,153 @@ Description
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+#   include "addTimeOptions.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createMesh.H"
 
-    Info<< "Time = " << runTime.timeName() << nl << endl;
+    instantList Times = runTime.times();
+
+    // set startTime and endTime depending on -time and -latestTime options
+#   include "checkTimeOptionsNoConstant.H"
+
+    runTime.setTime(Times[startTime], startTime);
+
+#   include "createMesh.H"
 
     // make a directory called proInterface in the case
     mkDir(runTime.rootPath()/runTime.caseName()/"fluentInterface");
 
-    // open a file for the mesh
-    OFstream fluentDataFile
-    (
-        runTime.rootPath()/
-        runTime.caseName()/
-        "fluentInterface"/
-        runTime.caseName() + ".dat"
-    );
-
-    fluentDataFile
-        << "(0 \"FOAM to Fluent data File\")" << endl << endl;
-
-    // Writing number of faces
-    label nFaces = mesh.nFaces();
-
-    forAll (mesh.boundary(), patchI)
+    for (label timeI = startTime; timeI < endTime; timeI++)
     {
-        nFaces += mesh.boundary()[patchI].size();
-    }
+        runTime.setTime(Times[timeI], timeI);
+        Info<< "Time = " << runTime.timeName() << endl;
 
-    fluentDataFile
-        << "(33 (" << mesh.nCells() << " " << nFaces << " "
-        << mesh.nPoints() << "))" << endl;
+        if (mesh.readUpdate())
+        {
+            Info<< "    Read new mesh" << endl;
+        }
 
-    IOdictionary foamDataToFluentDict
-    (
-        IOobject
+        // make a directory called proInterface in the case
+        mkDir(runTime.rootPath()/runTime.caseName()/"fluentInterface");
+
+        // open a file for the mesh
+        OFstream fluentDataFile
         (
-            "foamDataToFluentDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            runTime.rootPath()/
+            runTime.caseName()/
+            "fluentInterface"/
+            runTime.caseName() + runTime.timeName() + ".dat"
+        );
+
+        fluentDataFile
+            << "(0 \"FOAM to Fluent data File\")" << endl << endl;
+
+        // Writing number of faces
+        label nFaces = mesh.nFaces();
+
+        forAll (mesh.boundary(), patchI)
+        {
+            nFaces += mesh.boundary()[patchI].size();
+        }
+
+        fluentDataFile
+            << "(33 (" << mesh.nCells() << " " << nFaces << " "
+            << mesh.nPoints() << "))" << endl;
+
+        IOdictionary foamDataToFluentDict
+        (
+            IOobject
+            (
+                "foamDataToFluentDict",
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+
+        // Search for list of objects for this time
+        IOobjectList objects(mesh, runTime.timeName());
+
+
+        // Converting volScalarField
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // Search list of objects for volScalarFields
+        IOobjectList scalarFields(objects.lookupClass("volScalarField"));
+
+        for
+        (
+            IOobjectList::iterator scalarFieldIter = scalarFields.begin();
+            scalarFieldIter != scalarFields.end();
+            ++scalarFieldIter
         )
-    );
-
-
-    // Search for list of objects for this time
-    IOobjectList objects(mesh, runTime.timeName());
-
-
-    // Converting volScalarField
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Search list of objects for volScalarFields
-    IOobjectList scalarFields(objects.lookupClass("volScalarField"));
-
-    for
-    (
-        IOobjectList::iterator scalarFieldIter = scalarFields.begin();
-        scalarFieldIter != scalarFields.end();
-        ++scalarFieldIter
-    )
-    {
-        // Read field
-        volScalarField field
-        (
-            *scalarFieldIter(),
-            mesh
-        );
-
-        // lookup field from dictionary
-        if (foamDataToFluentDict.found(field.name()))
         {
-            label unitNumber
+            // Read field
+            volScalarField field
             (
-                readLabel(foamDataToFluentDict.lookup(field.name()))
+                *scalarFieldIter(),
+                mesh
             );
 
-            // Convert field
-            if (unitNumber > 0)
+            // lookup field from dictionary
+            if (foamDataToFluentDict.found(field.name()))
             {
-                Info<< "Converting field " << field.name() << endl;
-                writeFluentField(field, unitNumber, fluentDataFile);
+                label unitNumber
+                (
+                    readLabel(foamDataToFluentDict.lookup(field.name()))
+                );
+
+                // Convert field
+                if (unitNumber > 0)
+                {
+                    Info<< "    Converting field " << field.name() << endl;
+                    writeFluentField(field, unitNumber, fluentDataFile);
+                }
             }
         }
-    }
 
 
-    // Converting volVectorField
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Converting volVectorField
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Search list of objects for volVectorFields
-    IOobjectList vectorFields(objects.lookupClass("volVectorField"));
+        // Search list of objects for volVectorFields
+        IOobjectList vectorFields(objects.lookupClass("volVectorField"));
 
-    for
-    (
-        IOobjectList::iterator vectorFieldIter = vectorFields.begin();
-        vectorFieldIter != vectorFields.end();
-        ++vectorFieldIter
-    )
-    {
-        // Read field
-        volVectorField field
+        for
         (
-            *vectorFieldIter(),
-            mesh
-        );
-
-        // lookup field from dictionary
-        if (foamDataToFluentDict.found(field.name()))
+            IOobjectList::iterator vectorFieldIter = vectorFields.begin();
+            vectorFieldIter != vectorFields.end();
+            ++vectorFieldIter
+        )
         {
-            label unitNumber
+            // Read field
+            volVectorField field
             (
-                readLabel(foamDataToFluentDict.lookup(field.name()))
+                *vectorFieldIter(),
+                mesh
             );
 
-            // Convert field
-            if (unitNumber > 0)
+            // lookup field from dictionary
+            if (foamDataToFluentDict.found(field.name()))
             {
-                Info<< "Converting field " << field.name() << endl;
-                writeFluentField(field, unitNumber, fluentDataFile);
+                label unitNumber
+                (
+                    readLabel(foamDataToFluentDict.lookup(field.name()))
+                );
+
+                // Convert field
+                if (unitNumber > 0)
+                {
+                    Info<< "    Converting field " << field.name() << endl;
+                    writeFluentField(field, unitNumber, fluentDataFile);
+                }
             }
         }
+
+        Info<< endl;
     }
 
     Info << "End\n" << endl;

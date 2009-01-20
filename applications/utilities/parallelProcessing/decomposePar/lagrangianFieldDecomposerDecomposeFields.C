@@ -37,8 +37,9 @@ namespace Foam
 template<class Type>
 void lagrangianFieldDecomposer::readFields
 (
+    const label cloudI,
     const IOobjectList& lagrangianObjects,
-    PtrList<IOField<Type> >& lagrangianFields
+    PtrList<PtrList<IOField<Type> > >& lagrangianFields
 )
 {
     // Search list of objects for lagrangian fields
@@ -47,17 +48,23 @@ void lagrangianFieldDecomposer::readFields
         lagrangianObjects.lookupClass(IOField<Type>::typeName)
     );
 
-    lagrangianFields.setSize(lagrangianTypeObjects.size());
+    lagrangianFields.set
+    (
+        cloudI,
+        new PtrList<IOField<Type> >
+        (
+            lagrangianTypeObjects.size()
+        )
+    );
 
     label lagrangianFieldi=0;
-    for
-    (
-        IOobjectList::iterator iter = lagrangianTypeObjects.begin();
-        iter != lagrangianTypeObjects.end();
-        ++iter
-    )
+    forAllIter(IOobjectList, lagrangianTypeObjects, iter)
     {
-        lagrangianFields.set(lagrangianFieldi++, new IOField<Type>(*iter()));
+        lagrangianFields[cloudI].set
+        (
+            lagrangianFieldi++,
+            new IOField<Type>(*iter())
+        );
     }
 }
 
@@ -65,6 +72,7 @@ void lagrangianFieldDecomposer::readFields
 template<class Type>
 tmp<IOField<Type> > lagrangianFieldDecomposer::decomposeField
 (
+    const word& cloudName,
     const IOField<Type>& field
 ) const
 {
@@ -80,7 +88,7 @@ tmp<IOField<Type> > lagrangianFieldDecomposer::decomposeField
             (
                 field.name(),
                 procMesh_.time().timeName(),
-                "lagrangian",
+                "lagrangian"/cloudName,
                 procMesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -94,12 +102,16 @@ tmp<IOField<Type> > lagrangianFieldDecomposer::decomposeField
 template<class GeoField>
 void lagrangianFieldDecomposer::decomposeFields
 (
+    const word& cloudName,
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll (fields, fieldI)
+    if (particleIndices_.size())
     {
-        decomposeField(fields[fieldI])().write();
+        forAll (fields, fieldI)
+        {
+            decomposeField(cloudName, fields[fieldI])().write();
+        }
     }
 }
 

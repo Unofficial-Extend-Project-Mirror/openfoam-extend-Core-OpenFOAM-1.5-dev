@@ -1,35 +1,11 @@
 #!/bin/sh
-set -x
 
-CURDIR=`pwd`
-
-export RL_ARCH_PATH=$CURDIR/readline-5.0/platforms/$WM_OPTIONS
-
-
-#
-# Build readline if nessecary
-#
-
-if [ ! -r $RL_ARCH_PATH/lib/libreadline.so ]
-then
-    mkdir -p $RL_ARCH_PATH/lib
-
-    cd readline-5.0
-
-    make distclean
-    rm -rf $RL_ARCH_PATH
-
-    ./configure --prefix=$RL_ARCH_PATH --enable-static
-
-    make
-    make install
-    make distclean
-
-    cd $CURDIR
+READLINE=0
+if [ -f /usr/include/readline/readline.h ]; then
+    echo "Found readline/readline.h include file. Enabling readline support."
+    READLINE=1
+    export READLINELINK="-lreadline -lncurses"
+    break
 fi
-
-
-#
-# Build setSet (uses RL_ARCH_PATH)
-#
-wmake setSet
+export READLINE
+wmake

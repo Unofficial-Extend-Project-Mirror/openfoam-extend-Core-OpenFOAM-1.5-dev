@@ -51,16 +51,15 @@ void dumpBox(const treeBoundBox& bb, const fileName& fName)
 
 
     pointField boxPoints(bb.points());
-    edgeList boxEdges(bb.edges());
 
     forAll(boxPoints, i)
     {
         meshTools::writeOBJ(str, boxPoints[i]);
     }
 
-    forAll(boxEdges, i)
+    forAll(treeBoundBox::edges, i)
     {
-        const edge& e = boxEdges[i];
+        const edge& e = treeBoundBox::edges[i];
 
         str<< "l " << e[0]+1 <<  ' ' << e[1]+1 << nl;
     }
@@ -115,8 +114,8 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    fileName surfFileName(args.args()[1]);
-    fileName outFileName(args.args()[2]);
+    fileName surfFileName(args.additionalArgs()[0]);
+    fileName outFileName(args.additionalArgs()[1]);
 
     Pout<< "Surface            : " << surfFileName << nl
         << "Output feature set : " << outFileName << nl

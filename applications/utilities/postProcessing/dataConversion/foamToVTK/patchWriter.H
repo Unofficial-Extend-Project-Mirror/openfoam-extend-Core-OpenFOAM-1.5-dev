@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    patchWriter
+    Foam::patchWriter
 
 Description
     Write patch fields
@@ -37,6 +37,7 @@ SourceFiles
 #ifndef patchWriter_H
 #define patchWriter_H
 
+#include "pointMesh.H"
 #include "OFstream.H"
 #include "volFields.H"
 #include "pointFields.H"

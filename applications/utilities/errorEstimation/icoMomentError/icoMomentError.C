@@ -161,7 +161,8 @@ int main(int argc, char *argv[])
                             ).fvcDiv(phi, ek)
 
                           - nu*
-                            fv::gaussLaplacianScheme<scalar>(mesh).fvcLaplacian
+                            fv::gaussLaplacianScheme<scalar, scalar>(mesh)
+                           .fvcLaplacian
                             (
                                 ek
                             )

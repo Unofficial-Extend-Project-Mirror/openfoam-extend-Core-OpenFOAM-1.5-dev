@@ -26,45 +26,30 @@ Application
     yPlusLES
 
 Description
-    Calculates the yPlus of the near-wall cells for an LES.
+    Calculates and reports yPlus for all wall patches, for the specified times.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/LESModel/LESModel.H"
 #include "nearWallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
+    timeSelector::addOptions();
+    #include "setRootCase.H"
 #   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
+    instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
-
         mesh.readUpdate();
-
-#       include "createFields.H"
-        volScalarField nuEff = sgsModel->nuEff();
 
         volScalarField yPlus
         (
@@ -80,8 +65,34 @@ int main(int argc, char *argv[])
             dimensionedScalar("yPlus", dimless, 0.0)
         );
 
-        const fvPatchList& patches = mesh.boundary();    
-    
+        Info<< "Reading field U\n" << endl;
+        volVectorField U
+        (
+            IOobject
+            (
+                "U",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh
+        );
+
+#       include "createPhi.H"
+
+        singlePhaseTransportModel laminarTransport(U, phi);
+
+        autoPtr<incompressible::LESModel> sgsModel
+        (
+            incompressible::LESModel::New(U, phi, laminarTransport)
+        );
+
+        volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
+        volScalarField nuEff = sgsModel->nuEff();
+
+        const fvPatchList& patches = mesh.boundary();
+
         forAll(patches, patchi)
         {
             const fvPatch& currPatch = patches[patchi];
@@ -96,6 +107,11 @@ int main(int argc, char *argv[])
                        *mag(U.boundaryField()[patchi].snGrad())
                     )
                    /sgsModel->nu().boundaryField()[patchi];
+
+                Info<< "Patch " << patchi
+                    << " named " << currPatch.name()
+                    << " y+ : min: " << min(yPlus) << " max: " << max(yPlus)
+                    << " average: " << average(yPlus) << nl << endl;
             }
         }
 
@@ -104,7 +120,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

@@ -230,13 +230,13 @@ void write
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surface");
-    argList::validArgs.append("output name");
+    argList::validArgs.append("input file");
+    argList::validArgs.append("output file");
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    const fileName inFileName(args.args()[3]);
-    const word outFileName(args.args()[4]);
+    const fileName inFileName(args.additionalArgs()[0]);
+    const word outFileName(args.additionalArgs()[1]);
 
     Pout<< "Input features file  : " << inFileName << nl
         << "Output features file : " << outFileName << nl

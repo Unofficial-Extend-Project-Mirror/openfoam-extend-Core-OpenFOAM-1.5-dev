@@ -29,6 +29,5 @@ if (Pstream::master())
         }
     }
 
-    // Add trailing endl.  User forum, 20/Nov/2007
-    ensightCaseFile << endl;
+    ensightCaseFile << nl;
 }

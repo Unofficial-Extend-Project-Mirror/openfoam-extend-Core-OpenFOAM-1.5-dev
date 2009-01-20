@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,9 @@ Description
 #include "PstreamReduceOps.H"
 #include "argList.H"
 #include "Time.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
+#include "polyModifyFace.H"
+#include "polyAddFace.H"
 #include "combineFaces.H"
 #include "removePoints.H"
 #include "polyMesh.H"
@@ -91,7 +92,7 @@ void checkSnapMesh
     scalar relMinVol(readScalar(snapDict.lookup("minVol")));
     const scalar minCellVol = min(mesh.cellVolumes());
     const scalar minPyrVol = relMinVol*minCellVol;
-    // Min area 
+    // Min area
     scalar minArea(readScalar(snapDict.lookup("minArea")));
 
     if (maxNonOrtho < 180.0-SMALL)
@@ -186,13 +187,13 @@ label mergePatchFaces
         autoPtr<mapPolyMesh> map;
         {
             // Topology changes container
-            polyTopoChange meshMod(mesh);
+            directTopoChange meshMod(mesh);
 
             // Merge all faces of a set into the first face of the set.
             faceCombiner.setRefinement(allFaceSets, meshMod);
 
             // Change the mesh (no inflation)
-            map = polyTopoChanger::changeMesh(mesh, meshMod);
+            map = meshMod.changeMesh(mesh, false, true);
 
             // Update fields
             mesh.updateMesh(map);
@@ -276,7 +277,7 @@ label mergePatchFaces
 
 
             // Topology changes container
-            polyTopoChange meshMod(mesh);
+            directTopoChange meshMod(mesh);
 
 
             // Restore faces
@@ -349,7 +350,7 @@ label mergePatchFaces
             }
 
             // Change the mesh (no inflation)
-            map = polyTopoChanger::changeMesh(mesh, meshMod);
+            map = meshMod.changeMesh(mesh, false, true);
 
             // Update fields
             mesh.updateMesh(map);
@@ -397,13 +398,12 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
             << " straight edge points ..." << endl;
 
         // Topology changes container
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
         pointRemover.setRefinement(pointCanBeDeleted, meshMod);
 
         // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map =
-            polyTopoChanger::changeMesh(mesh, meshMod);
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
         // Update fields
         mesh.updateMesh(map);
@@ -435,12 +435,13 @@ int main(int argc, char *argv[])
     argList::validArgs.append("feature angle [0..180]");
     argList::validOptions.insert("concaveAngle", "[0..180]");
     argList::validOptions.insert("snapMesh", "");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    scalar featureAngle(readScalar(IStringStream(args.args()[3])()));
+    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
     scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
 
@@ -457,6 +458,7 @@ int main(int argc, char *argv[])
     scalar concaveSin = Foam::sin(concaveAngle*mathematicalConstant::pi/180.0);
 
     bool snapMeshDict = args.options().found("snapMesh");
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl
@@ -468,7 +470,10 @@ int main(int argc, char *argv[])
         << "      (sin:" << concaveSin << ')' << nl
         << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Merge faces on same patch
     label nChanged = mergePatchFaces

@@ -1,3 +1,0 @@
-if [ "$DXROOT" -a -r $DXROOT ] ; then
-    wmake
-fi

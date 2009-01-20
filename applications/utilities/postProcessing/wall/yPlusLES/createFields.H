@@ -16,9 +16,9 @@ volVectorField U
 
 singlePhaseTransportModel laminarTransport(U, phi);
 
-autoPtr<LESmodel> sgsModel
+autoPtr<incompressible::LESModel> sgsModel
 (
-    LESmodel::New(U, phi, laminarTransport)
+    incompressible::LESModel::New(U, phi, laminarTransport)
 );
 
 volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();

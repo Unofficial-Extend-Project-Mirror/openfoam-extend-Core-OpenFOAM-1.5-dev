@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName starMeshFile(args.args()[3]);
+    fileName starMeshFile(args.additionalArgs()[0]);
     starMesh makeMesh(starMeshFile, runTime, scaleFactor);
 
     // Set the precision of the points data to 10

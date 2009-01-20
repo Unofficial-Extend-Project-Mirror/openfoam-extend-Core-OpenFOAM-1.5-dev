@@ -43,7 +43,7 @@ labelList blockMesh::createMergeList()
 
     const pointField& blockPoints = topology().points();
     const cellList& blockCells = topology().cells();
-    const faceList& blockFaces = topology().allFaces();
+    const faceList& blockFaces = topology().faces();
     const labelList& faceOwnerBlocks = topology().faceOwner();
 
     // For efficiency, create merge pairs in the first pass

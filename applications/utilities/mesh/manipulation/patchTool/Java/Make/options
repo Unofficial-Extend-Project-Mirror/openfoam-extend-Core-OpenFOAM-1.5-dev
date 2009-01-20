@@ -1,6 +1,0 @@
-/* EXE_INC = ../lib/j3d-org.jar */
-
-EXE_INC = -classpath ".:Make/classes:../lib/j3d-org.jar"
-
-LIB_LIBS = META-INF/MANIFEST.MF
-

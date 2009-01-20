@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    reconstructLagrangian
+InClass
+    Foam::reconstructLagrangian
 
 Description
 
@@ -38,6 +38,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "IOobjectList.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +50,8 @@ namespace Foam
 void reconstructLagrangianPositions
 (
     const polyMesh& mesh,
-    PtrList<polyMesh>& meshes,
+    const word& cloudName,
+    const PtrList<fvMesh>& meshes,
     const PtrList<labelIOList>& faceProcAddressing,
     const PtrList<labelIOList>& cellProcAddressing
 );
@@ -58,17 +60,19 @@ void reconstructLagrangianPositions
 template<class Type>
 tmp<IOField<Type> > reconstructLagrangianField
 (
+    const word& cloudName,
     const polyMesh& mesh,
-    PtrList<polyMesh>& meshes,
-    const IOobject& fieldIoObject
+    const PtrList<fvMesh>& meshes,
+    const word& fieldName
 );
 
 
 template<class Type>
 void reconstructLagrangianFields
 (
+    const word& cloudName,
     const polyMesh& mesh,
-    PtrList<polyMesh>& meshes,
+    const PtrList<fvMesh>& meshes,
     const IOobjectList& objects
 );
 

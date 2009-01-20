@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output surface file");
     argList args(argc, argv);
 
-    fileName inFileName(args.args()[1]);
-    fileName outFileName(args.args()[2]);
+    fileName inFileName(args.additionalArgs()[0]);
+    fileName outFileName(args.additionalArgs()[1]);
 
     if (outFileName == inFileName)
     {

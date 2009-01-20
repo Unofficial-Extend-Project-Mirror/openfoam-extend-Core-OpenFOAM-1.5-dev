@@ -45,8 +45,8 @@ pointFieldDecomposer::decomposeField
     // Create and map the internal field values
     Field<Type> internalField(field.internalField(), pointAddressing_);
 
-    // Create a list of pointers for the patchFields including one extra for the
-    // global patch
+    // Create a list of pointers for the patchFields including one extra
+    // for the global patch
     PtrList<pointPatchField<Type> > patchFields
     (
         boundaryAddressing_.size() + 1

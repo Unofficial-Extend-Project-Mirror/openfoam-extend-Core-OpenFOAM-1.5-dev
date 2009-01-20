@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    lagrangianFieldDecomposer
+    Foam::lagrangianFieldDecomposer
 
 Description
     Lagrangian field decomposer.
@@ -85,6 +85,7 @@ public:
             const polyMesh& mesh,
             const polyMesh& procMesh,
             const labelList& cellProcAddressing,
+            const word& cloudName,
             const Cloud<indexedParticle>& lagrangianPositions,
             const List<SLList<indexedParticle*>*>& cellParticles
         );
@@ -96,16 +97,26 @@ public:
         template<class Type>
         static void readFields
         (
+            const label cloudI,
             const IOobjectList& lagrangianObjects,
-            PtrList<IOField<Type> >& lagrangianFields
+            PtrList<PtrList<IOField<Type> > >& lagrangianFields
+//            PtrList<IOField<Type> >& lagrangianFields
         );
 
         //- Decompose volume field
         template<class Type>
-        tmp<IOField<Type> > decomposeField(const IOField<Type>& field) const;
+        tmp<IOField<Type> > decomposeField
+        (
+            const word& cloudName,
+            const IOField<Type>& field
+        ) const;
 
         template<class GeoField>
-        void decomposeFields(const PtrList<GeoField>& fields) const;
+        void decomposeFields
+        (
+            const word& cloudName,
+            const PtrList<GeoField>& fields
+        ) const;
 };
 
 

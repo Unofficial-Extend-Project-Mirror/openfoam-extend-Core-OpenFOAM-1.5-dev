@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    collapseBase
+InClass
+    Foam::collapseBase
 
 Description
     Routines collapse sliver triangles by splitting the base edge.

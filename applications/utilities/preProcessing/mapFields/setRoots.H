@@ -1,12 +1,8 @@
+    argList::noParallel();
     argList::validArgs.clear();
+    argList::validArgs.append("source dir");
 
-    argList::validArgs.append("source root");
-    argList::validArgs.append("source case");
-
-    argList::validArgs.append("target root");
-    argList::validArgs.append("target case");
-
-    argList::validOptions.erase(argList::validOptions.find("parallel"));
+    argList::validOptions.insert("sourceTime", "scalar");
     argList::validOptions.insert("parallelSource", "");
     argList::validOptions.insert("parallelTarget", "");
     argList::validOptions.insert("consistent", "");
@@ -18,11 +14,12 @@
          FatalError.exit();
     }
 
-    fileName rootDirSource(args.args()[1]);
-    fileName caseDirSource(args.args()[2]);
+    fileName rootDirTarget(args.rootPath());
+    fileName caseDirTarget(args.globalCaseName());
 
-    fileName rootDirTarget(args.args()[3]);
-    fileName caseDirTarget(args.args()[4]);
+    fileName casePath(args.additionalArgs()[0]);
+    fileName rootDirSource = casePath.path();
+    fileName caseDirSource = casePath.name();
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << nl
         << "Target: " << rootDirTarget << " " << caseDirTarget << endl;

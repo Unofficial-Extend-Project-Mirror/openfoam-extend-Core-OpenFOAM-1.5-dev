@@ -28,7 +28,7 @@ License
 #include "OFstream.H"
 #include "floatScalar.H"
 #include "writeFuns.H"
-#include "emptyFvPatchFields.H"
+#include "emptyFvsPatchFields.H"
 #include "fvsPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -100,9 +100,9 @@ void writeSurfFields
 
             const fvPatch& pp = mesh.boundary()[patchI];
 
-            if (isA<emptyFvPatchVectorField>(pf))
+            if (isA<emptyFvsPatchVectorField>(pf))
             {
-                // Note: loop over polyPatch size, not fvPatch size.
+                // Note: loop over polypatch size, not fvpatch size.
                 forAll(pp.patch(), i)
                 {
                     writeFuns::insert(vector::zero, fField);

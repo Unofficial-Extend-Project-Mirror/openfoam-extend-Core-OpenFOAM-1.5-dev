@@ -13,11 +13,11 @@
          FatalError.exit();
     }
 
-    fileName rootDirMaster(args.args()[1]);
-    fileName caseDirMaster(args.args()[2]);
+    fileName rootDirMaster(args.additionalArgs()[0]);
+    fileName caseDirMaster(args.additionalArgs()[1]);
 
-    fileName rootDirToAdd(args.args()[3]);
-    fileName caseDirToAdd(args.args()[4]);
+    fileName rootDirToAdd(args.additionalArgs()[2]);
+    fileName caseDirToAdd(args.additionalArgs()[3]);
 
     Info<< "Master:      " << rootDirMaster << " " << caseDirMaster << nl
         << "mesh to add: " << rootDirToAdd << " " << caseDirToAdd << endl;

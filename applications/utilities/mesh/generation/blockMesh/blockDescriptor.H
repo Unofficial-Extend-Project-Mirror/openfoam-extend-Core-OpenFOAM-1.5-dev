@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    blockDescriptor
+    Foam::blockDescriptor
 
 Description
     block descriptor. Takes the description of the block and the list

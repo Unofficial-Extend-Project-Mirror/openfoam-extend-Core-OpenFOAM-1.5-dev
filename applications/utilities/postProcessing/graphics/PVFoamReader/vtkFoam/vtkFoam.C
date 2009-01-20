@@ -26,6 +26,7 @@ License
 
 #include "vtkFoam.H"
 
+#include "argList.H"
 #include "Time.H"
 #include "polyBoundaryMeshEntries.H"
 #include "IOobjectList.H"
@@ -237,9 +238,9 @@ void Foam::vtkFoam::convertMesh()
         IOobject
         (
             "boundary",
-            dbPtr_->findInstance(polyMesh::meshSubDir, "boundary"),
+            dbPtr_().findInstance(polyMesh::meshSubDir, "boundary"),
             polyMesh::meshSubDir,
-            *dbPtr_,
+            dbPtr_(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -384,21 +385,45 @@ void Foam::vtkFoam::convertMesh()
 Foam::vtkFoam::vtkFoam(const char* const FileName, vtkFoamReader* reader)
 :
     reader_(reader),
+    argsPtr_(NULL),
     dbPtr_(NULL),
     meshPtr_(NULL)
 {
-    rootPath_ = fileName(FileName).path();
-    casePath_ = rootPath_.name();
-    rootPath_ = rootPath_.path();
+    fileName fullCasePath(fileName(FileName).path());
 
-    if (!dir(rootPath_/casePath_))
+    if (!dir(fullCasePath))
     {
         return;
     }
 
-    dbPtr_ = new Time(Time::controlDictName, rootPath_, casePath_);
-    dbPtr_->functionObjects().off();
-    setSelectedTime(*dbPtr_, reader_);
+    char* argvStrings[3];
+    argvStrings[0] = new char[9];
+    strcpy(argvStrings[0], "/vtkFoam");
+    argvStrings[1] = new char[6];
+    strcpy(argvStrings[1], "-case");
+    argvStrings[2] = new char[fullCasePath.size()+1];
+    strcpy(argvStrings[2], fullCasePath.c_str());
+
+    int argc = 3;
+    char** argv = &argvStrings[0];
+    argsPtr_.reset(new argList(argc, argv));
+
+    for(int i = 0; i < argc; i++)
+    {
+        delete[] argvStrings[i];
+    }
+
+    dbPtr_.reset
+    (
+        new Time
+        (
+            Time::controlDictName,
+            argsPtr_().rootPath(),
+            argsPtr_().caseName()
+        )
+    );
+    dbPtr_().functionObjects().off();
+    setSelectedTime(dbPtr_(), reader_);
 
     if (debug)
     {
@@ -417,9 +442,9 @@ Foam::vtkFoam::vtkFoam(const char* const FileName, vtkFoamReader* reader)
         IOobject
         (
             "boundary",
-            dbPtr_->findInstance(polyMesh::meshSubDir, "boundary"),
+            dbPtr_().findInstance(polyMesh::meshSubDir, "boundary"),
             polyMesh::meshSubDir,
-            *dbPtr_,
+            dbPtr_(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -457,7 +482,9 @@ Foam::vtkFoam::vtkFoam(const char* const FileName, vtkFoamReader* reader)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::vtkFoam::~vtkFoam()
-{}
+{
+    // Do NOT delete meshPtr_ since still referenced somehow.
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -471,10 +498,10 @@ void Foam::vtkFoam::UpdateInformation()
         Info<< "TimeStep = " << reader_->GetTimeStep() << endl;
     }
 
-    setSelectedTime(*dbPtr_, reader_);
+    setSelectedTime(dbPtr_(), reader_);
 
     // Search for list of objects for this time
-    IOobjectList objects(*dbPtr_, dbPtr_->timeName());
+    IOobjectList objects(dbPtr_(), dbPtr_().timeName());
 
     addFields<volScalarField>(reader_->GetVolFieldSelection(), objects);
     addFields<volVectorField>(reader_->GetVolFieldSelection(), objects);
@@ -498,8 +525,7 @@ void Foam::vtkFoam::Update()
      || reader_->GetTimeSelection()->GetArraySetting(0)
     )
     {
-        delete meshPtr_;
-        meshPtr_ = NULL;
+        meshPtr_= NULL;
     }
 
     // Clear the current set of selected fields
@@ -546,15 +572,16 @@ void Foam::vtkFoam::Update()
         {
             Info<< "Reading Mesh" << endl;
         }
-        meshPtr_ = new fvMesh
-        (
-            IOobject
+        meshPtr_ = 
+            new fvMesh
             (
-                fvMesh::defaultRegion,
-                dbPtr_->timeName(),
-                *dbPtr_
-            )
-        );
+                IOobject
+                (
+                    fvMesh::defaultRegion,
+                    dbPtr_().timeName(),
+                    dbPtr_()
+                )
+            );
         convertMesh();
     }
     else
@@ -584,7 +611,7 @@ void Foam::vtkFoam::Update()
     Foam::volPointInterpolation pInterp(mesh, pMesh);
 
     // Search for list of objects for this time
-    Foam::IOobjectList objects(mesh, dbPtr_->timeName());
+    Foam::IOobjectList objects(mesh, dbPtr_().timeName());
 
     convertVolFields<Foam::scalar>
     (

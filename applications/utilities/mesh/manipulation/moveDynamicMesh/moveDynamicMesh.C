@@ -50,7 +50,14 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << endl;
 
+        if (dir(runTime.path()/"VTK"))
+        {
+            Info << "Clear VTK directory" << endl;
+            rmDir(runTime.path()/"VTK");
+        }
+
         mesh.update();
+#       include "meshInfo.H"
         mesh.checkMesh(true);
 
         runTime.write();

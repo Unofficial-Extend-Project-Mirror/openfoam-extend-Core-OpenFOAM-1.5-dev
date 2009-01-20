@@ -39,8 +39,34 @@ Description
 #include "MapConsistentVolFields.H"
 #include "UnMapped.H"
 #include "processorFvPatch.H"
+#include "mapLagrangian.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+int getTimeIndex
+(
+    const instantList& times,
+    const scalar t
+)
+{
+    int nearestIndex = -1;
+    scalar nearestDiff = Foam::GREAT;
+
+    forAll(times, timeIndex)
+    {
+        if (times[timeIndex].name() == "constant") continue;
+
+        scalar diff = fabs(times[timeIndex].value() - t);
+        if (diff < nearestDiff)
+        {
+            nearestDiff = diff;
+            nearestIndex = timeIndex;
+        }
+    }
+
+    return nearestIndex;
+}
+
 
 void mapConsistentMesh
 (
@@ -63,6 +89,8 @@ void mapConsistentMesh
         // ~~~~~~~~~~~~~
         MapConsistentVolFields<scalar>(objects, meshToMeshInterp);
         MapConsistentVolFields<vector>(objects, meshToMeshInterp);
+        MapConsistentVolFields<sphericalTensor>(objects, meshToMeshInterp);
+        MapConsistentVolFields<symmTensor>(objects, meshToMeshInterp);
         MapConsistentVolFields<tensor>(objects, meshToMeshInterp);
     }
 
@@ -74,21 +102,27 @@ void mapConsistentMesh
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         UnMapped<surfaceScalarField>(objects);
         UnMapped<surfaceVectorField>(objects);
+        UnMapped<surfaceSphericalTensorField>(objects);
+        UnMapped<surfaceSymmTensorField>(objects);
         UnMapped<surfaceTensorField>(objects);
 
         // Mark pointFields as unmapped
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         UnMapped<pointScalarField>(objects);
         UnMapped<pointVectorField>(objects);
+        UnMapped<pointSphericalTensorField>(objects);
+        UnMapped<pointSymmTensorField>(objects);
         UnMapped<pointTensorField>(objects);
     }
+
+    mapLagrangian(meshToMeshInterp);
 }
 
 
 void mapSubMesh
 (
     const fvMesh& meshSource,
-    const fvMesh& meshTarget, 
+    const fvMesh& meshTarget,
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches
 )
@@ -114,6 +148,8 @@ void mapSubMesh
         // ~~~~~~~~~~~~~
         MapVolFields<scalar>(objects, meshToMeshInterp);
         MapVolFields<vector>(objects, meshToMeshInterp);
+        MapVolFields<sphericalTensor>(objects, meshToMeshInterp);
+        MapVolFields<symmTensor>(objects, meshToMeshInterp);
         MapVolFields<tensor>(objects, meshToMeshInterp);
     }
 
@@ -125,14 +161,20 @@ void mapSubMesh
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         UnMapped<surfaceScalarField>(objects);
         UnMapped<surfaceVectorField>(objects);
+        UnMapped<surfaceSphericalTensorField>(objects);
+        UnMapped<surfaceSymmTensorField>(objects);
         UnMapped<surfaceTensorField>(objects);
 
         // Mark pointFields as unmapped
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         UnMapped<pointScalarField>(objects);
         UnMapped<pointVectorField>(objects);
+        UnMapped<pointSphericalTensorField>(objects);
+        UnMapped<pointSymmTensorField>(objects);
         UnMapped<pointTensorField>(objects);
     }
+
+    mapLagrangian(meshToMeshInterp);
 }
 
 
@@ -186,7 +228,7 @@ wordList addProcessorPatches
     {
         if (typeid(meshTarget.boundary()[patchi]) == typeid(processorFvPatch))
         {
-            if 
+            if
             (
                !cuttingPatchTable.found
                 (
@@ -202,7 +244,7 @@ wordList addProcessorPatches
             }
         }
     }
-    
+
     return cuttingPatchTable.toc();
 }
 
@@ -215,7 +257,9 @@ int main(int argc, char *argv[])
 
 #   include "createTimes.H"
 
-    runTimeSource.setTime(runTimeTarget);
+#   include "setTimeIndex.H"
+
+    runTimeSource.setTime(sourceTimes[sourceTimeIndex], sourceTimeIndex);
 
     Info<< "\nSource time: " << runTimeSource.value()
         << "\nTarget time: " << runTimeTarget.value()
@@ -238,9 +282,9 @@ int main(int argc, char *argv[])
                 false
             )
         );
-        
+
         mapFieldsDict.lookup("patchMap") >> patchMap;
-        
+
         mapFieldsDict.lookup("cuttingPatches") >>  cuttingPatches;
     }
 
@@ -285,7 +329,11 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procI))
             );
 
-            runTimeSource.setTime(runTimeTarget);
+            runTimeSource.setTime
+            (
+                sourceTimes[sourceTimeIndex],
+                sourceTimeIndex
+            );
 
             fvMesh meshSource
             (
@@ -429,7 +477,11 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procISource))
             );
 
-            runTimeSource.setTime(runTimeTarget);
+            runTimeSource.setTime
+            (
+                sourceTimes[sourceTimeIndex],
+                sourceTimeIndex
+            );
 
             fvMesh meshSource
             (
@@ -447,7 +499,7 @@ int main(int argc, char *argv[])
 
             for (int procITarget=0; procITarget<nProcsTarget; procITarget++)
             {
-                if 
+                if
                 (
                     !bbsTargetSet[procITarget]
                   || (
@@ -525,7 +577,7 @@ int main(int argc, char *argv[])
                 runTimeTarget
             )
         );
-        
+
         Info<< "Source mesh size: " << meshSource.nCells() << tab
             << "Target mesh size: " << meshTarget.nCells() << nl << endl;
 

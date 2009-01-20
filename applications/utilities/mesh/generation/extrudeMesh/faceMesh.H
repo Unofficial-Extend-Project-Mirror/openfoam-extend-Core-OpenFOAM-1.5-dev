@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceMesh
+    Foam::faceMesh
 
 Description
     Storage for surface mesh i.e. points and faces.
@@ -35,7 +35,8 @@ SourceFiles
 #ifndef faceMesh_H
 #define faceMesh_H
 
-#include "primitiveFacePatch.H"
+#include "PrimitivePatch.H"
+#include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,14 +49,16 @@ namespace Foam
 
 class faceMesh
 :
-    public primitiveFacePatch
+    public PrimitivePatch<face, List, pointField>
 {
-    primitiveFacePatch read(Istream& is)
-    {
-        pointField points(is);
-        faceList faces(is);
-        return primitiveFacePatch(faces, points);
-    }
+    // Private member functions
+
+        PrimitivePatch<face, List, pointField> read(Istream& is)
+        {
+            pointField points(is);
+            faceList faces(is);
+            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
+        }
 
 
 public:
@@ -65,13 +68,13 @@ public:
         //- Construct from components
         faceMesh(const faceList& faces, const pointField& points)
         :
-            primitiveFacePatch(faces, points)
+            PrimitivePatch<face, Foam::List, pointField>(faces, points)
         {}
 
         //- Construct from Istream
         faceMesh(Istream& is)
         :
-            primitiveFacePatch(read(is))
+            PrimitivePatch<face, Foam::List, pointField>(read(is))
         {}
 
 
@@ -82,7 +85,7 @@ public:
             return os
                 << fm.points()
                 << token::NL
-                << static_cast<primitiveFacePatch>(fm);
+                << static_cast<PrimitivePatch<face, Foam::List, pointField> >(fm);
         }
 };
 

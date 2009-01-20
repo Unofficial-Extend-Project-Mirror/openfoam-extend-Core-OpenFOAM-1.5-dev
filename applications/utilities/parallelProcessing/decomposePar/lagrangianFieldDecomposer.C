@@ -29,6 +29,7 @@ Description
 
 #include "lagrangianFieldDecomposer.H"
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -42,12 +43,13 @@ lagrangianFieldDecomposer::lagrangianFieldDecomposer
     const polyMesh& mesh,
     const polyMesh& procMesh,
     const labelList& cellProcAddressing,
+    const word& cloudName,
     const Cloud<indexedParticle>& lagrangianPositions,
     const List<SLList<indexedParticle*>*>& cellParticles
 )
 :
     procMesh_(procMesh),
-    positions_(procMesh),
+    positions_(procMesh, cloudName, false),
     particleIndices_(lagrangianPositions.size())
 {
     label pi = 0;
@@ -60,12 +62,7 @@ lagrangianFieldDecomposer::lagrangianFieldDecomposer
         {
             SLList<indexedParticle*>& particlePtrs = *cellParticles[celli];
 
-            for
-            (
-                SLList<indexedParticle*>::iterator iter = particlePtrs.begin();
-                iter != particlePtrs.end();
-                ++iter
-            )
+            forAllIter(SLList<indexedParticle*>, particlePtrs, iter)
             {
                 const indexedParticle& ppi = *iter();
                 particleIndices_[pi++] = ppi.index();
@@ -84,7 +81,8 @@ lagrangianFieldDecomposer::lagrangianFieldDecomposer
     }
 
     particleIndices_.setSize(pi);
-    positions_.write();
+
+    IOPosition<passiveParticle>(positions_).write();
 }
 
 

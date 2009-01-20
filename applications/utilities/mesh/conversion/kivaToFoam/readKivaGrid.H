@@ -215,7 +215,7 @@ enum patchTypeNames
     CYCLIC
 };
 
-char* kivaPatchNames[nBCs] =
+const char* kivaPatchNames[nBCs] =
 {
     "piston",
     "valve",
@@ -477,6 +477,7 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
 faceListList boundary(nPatches);
 wordList patchNames(nPatches);
 wordList patchTypes(nPatches);
+word defaultFacesName = "defaultFaces";
 word defaultFacesType = emptyPolyPatch::typeName;
 wordList patchPhysicalTypes(nPatches);
 
@@ -561,6 +562,7 @@ preservePatchTypes
     polyMesh::defaultRegion,
     patchNames,
     patchTypes,
+    defaultFacesName,
     defaultFacesType,
     patchPhysicalTypes
 );
@@ -579,12 +581,10 @@ polyMesh pShapeMesh
     boundary,
     patchNames,
     patchTypes,
+    defaultFacesName,
     defaultFacesType,
     patchPhysicalTypes
 );
-
-Info << "Checking mesh" << endl;
-pShapeMesh.checkMesh();
 
 Info << "Writing polyMesh" << endl;
 pShapeMesh.write();

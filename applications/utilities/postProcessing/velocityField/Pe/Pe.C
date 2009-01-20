@@ -27,191 +27,96 @@ Application
 
 Description
     Calculates and writes the Pe number as a surfaceScalarField obtained from
-    field phi for each time
+    field phi.
+    The -noWrite option just outputs the max/min values without writing
+    the field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
+#include "fvc.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-
-#include "incompressible/turbulenceModel/turbulenceModel.H"
-#include "incompressible/LESmodel/LESmodel.H"
-
+#include "incompressible/RASModel/RASModel.H"
+#include "incompressible/LESModel/LESModel.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "compressible/RASModel/RASModel.H"
+#include "compressible/LESModel/LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject phiHeader
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (phiHeader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        autoPtr<surfaceScalarField> PePtr;
 
-        Info<< "Time = " << runTime.timeName() << endl;
+        Info<< "    Reading phi" << endl;
+        surfaceScalarField phi(phiHeader, mesh);
 
-        IOobject phiHeader
+        volVectorField U
         (
-            "phi",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "U",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            mesh
         );
 
-        // Check U exists
-        if (phiHeader.headerOk())
+        IOobject RASPropertiesHeader
+        (
+            "RASProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        IOobject LESPropertiesHeader
+        (
+            "LESProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        Info<< "    Calculating Pe" << endl;
+
+        if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
         {
-            mesh.readUpdate();
-
-            Info<< "    Reading phi" << endl;
-            surfaceScalarField phi(phiHeader, mesh);
-
-            volVectorField U
-            (
-                IOobject
-                (
-                    "U",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::MUST_READ
-                ),
-                mesh
-            );
-
-
-            Info<< "    Calculating Pe" << endl;
-
-            if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
+            if (RASPropertiesHeader.headerOk())
             {
-                IOobject turbulencePropertiesHeader
+                IOdictionary RASProperties(RASPropertiesHeader);
+
+                singlePhaseTransportModel laminarTransport(U, phi);
+
+                autoPtr<incompressible::RASModel> RASModel
                 (
-                    "turbulenceProperties",
-                    runTime.constant(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
+                    incompressible::RASModel::New
+                    (
+                        U,
+                        phi,
+                        laminarTransport
+                    )
                 );
 
-                if (turbulencePropertiesHeader.headerOk())
-                {
-                    IOdictionary turbulenceProperties
-                    (
-                        turbulencePropertiesHeader
-                    );
-
-                    singlePhaseTransportModel laminarTransport(U, phi);
-
-                    if (turbulenceProperties.found("turbulenceModel"))
-                    {
-                        autoPtr<turbulenceModel> turbulenceModel
-                        (
-                            turbulenceModel::New(U, phi, laminarTransport)
-                        );
-
-                        surfaceScalarField Pe
-                        (
-                            IOobject
-                            (
-                                "Pe",
-                                runTime.timeName(),
-                                mesh,
-                                IOobject::NO_READ
-                            ),
-                            mag(phi)
-                            /(
-                                mesh.magSf()
-                               *mesh.surfaceInterpolation::deltaCoeffs()
-                               *fvc::interpolate(turbulenceModel->nuEff())
-                            )
-                        );
-
-                        Pe.write();
-                    }
-                    else if (turbulenceProperties.found("LESmodel"))
-                    {
-                        autoPtr<LESmodel> sgsModel
-                        (
-                            LESmodel::New(U, phi, laminarTransport)
-                        );
-
-                        surfaceScalarField Pe
-                        (
-                            IOobject
-                            (
-                                "Pe",
-                                runTime.timeName(),
-                                mesh,
-                                IOobject::NO_READ
-                            ),
-                            mag(phi)
-                            /(
-                                mesh.magSf()
-                               *mesh.surfaceInterpolation::deltaCoeffs()
-                               *fvc::interpolate(sgsModel->nuEff())
-                            )
-                        );
-
-                        Info << "    Max Pe = " << max(Pe).value() << endl;
-
-                        /*
-                        label count = 0;
-                        forAll(Pe, i)
-                        {
-                            if (Pe[i] > 200) count++;
-                        }
-
-                        Info<< "Fraction > 200 = "
-                            << scalar(count)/Pe.size() << endl;
-                        */
-
-                        Pe.write();
-                    }
-                    else
-                    {
-                        FatalErrorIn(args.executable())
-                            << "Cannot find turbulence model type in"
-                               "turbulenceModel dictionary"
-                            << exit(FatalError);
-                    }
-                }
-                else
-                {
-                    IOdictionary transportProperties
-                    (
-                        IOobject
-                        (
-                            "transportProperties",
-                            runTime.constant(),
-                            mesh,
-                            IOobject::MUST_READ,
-                            IOobject::NO_WRITE
-                        )
-                    );
-
-                    dimensionedScalar nu
-                    (
-                        transportProperties.lookup("nu")
-                    );
-
-                    surfaceScalarField Pe
+                PePtr.set
+                (
+                    new surfaceScalarField
                     (
                         IOobject
                         (
@@ -220,137 +125,29 @@ int main(int argc, char *argv[])
                             mesh,
                             IOobject::NO_READ
                         ),
-                        mesh.surfaceInterpolation::deltaCoeffs()
-                       *(mag(phi)/mesh.magSf())*(runTime.deltaT()/nu)
-                    );
-
-                    Info << "    Max Pe = " << max(Pe).value() << endl;
-                    
-                    Pe.write();
-                }
+                        mag(phi)
+                       /(
+                            mesh.magSf()
+                          * mesh.surfaceInterpolation::deltaCoeffs()
+                          * fvc::interpolate(RASModel->nuEff())
+                         )
+                    )
+                );
             }
-            else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
+            else if (LESPropertiesHeader.headerOk())
             {
-                IOobject turbulencePropertiesHeader
+                IOdictionary LESProperties(LESPropertiesHeader);
+
+                singlePhaseTransportModel laminarTransport(U, phi);
+
+                autoPtr<incompressible::LESModel> sgsModel
                 (
-                    "turbulenceProperties",
-                    runTime.constant(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
+                    incompressible::LESModel::New(U, phi, laminarTransport)
                 );
 
-                if (turbulencePropertiesHeader.headerOk())
-                {
-                    IOdictionary turbulenceProperties
-                    (
-                        turbulencePropertiesHeader
-                    );
-
-                    autoPtr<basicThermo> thermo
-                    (
-                        basicThermo::New(mesh)
-                    );
-
-                    volScalarField rho
-                    (
-                        IOobject
-                        (
-                            "rho",
-                            runTime.timeName(),
-                            mesh
-                        ),
-                        thermo->rho()
-                    );
-
-                    if (turbulenceProperties.found("turbulenceModel"))
-                    {
-                        autoPtr<compressible::turbulenceModel> turbulenceModel
-                        (
-                            compressible::turbulenceModel::New
-                            (
-                                rho,
-                                U,
-                                phi,
-                                thermo()
-                            )
-                        );
-
-                        surfaceScalarField Pe
-                        (
-                            IOobject
-                            (
-                                "Pe",
-                                runTime.timeName(),
-                                mesh,
-                                IOobject::NO_READ
-                            ),
-                            mag(phi)
-                            /(
-                                mesh.magSf()
-                               *mesh.surfaceInterpolation::deltaCoeffs()
-                               *fvc::interpolate(turbulenceModel->muEff())
-                            )
-                        );
-
-                        Pe.write();
-                    }
-                    else if (turbulenceProperties.found("LESmodel"))
-                    {
-                        autoPtr<compressible::LESmodel> sgsModel
-                        (
-                            compressible::LESmodel::New(rho, U, phi, thermo())
-                        );
-
-                        surfaceScalarField Pe
-                        (
-                            IOobject
-                            (
-                                "Pe",
-                                runTime.timeName(),
-                                mesh,
-                                IOobject::NO_READ
-                            ),
-                            mag(phi)
-                            /(
-                                mesh.magSf()
-                               *mesh.surfaceInterpolation::deltaCoeffs()
-                               *fvc::interpolate(sgsModel->muEff())
-                            )
-                        );
-
-                        Info << "    Max Pe = " << max(Pe).value() << endl;
-
-                        Pe.write();
-                    }
-                    else
-                    {
-                        FatalErrorIn(args.executable())
-                            << "Cannot find turbulence model type in"
-                               "turbulenceModel dictionary"
-                            << exit(FatalError);
-                    }
-                }
-                else
-                {
-                    IOdictionary transportProperties
-                    (
-                        IOobject
-                        (
-                            "transportProperties",
-                            runTime.constant(),
-                            mesh,
-                            IOobject::MUST_READ,
-                            IOobject::NO_WRITE
-                        )
-                    );
-
-                    dimensionedScalar mu
-                    (
-                        transportProperties.lookup("mu")
-                    );
- 
-                    surfaceScalarField Pe
+                PePtr.set
+                (
+                    new surfaceScalarField
                     (
                         IOobject
                         (
@@ -359,34 +156,211 @@ int main(int argc, char *argv[])
                             mesh,
                             IOobject::NO_READ
                         ),
-                        mesh.surfaceInterpolation::deltaCoeffs()
-                       *(mag(phi)/(mesh.magSf()))*(runTime.deltaT()/mu)
-                    );
-
-                    Info << "    Max Pe = " << max(Pe).value() << endl;
-                
-                    Pe.write();
-                }
+                        mag(phi)
+                       /(
+                            mesh.magSf()
+                          * mesh.surfaceInterpolation::deltaCoeffs()
+                          * fvc::interpolate(sgsModel->nuEff())
+                        )
+                    )
+                );
             }
             else
             {
-                FatalErrorIn(args.executable())
-                    << "Incorrect dimensions of phi: " << phi.dimensions()
-                    << abort(FatalError);
+                IOdictionary transportProperties
+                (
+                    IOobject
+                    (
+                        "transportProperties",
+                        runTime.constant(),
+                        mesh,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                );
+
+                dimensionedScalar nu(transportProperties.lookup("nu"));
+
+                PePtr.set
+                (
+                    new surfaceScalarField
+                    (
+                        IOobject
+                        (
+                            "Pe",
+                            runTime.timeName(),
+                            mesh,
+                            IOobject::NO_READ
+                        ),
+                        mesh.surfaceInterpolation::deltaCoeffs()
+                      * (mag(phi)/mesh.magSf())*(runTime.deltaT()/nu)
+                    )
+                );
+            }
+        }
+        else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
+        {
+            if (RASPropertiesHeader.headerOk())
+            {
+                IOdictionary RASProperties(RASPropertiesHeader);
+
+                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
+
+                volScalarField rho
+                (
+                    IOobject
+                    (
+                        "rho",
+                        runTime.timeName(),
+                        mesh
+                    ),
+                    thermo->rho()
+                );
+
+                autoPtr<compressible::RASModel> RASModel
+                (
+                    compressible::RASModel::New
+                    (
+                        rho,
+                        U,
+                        phi,
+                        thermo()
+                    )
+                );
+
+                PePtr.set
+                (
+                    new surfaceScalarField
+                    (
+                        IOobject
+                        (
+                            "Pe",
+                            runTime.timeName(),
+                            mesh,
+                            IOobject::NO_READ
+                        ),
+                        mag(phi)
+                       /(
+                            mesh.magSf()
+                          * mesh.surfaceInterpolation::deltaCoeffs()
+                          * fvc::interpolate(RASModel->muEff())
+                        )
+                    )
+                );
+            }
+            else if (LESPropertiesHeader.headerOk())
+            {
+                IOdictionary LESProperties(LESPropertiesHeader);
+
+                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
+
+                volScalarField rho
+                (
+                    IOobject
+                    (
+                        "rho",
+                        runTime.timeName(),
+                        mesh
+                    ),
+                    thermo->rho()
+                );
+
+                autoPtr<compressible::LESModel> sgsModel
+                (
+                    compressible::LESModel::New(rho, U, phi, thermo())
+                );
+
+                PePtr.set
+                (
+                    new surfaceScalarField
+                    (
+                        IOobject
+                        (
+                            "Pe",
+                            runTime.timeName(),
+                            mesh,
+                            IOobject::NO_READ
+                        ),
+                        mag(phi)
+                       /(
+                            mesh.magSf()
+                          * mesh.surfaceInterpolation::deltaCoeffs()
+                          * fvc::interpolate(sgsModel->muEff())
+                        )
+                    )
+                );
+            }
+            else
+            {
+                IOdictionary transportProperties
+                (
+                    IOobject
+                    (
+                        "transportProperties",
+                        runTime.constant(),
+                        mesh,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                );
+
+                dimensionedScalar mu(transportProperties.lookup("mu"));
+
+                PePtr.set
+                (
+                    new surfaceScalarField
+                    (
+                        IOobject
+                        (
+                            "Pe",
+                            runTime.timeName(),
+                            mesh,
+                            IOobject::NO_READ
+                        ),
+                        mesh.surfaceInterpolation::deltaCoeffs()
+                      * (mag(phi)/(mesh.magSf()))*(runTime.deltaT()/mu)
+                    )
+                );
             }
         }
         else
         {
-            Info<< "    No phi" << endl;
+            FatalErrorIn(args.executable())
+                << "Incorrect dimensions of phi: " << phi.dimensions()
+                    << abort(FatalError);
         }
 
-        Info<< endl;
+
+        // can also check how many cells exceed a particular Pe limit
+        /*
+        {
+            label count = 0;
+            label PeLimit = 200;
+            forAll(PePtr(), i)
+            {
+                if (PePtr()[i] > PeLimit)
+                {
+                    count++;
+                }
+
+            }
+
+            Info<< "Fraction > " << PeLimit << " = "
+                << scalar(count)/Pe.size() << endl;
+        }
+        */
+
+        Info << "Pe max : " << max(PePtr()).value() << endl;
+
+        if (writeResults)
+        {
+            PePtr().write();
+        }
     }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    else
+    {
+        Info<< "    No phi" << endl;
+    }
 }
-
 
 // ************************************************************************* //

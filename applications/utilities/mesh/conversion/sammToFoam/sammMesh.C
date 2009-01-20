@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "sammMesh.H"
@@ -164,6 +162,7 @@ sammMesh::sammMesh
     cellShapes_(0),
     boundary_(0),
     patchTypes_(0),
+    defaultFacesName_("defaultFaces"),
     defaultFacesType_(emptyPolyPatch::typeName),
     patchNames_(0),
     patchPhysicalTypes_(0),

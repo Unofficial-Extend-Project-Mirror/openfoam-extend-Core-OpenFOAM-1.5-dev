@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    ensightParticlePositions
+InApplication
+    foamToEnsight
 
 Description
 
@@ -44,7 +44,8 @@ void ensightParticlePositions
     const Foam::fvMesh& mesh,
     const Foam::fileName& postProcPath,
     const Foam::word& timeFile,
-    const Foam::word& sprayName
+    const Foam::word& CloudName,
+    const bool dataExists
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

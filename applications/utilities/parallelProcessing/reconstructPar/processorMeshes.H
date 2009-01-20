@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    processorMeshes
+    Foam::processorMeshes
 
 Description
     Container for processor mesh addressing.
@@ -58,6 +58,8 @@ class processorMeshes
         //- Processor databases
         PtrList<Time>& databases_;
 
+        const word meshName_;
+
         //- List of processor meshes
         PtrList<fvMesh> meshes_;
 
@@ -91,7 +93,7 @@ public:
     // Constructors
 
         //- Construct from components
-        processorMeshes(PtrList<Time>& databases);
+        processorMeshes(PtrList<Time>& databases, const word& meshName);
 
 
     // Member Functions

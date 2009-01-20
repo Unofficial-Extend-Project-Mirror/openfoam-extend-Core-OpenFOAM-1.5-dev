@@ -31,9 +31,9 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
-autoPtr<compressible::turbulenceModel> turbulence
+autoPtr<compressible::RASModel> RASModel
 (
-    compressible::turbulenceModel::New
+    compressible::RASModel::New
     (
         rho,
         U,

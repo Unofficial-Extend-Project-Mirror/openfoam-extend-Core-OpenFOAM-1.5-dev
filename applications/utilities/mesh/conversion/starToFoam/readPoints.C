@@ -32,7 +32,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-label readVtxLabel(IFstream& is)
+label starMesh::readVtxLabel(IFstream& is)
 {
     char lcs[16];
 
@@ -47,7 +47,7 @@ label readVtxLabel(IFstream& is)
 }
 
 
-scalar readVtxCmpt(IFstream& is)
+scalar starMesh::readVtxCmpt(IFstream& is)
 {
     char lcs[17];
 
@@ -59,6 +59,16 @@ scalar readVtxCmpt(IFstream& is)
     lcs[16] = '\0';
 
     return scalar(atof(lcs));
+}
+
+
+void starMesh::readToNl(IFstream& is)
+{
+    char c;
+    do
+    {
+        is.get(c);
+    } while (is && c != '\n');
 }
 
 
@@ -78,7 +88,6 @@ void starMesh::readPoints(const scalar scaleFactor)
         {
             label pointLabel;
             scalar x, y, z;
-            char nlc;
 
             maxLabel = -1;
             while (pointsFile)
@@ -93,14 +102,7 @@ void starMesh::readPoints(const scalar scaleFactor)
                 y = readVtxCmpt(pointsFile);
                 z = readVtxCmpt(pointsFile);
 
-                pointsFile.get(nlc);
-
-                if (nlc != '\n')
-                {
-                    FatalIOErrorIn("starMesh::readPoints()", pointsFile)
-                        << "Unexpected \\n"
-                        << abort(FatalIOError);
-                }
+                readToNl(pointsFile);
 
                 nPoints++;
             }
@@ -136,7 +138,6 @@ void starMesh::readPoints(const scalar scaleFactor)
 
         IFstream pointsFile(pointsFileName);
         label pointLabel;
-        char nlc;
 
         forAll(points_, p)
         {
@@ -145,14 +146,7 @@ void starMesh::readPoints(const scalar scaleFactor)
             points_[p].y() = readVtxCmpt(pointsFile);
             points_[p].z() = readVtxCmpt(pointsFile);
 
-            pointsFile.get(nlc);
-
-            if (nlc != '\n')
-            {
-                FatalIOErrorIn("starMesh::readPoints()", pointsFile)
-                    << "Unexpected \\n"
-                    << abort(FatalIOError);
-            }
+            readToNl(pointsFile);
 
 #           ifdef starMesh_H
             starPointID_[p] = pointLabel;

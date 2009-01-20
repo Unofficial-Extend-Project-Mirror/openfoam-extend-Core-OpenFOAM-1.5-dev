@@ -1,3 +1,0 @@
-PatchTool.C
-
-LIB = $(FOAM_LIBBIN)/libPatchToolServer

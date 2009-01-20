@@ -1,6 +1,0 @@
-#!/bin/sh
-set -x
-
-rmclassall
-javac -classpath ".:../lib/j3d-org.jar" -d Make/classes/ PatchTool/PatchTool.java
-jar cf ../lib/PatchTool.jar -C Make/classes .

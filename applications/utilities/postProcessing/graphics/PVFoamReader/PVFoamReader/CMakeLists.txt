@@ -1,3 +1,6 @@
+# Cmake version
+cmake_minimum_required(VERSION 2.4)
+
 # Set the project/library name here.  Classes should be declared as
 # "class VTK_FoamReader_EXPORT vtkFoo", where PVFoamReader is the name of the
 # project set here.

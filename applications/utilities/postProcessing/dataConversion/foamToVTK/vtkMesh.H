@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    vtkMesh
+    Foam::vtkMesh
 
 Description
     Encapsulation of VTK mesh data. Holds mesh or meshsubset and
@@ -39,13 +39,14 @@ SourceFiles
 
 #include "vtkTopo.H"
 #include "fvMeshSubset.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -58,6 +59,9 @@ class vtkMesh
 {
     // Private data
 
+        //- Demand driven pointMesh
+        mutable autoPtr<pointMesh> pointMeshPtr_;
+
         //- Mesh subset
         fvMeshSubset subsetMesh_;
 
@@ -65,7 +69,7 @@ class vtkMesh
         const word setName_;
 
         //- Current decomposition of topology
-        mutable vtkTopo* topoPtr_;
+        mutable autoPtr<vtkTopo> topoPtr_;
 
 
 
@@ -100,6 +104,15 @@ public:
                 return subsetMesh_;
             }
 
+            const pointMesh& basePointMesh() const
+            {
+                if (!pointMeshPtr_.valid())
+                {
+                    pointMeshPtr_.reset(new pointMesh(*this));
+                }
+                return pointMeshPtr_();
+            }
+
             //- Check if running subMesh
             bool useSubMesh() const
             {
@@ -109,11 +122,11 @@ public:
             //- topology
             const vtkTopo& topo() const
             {
-                if (!topoPtr_)
+                if (!topoPtr_.valid())
                 {
-                    topoPtr_ = new vtkTopo(mesh());
+                    topoPtr_.reset(new vtkTopo(mesh()));
                 }
-                return *topoPtr_;
+                return topoPtr_();
             }
 
             //- Access either mesh or submesh
@@ -125,7 +138,20 @@ public:
                 }
                 else
                 {
-                    return subsetMesh_.baseMesh();
+                    return *this;
+                }
+            }
+
+            //- Access either pointMesh of base or pointMesh of subset
+            const pointMesh& pMesh() const
+            {
+                if (useSubMesh())
+                {
+                    return subsetMesh_.subPointMesh();
+                }
+                else
+                {
+                    return basePointMesh();
                 }
             }
 
@@ -138,7 +164,7 @@ public:
             //- Number of field points
             label nFieldPoints() const
             {
-                return mesh().nPoints() + topo().addPointCellLabels().size();
+                return pMesh().size() + topo().addPointCellLabels().size();
             }
 
 
@@ -164,7 +190,6 @@ public:
                     return fld;
                 }
             }
-
 };
 
 

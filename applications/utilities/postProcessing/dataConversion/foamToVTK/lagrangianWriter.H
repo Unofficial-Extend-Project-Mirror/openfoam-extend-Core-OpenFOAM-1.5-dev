@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    lagrangianWriter
+    Foam::lagrangianWriter
 
 Description
     Write fields (internal).
@@ -37,6 +37,7 @@ SourceFiles
 #ifndef lagrangianWriter_H
 #define lagrangianWriter_H
 
+#include "globalPointPatch.H"
 #include "OFstream.H"
 #include "volFields.H"
 #include "pointFields.H"
@@ -63,9 +64,12 @@ class lagrangianWriter
 
     const fileName fName_;
 
+    const word cloudName_;
+
     std::ofstream os_;
 
     label nParcels_;
+
 
 public:
 
@@ -76,7 +80,8 @@ public:
         (
             const vtkMesh&,
             const bool binary,
-            const fileName&
+            const fileName&,
+            const word&
         );
 
 

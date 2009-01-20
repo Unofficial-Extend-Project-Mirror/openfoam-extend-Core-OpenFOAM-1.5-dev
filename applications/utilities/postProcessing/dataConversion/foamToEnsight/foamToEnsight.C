@@ -23,23 +23,36 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Translate OpenFOAM data to EnSight format
+    Translates FOAM data to EnSight format
+
+Usage
+    - foamToEnsight [OPTION] \n
+    Translates OpenFOAM data to Ensight format
+
+    @param -ascii \n
+    Write Ensight data in ASCII format instead of "C Binary"
+
+Note
+    Parallel support for cloud data is not supported
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "volFields.H"
-#include "tensorIOField.H"
 #include "IOobjectList.H"
-#include "OFstream.H"
 #include "IOmanip.H"
+#include "OFstream.H"
+
+#include "volFields.H"
+
+#include "labelIOField.H"
 #include "scalarIOField.H"
+#include "tensorIOField.H"
 
 #include "ensightMesh.H"
 #include "ensightField.H"
 
 #include "ensightParticlePositions.H"
-#include "ensightSprayField.H"
+#include "ensightCloudField.H"
 
 #include "fvc.H"
 
@@ -47,46 +60,41 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+bool inFileNameList
+(
+    const fileNameList& nameList,
+    const word& name
+)
+{
+    forAll(nameList, i)
+    {
+        if (nameList[i] == name)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("patches", "patch list");
+    argList::validOptions.insert("ascii", "" );
 #   include "addTimeOptions.H"
 
-    /*
-    const label nTypes = 3;
-    const word fieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volTensorField::typeName
-    };
-
-    const label nSprayFieldTypes = 3;
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName
-    };
-    */
-
-    const label nTypes = 2;
-    const word fieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName
-    };
-
-    const label nSprayFieldTypes = 2;
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName
-    };
-
 #   include "setRootCase.H"
+
+    // Check options
+    bool binary = true;
+    if (args.options().found("ascii"))
+    {
+        binary = false;
+    }
+
 #   include "createTime.H"
 
     // get the available time-steps
@@ -96,12 +104,29 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
+    // Mesh instance (region0 gets filtered out)
+    fileName regionPrefix = "";
+
+    if (regionName != polyMesh::defaultRegion)
+    {
+        regionPrefix = regionName;
+    }
+
+    const label nTypes = 2;
+    const word fieldTypes[] =
+    {
+        volScalarField::typeName,
+        volVectorField::typeName
+    };
+
+    // Create the output folder
     const word postProcDir = "EnSight";
-    const word prepend = args.globalCaseName() + '.';
-    const word sprayName = "lagrangian";
 
+    // Path to EnSight folder at case level only
+    // - For parallel cases, data only written from master
+//    fileName postProcPath = runTime.path()/postProcDir;
     fileName postProcPath = args.rootPath()/args.globalCaseName()/postProcDir;
 
     if (Pstream::master())
@@ -114,68 +139,153 @@ int main(int argc, char *argv[])
         mkDir(postProcPath);
     }
 
-    OFstream *ensightCaseFilePtr = NULL;
+    // Start of case file header output
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    const word prepend = args.globalCaseName() + '.';
+
+    OFstream *ensightCaseFilePtr = NULL;
     if (Pstream::master())
     {
-        // Open the Case file
         fileName ensightCaseFileName = prepend + "case";
 
-        ensightCaseFilePtr = new OFstream
-        (
-            postProcPath/ensightCaseFileName,
-            ios_base::out|ios_base::trunc,
-            runTime.writeFormat(),
-            runTime.writeVersion(),
-            IOstream::UNCOMPRESSED
-        );
+        if (!binary)
+        {
+            ensightCaseFilePtr = new OFstream
+            (
+                postProcPath/ensightCaseFileName,
+                ios_base::out|ios_base::trunc,
+                runTime.writeFormat(),
+                runTime.writeVersion(),
+                runTime.writeCompression()
+            );
+        }
+        else
+        {
+            ensightCaseFilePtr = new OFstream
+            (
+                postProcPath/ensightCaseFileName,
+                ios_base::out|ios_base::trunc,
+                runTime.writeFormat(),
+                runTime.writeVersion(),
+                IOstream::UNCOMPRESSED
+            );
+        }
 
         Info<< nl << "Case file is " << ensightCaseFileName << endl;
     }
 
     OFstream& ensightCaseFile = *ensightCaseFilePtr;
 
-    // Construct the EnSight mesh
-    ensightMesh eMesh(mesh, args);
+#   include "ensightCaseHeader.H"
 
-    // Set Time to the last time before looking for the spray objects
+    // Construct the EnSight mesh
+    ensightMesh eMesh(mesh, args, binary);
+
+    // Set Time to the last time before looking for the lagrangian objects
     runTime.setTime(Times[Times.size()-1], Times.size()-1);
 
     IOobjectList objects(mesh, runTime.timeName());
-    IOobjectList sprayObjects(mesh, runTime.timeName(), "lagrangian");
-
-    bool lagrangianExist = false;
-
-    if (!eMesh.patchNames.size())
-    {
-        IOobject lagrangianHeader
-        (
-            "positions",
-            runTime.timeName(),
-            "lagrangian",
-            mesh,
-            IOobject::NO_READ
-        );
-
-        if (lagrangianHeader.headerOk())
-        {
-            lagrangianExist = true;
-        }
-    }
-
-#   include "ensightCaseHeader.H"
 
 #   include "checkMeshMoving.H"
 
+    wordHashSet allCloudNames;
     word geomCaseFileName = prepend + "000";
     if (Pstream::master())
     {
         // test pre check variable if there is a moving mesh
-        if (meshMoving == true) geomCaseFileName = prepend + "***";
+        if (meshMoving == true)
+        {
+            geomCaseFileName = prepend + "***";
+        }
+
         ensightCaseFile
             << "GEOMETRY" << nl
             << "model:        1     "
             << (geomCaseFileName + ".mesh").c_str() << nl;
+    }
+
+    // Identify if lagrangian data exists at each time, and add clouds
+    // to the 'allCloudNames' hash set
+    for (label n=startTime; n<endTime; n++)
+    {
+        runTime.setTime(Times[n], n);
+
+        fileNameList cloudDirs = readDir
+        (
+            runTime.timePath()/regionPrefix/"lagrangian",
+            fileName::DIRECTORY
+        );
+
+        forAll(cloudDirs, cloudI)
+        {
+            IOobjectList cloudObjs
+            (
+                mesh,
+                runTime.timeName(),
+                "lagrangian"/cloudDirs[cloudI]
+            );
+
+            IOobject* positionsPtr = cloudObjs.lookup("positions");
+
+            if (positionsPtr)
+            {
+                allCloudNames.insert(cloudDirs[cloudI]);
+            }
+        }
+    }
+
+    HashTable<HashTable<word> > allCloudFields;
+    forAllConstIter(wordHashSet, allCloudNames, cloudIter)
+    {
+        // Add the name of the cloud(s) to the case file header
+        if (Pstream::master())
+        {
+            ensightCaseFile
+            <<  (
+                    "measured:     1     "
+                  + prepend
+                  + "***."
+                  + cloudIter.key()
+                ).c_str()
+            << nl;
+        }
+
+        // Create a new hash table for each cloud
+        allCloudFields.insert(cloudIter.key(), HashTable<word>());
+
+        // Identify the new cloud in the hash table
+        HashTable<HashTable<word> >::iterator newCloudIter =
+            allCloudFields.find(cloudIter.key());
+
+        // Loop over all times to build list of fields and field types
+        // for each cloud
+        for (label n=startTime; n<endTime; n++)
+        {
+            runTime.setTime(Times[n], n);
+
+            IOobjectList cloudObjs
+            (
+                mesh,
+                runTime.timeName(),
+                "lagrangian"/cloudIter.key()
+            );
+
+            forAllConstIter(IOobjectList, cloudObjs, fieldIter)
+            {
+                const IOobject obj = *fieldIter();
+
+                if (obj.name() != "positions")
+                {
+                    // Add field and field type
+                    newCloudIter().insert
+                    (
+                        obj.name(),
+                        obj.headerClassName()
+                    );
+                }
+            }
+        }
     }
 
     label nTimeSteps = 0;
@@ -188,7 +298,7 @@ int main(int argc, char *argv[])
         word timeName = itoa(timeIndex);
         word timeFile = prepend + timeName;
 
-        Info << "Translating time = " << runTime.timeName() << nl;
+        Info<< "Translating time = " << runTime.timeName() << nl;
 
 #       include "moveMesh.H"
 
@@ -203,21 +313,18 @@ int main(int argc, char *argv[])
             );
         }
 
-        if (Pstream::master() && timeIndex == 0)
+
+        // Start of field data output
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if (timeIndex == 0 && Pstream::master())
         {
-            if (lagrangianExist)
-            {
-                ensightCaseFile
-                    <<  (
-                            "measured:     1     "
-                          + prepend
-                          + "***."
-                          + sprayName
-                        ).c_str()
-                    << nl;
-             }
-             ensightCaseFile << nl << "VARIABLE" << nl;
+            ensightCaseFile<< nl << "VARIABLE" << nl;
         }
+
+
+        // Cell field data output
+        // ~~~~~~~~~~~~~~~~~~~~~~
 
         for (label i=0; i<nTypes; i++)
         {
@@ -251,6 +358,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -263,6 +371,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -275,6 +384,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -287,6 +397,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -299,6 +410,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -306,70 +418,75 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (lagrangianExist)
+
+        // Cloud field data output
+        // ~~~~~~~~~~~~~~~~~~~~~~~
+
+        forAllConstIter(HashTable<HashTable<word> >, allCloudFields, cloudIter)
         {
+            const word& cloudName = cloudIter.key();
+
+            fileNameList currentCloudDirs = readDir
+            (
+                runTime.timePath()/regionPrefix/"lagrangian",
+                fileName::DIRECTORY
+            );
+
+            bool cloudExists = inFileNameList(currentCloudDirs, cloudName);
             ensightParticlePositions
             (
                 mesh,
                 postProcPath,
                 timeFile,
-                sprayName
+                cloudName,
+                cloudExists
             );
 
-            for (label i=0; i<nSprayFieldTypes; i++)
+            forAllConstIter(HashTable<word>, cloudIter(), fieldIter)
             {
-                wordList fieldNames = sprayObjects.names(sprayFieldTypes[i]);
+                const word& fieldName = fieldIter.key();
+                const word& fieldType = fieldIter();
 
-                for (label j=0; j<fieldNames.size(); j++)
+                IOobject fieldObject
+                (
+                    fieldName,
+                    mesh.time().timeName(),
+                    "lagrangian"/cloudName,
+                    mesh,
+                    IOobject::MUST_READ
+                );
+
+                bool fieldExists = fieldObject.headerOk();
+                if (fieldType == scalarIOField::typeName)
                 {
-                    word fieldName = fieldNames[j];
-
-                    IOobject fieldObject
+                    ensightCloudField<scalar>
                     (
-                        fieldName,
-                        mesh.time().timeName(),
-                        "lagrangian",
-                        mesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
+                        fieldObject,
+                        postProcPath,
+                        prepend,
+                        timeIndex,
+                        cloudName,
+                        ensightCaseFile,
+                        fieldExists
                     );
-
-                    if (sprayFieldTypes[i] == scalarIOField::typeName)
-                    {
-                        ensightSprayField<scalar>
-                        (
-                            fieldObject,
-                            postProcPath,
-                            prepend,
-                            timeIndex,
-                            sprayName,
-                            ensightCaseFile
-                        );
-                    }
-                    else if (sprayFieldTypes[i] == vectorIOField::typeName)
-                    {
-                        ensightSprayField<vector>
-                        (
-                            fieldObject,
-                            postProcPath,
-                            prepend,
-                            timeIndex,
-                            sprayName,
-                            ensightCaseFile
-                        );
-                    }
-                    else if (sprayFieldTypes[i] == tensorIOField::typeName)
-                    {
-                        ensightSprayField<tensor>
-                        (
-                            fieldObject,
-                            postProcPath,
-                            prepend,
-                            timeIndex,
-                            sprayName,
-                            ensightCaseFile
-                        );
-                    }
+                }
+                else if (fieldType == vectorIOField::typeName)
+                {
+                    ensightCloudField<vector>
+                    (
+                        fieldObject,
+                        postProcPath,
+                        prepend,
+                        timeIndex,
+                        cloudName,
+                        ensightCaseFile,
+                        fieldExists
+                    );
+                }
+                else
+                {
+                    Info<< "Unable to convert field type " << fieldType
+                        << " for field " << fieldName << endl;
                 }
             }
         }

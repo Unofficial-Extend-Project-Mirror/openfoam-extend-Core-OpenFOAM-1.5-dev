@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    starMesh
+    Foam::starMesh
 
 Description
     A messy mesh class which supports the possibility of creating a shapeMesh
@@ -55,6 +55,7 @@ SourceFiles
 #include "cellList.H"
 #include "polyPatchList.H"
 #include "coupledFacePair.H"
+#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +63,7 @@ SourceFiles
 #define namespaceFoam
     using namespace Foam;
 #endif
+
 
 /*---------------------------------------------------------------------------*\
                            Class starMesh Declaration
@@ -88,6 +90,9 @@ class starMesh
 
         //- Boundary patch types
         wordList patchTypes_;
+
+        //- Default boundary patch name
+        word defaultFacesName_;
 
         //- Default boundary patch types
         word defaultFacesType_;
@@ -190,6 +195,15 @@ class starMesh
         //- Disallow default bitwise assignment
         void operator=(const starMesh&);
 
+
+        //- read fixed format vertex label
+        static label readVtxLabel(IFstream&);
+
+        //- read fixed format vertex coordinate component
+        static scalar readVtxCmpt(IFstream&);
+
+        //- Read to nl
+        static void readToNl(IFstream&);
 
         //- Read the points file
         void readPoints(const scalar scaleFactor);

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    arcEdge
+    Foam::arcEdge
 
 Description
     arcEdge class : defines the arcEdge of a circle in terms of 3 points on its

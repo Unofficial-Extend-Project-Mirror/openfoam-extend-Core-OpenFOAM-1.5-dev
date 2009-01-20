@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    block
+    Foam::block
 
 Description
     creates a single block of cells from point coordinates,

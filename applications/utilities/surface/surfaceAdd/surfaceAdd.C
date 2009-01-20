@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("mergeRegions", "");
     argList args(argc, argv);
 
-    fileName inFileName1(args.args()[1]);
-    fileName inFileName2(args.args()[2]);
-    fileName outFileName(args.args()[3]);
+    fileName inFileName1(args.additionalArgs()[0]);
+    fileName inFileName2(args.additionalArgs()[1]);
+    fileName outFileName(args.additionalArgs()[2]);
 
     bool addPoint = args.options().found("points");
     bool mergeRegions = args.options().found("mergeRegions");

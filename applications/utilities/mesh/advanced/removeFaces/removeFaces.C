@@ -31,15 +31,14 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "Random.H"
 #include "argList.H"
 #include "Time.H"
-#include "polyMesh.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
-#include "mapPolyMesh.H"
+#include "directTopoChange.H"
 #include "faceSet.H"
 #include "removeFaces.H"
+#include "ReadFields.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 using namespace Foam;
 
@@ -49,13 +48,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    Foam::argList::validOptions.insert("overwrite", "");
     Foam::argList::validArgs.append("faceSet");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createPolyMesh.H"
+#   include "createMesh.H"
 
-    word setName(args.args()[3]);
+    bool overwrite = args.options().found("overwrite");
+
+    word setName(args.additionalArgs()[0]);
 
     // Read faces
     faceSet candidateSet(mesh, setName);
@@ -98,10 +100,47 @@ int main(int argc, char *argv[])
         compatibleRemoves.write();
     }
 
-    // Topo changes container
-    polyTopoChange meshMod(mesh);
 
-    // Insert mesh refinement into polyTopoChange.
+    // Read objects in time directory
+    IOobjectList objects(mesh, runTime.timeName());
+
+    // Read vol fields.
+    PtrList<volScalarField> vsFlds;
+    ReadFields(mesh, objects, vsFlds);
+
+    PtrList<volVectorField> vvFlds;
+    ReadFields(mesh, objects, vvFlds);
+
+    PtrList<volSphericalTensorField> vstFlds;
+    ReadFields(mesh, objects, vstFlds);
+
+    PtrList<volSymmTensorField> vsymtFlds;
+    ReadFields(mesh, objects, vsymtFlds);
+
+    PtrList<volTensorField> vtFlds;
+    ReadFields(mesh, objects, vtFlds);
+
+    // Read surface fields.
+    PtrList<surfaceScalarField> ssFlds;
+    ReadFields(mesh, objects, ssFlds);
+
+    PtrList<surfaceVectorField> svFlds;
+    ReadFields(mesh, objects, svFlds);
+
+    PtrList<surfaceSphericalTensorField> sstFlds;
+    ReadFields(mesh, objects, sstFlds);
+
+    PtrList<surfaceSymmTensorField> ssymtFlds;
+    ReadFields(mesh, objects, ssymtFlds);
+
+    PtrList<surfaceTensorField> stFlds;
+    ReadFields(mesh, objects, stFlds);
+
+
+    // Topo changes container
+    directTopoChange meshMod(mesh);
+
+    // Insert mesh refinement into directTopoChange.
     faceRemover.setRefinement
     (
         facesToRemove,
@@ -110,10 +149,7 @@ int main(int argc, char *argv[])
         meshMod
     );
 
-    mesh.write();
-
-    autoPtr<mapPolyMesh> morphMap =
-        polyTopoChanger::changeMesh(mesh, meshMod);
+    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
     mesh.updateMesh(morphMap);
 
@@ -126,7 +162,10 @@ int main(int argc, char *argv[])
     // Update numbering of cells/vertices.
     faceRemover.updateMesh(morphMap);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Take over refinement levels and write to new time directory.
     Pout<< "Writing mesh to time " << runTime.timeName() << endl;

@@ -4,19 +4,13 @@
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "EdgeMap.H"
 
-Foam::label Foam::checkGeometry
-(
-    const polyMesh& mesh,
-    bool checkPointNearness,
-    bool checkCellDeterminant
-)
+Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
 {
     label noFailedChecks = 0;
 
     Info<< "\nChecking geometry..." << endl;
-
-    if (mesh.checkClosedBoundary(true)) noFailedChecks++;
 
     // Check directions
     {
@@ -44,24 +38,45 @@ Foam::label Foam::checkGeometry
         Info << "    This is a " << nValidDirs << "-D mesh" << endl;
     }
 
-    boundBox bb(mesh.points());
-
-    Pout<< "    Domain bounding box: "
-           << bb.min() << " " << bb.max() << endl;
-
     // Get a small relative length from the bounding box
-    const boundBox& globalBb = mesh.globalData().bb();
+    const boundBox& globalBb = mesh.bounds();
 
-    if (Pstream::parRun())
-    {
-        Info<< "    Overall domain bounding box: "
-            << globalBb.min() << " " << globalBb.max() << endl;
-    }
+    Info<< "    Overall domain bounding box "
+        << globalBb.min() << " " << globalBb.max() << endl;
 
 
     // Min length
     scalar minDistSqr = magSqr(1e-6*(globalBb.max() - globalBb.min()));
 
+    // Non-empty directions
+    const Vector<label> validDirs = (mesh.directions() + Vector<label>::one)/2;
+
+    Info<< "    Mesh (non-empty) directions " << validDirs << endl;
+
+    scalar nGeomDims = mesh.nGeometricD();
+
+    Info<< "    Mesh (non-empty, non-wedge) dimensions "
+        << nGeomDims << endl;
+
+    if (nGeomDims < 3)
+    {
+        pointSet nonAlignedPoints(mesh, "nonAlignedEdges", mesh.nPoints()/100);
+
+        if (mesh.checkEdgeAlignment(true, validDirs, &nonAlignedPoints))
+        {
+            noFailedChecks++;
+
+            if (nonAlignedPoints.size() > 0)
+            {
+                Pout<< "  <<Writing " << nonAlignedPoints.size()
+                    << " points on non-aligned edges to set "
+                    << nonAlignedPoints.name() << endl;
+                nonAlignedPoints.write();
+            }
+        }
+    }
+
+    if (mesh.checkClosedBoundary(true)) noFailedChecks++;
 
     {
         cellSet cells(mesh, "nonClosedCells", mesh.nCells()/100+1);
@@ -163,24 +178,10 @@ Foam::label Foam::checkGeometry
         }
     }
 
-    if (checkPointNearness)
+    if (allGeometry)
     {
-        pointSet points(mesh, "nearPoints", mesh.nPoints()/100 + 1);
-        if (mesh.checkPointNearness(true, minDistSqr, &points))
-        {
-            //noFailedChecks++;
-
-            if (points.size() > 0)
-            {
-                Pout<< "  <<Writing " << points.size()
-                    << " near points to set " << points.name() << endl;
-                points.write();
-            }
-        }
-    }
-
-    {
-        pointSet points(mesh, "shortEdges", mesh.nEdges()/1000 + 1);
+        // Note use of nPoints since don't want edge construction.
+        pointSet points(mesh, "shortEdges", mesh.nPoints()/1000 + 1);
         if (mesh.checkEdgeLength(true, minDistSqr, &points))
         {
             //noFailedChecks++;
@@ -193,8 +194,25 @@ Foam::label Foam::checkGeometry
                 points.write();
             }
         }
+
+        label nEdgeClose = points.size();
+
+        if (mesh.checkPointNearness(false, minDistSqr, &points))
+        {
+            //noFailedChecks++;
+
+            if (points.size() > nEdgeClose)
+            {
+                pointSet nearPoints(mesh, "nearPoints", points);
+                Pout<< "  <<Writing " << nearPoints.size()
+                    << " near (closer than " << Foam::sqrt(minDistSqr)
+                    << " apart) points to set " << nearPoints.name() << endl;
+                nearPoints.write();
+            }
+        }
     }
 
+    if (allGeometry)
     {
         faceSet faces(mesh, "concaveFaces", mesh.nFaces()/100 + 1);
         if (mesh.checkFaceAngles(true, 10, &faces))
@@ -211,6 +229,7 @@ Foam::label Foam::checkGeometry
         }
     }
 
+    if (allGeometry)
     {
         faceSet faces(mesh, "warpedFaces", mesh.nFaces()/100 + 1);
         if (mesh.checkFaceFlatness(true, 0.8, &faces))
@@ -226,7 +245,7 @@ Foam::label Foam::checkGeometry
         }
     }
 
-    if (checkCellDeterminant)
+    if (allGeometry)
     {
         cellSet cells(mesh, "underdeterminedCells", mesh.nCells()/100);
         if (mesh.checkCellDeterminant(true, &cells))
@@ -234,11 +253,11 @@ Foam::label Foam::checkGeometry
             noFailedChecks++;
 
             Pout<< "  <<Writing " << cells.size()
-                << " under-determines cells to set " << cells.name() << endl;
+                << " under-determined cells to set " << cells.name() << endl;
             cells.write();
         }
     }
-    
+
 
     return noFailedChecks;
 }

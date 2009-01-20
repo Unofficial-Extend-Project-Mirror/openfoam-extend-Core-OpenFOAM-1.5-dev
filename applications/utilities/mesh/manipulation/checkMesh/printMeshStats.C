@@ -10,12 +10,27 @@
 #include "tetMatcher.H"
 
 
-void Foam::printMeshStats(const polyMesh& mesh)
+void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 {
     Pout<< "Mesh stats" << nl
-        << "    points:           " << mesh.points().size() << nl
-        << "    edges:            " << mesh.edges().size() << nl
-        << "    faces:            " << mesh.faces().size() << nl
+        << "    points:           " << mesh.points().size() << nl;
+
+    if (mesh.nInternalPoints() != -1)
+    {
+        Pout<< "    internal points:  " << mesh.nInternalPoints() << nl;
+    }
+
+    if (allTopology && mesh.nInternalPoints() != -1)
+    {
+        Pout<< "    edges:            " << mesh.nEdges() << nl
+            << "    internal edges:   " << mesh.nInternalEdges() << nl
+            << "    internal edges using one boundary point:   "
+            << mesh.nInternal1Edges()-mesh.nInternal0Edges() << nl
+            << "    internal edges using two boundary points:  "
+            << mesh.nInternalEdges()-mesh.nInternal1Edges() << nl;
+    }
+
+    Pout<< "    faces:            " << mesh.faces().size() << nl
         << "    internal faces:   " << mesh.faceNeighbour().size() << nl
         << "    cells:            " << mesh.cells().size() << nl
         << "    boundary patches: " << mesh.boundaryMesh().size() << nl
@@ -79,7 +94,7 @@ void Foam::printMeshStats(const polyMesh& mesh)
             nTetWedge++;
         }
         else
-        {   
+        {
             nUnknown++;
         }
     }

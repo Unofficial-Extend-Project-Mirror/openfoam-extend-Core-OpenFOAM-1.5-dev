@@ -282,14 +282,14 @@ void Foam::readerDatabase::loadMesh()
     subsetMeshPtr_ =
         new fvMeshSubset
         (
-        IOobject
-        (
-            "subset",
-            meshPtr_->time().constant(),
-            *meshPtr_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+            IOobject
+            (
+                "set",
+                meshPtr_->time().constant(),
+                *meshPtr_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
             *meshPtr_
         );
 
@@ -313,7 +313,7 @@ Foam::polyMesh::readUpdateState Foam::readerDatabase::setTime
     const label timeIndex
 )
 {
-    runTimePtr_->setTime(timeInstance, timeIndex);
+    runTime().setTime(timeInstance, timeIndex);
 
     polyMesh::readUpdateState meshChange;
 

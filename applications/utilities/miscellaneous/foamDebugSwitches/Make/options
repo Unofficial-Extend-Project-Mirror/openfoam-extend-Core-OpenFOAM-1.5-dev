@@ -1,28 +1,43 @@
 EXE_LIBS = \
-    -L/usr/X11R6/lib -lGstream -lGL \
-    -lLESfilters \
-    -lODE \
-    -lcompressibleLESmodels \
+/*    -lautoMesh */ \
     -lbasicThermophysicalModels \
-    -lfiniteVolume \
+    -lchemistryModel \
     -lcombustionThermophysicalModels \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleLESModels \
+    -lcompressibleRASModels \
+    -ldecompositionMethods \
     -ldieselSpray \
+    -ldynamicFvMesh \
+    -ldynamicMesh \
     -ledgeMesh \
     -lengine \
     -lerrorEstimation \
-    -ldynamicMesh \
-    $(WM_DECOMP_LIBS) \
-    -lfiniteArea \
+    -lfiniteVolume \
+    -lforces \
+    -lfvMotionSolver \
+    -lincompressibleLESModels \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
-    -lincompressibleLESmodels \
+    -lincompressibleRASModels \
+    -linterfaceProperties \
+    -llagrangianIntermediate \
     -llagrangian \
     -llaminarFlameSpeedModels \
+    -lLESdeltas \
+    -lLESfilters \
+    -lliquidMixture \
     -lliquids \
+    -lmeshTools \
+    -lODE \
+    -lOpenFOAM \
+    -lpdf \
+    -lphaseModel \
+    -lradiation \
     -lrandomProcesses \
     -lsampling \
+    -lsolidMixture \
+    -lsolids \
     -lspecie \
     -lthermophysicalFunctions \
-    -ltriSurface \
-    -lpdf
+    -ltopoChangerFvMesh \
+    -ltriSurface
+

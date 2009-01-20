@@ -41,23 +41,97 @@ Description
     The any or all of the three options may be specified and are processed
     in the above order.
 
+    With -rotateFields (in combination with -rotate) it will also
+    read & transform vector & tensor fields.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "Time.H"
-#include "polyMesh.H"
+#include "fvMesh.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "ReadFields.H"
+#include "pointFields.H"
 #include "transformField.H"
+#include "transformGeometricField.H"
 #include "IStringStream.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class GeoField>
+void readAndRotateFields
+(
+    PtrList<GeoField>& flds,
+    const fvMesh& mesh,
+    const tensor& T,
+    const IOobjectList& objects
+)
+{
+    ReadFields(mesh, objects, flds);
+    forAll(flds, i)
+    {
+        Info<< "Transforming " << flds[i].name() << endl;
+        dimensionedTensor dimT("t", flds[i].dimensions(), T);
+        transform(flds[i], dimT, flds[i]);
+    }
+}
+
+
+void rotateFields(const Time& runTime, const tensor& T)
+{
+#   include "createMesh.H"
+
+    // Read objects in time directory
+    IOobjectList objects(mesh, runTime.timeName());
+
+    // Read vol fields.
+
+    PtrList<volScalarField> vsFlds;
+    readAndRotateFields(vsFlds, mesh, T, objects);
+
+    PtrList<volVectorField> vvFlds;
+    readAndRotateFields(vvFlds, mesh, T, objects);
+
+    PtrList<volSphericalTensorField> vstFlds;
+    readAndRotateFields(vstFlds, mesh, T, objects);
+
+    PtrList<volSymmTensorField> vsymtFlds;
+    readAndRotateFields(vsymtFlds, mesh, T, objects);
+
+    PtrList<volTensorField> vtFlds;
+    readAndRotateFields(vtFlds, mesh, T, objects);
+
+    // Read surface fields.
+
+    PtrList<surfaceScalarField> ssFlds;
+    readAndRotateFields(ssFlds, mesh, T, objects);
+
+    PtrList<surfaceVectorField> svFlds;
+    readAndRotateFields(svFlds, mesh, T, objects);
+
+    PtrList<surfaceSphericalTensorField> sstFlds;
+    readAndRotateFields(sstFlds, mesh, T, objects);
+
+    PtrList<surfaceSymmTensorField> ssymtFlds;
+    readAndRotateFields(ssymtFlds, mesh, T, objects);
+
+    PtrList<surfaceTensorField> stFlds;
+    readAndRotateFields(stFlds, mesh, T, objects);
+
+    mesh.write();
+}
+
+
 //  Main program:
 
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("translate", "vector");
     argList::validOptions.insert("rotate", "(vector vector)");
+    argList::validOptions.insert("rotateFields", "");
     argList::validOptions.insert("scale", "vector");
  
 #   include "setRootCase.H"
@@ -105,6 +179,11 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by " << T << endl;
 
         points = transform(T, points);
+
+        if (args.options().found("rotateFields"))
+        {
+            rotateFields(runTime, T);
+        }
     }
 
     if (args.options().found("scale"))

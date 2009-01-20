@@ -162,7 +162,8 @@ int main(int argc, char *argv[])
                             ).fvcDiv(phi, TE)
 
                           - DT*
-                            fv::gaussLaplacianScheme<scalar>(mesh).fvcLaplacian
+                            fv::gaussLaplacianScheme<scalar, scalar>(mesh)
+                           .fvcLaplacian
                             (
                                 TE
                             )

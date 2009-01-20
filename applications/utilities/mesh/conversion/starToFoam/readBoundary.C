@@ -236,6 +236,7 @@ void starMesh::readBoundary()
         polyMesh::defaultRegion,
         patchNames_,
         patchTypes_,
+        defaultFacesName_,
         defaultFacesType_,
         patchPhysicalTypes_
     );

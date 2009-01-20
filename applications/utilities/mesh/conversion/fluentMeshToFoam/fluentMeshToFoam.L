@@ -35,9 +35,9 @@ Description
 
 #undef yyFlexLexer
 
- /* ------------------------------------------------------------------------- *\
+/* ------------------------------------------------------------------------- *\
    ------ local definitions
- \* ------------------------------------------------------------------------- */
+\* ------------------------------------------------------------------------- */
 
 #include "argList.H"
 #include "Time.H"
@@ -55,7 +55,7 @@ Description
 
 #include "readHexLabel.H"
 #include "cellShapeRecognition.H"
-#include "repatchPolyTopoChanger.H"
+#include "repatch.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -93,7 +93,7 @@ SLList<label> cellGroupEndIndex;
 SLList<label> cellGroupType;
 
 // number of zones adjusted at run-time if necessary
-label maxZoneID = 100; 
+label maxZoneID = 100;
 label zoneIDBuffer = 10;
 
 wordList patchTypeIDs(maxZoneID);
@@ -102,8 +102,11 @@ wordList patchNameIDs(maxZoneID);
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-int yywrap()
-// int yyFlexLexer::yywrap()
+#if YY_FLEX_SUBMINOR_VERSION < 34
+extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -328,7 +331,6 @@ endOfSection               {space}")"{space}
     }
 
 <readPointGroupData>{space}{hexLabel}{space}{hexLabel}{space}{hexLabel}{labelList} {
-
         IStringStream pointGroupDataStream(YYText());
 
         // read point zone-ID, start and end-label
@@ -345,7 +347,7 @@ endOfSection               {space}")"{space}
         // In FOAM, indices start from zero - adjust
         pointI = pointGroupStartIndex.last() - 1;
 
-        // reset number of components to default 
+        // reset number of components to default
         pointGroupNumberOfComponents = 3;
 
         // read number of components in the vector
@@ -377,7 +379,7 @@ endOfSection               {space}")"{space}
 
         IStringStream vertexXyzStream(YYText());
 
-        // Note: coordinates must be read one at the time.  
+        // Note: coordinates must be read one at the time.
         scalar x = readScalar(vertexXyzStream);
         scalar y = readScalar(vertexXyzStream);
 
@@ -389,7 +391,7 @@ endOfSection               {space}")"{space}
 
         IStringStream vertexXyzStream(YYText());
 
-        // Note: coordinates must be read one at the time.  
+        // Note: coordinates must be read one at the time.
         scalar x = readScalar(vertexXyzStream);
         scalar y = readScalar(vertexXyzStream);
         scalar z = readScalar(vertexXyzStream);
@@ -589,7 +591,7 @@ endOfSection               {space}")"{space}
 
 
         // Note. Potentially skip cell set if type is zero.
-        // This entry does not exist in Tgrid files. 
+        // This entry does not exist in Tgrid files.
         if (dimensionOfGrid == 2)
         {
             // Tgrid creating triangles
@@ -704,7 +706,7 @@ endOfSection               {space}")"{space}
 
         IStringStream zoneDataStream(YYText());
 
-        // cell zone-ID not in hexadecimal!!! Inconsistency 
+        // cell zone-ID not in hexadecimal!!! Inconsistency
         label zoneID(readLabel(zoneDataStream));
 
         if (zoneID > maxZoneID - 1)
@@ -729,7 +731,7 @@ endOfSection               {space}")"{space}
         // Fluent manual inconsistency, version 6.1.22
         IStringStream zoneDataStream(YYText());
 
-        // cell zone-ID not in hexadecimal!!! Inconsistency 
+        // cell zone-ID not in hexadecimal!!! Inconsistency
         label zoneID(readLabel(zoneDataStream));
 
         if (zoneID > maxZoneID - 1)
@@ -881,28 +883,30 @@ int main(int argc, char *argv[])
     {
         scaleFactor = atof(args.options()["scale"].c_str());
     }
-    
+
     bool writeSets = args.options().found("writeSets");
     bool writeZones = args.options().found("writeZones");
 
 #   include "createTime.H"
 
-    fileName fluentFile(args.args()[3]);
+    fileName fluentFile(args.additionalArgs()[0]);
     std::ifstream fluentStream(fluentFile.c_str());
 
     if (!fluentStream)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorIn("fluentToFoam::main(int argc, char *argv[])")
+            << args.executable()
             << ": file " << fluentFile << " not found"
             << exit(FatalError);
     }
 
     yyFlexLexer lexer(&fluentStream);
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info<< "\n\nFINISHED LEXING\n\n\n";
     // Lookup table giving number of vertices given a fluent cell type ID
-    // Currently not used. 
+    // Currently not used.
     // label fluentModelNVertices[7] = {-1, 3, 4, 4, 8, 5, 6};
 
     // Lookup table giving number of vertices given a fluent cell type ID
@@ -1154,19 +1158,20 @@ int main(int argc, char *argv[])
 
 
     //make patchless mesh before analysing boundaries
-    
+
     faceListList patches(0);
     wordList patchNames(0);
     wordList patchTypes(0);
+    word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes(0);
-    
+
     // Scale the points
-    
+
     points *= scaleFactor;
-    
+
     Info<< "Building patch-less mesh..." << flush;
-    
+
     polyMesh pShapeMesh
     (
         IOobject
@@ -1180,6 +1185,7 @@ int main(int argc, char *argv[])
         patches,
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
@@ -1188,13 +1194,13 @@ int main(int argc, char *argv[])
     //and zones wont be written
     //checkmesh done after patch addition as well
     Info<< "done." << endl;
-    
-    
+
+
     Info<< endl << "Building boundary and internal patches." << endl;
     //adding patches after mesh construction allows topological checks
-    //on whether a patch is internal or external, something fluent 
+    //on whether a patch is internal or external, something fluent
     //doesnt seem to mind
-    
+
     // Make boundary patches
 
     SLList<label>::iterator faceGroupZoneIDIter = faceGroupZoneID.begin();
@@ -1204,7 +1210,7 @@ int main(int argc, char *argv[])
 
     // Note. Not all groups of faces will be boundary patches.
     // Take care on construction
-    
+
     //2D needs extra space for frontAndBack faces
     if (dimensionOfGrid == 2)
     {
@@ -1242,7 +1248,7 @@ int main(int argc, char *argv[])
 
         Info<< "Creating patch " << nPatches
             << " for zone: " << faceGroupZoneIDIter()
-            << " start: " << faceGroupStartIndexIter() 
+            << " start: " << faceGroupStartIndexIter()
             << " end: " << faceGroupEndIndexIter()
             << " type: " << curPatchType << " name: " << curPatchName << endl;
 
@@ -1272,7 +1278,7 @@ int main(int argc, char *argv[])
         }
 
         //inlets and outlets
-        if 
+        if
         (
             curPatchType == "pressure"
          || curPatchType == "pressure-inlet"
@@ -1296,7 +1302,7 @@ int main(int argc, char *argv[])
 
             nPatches++;
         }
-        else if (curPatchType == "wall")
+        else if (curPatchType == "wall" ) //wall boundaries
         {
             patches[nPatches] = patchFaces;
             patchTypes[nPatches] = wallPolyPatch::typeName;
@@ -1308,7 +1314,7 @@ int main(int argc, char *argv[])
         (
             curPatchType == "symmetry"
          || curPatchType == "axis"
-        )
+        ) //symmetry planes
         {
             patches[nPatches] = patchFaces;
             patchTypes[nPatches] = symmetryPolyPatch::typeName;
@@ -1341,7 +1347,7 @@ int main(int argc, char *argv[])
             Info<< "Patch " << faceGroupZoneIDIter()
                 << ": Faces are defined but "
                 << "not created as a zone." << endl
-                << "Null specification is only valid for internal faces." 
+                << "Null specification is only valid for internal faces."
                 << endl;
 
             patches[nPatches] = patchFaces;
@@ -1370,14 +1376,14 @@ int main(int argc, char *argv[])
         nPatches++;
     }
 
-    //Now have all patch information, 
+    //Now have all patch information,
     //check whether each patch is internal or external
     //and add boundaries to mesh
     //also write face sets of all patches
     patches.setSize(nPatches);
     patchTypes.setSize(nPatches);
     patchNames.setSize(nPatches);
-    
+
 
     //old polyBoundary
     const polyBoundaryMesh& oPatches = pShapeMesh.boundaryMesh();
@@ -1425,12 +1431,12 @@ int main(int argc, char *argv[])
         //if a face is defined as internal but is actually external
         //it will be put in a default wall boundary
         //internal boundaries are simply ignored
-        
+
         if(patchTypes[patchI] != "internal" && !pShapeMesh.isInternalFace(meshFaces[0]))
         {
             //first face is external and has valid non-internal type
 
-            //check all faces for externalness just to be sure 
+            //check all faces for externalness just to be sure
             //and mark patch number to global list
             forAll(meshFaces, i)
             {
@@ -1448,7 +1454,7 @@ int main(int argc, char *argv[])
                 if(facePatchID[faceI - pShapeMesh.nInternalFaces()]!= -1)
                 {
                     FatalErrorIn(args.executable())
-                        << "Face " << faceI << " on new patch " 
+                        << "Face " << faceI << " on new patch "
                         << patchNames[patchI]
                         << " has already been marked for repatching to"
                         << " patch "
@@ -1459,8 +1465,8 @@ int main(int argc, char *argv[])
             }
 
             //add to boundary patch
-            
-            Info<< "Adding new patch " << patchNames[patchI] 
+
+            Info<< "Adding new patch " << patchNames[patchI]
                 << " of type " << patchTypes[patchI]
                 << " as patch " << nBoundaries << endl;
 
@@ -1482,15 +1488,15 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< "Patch " << patchNames[patchI] 
+            Info<< "Patch " << patchNames[patchI]
                  << " is internal to the mesh "
                  << " and is not being added to the boundary."
                  << endl;
-        
+
         }
     }
-    
-    // Check for any remaining boundary faces 
+
+    // Check for any remaining boundary faces
     // and add them to a default wall patch
     // this routine should generally not be invoked
     {
@@ -1504,16 +1510,16 @@ int main(int argc, char *argv[])
             }
         }
         defaultBoundaryFaces.shrink();
-        
+
         if(defaultBoundaryFaces.size() != 0)
         {
             Warning << " fluent mesh has " << defaultBoundaryFaces.size()
                     << " undefined boundary faces." << endl
                     << " Adding undefined faces to new patch `default_wall`"
                     << endl;
-                    
+
             // Add patch to new patch list
-            
+
             newPatches.append
             (
                 polyPatch::New
@@ -1530,12 +1536,12 @@ int main(int argc, char *argv[])
             cMeshFace += defaultBoundaryFaces.size();
         }
     }
-    
+
     newPatches.shrink();
 
     // Use facePatchIDs map to reorder boundary faces into compact regions
-    
-    repatchPolyTopoChanger repatcher(pShapeMesh);
+
+    repatch repatcher(pShapeMesh);
 
     // Add new list of patches
     repatcher.changePatches(newPatches);
@@ -1547,7 +1553,7 @@ int main(int argc, char *argv[])
 
         repatcher.changePatchID(faceI, facePatchID[idI]);
     }
-    repatcher.repatch();
+    repatcher.execute();
 
     preservePatchTypes
     (
@@ -1556,13 +1562,10 @@ int main(int argc, char *argv[])
         polyMesh::defaultRegion,
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
-
-    Info<< endl << "Checking mesh..." << flush;
-    pShapeMesh.checkMesh();
-    Info<< "done." << endl << endl;
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
@@ -1571,11 +1574,11 @@ int main(int argc, char *argv[])
     // Zones
     // will write out cell zones and internal faces for those zones
     // note: zone boundary faces are not added to face zones
-    // the names of boundaries bordering on cell zones are written to 
+    // the names of boundaries bordering on cell zones are written to
     // a list containing the boundary name and cellzone it borders on
     // interior boundaries are handled via faceSets
     // cell zones will only be written if there is more than one
-    
+
     if (writeZones && cellGroupZoneID.size()>1)
     {
         Info<< "Adding Zones" << endl;
@@ -1586,14 +1589,14 @@ int main(int argc, char *argv[])
 
         // Make face zones for cell zones
         List<faceZone*> fz(nrCellZones);
-        
+
         // List of patch names and the cellZone(s) they border
-        // this is just an info file to make MRF easier to setup 
+        // this is just an info file to make MRF easier to setup
         List<DynamicList<word> > boundaryZones
         (
             pShapeMesh.boundaryMesh().size()
         );
-        
+
         const polyBoundaryMesh& bPatches = pShapeMesh.boundaryMesh();
         forAll(bPatches, pI)
         {
@@ -1618,7 +1621,7 @@ int main(int argc, char *argv[])
 
             // Mark zone cells, used for finding faces
             boolList zoneCell(pShapeMesh.nCells(), false);
-            
+
 	        // shift cell indizes by 1
 	        label nr=0;
 	        for (label celli = (start() - 1); celli < end(); celli++)
@@ -1637,10 +1640,10 @@ int main(int argc, char *argv[])
 	        );
 
             DynamicList<label> zoneFaces(pShapeMesh.nFaces());
-            forAll(pShapeMesh.allNeighbour(), faceI)
+            forAll(pShapeMesh.faceNeighbour(), faceI)
             {
-                label nei = pShapeMesh.allNeighbour()[faceI];
-                label own = pShapeMesh.allOwner()[faceI];
+                label nei = pShapeMesh.faceNeighbour()[faceI];
+                label own = pShapeMesh.faceOwner()[faceI];
                 if(nei != -1)
                 {
                     if(zoneCell[nei] && zoneCell[own])
@@ -1672,11 +1675,11 @@ int main(int argc, char *argv[])
                         break;
                     }
                 }
-            }            
-            
+            }
+
 	        cnt++;
 	    }
-        
+
         pShapeMesh.addZones(pz, fz, cz);
 
         forAll(bPatches, pI)
@@ -1703,10 +1706,10 @@ int main(int argc, char *argv[])
     }
 
     Info<< endl << "Writing mesh..." << flush;
-    
+
     Info<< " to " << pShapeMesh.instance()/pShapeMesh.meshDir()
         << "  " << flush;
-    
+
     pShapeMesh.setInstance(pShapeMesh.instance());
     pShapeMesh.write();
     Info<< "done." << endl << endl;

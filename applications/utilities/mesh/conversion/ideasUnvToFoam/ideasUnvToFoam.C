@@ -576,7 +576,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName ideasName(args.args()[3]);
+    fileName ideasName(args.additionalArgs()[0]);
 
     IFstream inFile(ideasName.c_str());
 
@@ -912,6 +912,7 @@ int main(int argc, char *argv[])
         patchFaceVerts,             //boundaryFaces,
         patchNames,                 //boundaryPatchNames,
         wordList(patchNames.size(), polyPatch::typeName), //boundaryPatchTypes,
+        "defaultFaces",             //defaultFacesName
         polyPatch::typeName,        //defaultFacesType,
         wordList(0)                 //boundaryPatchPhysicalTypes
     );

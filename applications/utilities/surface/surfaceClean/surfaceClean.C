@@ -20,7 +20,7 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
     surfaceClean
@@ -54,9 +54,9 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output surface file");
     argList::argList args(argc, argv);
 
-    fileName inFileName(args.args()[1]);
-    scalar minLen(readScalar(IStringStream(args.args()[2])()));
-    fileName outFileName(args.args()[3]);
+    fileName inFileName(args.additionalArgs()[0]);
+    scalar minLen(readScalar(IStringStream(args.additionalArgs()[1])()));
+    fileName outFileName(args.additionalArgs()[2]);
 
     Pout<< "Reading surface " << inFileName << nl
         << "Collapsing all triangles with edges or heights < " << minLen << nl

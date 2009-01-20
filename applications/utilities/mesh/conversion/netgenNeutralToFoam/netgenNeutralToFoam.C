@@ -89,11 +89,13 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("Neutral file");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName neuFile(args.args()[3]);
+    fileName neuFile(args.additionalArgs()[0]);
+    bool overwrite = args.options().found("overwrite");
 
 
     IFstream str(neuFile);
@@ -264,6 +266,7 @@ int main(int argc, char *argv[])
     }
 
     wordList patchTypes(nPatches, polyPatch::typeName);
+    word defaultFacesName = "defaultFaces";
     word defaultFacesType = polyPatch::typeName;
     wordList patchPhysicalTypes(nPatches, polyPatch::typeName);
 
@@ -297,7 +300,10 @@ int main(int argc, char *argv[])
     }
 
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     polyMesh mesh
     (
@@ -312,6 +318,7 @@ int main(int argc, char *argv[])
         patchFaces,
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
@@ -319,7 +326,7 @@ int main(int argc, char *argv[])
     Info<< "Writing mesh to " << runTime.constant() << endl << endl;
 
     mesh.write();
-    
+
 
     Info<< "End\n" << endl;
 

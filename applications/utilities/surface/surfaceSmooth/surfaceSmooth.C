@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output file");
     argList args(argc, argv);
 
-    fileName surfFileName(args.args()[1]);
-    scalar relax(readScalar(IStringStream(args.args()[2])()));
+    fileName surfFileName(args.additionalArgs()[0]);
+    scalar relax(readScalar(IStringStream(args.additionalArgs()[1])()));
     if ((relax <= 0) || (relax > 1))
     {
         FatalErrorIn(args.executable()) << "Illegal relaxation factor "
@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
             << "0: no change   1: move vertices to average of neighbours"
             << exit(FatalError);
     }
-    label iters(readLabel(IStringStream(args.args()[3])()));
-    fileName outFileName(args.args()[4]);
+    label iters(readLabel(IStringStream(args.additionalArgs()[2])()));
+    fileName outFileName(args.additionalArgs()[3]);
 
     Info<< "Relax:" << relax << endl;
     Info<< "Iters:" << iters << endl;

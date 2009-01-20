@@ -1,3 +1,0 @@
-divU.C
-
-EXE = $(FOAM_APPBIN)/divU

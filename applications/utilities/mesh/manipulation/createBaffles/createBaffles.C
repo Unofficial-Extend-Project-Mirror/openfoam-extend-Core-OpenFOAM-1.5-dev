@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "faceSet.H"
-#include "directPolyTopoChange.H"
+#include "directTopoChange.H"
 #include "polyModifyFace.H"
 #include "polyAddFace.H"
 #include "ReadFields.H"
@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("set");
     argList::validArgs.append("patch");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -63,14 +64,14 @@ int main(int argc, char *argv[])
     const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
-    word setName(args.args()[3]);
+    word setName(args.additionalArgs()[0]);
     Pout<< "Reading faceSet from " << setName << nl << endl;
     faceSet facesToSplit(mesh, setName);
     Pout<< "Read " << facesToSplit.size() << " faces from " << setName
         << nl << endl;
 
     // Patch to put them into
-    word patchName(args.args()[4]);
+    word patchName(args.additionalArgs()[1]);
     label wantedPatchI = patches.findPatchID(patchName);
 
     Pout<< "Using patch " << patchName << " at index " << wantedPatchI << endl;
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
         FatalErrorIn(args.executable())
             << "Cannot find patch " << patchName << exit(FatalError);
     }
+
+    bool overwrite = args.options().found("overwrite");
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
 
 
     // Mesh change container
-    directPolyTopoChange meshMod(mesh);
+    directTopoChange meshMod(mesh);
 
 
     // Creating baffles:
@@ -226,7 +229,10 @@ int main(int argc, char *argv[])
     Pout<< "Converted locally " << nBaffled
         << " faces into boundary faces on patch " << patchName << nl << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Change the mesh. Change points directly (no inflation).
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);

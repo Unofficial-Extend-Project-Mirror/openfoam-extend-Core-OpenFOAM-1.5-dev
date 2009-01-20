@@ -56,6 +56,7 @@ void starMesh::writeMesh()
             boundary_,
             patchNames_,
             patchTypes_,
+            defaultFacesName_,
             defaultFacesType_,
             patchPhysicalTypes_
         );

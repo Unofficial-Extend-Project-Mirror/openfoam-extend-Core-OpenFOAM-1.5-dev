@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,40 +34,29 @@ Description
 
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    timeSelector::addOptions();
+    #include "setRootCase.H"
 #   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
+    instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
-
         mesh.readUpdate();
 
 #       include "createFields.H"
 
-        surfaceScalarField heatFlux = 
-            fvc::interpolate(turbulence->alphaEff())*fvc::snGrad(h);
+        surfaceScalarField heatFlux =
+            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h);
 
         const surfaceScalarField::GeometricBoundaryField& patchHeatFlux =
             heatFlux.boundaryField();
@@ -75,7 +64,7 @@ int main(int argc, char *argv[])
         Info<< "\nWall heat fluxes [W]" << endl;
         forAll(patchHeatFlux, patchi)
         {
-            if (typeid(mesh.boundary()) == typeid(wallFvPatch))
+            if (typeid(mesh.boundary()[patchi]) == typeid(wallFvPatch))
             {
                 Info<< mesh.boundary()[patchi].name()
                     << " "
@@ -83,7 +72,7 @@ int main(int argc, char *argv[])
                        (
                            mesh.magSf().boundaryField()[patchi]
                           *patchHeatFlux[patchi]
-                       ) 
+                       )
                     << endl;
             }
         }
@@ -111,8 +100,7 @@ int main(int argc, char *argv[])
 
     Info<< "End" << endl;
 
-    return(0);
+    return 0;
 }
-
 
 // ************************************************************************* //

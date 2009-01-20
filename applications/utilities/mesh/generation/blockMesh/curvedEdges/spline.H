@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    spline
+    Foam::spline
 
 Description
     spline class : define a basic spline on nKnots knots - this

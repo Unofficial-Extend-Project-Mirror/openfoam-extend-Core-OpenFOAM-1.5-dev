@@ -76,7 +76,7 @@ Foam::edgeStats::edgeStats(const polyMesh& mesh)
 {
     IOobject motionObj
     (
-        "meshMotionDict",
+        "motionProperties",
         mesh.time().constant(),
         mesh,
         IOobject::MUST_READ,
@@ -85,12 +85,12 @@ Foam::edgeStats::edgeStats(const polyMesh& mesh)
 
     if (motionObj.headerOk())
     {
-        Info<< "Reading " << mesh.time().constant() / "meshMotionDict"
+        Info<< "Reading " << mesh.time().constant() / "motionProperties"
             << endl << endl;
 
-        IOdictionary meshMotionDict(motionObj);
+        IOdictionary motionProperties(motionObj);
 
-        Switch twoDMotion(meshMotionDict.lookup("twoDMotion"));
+        Switch twoDMotion(motionProperties.lookup("twoDMotion"));
 
         if (twoDMotion)
         {

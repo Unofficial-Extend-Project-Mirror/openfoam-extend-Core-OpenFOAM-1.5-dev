@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "triangle.H"
@@ -36,8 +34,6 @@ Description
 #include "SortableList.H"
 
 using namespace Foam;
-using namespace Foam::triSurfaceTools;
-
 
 // Does face use valid vertices?
 bool validTri(const triSurface& surf, const label faceI)
@@ -178,7 +174,7 @@ int main(int argc, char *argv[])
 
     bool checkSelfIntersection = !args.options().found("noSelfIntersection");
 
-    fileName surfFileName(args.args()[1]);
+    fileName surfFileName(args.additionalArgs()[0]);
     Pout<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
 

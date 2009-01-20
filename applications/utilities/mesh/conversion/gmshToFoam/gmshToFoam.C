@@ -47,7 +47,7 @@ Description
 #include "polyMesh.H"
 #include "IFstream.H"
 #include "cellModeller.H"
-#include "repatchPolyTopoChanger.H"
+#include "repatch.H"
 #include "cellSet.H"
 #include "faceSet.H"
 
@@ -204,23 +204,26 @@ void storeCellInZone
 (
     const label regPhys,
     const label cellI,
-    Map<label>& regionToZone,
+    Map<label>& physToZone,
+
+    labelList& zoneToPhys,
     List<DynamicList<label> >& zoneCells
 )
 {
-    Map<label>::iterator zoneFnd = regionToZone.find(regPhys);
+    Map<label>::const_iterator zoneFnd = physToZone.find(regPhys);
 
-    if (zoneFnd == regionToZone.end())
+    if (zoneFnd == physToZone.end())
     {
         // New region. Allocate zone for it.
-        zoneCells.setSize(zoneCells.size() + 1);
-
-        label zoneI = zoneCells.size()-1;
+        label zoneI = zoneCells.size();
+        zoneCells.setSize(zoneI+1);
+        zoneToPhys.setSize(zoneI+1);
 
         Info<< "Mapping region " << regPhys << " to Foam cellZone "
             << zoneI << endl;
-        regionToZone.insert(regPhys, zoneI);
+        physToZone.insert(regPhys, zoneI);
 
+        zoneToPhys[zoneI] = regPhys;
         zoneCells[zoneI].append(cellI);
     }
     else
@@ -276,8 +279,56 @@ void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
 
     if (tag != "$ENDNOD" && tag != "$EndNodes")
     {
-        FatalErrorIn("readPoints")
+        FatalErrorIn("readPoints(..)")
             << "Did not find $ENDNOD tag on line "
+            << inFile.lineNumber() << exit(FatalError);
+    }
+    Info<< endl;
+}
+
+
+// Reads physical names
+void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
+{
+    Info<< "Starting to read physical names at line " << inFile.lineNumber()
+        << endl;
+
+    string line;
+    inFile.getLine(line);
+    IStringStream lineStr(line);
+
+    label nNames;
+    lineStr >> nNames;
+
+    Info<< "Physical names:" << nNames << endl;
+
+    physicalNames.resize(nNames);
+
+    for (label i = 0; i < nNames; i++)
+    {
+        label regionI;
+        string regionName;
+
+        string line;
+        inFile.getLine(line);
+        IStringStream lineStr(line);
+
+        lineStr >> regionI >> regionName;
+
+        Info<< "    " << regionI << '\t' << string::validate<word>(regionName)
+            << endl;
+
+        physicalNames.insert(regionI, string::validate<word>(regionName));
+    }
+
+    inFile.getLine(line);
+    IStringStream tagStr(line);
+    word tag(tagStr);
+
+    if (tag != "$EndPhysicalNames")
+    {
+        FatalErrorIn("readPhysicalNames(..)")
+            << "Did not find $EndPhysicalNames tag on line "
             << inFile.lineNumber() << exit(FatalError);
     }
     Info<< endl;
@@ -293,7 +344,11 @@ void readCells
     const Map<label>& mshToFoam,
     IFstream& inFile,
     cellShapeList& cells,
+
+    labelList& patchToPhys,
     List<DynamicList<face> >& patchFaces,
+
+    labelList& zoneToPhys,
     List<DynamicList<label> >& zoneCells
 )
 {
@@ -333,10 +388,10 @@ void readCells
 
 
     // From gmsh physical region to Foam patch
-    Map<label> regionToPatch;
+    Map<label> physToPatch;
 
     // From gmsh physical region to Foam cellZone
-    Map<label> regionToZone;
+    Map<label> physToZone;
 
 
     for (label elemI = 0; elemI < nElems; elemI++)
@@ -384,19 +439,21 @@ void readCells
 
             renumber(mshToFoam, triPoints);
 
-            Map<label>::iterator regFnd = regionToPatch.find(regPhys);
+            Map<label>::iterator regFnd = physToPatch.find(regPhys);
 
             label patchI = -1;
-            if (regFnd == regionToPatch.end())
+            if (regFnd == physToPatch.end())
             {
                 // New region. Allocate patch for it.
-                patchFaces.setSize(patchFaces.size() + 1);
+                patchI = patchFaces.size();
 
-                patchI = patchFaces.size()-1;
+                patchFaces.setSize(patchI + 1);
+                patchToPhys.setSize(patchI + 1);
 
                 Info<< "Mapping region " << regPhys << " to Foam patch "
                     << patchI << endl;
-                regionToPatch.insert(regPhys, patchI);
+                physToPatch.insert(regPhys, patchI);
+                patchToPhys[patchI] = regPhys;
             }
             else
             {
@@ -415,19 +472,21 @@ void readCells
 
             renumber(mshToFoam, quadPoints);
 
-            Map<label>::iterator regFnd = regionToPatch.find(regPhys);
+            Map<label>::iterator regFnd = physToPatch.find(regPhys);
 
             label patchI = -1;
-            if (regFnd == regionToPatch.end())
+            if (regFnd == physToPatch.end())
             {
                 // New region. Allocate patch for it.
-                patchFaces.setSize(patchFaces.size() + 1);
+                patchI = patchFaces.size();
 
-                patchI = patchFaces.size()-1;
+                patchFaces.setSize(patchI + 1);
+                patchToPhys.setSize(patchI + 1);
 
                 Info<< "Mapping region " << regPhys << " to Foam patch "
                     << patchI << endl;
-                regionToPatch.insert(regPhys, patchI);
+                physToPatch.insert(regPhys, patchI);
+                patchToPhys[patchI] = regPhys;
             }
             else
             {
@@ -444,7 +503,8 @@ void readCells
             (
                 regPhys,
                 cellI,
-                regionToZone,
+                physToZone,
+                zoneToPhys,
                 zoneCells
             );
 
@@ -464,7 +524,8 @@ void readCells
             (
                 regPhys,
                 cellI,
-                regionToZone,
+                physToZone,
+                zoneToPhys,
                 zoneCells
             );
 
@@ -484,7 +545,8 @@ void readCells
             (
                 regPhys,
                 cellI,
-                regionToZone,
+                physToZone,
+                zoneToPhys,
                 zoneCells
             );
 
@@ -522,7 +584,8 @@ void readCells
             (
                 regPhys,
                 cellI,
-                regionToZone,
+                physToZone,
+                zoneToPhys,
                 zoneCells
             );
 
@@ -572,7 +635,7 @@ void readCells
 
     if (tag != "$ENDELM" && tag != "$EndElements")
     {
-        FatalErrorIn("readCells")
+        FatalErrorIn("readCells(..)")
             << "Did not find $ENDELM tag on line "
             << inFile.lineNumber() << exit(FatalError);
     }
@@ -624,7 +687,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName mshName(args.args()[3]);
+    fileName mshName(args.additionalArgs()[0]);
 
     bool keepOrientation = args.options().found("keepOrientation");
 
@@ -635,10 +698,18 @@ int main(int argc, char *argv[])
     // Storage for all cells.
     cellShapeList cells;
 
+    // Map from patch to gmsh physical region
+    labelList patchToPhys;
     // Storage for patch faces.
     List<DynamicList<face> > patchFaces(0);
+
+    // Map from cellZone to gmsh physical region
+    labelList zoneToPhys;
     // Storage for cell zones.
     List<DynamicList<label> > zoneCells(0);
+
+    // Name per physical region
+    Map<word> physicalNames;
 
     // Version 1 or 2 format
     bool version2Format = false;
@@ -665,6 +736,10 @@ int main(int argc, char *argv[])
                 break;
             }
         }
+        else if (tag == "$PhysicalNames")
+        {
+            readPhysNames(inFile, physicalNames);
+        }
         else if (tag == "$NOD" || tag == "$Nodes")
         {
             readPoints(inFile, points, mshToFoam);
@@ -679,7 +754,9 @@ int main(int argc, char *argv[])
                 mshToFoam,
                 inFile,
                 cells,
+                patchToPhys,
                 patchFaces,
+                zoneToPhys,
                 zoneCells
             );
         }
@@ -716,7 +793,6 @@ int main(int argc, char *argv[])
     //    and repatch it.
 
 
-
     // Create correct number of patches
     // (but without any faces in it)
     faceListList boundaryFaces(patchFaces.size());
@@ -725,10 +801,25 @@ int main(int argc, char *argv[])
 
     forAll(boundaryPatchNames, patchI)
     {
-        boundaryPatchNames[patchI] = word("patch") + name(patchI);
+        label physReg = patchToPhys[patchI];
+
+        Map<word>::const_iterator iter = physicalNames.find(physReg);
+
+        if (iter != physicalNames.end())
+        {
+            boundaryPatchNames[patchI] = iter();
+        }
+        else
+        {
+            boundaryPatchNames[patchI] = word("patch") + name(patchI);
+        }
+        Info<< "Patch " << patchI << " gets name "
+            << boundaryPatchNames[patchI] << endl;
     }
+    Info<< endl;
 
     wordList boundaryPatchTypes(boundaryFaces.size(), polyPatch::typeName);
+    word defaultFacesName = "defaultFaces";
     word defaultFacesType = polyPatch::typeName;
     wordList boundaryPatchPhysicalTypes
     (
@@ -749,11 +840,12 @@ int main(int argc, char *argv[])
         boundaryFaces,
         boundaryPatchNames,
         boundaryPatchTypes,
+        defaultFacesName,
         defaultFacesType,
         boundaryPatchPhysicalTypes
     );
 
-    repatchPolyTopoChanger repatcher(mesh);
+    repatch repatcher(mesh);
 
     // Now use the patchFaces to patch up the outside faces of the mesh.
 
@@ -831,7 +923,7 @@ int main(int argc, char *argv[])
     //Get polyMesh to write to constant
     runTime.setTime(instant(runTime.constant()), 0);
 
-    repatcher.repatch();
+    repatcher.execute();
 
     List<cellZone*> cz;
     List<faceZone*> fz;
@@ -850,7 +942,15 @@ int main(int argc, char *argv[])
         {
             if (zoneCells[zoneI].size() > 0)
             {
+                label physReg = zoneToPhys[zoneI];
+
+                Map<word>::const_iterator iter = physicalNames.find(physReg);
+
                 word zoneName = "cellZone_" + name(zoneI);
+                if (iter != physicalNames.end())
+                {
+                    zoneName = iter();
+                }
     
                 Info<< "Writing zone " << zoneI << " to cellZone "
                     << zoneName << " and cellSet"
@@ -881,8 +981,16 @@ int main(int argc, char *argv[])
         {
             if (zoneFaces[zoneI].size() > 0)
             {
+                label physReg = zoneToPhys[zoneI];
+
+                Map<word>::const_iterator iter = physicalNames.find(physReg);
+
                 word zoneName = "faceZone_" + name(zoneI);
-    
+                if (iter != physicalNames.end())
+                {
+                    zoneName = iter();
+                }
+
                 Info<< "Writing zone " << zoneI << " to faceZone "
                     << zoneName << " and faceSet"
                     << endl;

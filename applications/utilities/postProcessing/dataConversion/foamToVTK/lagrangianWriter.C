@@ -39,12 +39,14 @@ Foam::lagrangianWriter::lagrangianWriter
 (
     const vtkMesh& vMesh,
     const bool binary,
-    const fileName& fName
+    const fileName& fName,
+    const word& cloudName
 )
 :
     vMesh_(vMesh),
     binary_(binary),
     fName_(fName),
+    cloudName_(cloudName),
     os_(fName.c_str())
 {
     const fvMesh& mesh = vMesh_.mesh();
@@ -53,8 +55,7 @@ Foam::lagrangianWriter::lagrangianWriter
     writeFuns::writeHeader(os_, binary_, mesh.time().caseName());
     os_ << "DATASET POLYDATA" << std::endl;
 
-
-    Cloud<passiveParticle> parcels(mesh);
+    Cloud<passiveParticle> parcels(mesh, cloudName_, false);
 
     nParcels_ = parcels.size();
 
@@ -62,12 +63,7 @@ Foam::lagrangianWriter::lagrangianWriter
 
     DynamicList<floatScalar> partField(3*parcels.size());
 
-    for
-    (
-        Cloud<passiveParticle>::const_iterator elmnt = parcels.begin();
-        elmnt != parcels.end();
-        ++elmnt
-    )
+    forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
     {
         writeFuns::insert(elmnt().position(), partField);
     }

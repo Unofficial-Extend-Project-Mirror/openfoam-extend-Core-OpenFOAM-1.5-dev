@@ -65,12 +65,12 @@ int main(int argc, char *argv[])
 
 #   include "createMesh.H"
 
-    IFstream smapFile(args.args()[3]);
+    IFstream smapFile(args.additionalArgs()[0]);
 
     if (!smapFile.good())
     {
         FatalErrorIn(args.executable())
-            << "Cannot open SMAP file " << args.args()[3]
+            << "Cannot open SMAP file " << smapFile.name()
             << exit(FatalError);
     }
 

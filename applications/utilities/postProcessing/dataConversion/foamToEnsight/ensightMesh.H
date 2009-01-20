@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ensightMesh
+    Foam::ensightMesh
 
 Description
 
@@ -41,6 +41,7 @@ SourceFiles
 #include "HashSet.H"
 #include "fvMesh.H"
 #include "OFstream.H"
+#include <fstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +57,47 @@ class argList;
 
 class ensightMesh
 {
+        class nFacePrimitives
+        {
+        public:
+
+            label nPoints;
+            label nTris;
+            label nQuads;
+            label nPolys;
+
+            nFacePrimitives()
+            :
+                nPoints(0),
+                nTris(0),
+                nQuads(0),
+                nPolys(0)
+            {}
+        };
+
+
     // Private data
+
+        //- Set binary file output
+        bool binary_;
+
+        //- Reference to the OpenFOAM mesh
+        const fvMesh& mesh_;
+
+        cellSets meshCellSets_;
+
+        List<faceSets> boundaryFaceSets_;
+
+
+
+
+        HashTable<labelList> allPatchNames_;
+
+        HashTable<label> patchIndices_;
+
+        wordHashSet patchNames_;
+
+        HashTable<nFacePrimitives> nPatchPrims_;
 
 
     // Private Member Functions
@@ -136,45 +177,73 @@ class ensightMesh
             OFstream& ensightGeometryFile
         ) const;
 
+        void writeAscii
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
+
+        void writeBinary
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
+
+        void writePrimsBinary
+        (
+            const cellShapeList& cellShapes,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeAllPrimsBinary
+        (
+            const char* key,
+            const label nPrims,
+            const cellShapeList& cellShapes,
+            const labelList& pointOffsets,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writePolysBinary
+        (
+            const labelList& polys,
+            const cellList& cellFaces,
+            const faceList& faces,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeAllFacePrimsBinary
+        (
+            const char* key,
+            const labelList& prims,
+            const label nPrims,
+            const faceList& patchFaces,
+            const labelList& pointOffsets,
+            const labelList& patchProcessors,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeFacePrimsBinary
+        (
+            const char* key,
+            const faceList& patchFaces,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
 
 public:
-
-    // Public data
-
-        const fvMesh& mesh;
-        cellSets meshCellSets;
-        List<faceSets> boundaryFaceSets;
-
-        HashTable<labelList> allPatchNames;
-        HashTable<label> patchIndices;
-        wordHashSet patchNames;
-
-        class nFacePrims
-        {
-
-        public:
-
-            label nPoints;
-            label nTris;
-            label nQuads;
-            label nPolys;
-
-            nFacePrims()
-            :
-                nPoints(0),
-                nTris(0),
-                nQuads(0),
-                nPolys(0)
-            {}
-        };
-
-        HashTable<nFacePrims> nPatchPrims;
-
 
     // Constructors
 
         //- Construct from fvMesh
-        ensightMesh(const fvMesh&, const argList& args);
+        ensightMesh(const fvMesh&, const argList& args, const bool binary);
 
 
     // Destructor
@@ -186,19 +255,51 @@ public:
 
         // Access
 
-        // Check
+            const fvMesh& mesh() const
+            {
+                return mesh_;
+            }
 
-        // Edit
+            const cellSets& meshCellSets() const
+            {
+                return meshCellSets_;
+            }
 
-        // Write
+            const List<faceSets>& boundaryFaceSets() const
+            {
+                return boundaryFaceSets_;
+            }
 
-            void write
-            (
-                const fileName& postProcPath,
-                const word& prepend,
-                const label timeIndex,
-                Ostream& ensightCaseFile
-            ) const;
+            const HashTable<labelList>& allPatchNames() const
+            {
+                return allPatchNames_;
+            }
+
+            const HashTable<label>& patchIndices() const
+            {
+                return patchIndices_;
+            }
+
+            const wordHashSet& patchNames() const
+            {
+                return patchNames_;
+            }
+
+            const HashTable<nFacePrimitives>& nPatchPrims() const
+            {
+                return nPatchPrims_;
+            }
+
+
+    // I-O
+
+        void write
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
 };
 
 

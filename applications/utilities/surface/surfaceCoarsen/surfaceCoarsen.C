@@ -72,9 +72,9 @@ int main(int argc, char *argv[])
     argList::validArgs.append("Foam output file");
     argList args(argc, argv);
 
-    fileName inFileName(args.args()[1]);
+    fileName inFileName(args.additionalArgs()[0]);
 
-    scalar reduction(readScalar(IStringStream(args.args()[2])()));
+    scalar reduction(readScalar(IStringStream(args.additionalArgs()[1])()));
 
     if (reduction <= 0 || reduction > 1)
     {
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    fileName outFileName(args.args()[3]);
+    fileName outFileName(args.additionalArgs()[2]);
 
     Info<< "Input surface   :" << inFileName << endl
         << "Reduction factor:" << reduction << endl

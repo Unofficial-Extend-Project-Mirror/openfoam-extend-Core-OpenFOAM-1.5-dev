@@ -134,11 +134,32 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
     blockMesh& blocks = *this;
 
+    word defaultPatchName = "defaultFaces";
+    word defaultPatchType = emptyPolyPatch::typeName;
+
+    // get names and types for the unassigned patch faces
+    if (meshDescription.found("defaultPatch"))
+    {
+        const dictionary& defaultPatch =
+            meshDescription.subDict("defaultPatch");
+
+        // this is a bit heavy handed (and ugly), but there is currently
+        // no easy way to rename polyMesh patches subsequently
+        if (defaultPatch.found("name"))
+        {
+            defaultPatch.lookup("name") >> defaultPatchName;
+        }
+
+        if (defaultPatch.found("type"))
+        {
+            defaultPatch.lookup("type") >> defaultPatchType;
+        }
+    }
+
     Info<< nl << "Creating blockCorners" << endl;
 
     // create blockCorners
     pointField tmpBlockPoints(meshDescription.lookup("vertices"));
-
 
     if (meshDescription.found("edges"))
     {
@@ -187,7 +208,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                 nEdges,
                 curvedEdge::New(tmpBlockPoints, edgesStream)
             );
-            
+
             nEdges++;
 
             edgesStream >> lastToken;
@@ -211,7 +232,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         label nBlocks = 0;
 
         token firstToken(blockDescriptorStream);
-        
+
         if (firstToken.isLabel())
         {
             nBlocks = firstToken.labelToken();
@@ -304,7 +325,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
         // Read beginning of blocks
         patchStream.readBegin("patches");
-        
+
         nPatches = 0;
 
         token lastToken(patchStream);
@@ -366,7 +387,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
     if (!topologyOK)
     {
-        FatalErrorIn("blockMesh::createTopology(IOdictionary& meshDescription)")
+        FatalErrorIn("blockMesh::createTopology(IOdictionary&)")
             << "Cannot create mesh due to errors in topology, exiting !" << nl
             << exit(FatalError);
     }
@@ -387,13 +408,12 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         {
             WarningIn
             (
-                "blockMesh::createTopology(IOdictionary& meshDescription)"
+                "blockMesh::createTopology(IOdictionary&)"
             )   << "negative volume block : " << blockLabel
                 << ", probably defined inside-out" << endl;
         }
     }
 
-    word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes(tmpBlocksPatches.size());
 
     preservePatchTypes
@@ -403,7 +423,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         polyMesh::meshSubDir,
         patchNames,
         patchTypes,
-        defaultFacesType,
+        defaultPatchName,
+        defaultPatchType,
         patchPhysicalTypes
     );
 
@@ -423,7 +444,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         tmpBlocksPatches,
         patchNames,
         patchTypes,
-        defaultFacesType,
+        defaultPatchName,
+        defaultPatchType,
         patchPhysicalTypes
     );
 

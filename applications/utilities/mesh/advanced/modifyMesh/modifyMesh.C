@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,7 +20,7 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
     Manipulates mesh elements.
@@ -49,8 +49,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "polyTopoChanger.H"
-#include "polyTopoChange.H"
+#include "directTopoChange.H"
 #include "mapPolyMesh.H"
 #include "boundaryCutter.H"
 #include "cellSplitter.H"
@@ -329,9 +328,13 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
+
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Reading modifyMeshDict\n" << endl;
 
@@ -367,7 +370,7 @@ int main(int argc, char *argv[])
 
     bool cellsToSplit = cellsToPyramidise.size() > 0;
 
-    //List<Tuple<pointField,point> > 
+    //List<Tuple<pointField,point> >
     //  cellsToCreate(dict.lookup("cellsToCreate"));
 
     Info<< "Read from " << dict.name() << nl
@@ -527,17 +530,13 @@ int main(int argc, char *argv[])
         cellSplitter cutter(mesh);
 
         // Topo change container
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
         // Insert commands into meshMod
         cutter.setRefinement(cellToPyrCentre, meshMod);
 
         // Do changes
-        autoPtr<mapPolyMesh> morphMap = polyTopoChanger::changeMesh
-        (
-            mesh,
-            meshMod
-        );
+        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
         if (morphMap().hasMotionPoints())
         {
@@ -546,7 +545,10 @@ int main(int argc, char *argv[])
 
         cutter.updateMesh(morphMap());
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;
@@ -575,14 +577,13 @@ int main(int argc, char *argv[])
         mesh.movePoints(newPoints);
 
         // Topo change container
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
-        // Insert 
+        // Insert
         cutter.setRefinement(meshMod);
 
         // Do changes
-        autoPtr<mapPolyMesh> morphMap =
-            polyTopoChanger::changeMesh(mesh, meshMod);
+        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
         if (morphMap().hasMotionPoints())
         {
@@ -593,7 +594,10 @@ int main(int argc, char *argv[])
         //cutter.updateMesh(morphMap());
 
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;
@@ -607,7 +611,7 @@ int main(int argc, char *argv[])
         boundaryCutter cutter(mesh);
 
         // Topo change container
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
         // Insert commands into meshMod
         cutter.setRefinement
@@ -620,11 +624,7 @@ int main(int argc, char *argv[])
         );
 
         // Do changes
-        autoPtr<mapPolyMesh> morphMap = polyTopoChanger::changeMesh
-        (
-            mesh,
-            meshMod
-        );
+        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
         if (morphMap().hasMotionPoints())
         {
@@ -633,7 +633,10 @@ int main(int argc, char *argv[])
 
         cutter.updateMesh(morphMap());
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;

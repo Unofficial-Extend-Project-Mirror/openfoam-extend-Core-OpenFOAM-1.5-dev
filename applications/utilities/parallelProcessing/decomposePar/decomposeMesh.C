@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
+InClass
     domainDecomposition
 
 Description
@@ -68,18 +68,18 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procCellList(nProcs_);
 
-        forAll (cellToProc_, cellI)
+        forAll (cellToProc_, celli)
         {
-            if (cellToProc_[cellI] >= nProcs_)
+            if (cellToProc_[celli] >= nProcs_)
             {
                 FatalErrorIn("domainDecomposition::decomposeMesh()")
-                    << "Impossible processor label " << cellToProc_[cellI]
-                    << "for cell " << cellI
+                    << "Impossible processor label " << cellToProc_[celli]
+                    << "for cell " << celli
                     << abort(FatalError);
             }
             else
             {
-                procCellList[cellToProc_[cellI]].append(cellI);
+                procCellList[cellToProc_[celli]].append(celli);
             }
         }
 
@@ -101,12 +101,12 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procFaceList(nProcs_);
 
-        forAll (neighbour, faceI)
+        forAll (neighbour, facei)
         {
-            if (cellToProc_[owner[faceI]] == cellToProc_[neighbour[faceI]])
+            if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
             {
                 // Face internal to processor
-                procFaceList[cellToProc_[owner[faceI]]].append(faceI);
+                procFaceList[cellToProc_[owner[facei]]].append(facei);
             }
         }
 
@@ -120,16 +120,16 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         List<SLList<label> > procPatchIndex(nProcs_);
 
-        forAll (neighbour, faceI)
+        forAll (neighbour, facei)
         {
-            if (cellToProc_[owner[faceI]] != cellToProc_[neighbour[faceI]])
+            if (cellToProc_[owner[facei]] != cellToProc_[neighbour[facei]])
             {
                 // inter - processor patch face found. Go through the list of
                 // inside boundaries for the owner processor and try to find
                 // this inter-processor patch.
 
-                label ownerProc = cellToProc_[owner[faceI]];
-                label neighbourProc = cellToProc_[neighbour[faceI]];
+                label ownerProc = cellToProc_[owner[facei]];
+                label neighbourProc = cellToProc_[neighbour[facei]];
 
                 SLList<label>::iterator curInterProcBdrsOwnIter =
                     interProcBoundaries[ownerProc].begin();
@@ -156,7 +156,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                         // the inter - processor boundary exists. Add the face
                         interProcBouFound = true;
 
-                        curInterProcBFacesOwnIter().append(faceI);
+                        curInterProcBFacesOwnIter().append(facei);
 
                         SLList<label>::iterator curInterProcBdrsNeiIter =
                             interProcBoundaries[neighbourProc].begin();
@@ -185,7 +185,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                                 // boundary found. Add the face
                                 neighbourFound = true;
 
-                                curInterProcBFacesNeiIter().append(faceI);
+                                curInterProcBFacesNeiIter().append(facei);
                             }
 
                             if (neighbourFound) break;
@@ -213,11 +213,11 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
                     // owner
                     interProcBoundaries[ownerProc].append(neighbourProc);
-                    interProcBFaces[ownerProc].append(SLList<label>(faceI));
+                    interProcBFaces[ownerProc].append(SLList<label>(facei));
 
                     // neighbour
                     interProcBoundaries[neighbourProc].append(ownerProc);
-                    interProcBFaces[neighbourProc].append(SLList<label>(faceI));
+                    interProcBFaces[neighbourProc].append(SLList<label>(facei));
                 }
             }
         }
@@ -234,42 +234,42 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             procPatchStartIndex_[procI].setSize(patches.size());
         }
 
-        forAll (patches, patchI)
+        forAll (patches, patchi)
         {
             // Reset size and start index for all processors
             forAll (procPatchSize_, procI)
             {
-                procPatchSize_[procI][patchI] = 0;
-                procPatchStartIndex_[procI][patchI] =
+                procPatchSize_[procI][patchi] = 0;
+                procPatchStartIndex_[procI][patchi] =
                     procFaceList[procI].size();
             }
 
-            const label patchStart = patches[patchI].start();
+            const label patchStart = patches[patchi].start();
 
-            if (typeid(patches[patchI]) != typeid(cyclicPolyPatch))
+            if (typeid(patches[patchi]) != typeid(cyclicPolyPatch))
             {
                 // Normal patch. Add faces to processor where the cell
                 // next to the face lives
 
                 const unallocLabelList& patchFaceCells =
-                    patches[patchI].faceCells();
+                    patches[patchi].faceCells();
 
-                forAll (patchFaceCells, faceI)
+                forAll (patchFaceCells, facei)
                 {
-                    const label curProc = cellToProc_[patchFaceCells[faceI]];
+                    const label curProc = cellToProc_[patchFaceCells[facei]];
 
                     // add the face
-                    procFaceList[curProc].append(patchStart + faceI);
+                    procFaceList[curProc].append(patchStart + facei);
 
                     // increment the number of faces for this patch
-                    procPatchSize_[curProc][patchI]++;
+                    procPatchSize_[curProc][patchi]++;
                 }
             }
             else
             {
                 // Cyclic patch special treatment
 
-                const polyPatch& cPatch = patches[patchI];
+                const polyPatch& cPatch = patches[patchi];
 
                 const label cycOffset = cPatch.size()/2;
 
@@ -287,12 +287,12 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     cycOffset
                 );
 
-                forAll (firstFaceCells, faceI)
+                forAll (firstFaceCells, facei)
                 {
                     if
                     (
-                        cellToProc_[firstFaceCells[faceI]]
-                     != cellToProc_[secondFaceCells[faceI]]
+                        cellToProc_[firstFaceCells[facei]]
+                     != cellToProc_[secondFaceCells[facei]]
                     )
                     {
                         // This face becomes an inter-processor boundary face
@@ -303,9 +303,9 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
                         cyclicParallel_ = true;
 
-                        label ownerProc = cellToProc_[firstFaceCells[faceI]];
+                        label ownerProc = cellToProc_[firstFaceCells[facei]];
                         label neighbourProc =
-                            cellToProc_[secondFaceCells[faceI]];
+                            cellToProc_[secondFaceCells[facei]];
 
                         SLList<label>::iterator curInterProcBdrsOwnIter =
                             interProcBoundaries[ownerProc].begin();
@@ -336,7 +336,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                                 interProcBouFound = true;
 
                                 curInterProcBFacesOwnIter().append
-                                    (patchStart + faceI);
+                                    (patchStart + facei);
 
                                 SLList<label>::iterator curInterProcBdrsNeiIter
                                    = interProcBoundaries[neighbourProc].begin();
@@ -370,7 +370,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                                             (
                                                 patchStart
                                               + cycOffset
-                                              + faceI
+                                              + facei
                                             );
                                     }
 
@@ -404,7 +404,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                             interProcBoundaries[ownerProc]
                                 .append(neighbourProc);
                             interProcBFaces[ownerProc]
-                                .append(SLList<label>(patchStart + faceI));
+                                .append(SLList<label>(patchStart + facei));
 
                             // neighbour
                             interProcBoundaries[neighbourProc]
@@ -416,7 +416,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                                     (
                                         patchStart
                                       + cycOffset
-                                      + faceI
+                                      + facei
                                     )
                                 );
                         }
@@ -424,13 +424,13 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     else
                     {
                         // This cyclic face remains on the processor
-                        label ownerProc = cellToProc_[firstFaceCells[faceI]];
+                        label ownerProc = cellToProc_[firstFaceCells[facei]];
 
                         // add the face
-                        procFaceList[ownerProc].append(patchStart + faceI);
+                        procFaceList[ownerProc].append(patchStart + facei);
 
                         // increment the number of faces for this patch
-                        procPatchSize_[ownerProc][patchI]++;
+                        procPatchSize_[ownerProc][patchi]++;
 
                         // Note: I cannot add the other side of the cyclic
                         // boundary here because this would violate the order.
@@ -442,23 +442,23 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 // Ordering in cyclic boundaries is important.
                 // Add the other half of cyclic faces for cyclic boundaries
                 // that remain on the processor
-                forAll (secondFaceCells, faceI)
+                forAll (secondFaceCells, facei)
                 {
                     if
                     (
-                        cellToProc_[firstFaceCells[faceI]]
-                     == cellToProc_[secondFaceCells[faceI]]
+                        cellToProc_[firstFaceCells[facei]]
+                     == cellToProc_[secondFaceCells[facei]]
                     )
                     {
                         // This cyclic face remains on the processor
-                        label ownerProc = cellToProc_[firstFaceCells[faceI]];
+                        label ownerProc = cellToProc_[firstFaceCells[facei]];
 
                         // add the second face
                         procFaceList[ownerProc].append
-                            (patchStart + cycOffset + faceI);
+                            (patchStart + cycOffset + facei);
 
                         // increment the number of faces for this patch
-                        procPatchSize_[ownerProc][patchI]++;
+                        procPatchSize_[ownerProc][patchi]++;
                     }
                 }
             }
@@ -631,15 +631,15 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         label nPatches = 0;
 
-        forAll (oldPatchSizes, patchI)
+        forAll (oldPatchSizes, patchi)
         {
-            if (!filterEmptyPatches || oldPatchSizes[patchI] > 0)
+            if (!filterEmptyPatches || oldPatchSizes[patchi] > 0)
             {
-                curBoundaryAddressing[nPatches] = patchI;
+                curBoundaryAddressing[nPatches] = patchi;
 
-                curPatchSizes[nPatches] = oldPatchSizes[patchI];
+                curPatchSizes[nPatches] = oldPatchSizes[patchi];
 
-                curPatchStarts[nPatches] = oldPatchStarts[patchI];
+                curPatchStarts[nPatches] = oldPatchStarts[patchi];
 
                 nPatches++;
             }
@@ -672,15 +672,15 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         // Get reference to list of used faces
         const labelList& procFaceLabels = procFaceAddressing_[procI];
 
-        forAll (procFaceLabels, faceI)
+        forAll (procFaceLabels, facei)
         {
             // Because of the turning index, some labels may be negative
-            const labelList& facePoints = fcs[mag(procFaceLabels[faceI]) - 1];
+            const labelList& facePoints = fcs[mag(procFaceLabels[facei]) - 1];
 
-            forAll (facePoints, pointI)
+            forAll (facePoints, pointi)
             {
                 // Mark the point as used
-                pointLabels[facePoints[pointI]] = true;
+                pointLabels[facePoints[pointi]] = true;
             }
         }
 
@@ -691,11 +691,11 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         label nUsedPoints = 0;
 
-        forAll (pointLabels, pointI)
+        forAll (pointLabels, pointi)
         {
-            if (pointLabels[pointI])
+            if (pointLabels[pointi])
             {
-                procPointLabels[nUsedPoints] = pointI;
+                procPointLabels[nUsedPoints] = pointi;
 
                 nUsedPoints++;
             }
@@ -737,36 +737,36 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             // Reset the lookup list
             pointsUsage = 0;
 
-            forAll (curProcessorPatchStarts, patchI)
+            forAll (curProcessorPatchStarts, patchi)
             {
-                const label curStart = curProcessorPatchStarts[patchI];
-                const label curEnd = curStart + curProcessorPatchSizes[patchI];
+                const label curStart = curProcessorPatchStarts[patchi];
+                const label curEnd = curStart + curProcessorPatchSizes[patchi];
 
                 for
                 (
-                    label faceI = curStart;
-                    faceI < curEnd;
-                    faceI++
+                    label facei = curStart;
+                    facei < curEnd;
+                    facei++
                 )
                 {
                     // Mark the original face as used
                     // Remember to decrement the index by one (turning index)
                     // 
-                    const label curF = mag(curFaceLabels[faceI]) - 1;
+                    const label curF = mag(curFaceLabels[facei]) - 1;
 
                     const face& f = fcs[curF];
 
-                    forAll (f, pointI)
+                    forAll (f, pointi)
                     {
-                        if (pointsUsage[f[pointI]] == 0)
+                        if (pointsUsage[f[pointi]] == 0)
                         {
                             // Point not previously used
-                            pointsUsage[f[pointI]] = patchI + 1;
+                            pointsUsage[f[pointi]] = patchi + 1;
                         }
-                        else if (pointsUsage[f[pointI]] != patchI + 1)
+                        else if (pointsUsage[f[pointi]] != patchi + 1)
                         {
                             // Point used by some other patch = global point!
-                            gSharedPoints.insert(f[pointI]);
+                            gSharedPoints.insert(f[pointi]);
                         }
                     }
                 }

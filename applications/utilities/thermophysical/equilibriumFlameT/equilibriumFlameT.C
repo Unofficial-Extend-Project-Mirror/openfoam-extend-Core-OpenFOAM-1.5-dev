@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("controlFile");
     argList args(argc, argv);
 
-    fileName controlFileName(args.args()[1]);
+    fileName controlFileName(args.additionalArgs()[0]);
 
     // Construct control dictionary
     IFstream controlFile(controlFileName);

@@ -48,7 +48,7 @@ Description
 #include "mapPolyMesh.H"
 #include "faceSet.H"
 #include "attachDetach.H"
-#include "attachPolyTopoChanger.H"
+#include "polyTopoChanger.H"
 #include "regionSide.H"
 
 using namespace Foam;
@@ -118,14 +118,16 @@ int main(int argc, char *argv[])
     Foam::argList::validArgs.append("faceSet");
     Foam::argList::validArgs.append("masterPatch");
     Foam::argList::validArgs.append("slavePatch");
+    Foam::argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    word setName(args.args()[3]);
-    word masterPatch(args.args()[4]);
-    word slavePatch(args.args()[5]);
+    word setName(args.additionalArgs()[0]);
+    word masterPatch(args.additionalArgs()[1]);
+    word slavePatch(args.additionalArgs()[2]);
+    bool overwrite = args.options().found("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);
@@ -229,7 +231,7 @@ int main(int argc, char *argv[])
     Info << "Adding point and face zones" << endl;
     mesh.addZones(pz, fz, cz);
 
-    attachPolyTopoChanger splitter(mesh);
+    polyTopoChanger splitter(mesh);
     splitter.setSize(1);
 
     // Add the sliding interface mesh modifier to start working at current
@@ -252,9 +254,12 @@ int main(int argc, char *argv[])
     Info<< nl << "Constructed topologyModifier:" << endl;
     splitter[0].writeDict(Info);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
-    splitter.attach();
+    splitter.changeMesh();
 
     Info << nl << "Writing polyMesh" << endl;
     if (!mesh.write())

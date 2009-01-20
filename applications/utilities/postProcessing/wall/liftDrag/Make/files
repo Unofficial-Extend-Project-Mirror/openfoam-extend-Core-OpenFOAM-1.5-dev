@@ -1,3 +1,0 @@
-liftDrag.C
-
-EXE = $(FOAM_APPBIN)/liftDrag

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    mergePolyMesh
+    Foam::mergePolyMesh
 
 Description
     Add a given mesh to the original mesh to create a single new mesh
@@ -37,14 +37,14 @@ SourceFiles
 #define mergePolyMesh_H
 
 #include "polyMesh.H"
-#include "polyTopoChange.H"
+#include "directTopoChange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class mergePolyMesh Declaration
@@ -57,7 +57,7 @@ class mergePolyMesh
     // Private data
 
         //- Topological change to accumulated all mesh changes
-        polyTopoChange meshMod_;
+        directTopoChange meshMod_;
 
         //- Patch types
         DynamicList<word> patchTypes_;

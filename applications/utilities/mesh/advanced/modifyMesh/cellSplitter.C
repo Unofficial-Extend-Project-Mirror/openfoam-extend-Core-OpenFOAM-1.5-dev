@@ -20,7 +20,7 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
 
@@ -28,7 +28,7 @@ Description
 
 #include "cellSplitter.H"
 #include "polyMesh.H"
-#include "polyTopoChange.H"
+#include "directTopoChange.H"
 #include "polyAddCell.H"
 #include "polyAddFace.H"
 #include "polyAddPoint.H"
@@ -155,7 +155,7 @@ Foam::cellSplitter::~cellSplitter()
 void Foam::cellSplitter::setRefinement
 (
     const Map<point>& cellToMidPoint,
-    polyTopoChange& meshMod
+    directTopoChange& meshMod
 )
 {
     addedPoints_.clear();

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sammMesh
+    Foam::sammMesh
 
 Description
     A messy mesh class which supports the possibility of creating a shapeMesh
@@ -50,7 +50,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class sammMesh Declaration
@@ -77,6 +77,9 @@ class sammMesh
 
         //- Boundary patch types
         wordList patchTypes_;
+
+        //- Default boundary patch name
+        word defaultFacesName_;
 
         //- Default boundary patch types
         word defaultFacesType_;

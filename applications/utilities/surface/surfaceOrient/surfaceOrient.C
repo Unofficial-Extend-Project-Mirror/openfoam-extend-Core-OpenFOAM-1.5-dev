@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("inside", "");
     argList args(argc, argv);
 
-    fileName surfFileName(args.args()[1]);
+    fileName surfFileName(args.additionalArgs()[0]);
     Info<< "Reading surface from " << surfFileName << endl;
 
-    point visiblePoint(IStringStream(args.args()[2])());
+    point visiblePoint(IStringStream(args.additionalArgs()[1])());
     Info<< "Visible point " << visiblePoint << endl;
 
     bool orientInside = args.options().found("inside");
@@ -67,18 +67,33 @@ int main(int argc, char *argv[])
             << " is outside" << endl;
     }
 
-    fileName outFileName(args.args()[3]);
+    fileName outFileName(args.additionalArgs()[2]);
     Info<< "Writing surface to " << outFileName << endl;
 
 
     // Load surface
     triSurface surf(surfFileName);
 
-    orientedSurface normalSurf(surf, visiblePoint, !orientInside);
+    //orientedSurface normalSurf(surf, visiblePoint, !orientInside);
+    bool anyFlipped = orientedSurface::orient
+    (
+        surf,
+        visiblePoint,
+       !orientInside
+    );
+
+    if (anyFlipped)
+    {
+        Info<< "Flipped orientation of (part of) surface." << endl;
+    }
+    else
+    {
+        Info<< "Did not flip orientation of any triangle of surface." << endl;
+    }
 
     Info<< "Writing new surface to " << outFileName << endl;
 
-    normalSurf.write(outFileName);
+    surf.write(outFileName);
 
     Info << "End\n" << endl;
 

@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output VTK file");
     argList::argList args(argc, argv);
 
-    fileName objName(args.args()[1]);
-    fileName outName(args.args()[2]);
+    fileName objName(args.additionalArgs()[0]);
+    fileName outName(args.additionalArgs()[1]);
 
     std::ifstream OBJfile(objName.c_str());
 

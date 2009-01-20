@@ -32,18 +32,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void readToNl(IFstream& is)
-{
-    char c;
-    do
-    {
-        is.get(c);
-    } while (is && c != '\n');
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 void starMesh::addRegularCell
 (
     const labelList& labels,

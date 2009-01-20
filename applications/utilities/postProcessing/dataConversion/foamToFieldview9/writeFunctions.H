@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    writeFunctions
+InClass
+    Foam::writeFunctions
 
 Description
 
@@ -35,12 +35,10 @@ SourceFiles
 #ifndef writeFunctions_H
 #define writeFunctions_H
 
-#include <iostream>
-#include <cstring>
-#include <cstdlib> 
 #include "scalar.H"
 #include "string.H"
 #include "labelList.H"
+#include <iostream>
 
 using namespace Foam;
 

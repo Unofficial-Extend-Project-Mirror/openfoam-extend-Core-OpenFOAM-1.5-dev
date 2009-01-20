@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    writeFunctions
+    Foam::writeFunctions
 
 Description
     Various functions for collecting and writing binary data.
@@ -37,21 +37,16 @@ SourceFiles
 #define writeFunctions_H
 
 #include "floatScalar.H"
-#include "OFstream.H"
 #include "DynamicList.H"
-#include "volFields.H"
-#include "pointFields.H"
+#include "volFieldsFwd.H"
+#include "pointFieldsFwd.H"
 #include "vtkMesh.H"
 #include "volPointInterpolation.H"
-#include "PrimitivePatchInterpolation.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                            Class writeFuns Declaration
@@ -59,121 +54,44 @@ namespace Foam
 
 class writeFuns
 {
-    //- Swap halves of word.
-    static void swapWord(label& word32);
-    static void swapWords(const label nWords, label* words32);
+    // Private member functions
+
+        // Swap halves of word.
+
+            static void swapWord(label& word32);
+            static void swapWords(const label nWords, label* words32);
+
 
 public:
 
-//    // Public classes
-//
-//        //- nearCell value
-//        template<class Type>
-//        class accessOp
-//        {
-//            const bool nearCell_;
-//
-//        public:
-//
-//            accessOp(const bool nearCell)
-//            :
-//                nearCell_(nearCell)
-//            {}
-//
-//            tmp<Field<Type> > operator()
-//            (
-//                const GeometricField<Type, fvPatchField, volMesh>& fld,
-//                const label patchI
-//            ) const
-//            {
-//                if (nearCell_)
-//                {
-//                    return fld.boundaryField()[patchI].patchInternalField();
-//                }
-//                else
-//                {
-//                    return fld.boundaryField()[patchI];
-//                }
-//            }
-//        };
-//
-//        //- nearCell value for point fields
-//        template<class Type>
-//        class internalAccessOp
-//        {
-//
-//        public:
-//
-//            internalAccessOp()
-//            {}
-//
-//            tmp<Field<Type> > operator()
-//            (
-//                const GeometricField<Type, pointPatchField, pointMesh>& fld,
-//                const label patchI
-//            ) const
-//            {
-//                return fld.boundaryField()[patchI].patchInternalField();
-//            }
-//        };
-//
-//        //- No op
-//        template<class Type>
-//        class noOp
-//        {
-//        public:
-//
-//            noOp()
-//            {}
-//
-//            tmp<Field<Type> > operator()(const Field<Type>& fld) const
-//            {
-//                return fld;
-//            }
-//        };
-//
-//        //- Interpolation
-//        template<class Type>
-//        class interpolateOp
-//        {
-//            const PrimitivePatchInterpolation<primitivePatch>& pi_;
-//
-//        public:
-//
-//            interpolateOp(const PrimitivePatchInterpolation<primitivePatch>& pi)
-//            :
-//                pi_(pi)
-//            {}
-//
-//            tmp<Field<Type> > operator()(const Field<Type>& fld) const
-//            {
-//                return pi_.faceToPointInterpolate(fld);
-//            }
-//        };
+    // Write ascii or binary. If binary optionally in-place swaps argument
+
+        static void write(std::ostream&, const bool, List<floatScalar>&);
+        static void write(std::ostream&, const bool, DynamicList<floatScalar>&);
+        static void write(std::ostream&, const bool, labelList&);
+        static void write(std::ostream&, const bool, DynamicList<label>&);
 
 
-    //- Write ascii or binary. If binary optionally in-place swaps argument
-    static void write(std::ostream&, const bool, List<floatScalar>&);
-    static void write(std::ostream&, const bool, DynamicList<floatScalar>&);
-    static void write(std::ostream&, const bool, labelList&);
-    static void write(std::ostream&, const bool, DynamicList<label>&);
+    // Write header
 
-    //- write header
-    static void writeHeader(std::ostream&, const bool, const string&);
-    static void writeCellDataHeader(std::ostream&, const label, const label);
-    static void writePointDataHeader
-    (
-        std::ostream&,
-        const label,
-        const label
-    );
+        static void writeHeader(std::ostream&, const bool, const string&);
+        static void writeCellDataHeader(std::ostream&, const label, const label);
+        static void writePointDataHeader
+        (
+            std::ostream&,
+            const label,
+            const label
+        );
 
-    //- convert to VTK and store
-    static void insert(const scalar&, DynamicList<floatScalar>& dest);
-    static void insert(const point&, DynamicList<floatScalar>& dest);
-    static void insert(const symmTensor&, DynamicList<floatScalar>& dest);
-    static void insert(const sphericalTensor&, DynamicList<floatScalar>& dest);
-    static void insert(const tensor&, DynamicList<floatScalar>& dest);
+
+    // Convert to VTK and store
+
+        static void insert(const scalar&, DynamicList<floatScalar>&);
+        static void insert(const point&, DynamicList<floatScalar>&);
+        static void insert(const sphericalTensor&, DynamicList<floatScalar>&);
+        static void insert(const symmTensor&, DynamicList<floatScalar>&);
+        static void insert(const tensor&, DynamicList<floatScalar>&);
+
 
     //- Append elements to DynamicList
     static void insert(const labelList&, DynamicList<label>&);
@@ -245,7 +163,6 @@ public:
 #ifdef NoRepository
 #   include "writeFunsTemplates.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

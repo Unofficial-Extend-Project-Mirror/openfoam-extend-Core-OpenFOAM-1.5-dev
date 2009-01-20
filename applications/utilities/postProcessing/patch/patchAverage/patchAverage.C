@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,31 +37,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
     argList::validArgs.append("fieldName");
     argList::validArgs.append("patchName");
-
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
-
-    word fieldName(args.args()[3]);
-    word patchName(args.args()[4]);
-
 #   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
+    instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    for (label i=startTime; i<endTime; i++)
-    {
-        runTime.setTime(Times[i], i);
+    word fieldName(args.additionalArgs()[0]);
+    word patchName(args.additionalArgs()[1]);
 
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
         IOobject fieldHeader
@@ -77,21 +66,40 @@ int main(int argc, char *argv[])
         {
             mesh.readUpdate();
 
-            Info<< "    Reading field " << fieldName << endl;
-            volScalarField field(fieldHeader, mesh);
-
             label patchi = mesh.boundaryMesh().findPatchID(patchName);
-
-            if (patchi >= 0)
+            if (patchi < 0)
             {
+                FatalError
+                    << "Unable to find patch " << patchName << nl
+                    << exit(FatalError);
+            }
+
+            if (fieldHeader.headerClassName() == "volScalarField")
+            {
+                Info<< "    Reading volScalarField " << fieldName << endl;
+                volScalarField field(fieldHeader, mesh);
+
+                scalar area = gSum(mesh.magSf().boundaryField()[patchi]);
+                scalar sumField = 0;
+
+                if (area > 0)
+                {
+                    sumField = gSum
+                    (
+                        mesh.magSf().boundaryField()[patchi]
+                      * field.boundaryField()[patchi]
+                    ) / area;
+                }
+
                 Info<< "    Average of " << fieldName << " over patch "
                     << patchName << '[' << patchi << ']' << " = "
-                    <<  sum
-                        (
-                            mesh.magSf().boundaryField()[patchi]
-                           *field.boundaryField()[patchi]
-                        )/sum(mesh.magSf().boundaryField()[patchi])
-                    << endl;
+                    << sumField << endl;
+            }
+            else
+            {
+                FatalError
+                    << "Only possible to average volScalarFields "
+                    << nl << exit(FatalError);
             }
         }
         else
@@ -104,8 +112,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
-
 
 // ************************************************************************* //

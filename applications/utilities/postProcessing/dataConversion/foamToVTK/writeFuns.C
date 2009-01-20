@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "writeFuns.H"
@@ -239,26 +237,26 @@ void Foam::writeFuns::insert(const vector& pt, DynamicList<floatScalar>& dest)
 
 void Foam::writeFuns::insert
 (
-    const symmTensor& pt,
+    const sphericalTensor& pt,
     DynamicList<floatScalar>& dest
-) 
-{ 
-    for (direction cmpt = 0; cmpt < symmTensor::nComponents; cmpt++) 
-    { 
-        dest.append(float(pt[cmpt])); 
-    } 
-} 
+)
+{
+    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; cmpt++)
+    {
+        dest.append(float(pt[cmpt]));
+    }
+}
 
 
 void Foam::writeFuns::insert
 (
-    const sphericalTensor& pt,
+    const symmTensor& pt,
     DynamicList<floatScalar>& dest
-) 
-{ 
-    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; cmpt++) 
-    { 
-        dest.append(float(pt[cmpt])); 
+)
+{
+    for (direction cmpt = 0; cmpt < symmTensor::nComponents; cmpt++)
+    {
+        dest.append(float(pt[cmpt]));
     }
 }
 
@@ -272,7 +270,6 @@ void Foam::writeFuns::insert(const tensor& pt, DynamicList<floatScalar>& dest)
 }
 
 
-// Store labelList in dest.
 void Foam::writeFuns::insert(const labelList& source, DynamicList<label>& dest)
 {
     forAll(source, i)

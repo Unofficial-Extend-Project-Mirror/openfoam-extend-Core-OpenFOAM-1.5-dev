@@ -20,10 +20,10 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellSplitter
+    Foam::cellSplitter
 
 Description
     Does pyramidal decomposition of selected cells. So all faces will become
@@ -46,8 +46,8 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
-class polyTopoChange;
+// Forward declaration of classes
+class directTopoChange;
 class mapPolyMesh;
 class polyMesh;
 
@@ -123,7 +123,7 @@ public:
             void setRefinement
             (
                 const Map<point>& cellToMidPoint,
-                polyTopoChange& meshMod
+                directTopoChange& meshMod
             );
 
             //- Force recalculation of locally stored data on topological change

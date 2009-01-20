@@ -67,8 +67,8 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
         readScalar(mirrorMeshDict_.lookup("planeTolerance"))
     );
 
-    const pointField& oldPoints = allPoints();
-    const faceList& oldFaces = allFaces();
+    const pointField& oldPoints = points();
+    const faceList& oldFaces = faces();
     const cellList& oldCells = cells();
     const label nOldInternalFaces = nInternalFaces();
     const polyPatchList& oldPatches = boundaryMesh();
@@ -398,10 +398,6 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     pMesh.addPatches(p);
-
-    Info << "Checking mesh" << endl;
-    pMesh.checkMesh();
-
 }
 
 

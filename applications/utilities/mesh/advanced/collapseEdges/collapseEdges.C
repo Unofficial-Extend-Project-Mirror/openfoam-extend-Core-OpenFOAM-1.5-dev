@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,8 +43,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "edgeCollapser.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
 #include "polyMesh.H"
 #include "mapPolyMesh.H"
 #include "mathematicalConstants.H"
@@ -312,7 +311,7 @@ label collapseHighAspectFaces
                 if (lengths[1] > edgeRatio*lengths[0])
                 {
                     edgeI = fEdges[lengths.indices()[0]];
-                }    
+                }
             }
 
 
@@ -456,6 +455,7 @@ label simplifyFaces
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::validOptions.insert("overwrite", "");
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
 
@@ -463,8 +463,9 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    scalar minLen(readScalar(IStringStream(args.args()[3])()));
-    scalar angle(readScalar(IStringStream(args.args()[4])()));
+    scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
+    scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
+    bool overwrite = args.options().found("overwrite");
 
     scalar maxCos = Foam::cos(angle*180/mathematicalConstant::pi);
 
@@ -557,27 +558,22 @@ int main(int argc, char *argv[])
             break;
         }
 
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
-        // Insert mesh refinement into polyTopoChange.
+        // Insert mesh refinement into directTopoChange.
         collapser.setRefinement(meshMod);
 
         // Do all changes
         Info<< "Morphing ..." << endl;
 
-        autoPtr<mapPolyMesh> morphMap = polyTopoChanger::changeMesh
-        (
-            mesh,
-            meshMod
-        );
+        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
+
+        collapser.updateMesh(morphMap());
 
         if (morphMap().hasMotionPoints())
         {
             mesh.movePoints(morphMap().preMotionPoints());
         }
-
-        //Not implemented yet.
-        //collapser.updateMesh(morphMap());
 
         meshChanged = true;
     }
@@ -585,7 +581,10 @@ int main(int argc, char *argv[])
     if (meshChanged)
     {
         // Write resulting mesh
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         Info << "Writing collapsed mesh to time " << runTime.value() << endl;
 

@@ -69,7 +69,7 @@ polyLine::polyLine(const pointField& ps)
     controlPoints_(ps),
     distances_(ps.size())
 {
-    if (ps.size() > 0)
+    if (ps.size())
     {
         calcDistances();
     }

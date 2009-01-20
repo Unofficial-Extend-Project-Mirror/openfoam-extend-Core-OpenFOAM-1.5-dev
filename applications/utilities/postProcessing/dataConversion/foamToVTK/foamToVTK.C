@@ -22,8 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    foamToVTK
+
 Description
-    legacy VTK file format writer.
+    Legacy VTK file format writer.
+
     - handles volScalar, volVector, pointScalar, pointVector, surfaceScalar
       fields.
     - mesh topo changes.
@@ -33,44 +37,91 @@ Description
     - automatic decomposition of cells; polygons on boundary undecomposed since
       handled by vtk.
 
+Usage
 
-    Current options:
-    -mesh           : different mesh name (instead of -region)
-    -fields         : selected fields only
-    -surfaceFields  : write surfaceScalarFields (e.g. phi)
-    -cellSet, -faceSet : set display
-    -ascii
-    -nearCellValue  : output cell value on patches instead of patch value itself
-    -noInternal     : do not generate file for mesh, only for patches
-    -noPointValues  : no pointFields
-    -allPatches     : combine all patches into one big file
+    - foamToVTK [OPTION]
 
-    Note: mesh subset is handled by vtkMesh. Slight inconsistency in
+
+    @param -ascii \n
+    Write VTK data in ASCII format instead of binary.
+
+    @param -mesh \<name\>\n
+    Use a different mesh name (instead of -region)
+
+    @param -fields \<fields\>\n
+    Convert selected fields only. For example,
+    @verbatim
+         -fields "( p T U )"
+    @endverbatim
+    The quoting is required to avoid shell expansions and to pass the
+    information as a single argument.
+
+    @param -surfaceFields \n
+    Write surfaceScalarFields (e.g., phi)
+
+    @param -cellSet \<name\>\n
+    @param -faceSet \<name\>\n
+    @param -pointSet \<name\>\n
+    Restrict conversion to the cellSet, faceSet or pointSet.
+
+    @param -nearCellValue \n
+    Output cell value on patches instead of patch value itself
+
+    @param -noInternal \n
+    Do not generate file for mesh, only for patches
+
+    @param -noPointValues \n
+    No pointFields
+
+    @param -noFaceZones \n
+    No faceZones
+
+    @param -noLinks \n
+    (in parallel) do not link processor files to master
+
+    @param -allPatches \n
+    Combine all patches into a single file
+
+    @param -excludePatches \<patchNames\>\n
+    Specify patches to exclude. For example,
+    @verbatim
+         -excludePatches "( inlet_1 inlet_2 )"
+    @endverbatim
+    The quoting is required to avoid shell expansions and to pass the
+    information as a single argument.
+
+Note
+    mesh subset is handled by vtkMesh. Slight inconsistency in
     interpolation: on the internal field it interpolates the whole volfield
-    to the whole-mesh pointField and then selects only those values it needs
-    for the subMesh (using the fvMeshSubset cellMap(), pointMap() functions).
-    For the patches however it uses the fvMeshSubset.interpolate function
-    to directly interpolate the whole-mesh values onto the subset patch.
+    to the whole-mesh pointField and then selects only those values it
+    needs for the subMesh (using the fvMeshSubset cellMap(), pointMap()
+    functions). For the patches however it uses the
+    fvMeshSubset.interpolate function to directly interpolate the
+    whole-mesh values onto the subset patch.
 
-    Note: new file format: no automatic timestep recognition. However can
-    have .pvd file format which refers to time simulation:
+Note
+    new file format: \n
+    no automatic timestep recognition.
+    However can have .pvd file format which refers to time simulation
+    if XML *.vtu files are available:
 
-<?xml version="1.0"?>
-<VTKFile type="Collection" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
-  <Collection>
-    <DataSet timestep="50" file="pitzDaily_2.vtk"/>
-    <DataSet timestep="100" file="pitzDaily_3.vtk"/>
-    <DataSet timestep="150" file="pitzDaily_4.vtk"/>
-    <DataSet timestep="200" file="pitzDaily_5.vtk"/>
-    <DataSet timestep="250" file="pitzDaily_6.vtk"/>
-    <DataSet timestep="300" file="pitzDaily_7.vtk"/>
-    <DataSet timestep="350" file="pitzDaily_8.vtk"/>
-    <DataSet timestep="400" file="pitzDaily_9.vtk"/>
-    <DataSet timestep="450" file="pitzDaily_10.vtk"/>
-    <DataSet timestep="500" file="pitzDaily_11.vtk"/>
-  </Collection>
-</VTKFile>
-
+    @verbatim
+      <?xml version="1.0"?>
+      <VTKFile type="Collection" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
+        <Collection>
+          <DataSet timestep="50" file="pitzDaily_2.vtu"/>
+          <DataSet timestep="100" file="pitzDaily_3.vtu"/>
+          <DataSet timestep="150" file="pitzDaily_4.vtu"/>
+          <DataSet timestep="200" file="pitzDaily_5.vtu"/>
+          <DataSet timestep="250" file="pitzDaily_6.vtu"/>
+          <DataSet timestep="300" file="pitzDaily_7.vtu"/>
+          <DataSet timestep="350" file="pitzDaily_8.vtu"/>
+          <DataSet timestep="400" file="pitzDaily_9.vtu"/>
+          <DataSet timestep="450" file="pitzDaily_10.vtu"/>
+          <DataSet timestep="500" file="pitzDaily_11.vtu"/>
+        </Collection>
+      </VTKFile>
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,6 +135,8 @@ Description
 #include "symmTensorIOField.H"
 #include "tensorIOField.H"
 #include "faceZoneMesh.H"
+#include "Cloud.H"
+#include "passiveParticle.H"
 
 #include "vtkMesh.H"
 #include "readFields.H"
@@ -141,7 +194,7 @@ labelList getSelectedPatches
 {
     DynamicList<label> patchIDs(patches.size());
 
-    Pout<< "Combining patches:" << endl;
+    Info<< "Combining patches:" << endl;
 
     forAll(patches, patchI)
     {
@@ -153,13 +206,13 @@ labelList getSelectedPatches
             || (Pstream::parRun() && isType<processorPolyPatch>(pp))
         )
         {
-            Pout<< "    discarding empty/processor patch " << patchI
+            Info<< "    discarding empty/processor patch " << patchI
                 << " " << pp.name() << endl;
         }
         else if (!excludePatches.found(pp.name()))
         {
             patchIDs.append(patchI);
-            Pout<< "    patch " << patchI << " " << pp.name() << endl;
+            Info<< "    patch " << patchI << " " << pp.name() << endl;
         }
     }
     return patchIDs.shrink();
@@ -173,7 +226,7 @@ labelList getSelectedPatches
 int main(int argc, char *argv[])
 {
 #   include "addTimeOptions.H"
-    argList::validOptions.insert("mesh", "mesh name");
+#   include "addRegionOption.H"
     argList::validOptions.insert("fields", "fields");
     argList::validOptions.insert("cellSet", "cellSet name");
     argList::validOptions.insert("faceSet", "faceSet name");
@@ -185,12 +238,16 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("noPointValues","");
     argList::validOptions.insert("allPatches","");
     argList::validOptions.insert("excludePatches","patches to exclude");
+    argList::validOptions.insert("noFaceZones","");
+    argList::validOptions.insert("noLinks","");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
 
     bool doWriteInternal = !args.options().found("noInternal");
+    bool doFaceZones = !args.options().found("noFaceZones");
+    bool doLinks = !args.options().found("noLinks");
 
     bool binary = !args.options().found("ascii");
 
@@ -254,15 +311,26 @@ int main(int argc, char *argv[])
         vtkName = runTime.caseName();
     }
 
-    word meshName = fvMesh::defaultRegion;
 
-    // make a directory called VTK in the case
+    instantList Times = runTime.times();
+
+    // set startTime and endTime depending on -time and -latestTime options
+#   include "checkTimeOptions.H"
+
+    runTime.setTime(Times[startTime], startTime);
+
+    // Current mesh.
+#   include "createNamedMesh.H"
+
+    // VTK/ directory in the case
     fileName fvPath(runTime.path()/"VTK");
+    // Directory of mesh (region0 gets filtered out)
+    fileName regionPrefix = "";
 
-    if (args.options().found("mesh"))
+    if (regionName != polyMesh::defaultRegion)
     {
-        meshName = args.options()["mesh"];
-        fvPath = fvPath/meshName;
+        fvPath = fvPath/regionName;
+        regionPrefix = regionName;
     }
 
     if (dir(fvPath))
@@ -272,13 +340,14 @@ int main(int argc, char *argv[])
             args.options().found("time")
          || args.options().found("latestTime")
          || cellSetName.size() > 0
+         || regionName != polyMesh::defaultRegion
         )
         {
-            Pout<< "Keeping old VTK files in " << fvPath << nl << endl;
+            Info<< "Keeping old VTK files in " << fvPath << nl << endl;
         }
         else
         {
-            Pout<< "Deleting old VTK files in " << fvPath << nl << endl;
+            Info<< "Deleting old VTK files in " << fvPath << nl << endl;
 
             rmDir(fvPath);
         }
@@ -287,19 +356,11 @@ int main(int argc, char *argv[])
     mkDir(fvPath);
 
 
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptionsNoConstant.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-    // Current mesh.
     vtkMesh vMesh
     (
         IOobject
         (
-            meshName,
+            regionName,
             runTime.timeName(),
             runTime,
             IOobject::MUST_READ
@@ -307,12 +368,11 @@ int main(int argc, char *argv[])
         cellSetName
     );
 
-
-    for (label i = startTime; i < endTime; i++)
+    for (label timeI = startTime; timeI < endTime; timeI++)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(Times[timeI], timeI);
 
-        Pout<< "Time " << Times[i].name() << endl;
+        Info<< "Time " << Times[timeI].name() << endl;
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
@@ -326,7 +386,7 @@ int main(int argc, char *argv[])
          || meshState == polyMesh::TOPO_PATCH_CHANGE
         )
         {
-            Pout<< "    Read new mesh" << nl << endl;
+            Info<< "    Read new mesh" << nl << endl;
         }
 
 
@@ -343,11 +403,11 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(runTime.timeIndex())
+              + name(timeI)
               + ".vtk"
             );
 
-            Pout<< "    FaceSet   : " << patchFileName << endl;
+            Info<< "    FaceSet   : " << patchFileName << endl;
 
             writeFaceSet(binary, vMesh, set, patchFileName);
 
@@ -366,11 +426,11 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(runTime.timeIndex())
+              + name(timeI)
               + ".vtk"
             );
 
-            Pout<< "    pointSet   : " << patchFileName << endl;
+            Info<< "    pointSet   : " << patchFileName << endl;
 
             writePointSet(binary, vMesh, set, patchFileName);
 
@@ -391,23 +451,23 @@ int main(int argc, char *argv[])
 
         PtrList<volScalarField> vsf;
         readFields(vMesh, vMesh, objects, selectedFields, vsf);
-        print("    volScalarFields            :", Pout, vsf);
+        print("    volScalarFields            :", Info, vsf);
 
         PtrList<volVectorField> vvf;
         readFields(vMesh, vMesh, objects, selectedFields, vvf);
-        print("    volVectorFields            :", Pout, vvf);
+        print("    volVectorFields            :", Info, vvf);
 
         PtrList<volSphericalTensorField> vSpheretf;
         readFields(vMesh, vMesh, objects, selectedFields, vSpheretf);
-        print("    volSphericalTensorFields   :", Pout, vSpheretf);
+        print("    volSphericalTensorFields   :", Info, vSpheretf);
 
         PtrList<volSymmTensorField> vSymmtf;
         readFields(vMesh, vMesh, objects, selectedFields, vSymmtf);
-        print("    volSymmTensorFields        :", Pout, vSymmtf);
+        print("    volSymmTensorFields        :", Info, vSymmtf);
 
         PtrList<volTensorField> vtf;
         readFields(vMesh, vMesh, objects, selectedFields, vtf);
-        print("    volTensorFields            :", Pout, vtf);
+        print("    volTensorFields            :", Info, vtf);
 
         label nVolFields =
                 vsf.size()
@@ -419,17 +479,12 @@ int main(int argc, char *argv[])
 
         // Construct pointMesh only if nessecary since constructs edge
         // addressing (expensive on polyhedral meshes)
-        autoPtr<pointMesh> pMeshPtr(NULL);
         if (noPointValues)
         {
-            Pout<< "    pointScalarFields : switched off"
+            Info<< "    pointScalarFields : switched off"
                 << " (\"-noPointValues\" option)\n";
-            Pout<< "    pointVectorFields : switched off"
+            Info<< "    pointVectorFields : switched off"
                 << " (\"-noPointValues\" option)\n";
-        }
-        else
-        {
-            pMeshPtr.reset(new pointMesh(mesh));
         }
 
         PtrList<pointScalarField> psf;
@@ -438,24 +493,59 @@ int main(int argc, char *argv[])
         PtrList<pointSymmTensorField> pSymmtf;
         PtrList<pointTensorField> ptf;
 
-        if (pMeshPtr.valid())
+        if (!noPointValues)
         {
-            readFields(pMeshPtr(), objects, selectedFields, psf);
-            print("    pointScalarFields          :", Pout, psf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                psf
+            );
+            print("    pointScalarFields          :", Info, psf);
 
-            readFields(pMeshPtr(), objects, selectedFields, pvf);
-            print("    pointVectorFields          :", Pout, pvf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pvf
+            );
+            print("    pointVectorFields          :", Info, pvf);
 
-            readFields(pMeshPtr(), objects, selectedFields, pSpheretf);
-            print("    pointSphericalTensorFields :", Pout, pSpheretf);
-            
-            readFields(pMeshPtr(), objects, selectedFields, pSymmtf);
-            print("    pointSymmTensorFields      :", Pout, pSymmtf);
-            
-            readFields(pMeshPtr(), objects, selectedFields, ptf);
-            print("    pointTensorFields          :", Pout, ptf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pSpheretf
+            );
+            print("    pointSphericalTensorFields :", Info, pSpheretf);
+
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pSymmtf
+            );
+            print("    pointSymmTensorFields      :", Info, pSymmtf);
+
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                ptf
+            );
+            print("    pointTensorFields          :", Info, ptf);
         }
-        Pout<< endl;
+        Info<< endl;
 
         label nPointFields =
             psf.size()
@@ -473,11 +563,11 @@ int main(int argc, char *argv[])
             (
                 fvPath/vtkName
               + "_"
-              + name(runTime.timeIndex())
+              + name(timeI)
               + ".vtk"
             );
 
-            Pout<< "    Internal  : " << vtkFileName << endl;
+            Info<< "    Internal  : " << vtkFileName << endl;
 
             // Write mesh
             internalWriter writer(vMesh, binary, vtkFileName);
@@ -500,7 +590,7 @@ int main(int argc, char *argv[])
             writer.write(vSymmtf);
             writer.write(vtf);
 
-            if (pMeshPtr.valid())
+            if (!noPointValues)
             {
                 writeFuns::writePointDataHeader
                 (
@@ -517,7 +607,7 @@ int main(int argc, char *argv[])
                 writer.write(ptf);
 
                 // Interpolated volFields
-                volPointInterpolation pInterp(mesh, pMeshPtr());
+                volPointInterpolation pInterp(mesh, vMesh.pMesh());
                 writer.write(pInterp, vsf);
                 writer.write(pInterp, vvf);
                 writer.write(pInterp, vSpheretf);
@@ -529,7 +619,7 @@ int main(int argc, char *argv[])
         //---------------------------------------------------------------------
         //
         // Write surface fields
-        // 
+        //
         //---------------------------------------------------------------------
 
         if (args.options().found("surfaceFields"))
@@ -543,7 +633,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 ssf
             );
-            print("    surfScalarFields  :", Pout, ssf);
+            print("    surfScalarFields  :", Info, ssf);
 
             PtrList<surfaceVectorField> svf;
             readFields
@@ -554,7 +644,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 svf
             );
-            print("    surfVectorFields  :", Pout, svf);
+            print("    surfVectorFields  :", Info, svf);
 
             if (ssf.size() + svf.size() > 0)
             {
@@ -578,8 +668,9 @@ int main(int argc, char *argv[])
                 (
                     fvPath
                    /"surfaceFields"
-                   /"surfaceFields_"
-                   + name(runTime.timeIndex())
+                   /"surfaceFields"
+	           + "_"
+                   + name(timeI)
                    + ".vtk"
                 );
 
@@ -597,7 +688,7 @@ int main(int argc, char *argv[])
         //---------------------------------------------------------------------
         //
         // Write patches (POLYDATA file, one for each patch)
-        // 
+        //
         //---------------------------------------------------------------------
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
@@ -613,7 +704,7 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/cellSetName
                   + "_"
-                  + name(runTime.timeIndex())
+                  + name(timeI)
                   + ".vtk";
             }
             else
@@ -621,11 +712,11 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/"allPatches"
                   + "_"
-                  + name(runTime.timeIndex())
+                  + name(timeI)
                   + ".vtk";
             }
 
-            Pout<< "    Combined patches     : " << patchFileName << endl;
+            Info<< "    Combined patches     : " << patchFileName << endl;
 
             patchWriter writer
             (
@@ -654,7 +745,7 @@ int main(int argc, char *argv[])
             writer.write(vSymmtf);
             writer.write(vtf);
 
-            if (pMeshPtr.valid())
+            if (!noPointValues)
             {
                 writeFuns::writePointDataHeader
                 (
@@ -691,7 +782,7 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/cellSetName
                           + "_"
-                          + name(runTime.timeIndex())
+                          + name(timeI)
                           + ".vtk";
                     }
                     else
@@ -699,11 +790,11 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/pp.name()
                           + "_"
-                          + name(runTime.timeIndex())
+                          + name(timeI)
                           + ".vtk";
                     }
 
-                    Pout<< "    Patch     : " << patchFileName << endl;
+                    Info<< "    Patch     : " << patchFileName << endl;
 
                     patchWriter writer
                     (
@@ -734,7 +825,7 @@ int main(int argc, char *argv[])
                         writer.write(vSymmtf);
                         writer.write(vtf);
 
-                        if (pMeshPtr.valid())
+                        if (!noPointValues)
                         {
                             writeFuns::writePointDataHeader
                             (
@@ -771,44 +862,53 @@ int main(int argc, char *argv[])
         //---------------------------------------------------------------------
         //
         // Write faceZones (POLYDATA file, one for each zone)
-        // 
+        //
         //---------------------------------------------------------------------
 
-        const faceZoneMesh& zones = mesh.faceZones();
-
-        forAll(zones, zoneI)
+        if (doFaceZones)
         {
-            const faceZone& pp = zones[zoneI];
+            const faceZoneMesh& zones = mesh.faceZones();
 
-            mkDir(fvPath/pp.name());
-
-            fileName patchFileName;
-
-            if (vMesh.useSubMesh())
+            forAll(zones, zoneI)
             {
-                patchFileName =
-                    fvPath/pp.name()/cellSetName
-                  + "_"
-                  + name(runTime.timeIndex())
-                  + ".vtk";
+                const faceZone& pp = zones[zoneI];
+
+                mkDir(fvPath/pp.name());
+
+                fileName patchFileName;
+
+                if (vMesh.useSubMesh())
+                {
+                    patchFileName =
+                        fvPath/pp.name()/cellSetName
+                      + "_"
+                      + name(timeI)
+                      + ".vtk";
+                }
+                else
+                {
+                    patchFileName =
+                        fvPath/pp.name()/pp.name()
+                      + "_"
+                      + name(timeI)
+                      + ".vtk";
+                }
+
+                Info<< "    FaceZone  : " << patchFileName << endl;
+
+                std::ofstream str(patchFileName.c_str());
+
+                writeFuns::writeHeader(str, binary, pp.name());
+                str << "DATASET POLYDATA" << std::endl;
+
+                writePatchGeom
+                (
+                    binary,
+                    pp().localFaces(),
+                    pp().localPoints(),
+                    str
+                );
             }
-            else
-            {
-                patchFileName =
-                    fvPath/pp.name()/pp.name()
-                  + "_"
-                  + name(runTime.timeIndex())
-                  + ".vtk";
-            }
-
-            Pout<< "    FaceZone  : " << patchFileName << endl;
-
-            std::ofstream str(patchFileName.c_str());
-
-            writeFuns::writeHeader(str, binary, pp.name());
-            str << "DATASET POLYDATA" << std::endl;
-
-            writePatchGeom(binary, pp().localFaces(), pp().localPoints(), str);
         }
 
 
@@ -816,79 +916,104 @@ int main(int argc, char *argv[])
         //---------------------------------------------------------------------
         //
         // Write lagrangian data
-        // 
+        //
         //---------------------------------------------------------------------
 
-        IOobjectList sprayObjects(mesh, runTime.timeName(), "lagrangian");
+        fileNameList cloudDirs
+        (
+            readDir
+            (
+                runTime.timePath()/regionPrefix/"lagrangian",
+                fileName::DIRECTORY
+            )
+        );
 
-        if (!vMesh.useSubMesh() && sprayObjects.size())
+        forAll(cloudDirs, i)
         {
-            mkDir(fvPath/"lagrangian");
-
-            fileName lagrFileName
+            IOobjectList sprayObjs
             (
-                fvPath/"lagrangian"/vtkName
-              + "_" + name(runTime.timeIndex()) + ".vtk"
+                mesh,
+                runTime.timeName(),
+                "lagrangian"/cloudDirs[i]
             );
 
-            Pout<< "    Lagrangian: " << lagrFileName << endl;
+            IOobject* positionsPtr = sprayObjs.lookup("positions");
 
-            wordList labelNames(sprayObjects.names(labelIOField::typeName));
-            Pout<< "        labels            :";
-            print(Pout, labelNames);
+            if (positionsPtr)
+            {
+                mkDir(fvPath/"lagrangian"/cloudDirs[i]);
 
-            wordList scalarNames(sprayObjects.names(scalarIOField::typeName));
-            Pout<< "        scalars           :";
-            print(Pout, scalarNames);
-
-            wordList vectorNames(sprayObjects.names(vectorIOField::typeName));
-            Pout<< "        vectors           :";
-            print(Pout, vectorNames);
-
-            wordList sphereNames
-            (
-                sprayObjects.names
+                fileName lagrFileName
                 (
-                    sphericalTensorIOField::typeName
-                )
-            );
-            Pout<< "        spherical tensors :";
-            print(Pout, sphereNames);
+                    fvPath/"lagrangian"/cloudDirs[i]/cloudDirs[i]
+                  + "_" + name(timeI) + ".vtk"
+                );
 
-            wordList symmNames
-            (
-                sprayObjects.names
+                Info<< "    Lagrangian: " << lagrFileName << endl;
+
+                wordList labelNames(sprayObjs.names(labelIOField::typeName));
+                Info<< "        labels            :";
+                print(Info, labelNames);
+
+                wordList scalarNames(sprayObjs.names(scalarIOField::typeName));
+                Info<< "        scalars           :";
+                print(Info, scalarNames);
+
+                wordList vectorNames(sprayObjs.names(vectorIOField::typeName));
+                Info<< "        vectors           :";
+                print(Info, vectorNames);
+
+                wordList sphereNames
                 (
-                    symmTensorIOField::typeName
-                )
-            );
-            Pout<< "        symm tensors      :";
-            print(Pout, symmNames);
+                    sprayObjs.names
+                    (
+                        sphericalTensorIOField::typeName
+                    )
+                );
+                Info<< "        spherical tensors :";
+                print(Info, sphereNames);
 
-            wordList tensorNames(sprayObjects.names(tensorIOField::typeName));
-            Pout<< "        tensors           :";
-            print(Pout, tensorNames);
+                wordList symmNames
+                (
+                    sprayObjs.names
+                    (
+                        symmTensorIOField::typeName
+                    )
+                );
+                Info<< "        symm tensors      :";
+                print(Info, symmNames);
 
-            lagrangianWriter writer(vMesh, binary, lagrFileName);
+                wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
+                Info<< "        tensors           :";
+                print(Info, tensorNames);
 
-            // Write number of fields
-            writer.writeParcelHeader
-            (
-                labelNames.size()
-            + scalarNames.size()
-            + vectorNames.size()
-            + sphereNames.size()
-            + symmNames.size()
-            + tensorNames.size()
-            );
+                lagrangianWriter writer
+                (
+                    vMesh,
+                    binary,
+                    lagrFileName,
+                    cloudDirs[i]
+                );
 
-            // Fields
-            writer.writeIOField<label>(labelNames);
-            writer.writeIOField<scalar>(scalarNames);
-            writer.writeIOField<vector>(vectorNames);
-            writer.writeIOField<vector>(sphereNames);
-            writer.writeIOField<vector>(symmNames);
-            writer.writeIOField<vector>(tensorNames);
+                // Write number of fields
+                writer.writeParcelHeader
+                (
+                    labelNames.size()
+                + scalarNames.size()
+                + vectorNames.size()
+                + sphereNames.size()
+                + symmNames.size()
+                + tensorNames.size()
+                );
+
+                // Fields
+                writer.writeIOField<label>(labelNames);
+                writer.writeIOField<scalar>(scalarNames);
+                writer.writeIOField<vector>(vectorNames);
+                writer.writeIOField<vector>(sphereNames);
+                writer.writeIOField<vector>(symmNames);
+                writer.writeIOField<vector>(tensorNames);
+            }
         }
     }
 
@@ -896,15 +1021,15 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     //
     // Link parallel outputs back to undecomposed case for ease of loading
-    // 
+    //
     //---------------------------------------------------------------------
 
-    if (Pstream::parRun())
+    if (Pstream::parRun() && doLinks)
     {
         mkDir(runTime.path()/".."/"VTK");
         chDir(runTime.path()/".."/"VTK");
 
-        Pout<< "Linking all processor files to " << runTime.path()/".."/"VTK"
+        Info<< "Linking all processor files to " << runTime.path()/".."/"VTK"
             << endl;
 
         // Get list of vtk files
@@ -946,7 +1071,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Pout << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

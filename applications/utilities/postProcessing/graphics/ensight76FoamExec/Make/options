@@ -7,5 +7,5 @@ EXE_INC = \
 LIB_LIBS = \
     -lOpenFOAM \
     -lfiniteVolume \
-    -llagrangian
-
+    -llagrangian \
+    $(PROJECT_LIBS)

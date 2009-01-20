@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ Description
 #include "boundaryMesh.H"
 #include "polyMesh.H"
 #include "faceSet.H"
-#include "directPolyTopoChange.H"
+#include "directTopoChange.H"
 #include "polyModifyFace.H"
 #include "globalMeshData.H"
 
@@ -104,7 +104,7 @@ bool repatchFace
     const labelList& nearest,
     const labelList& surfToMeshPatch,
     const label faceI,
-    directPolyTopoChange& meshMod
+    directTopoChange& meshMod
 )
 {
     bool changed = false;
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    fileName surfName(args.args()[3]);
+    fileName surfName(args.additionalArgs()[0]);
 
     Info<< "Reading surface from " << surfName << " ..." << endl;
 
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
     }
 
 
-    directPolyTopoChange meshMod(mesh);
+    directTopoChange meshMod(mesh);
 
     label nChanged = 0;
 

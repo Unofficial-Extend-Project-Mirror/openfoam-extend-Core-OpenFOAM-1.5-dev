@@ -78,8 +78,11 @@ label nValuesForPatchFaces = 0;
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-int yywrap()
-// int yyFlexLexer::yywrap()
+#if YY_FLEX_SUBMINOR_VERSION < 34
+extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -309,7 +312,7 @@ mtype                 {space}"MTYPE:"{space}
 
         label nodeI(readLabel(nodeStream));
 
-        // Note: coordinates must be read one at the time.  
+        // Note: coordinates must be read one at the time.
         scalar x = readScalar(nodeStream);
         scalar y = readScalar(nodeStream);
         scalar z = readScalar(nodeStream);
@@ -431,7 +434,7 @@ mtype                 {space}"MTYPE:"{space}
 
         if (curGroupID > 0)
         {
-            FatalErrorIn("gambitToFoam")
+            FatalErrorIn("gambitToFoam::main")
                 << "<readCellStreamGroupID>{space}{label} : "
                 << "trying to reset group ID while active"
                 << abort(FatalError);
@@ -590,7 +593,7 @@ mtype                 {space}"MTYPE:"{space}
 <boundaryPatchFaces>{spaceNl}{label}({scalarList}|\n) {
 
         // Vertex-based boundary condition
-        FatalErrorIn("gambitToFoam")
+        FatalErrorIn("gambitToFoam::main")
             << "<boundaryPatchFaces>{spaceNl}{label}{scalarList} : "
             << "boundary condition specified on vertices not supported"
             << abort(FatalError);
@@ -650,18 +653,20 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName gambitFile(args.args()[3]);
+    fileName gambitFile(args.additionalArgs()[0]);
     ifstream gambitStream(gambitFile.c_str());
 
     if (!gambitStream)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorIn("gambitToFoam::main")
+            << args.executable()
             << ": file " << gambitFile << " not found"
             << abort(FatalError);
     }
 
     yyFlexLexer lexer(&gambitStream);
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info << "Finished lexing" << endl;
 
@@ -676,7 +681,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    
+
     labelList pointLookup(maxPointIndex + 1, -1);
 
     forAll (pointMap, pointI)
@@ -768,22 +773,6 @@ int main(int argc, char *argv[])
 
             cells[cellI] = cellShape(hex, labelsHex);
         }
-
-        // 2-D hex
-        else if (cellTypes[cellI] == 2 || cellTypes[cellI] == 1)
-        {
-            FatalErrorIn(args.executable())
-                << "Conversion of 2-D Gambit meshes is not supported."
-                << abort(FatalError);
-        }
-
-        else
-        {
-            FatalErrorIn(args.executable())
-                << "Did not recognise Gambit shape index " << cellTypes[cellI]
-                << abort(FatalError);
-
-        }
     }
 
     // give foam model face number given a fluent model face number
@@ -822,11 +811,11 @@ int main(int argc, char *argv[])
                     ]
                     [curFaces[faceI] - 1] // this gives a fluent face - 1
                 ];
-                
+
         }
     }
 
-    Info<< "gambitToFoam: " << endl
+    Info << "gambitToFoam: " << endl
         << "Gambit file format does not provide information about the type of "
         << "the patch (eg. wall, symmetry plane, cyclic etc)." << endl
         << "All the patches have been created "
@@ -837,6 +826,7 @@ int main(int argc, char *argv[])
     points *= scaleFactor;
 
     wordList patchTypes(boundary.size(), polyPatch::typeName);
+    word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes(boundary.size());
 
@@ -847,6 +837,7 @@ int main(int argc, char *argv[])
         polyMesh::defaultRegion,
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
@@ -865,12 +856,10 @@ int main(int argc, char *argv[])
         boundary,
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
-
-    Info << "Checking mesh" << endl;
-    pShapeMesh.checkMesh();
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);

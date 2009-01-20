@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    vtkTopo
+    Foam::vtkTopo
 
 Description
     Polyhedral cell decomposition for VTK.
@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -52,14 +52,6 @@ class polyMesh;
 
 class vtkTopo
 {
-    // Private static data
-
-        static const label VTK_TETRA      = 10;
-        static const label VTK_PYRAMID    = 14;
-        static const label VTK_WEDGE      = 13;
-        static const label VTK_HEXAHEDRON = 12;
-
-
     // Private data
 
         const polyMesh& mesh_;
@@ -85,6 +77,21 @@ class vtkTopo
 
 
 public:
+
+   // Public static data
+
+        // this must be consistent with the enumeration in "vtkCell.H"
+        enum vtkTypes
+        {
+            VTK_TRIANGLE   = 5,
+            VTK_POLYGON    = 7,
+            VTK_QUAD       = 9,
+
+            VTK_TETRA      = 10,
+            VTK_PYRAMID    = 14,
+            VTK_WEDGE      = 13,
+            VTK_HEXAHEDRON = 12,
+        };
 
     // Constructors
 

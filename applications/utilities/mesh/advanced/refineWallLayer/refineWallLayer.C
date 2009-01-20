@@ -31,8 +31,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 #include "cellCuts.H"
@@ -50,14 +49,16 @@ int main(int argc, char *argv[])
     Foam::argList::validArgs.append("patchName");
     Foam::argList::validArgs.append("edgeWeight");
     Foam::argList::validOptions.insert("useSet", "cellSet");
+    Foam::argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    word patchName(args.args()[3]);
+    word patchName(args.additionalArgs()[0]);
 
-    scalar weight(readScalar(IStringStream(args.args()[4])()));    
+    scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));
+    bool overwrite = args.options().found("overwrite");
 
 
     label patchID = mesh.boundaryMesh().findPatchID(patchName);
@@ -201,20 +202,23 @@ int main(int argc, char *argv[])
         cutEdgeWeights      // weight on cut edges
     );
 
-    polyTopoChange meshMod(mesh);
+    directTopoChange meshMod(mesh);
 
     // Cutting engine
     meshCutter cutter(mesh);
 
-    // Insert mesh refinement into polyTopoChange.
+    // Insert mesh refinement into directTopoChange.
     cutter.setRefinement(cuts, meshMod);
 
     // Do all changes
     Info<< "Morphing ..." << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
-    autoPtr<mapPolyMesh> morphMap = polyTopoChanger::changeMesh(mesh, meshMod);
+    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
     if (morphMap().hasMotionPoints())
     {

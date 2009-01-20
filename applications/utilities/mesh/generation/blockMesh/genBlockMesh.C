@@ -32,7 +32,6 @@ Description
 #include "IOPtrList.H"
 
 #include "blockMesh.H"
-#include "attachPolyTopoChanger.H"
 #include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
 #include "cellSet.H"
@@ -42,6 +41,8 @@ Description
 #include "OFstream.H"
 
 #include "Pair.H"
+#include "mapPolyMesh.H"
+#include "polyTopoChanger.H"
 #include "slidingInterface.H"
 
 using namespace Foam;
@@ -58,13 +59,30 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "checkOptions.H"
 
+    word regionName;
+    fileName polyMeshDir;
+
+    if (args.options().found("region"))
+    {
+        regionName = args.options()["region"];
+        polyMeshDir = regionName/polyMesh::meshSubDir;
+
+        Info<< nl << "Generating mesh for region " << regionName << endl;
+    }
+    else
+    {
+        regionName = polyMesh::defaultRegion;
+        polyMeshDir = polyMesh::meshSubDir;
+    }
+
+
     Info<< nl << "Reading block mesh description dictionary" << endl;
 
     IOobject meshDescriptionIOobject
     (
         "blockMeshDict",
         runTime.constant(),
-        "polyMesh",
+        polyMeshDir,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -73,39 +91,9 @@ int main(int argc, char *argv[])
 
     if (!meshDescriptionIOobject.headerOk())
     {
-        meshDescriptionIOobject = IOobject
-        (
-            "meshDescription",
-            runTime.constant(),
-            "polyMesh",
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-    }
-
-    if (!meshDescriptionIOobject.headerOk())
-    {
-        meshDescriptionIOobject = IOobject
-        (
-            "meshDescription",
-            runTime.constant(),
-            "mesh",
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-    }
-
-    if (!meshDescriptionIOobject.headerOk())
-    {
         FatalErrorIn(args.executable())
             << "Cannot open mesh description file " << nl
-            << runTime.constant()/"polyMesh"/"blockMeshDict" << " or " << nl
-            << runTime.constant()/"polyMesh"/"meshDescription" << " or " << nl
-            << runTime.constant()/"mesh"/"meshDescription"
+            << runTime.constant()/polyMeshDir/"blockMeshDict" << nl
             << exit(FatalError);
     }
 
@@ -118,16 +106,39 @@ int main(int argc, char *argv[])
 
     if (writeTopo)
     {
-        word objMeshFile("blockTopology.obj");
-
-        Info<< nl << "Dumping block structure as Lightwave obj format"
-            << " to " << objMeshFile << endl;
-
         // Write mesh as edges.
+        {
+            fileName objMeshFile("blockTopology.obj");
 
-        OFstream objStream(objMeshFile);
+            OFstream str(runTime.path()/objMeshFile);
 
-        blocks.writeTopology(objStream);
+            Info<< nl << "Dumping block structure as Lightwave obj format"
+                << " to " << objMeshFile << endl;
+
+            blocks.writeTopology(str);
+        }
+
+        // Write centres of blocks
+        {
+            fileName objCcFile("blockCentres.obj");
+
+            OFstream str(runTime.path()/objCcFile);
+
+            Info<< nl << "Dumping block centres as Lightwave obj format"
+                << " to " << objCcFile << endl;
+
+            const polyMesh& topo = blocks.topology();
+
+            const pointField& cellCentres = topo.cellCentres();
+
+            forAll(cellCentres, cellI)
+            {
+                //point cc = b.blockShape().centre(b.points());
+                const point& cc = cellCentres[cellI];
+
+                str << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
+            }
+        }
 
         Info<< nl << "end" << endl;
 
@@ -140,6 +151,7 @@ int main(int argc, char *argv[])
 
     wordList patchNames = blocks.patchNames();
     wordList patchTypes = blocks.patchTypes();
+    word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
 
@@ -147,9 +159,10 @@ int main(int argc, char *argv[])
     (
         runTime,
         runTime.constant(),
-        polyMesh::meshSubDir,
+        polyMeshDir,            //polyMesh::meshSubDir
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
@@ -158,7 +171,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            polyMesh::defaultRegion,
+            regionName,
             runTime.constant(),
             runTime
         ),
@@ -167,6 +180,7 @@ int main(int argc, char *argv[])
         blocks.patches(),
         patchNames,
         patchTypes,
+        defaultFacesName,
         defaultFacesType,
         patchPhysicalTypes
     );
@@ -269,9 +283,9 @@ int main(int argc, char *argv[])
             mesh.addZones(pz, fz, cz);
 
 
-            Info << "Creating attachPolyTopoChanger" << endl;
-            attachPolyTopoChanger polyMeshAttacher(mesh);
-            polyMeshAttacher.setSize(mergePatchPairs.size());
+            Info << "Creating topo change" << endl;
+            polyTopoChanger attacher(mesh);
+            attacher.setSize(mergePatchPairs.size());
 
             forAll (mergePatchPairs, pairI)
             {
@@ -283,14 +297,14 @@ int main(int argc, char *argv[])
                 );
 
                 // Add the sliding interface mesh modifier
-                polyMeshAttacher.set
+                attacher.set
                 (
                     pairI,
                     new slidingInterface
                     (
                         "couple" + name(pairI),
                         pairI,
-                        polyMeshAttacher,
+                        attacher,
                         mergeName + "MasterZone",
                         mergeName + "SlaveZone",
                         mergeName + "CutPointZone",
@@ -304,17 +318,13 @@ int main(int argc, char *argv[])
                 );
             }
 
-            polyMeshAttacher.attach(true);
+            attacher.changeMesh();
         }
     }
     else
     {
         Info<< nl << "There are no merge patch pairs" << endl;
     }
-
-
-    // Remove old files
-    mesh.removeFiles(mesh.instance());
 
 
     // Set any cellZones (note: cell labelling unaffected by above
@@ -406,6 +416,7 @@ int main(int argc, char *argv[])
     IOstream::defaultPrecision(10);
 
     Info << nl << "Writing polyMesh" << endl;
+    mesh.removeFiles(mesh.instance());
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
@@ -414,7 +425,6 @@ int main(int argc, char *argv[])
     }
 
     Info<< nl << "end" << endl;
-
     return 0;
 }
 

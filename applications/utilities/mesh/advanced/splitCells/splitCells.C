@@ -40,8 +40,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "polyTopoChange.H"
-#include "polyTopoChanger.H"
+#include "directTopoChange.H"
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 #include "cellCuts.H"
@@ -527,13 +526,14 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("set", "cellSet name");
     argList::validOptions.insert("geometry", "");
     argList::validOptions.insert("tol", "edge snap tolerance");
+    argList::validOptions.insert("overwrite", "");
     argList::validArgs.append("edge angle [0..360]");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    scalar featureAngle(readScalar(IStringStream(args.args()[3])()));
+    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
     scalar radAngle = featureAngle * mathematicalConstant::pi/180.0;
     scalar minCos = Foam::cos(radAngle);
@@ -541,6 +541,7 @@ int main(int argc, char *argv[])
 
     bool readSet = args.options().found("set");
     bool geometry = args.options().found("geometry");
+    bool overwrite = args.options().found("overwrite");
 
     scalar edgeTol = 0.2;
 
@@ -574,7 +575,7 @@ int main(int argc, char *argv[])
     // Cell circumference cutter
     geomCellLooper cellCutter(mesh);
     // Snap all edge cuts close to endpoints to vertices.
-    geomCellLooper::setSnapTol(edgeTol);    
+    geomCellLooper::setSnapTol(edgeTol);
 
     // Candidate cells to cut
     cellSet cellsToCut(mesh, "cellsToCut", mesh.nCells()/100);
@@ -612,7 +613,7 @@ int main(int argc, char *argv[])
             minCos,
             minSin,
             cellsToCut,
-            
+
             cutCells,
             cellLoops,
             cellEdgeWeights
@@ -658,24 +659,23 @@ int main(int argc, char *argv[])
         }
 
         // At least some cells are cut.
-        polyTopoChange meshMod(mesh);
+        directTopoChange meshMod(mesh);
 
         // Cutting engine
         meshCutter cutter(mesh);
 
-        // Insert mesh refinement into polyTopoChange.
+        // Insert mesh refinement into directTopoChange.
         cutter.setRefinement(cuts, meshMod);
 
         // Do all changes
         Info<< "Morphing ..." << endl;
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
-        autoPtr<mapPolyMesh> morphMap = polyTopoChanger::changeMesh
-        (
-            mesh,
-            meshMod
-        );
+        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
         if (morphMap().hasMotionPoints())
         {

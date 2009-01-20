@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    regionSide
+    Foam::regionSide
 
 Description
     Determines the 'side' for every face and connected to a 
@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\

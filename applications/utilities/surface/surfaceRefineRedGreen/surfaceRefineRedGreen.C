@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output surface file");
     argList::argList args(argc, argv);
 
-    fileName surfFileName(args.args()[1]);
-    fileName outFileName(args.args()[2]);
+    fileName surfFileName(args.additionalArgs()[0]);
+    fileName outFileName(args.additionalArgs()[1]);
 
     Info<< "Reading surface from " << surfFileName << " ..." << endl;
 

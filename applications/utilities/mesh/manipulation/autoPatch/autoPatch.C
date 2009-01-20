@@ -32,7 +32,7 @@ Description
 #include "polyMesh.H"
 #include "Time.H"
 #include "boundaryMesh.H"
-#include "repatchPolyTopoChanger.H"
+#include "repatch.H"
 #include "mathematicalConstants.H"
 #include "OFstream.H"
 #include "ListOps.H"
@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("feature angle[0-180]");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -87,7 +88,8 @@ int main(int argc, char *argv[])
 
     boundaryMesh bMesh;
 
-    scalar featureAngle(readScalar(IStringStream(args.args()[3])()));
+    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
+    bool overwrite = args.options().found("overwrite");
 
     scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
 
@@ -106,7 +108,7 @@ int main(int argc, char *argv[])
     collectFeatureEdges(bMesh, markedEdges);
 
 
-  
+
     // (new) patch ID for every face in mesh.
     labelList patchIDs(bMesh.mesh().size(), -1);
 
@@ -209,15 +211,18 @@ int main(int argc, char *argv[])
             newPatchI,
             mesh.boundaryMesh()
         ).ptr();
-        
+
         newPatchI++;
     }
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
 
     // Change patches
-    repatchPolyTopoChanger polyMeshRepatcher(mesh);    
+    repatch polyMeshRepatcher(mesh);
     polyMeshRepatcher.changePatches(newPatchPtrList);
 
 
@@ -234,7 +239,7 @@ int main(int argc, char *argv[])
         polyMeshRepatcher.changePatchID(meshFaceI, patchIDs[faceI]);
     }
 
-    polyMeshRepatcher.repatch();
+    polyMeshRepatcher.execute();
 
     // Write resulting mesh
     mesh.write();

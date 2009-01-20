@@ -258,7 +258,9 @@ bool domainDecomposition::writeDecomposition()
         (
             Time::controlDictName,
             time().rootPath(),
-            processorCasePath
+            processorCasePath,
+            "system",
+            "constant"
         );
 
         // create the mesh
@@ -592,7 +594,7 @@ bool domainDecomposition::writeDecomposition()
                     procMesh.boundaryMesh()[patchi]
                 );
 
-                Info<< "    Number of faces shared with processor " 
+                Info<< "    Number of faces shared with processor "
                     << ppp.neighbProcNo() << " = " << ppp.size() << endl;
 
                 nProcPatches++;

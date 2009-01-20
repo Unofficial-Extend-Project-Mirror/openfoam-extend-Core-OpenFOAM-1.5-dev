@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvFieldReconstructor
+    Foam::fvFieldReconstructor
 
 Description
     FV volume and surface field reconstructor.
@@ -50,7 +50,7 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                     Class fvFieldReconstructor Declaration
+                 Class fvFieldReconstructor Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvFieldReconstructor

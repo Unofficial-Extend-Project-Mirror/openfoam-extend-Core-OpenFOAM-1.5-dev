@@ -45,14 +45,20 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
 
 #   include "addTimeOptionsNoConstant.H"
 
-    argList::validOptions.insert("fullTopology", "");
-    argList::validOptions.insert("pointNearness", "");
-    argList::validOptions.insert("cellDeterminant", "");
+    argList::validOptions.insert("noTopology", "");
+    argList::validOptions.insert("allGeometry", "");
+    argList::validOptions.insert("allTopology", "");
 
 #   include "setRootCase.H"
+
+    const bool noTopology = args.options().found("noTopology");
+    const bool allGeometry = args.options().found("allGeometry");
+    const bool allTopology = args.options().found("allTopology");
+
 #   include "createTime.H"
 
     // Get times list
@@ -62,7 +68,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     bool firstCheck = true;
 
@@ -89,22 +95,16 @@ int main(int argc, char *argv[])
             // Reconstruct globalMeshData
             mesh.globalData();
 
-            printMeshStats(mesh);
+            printMeshStats(mesh, allTopology);
 
             label noFailedChecks = 0;
 
-            noFailedChecks += checkTopology
-            (
-                mesh,
-                args.options().found("fullTopology")
-            );
+            if (!noTopology)
+            {
+                noFailedChecks += checkTopology(mesh, allTopology, allGeometry);
+            }
 
-            noFailedChecks += checkGeometry
-            (
-                mesh,
-                args.options().found("pointNearness"),
-                args.options().found("cellDeterminant")
-            );
+            noFailedChecks += checkGeometry(mesh, allGeometry);
 
             reduce(noFailedChecks, sumOp<label>());
 
@@ -121,12 +121,9 @@ int main(int argc, char *argv[])
         }
         else if (state == polyMesh::POINTS_MOVED)
         {
-            label noFailedChecks = checkGeometry
-            (
-                mesh,
-                args.options().found("pointNearness"),
-                args.options().found("cellDeterminant")
-            );
+            Info<< "Time = " << runTime.timeName() << nl << endl;
+
+            label noFailedChecks = checkGeometry(mesh, allGeometry);
 
             reduce(noFailedChecks, sumOp<label>());
 
