@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    singlePhaseTransportModel
-
 \*---------------------------------------------------------------------------*/
 
 #include "singlePhaseTransportModel.H"
@@ -58,7 +55,7 @@ singlePhaseTransportModel::~singlePhaseTransportModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<volScalarField> singlePhaseTransportModel::nu() const
+const volScalarField& singlePhaseTransportModel::nu() const
 {
     return viscosityModelPtr_->nu();
 }

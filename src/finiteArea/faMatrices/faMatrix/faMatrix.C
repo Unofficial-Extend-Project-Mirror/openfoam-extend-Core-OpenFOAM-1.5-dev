@@ -179,7 +179,7 @@ void faMatrix<Type>::addBoundarySource
 
             forAll(addr, facei)
             {
-                source[addr[facei]] += scale(pbc[facei], pnf[facei]);
+                source[addr[facei]] += cmptMultiply(pbc[facei], pnf[facei]);
             }
         }
     }
@@ -497,7 +497,7 @@ void faMatrix<Type>::relax(const scalar alpha)
                     sumOff[pa[face]] -= cmptMin(iCoeffs[face]);
                     iCoeffs[face] /= alpha;
                     S[pa[face]] +=
-                        scale(iCoeffs[face] - iCoeff0, psi_[pa[face]]);
+                        cmptMultiply(iCoeffs[face] - iCoeff0, psi_[pa[face]]);
                 }
             }
         }
@@ -671,7 +671,7 @@ flux() const
     forAll(InternalContrib, patchI)
     {
         InternalContrib[patchI] =
-            scale
+            cmptMultiply
             (
                 InternalContrib[patchI],
                 psi_.boundaryField()[patchI].patchInternalField()
@@ -685,7 +685,7 @@ flux() const
         if (psi_.boundaryField()[patchI].coupled())
         {
             NeighbourContrib[patchI] =
-                scale
+                cmptMultiply
                 (
                     NeighbourContrib[patchI],
                     psi_.boundaryField()[patchI].patchNeighbourField()

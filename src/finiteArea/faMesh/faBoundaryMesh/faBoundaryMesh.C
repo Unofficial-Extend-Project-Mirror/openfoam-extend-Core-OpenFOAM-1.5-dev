@@ -328,22 +328,30 @@ void faBoundaryMesh::updateMesh()
 // writeData member function required by regIOobject
 bool faBoundaryMesh::writeData(Ostream& os) const
 {
-    os << *this;
+    const faPatchList& patches = *this;
+
+    os  << patches.size() << nl << token::BEGIN_LIST << incrIndent << nl;
+
+    forAll(patches, patchi)
+    {
+        os  << indent << patches[patchi].name() << nl
+            << indent << token::BEGIN_BLOCK << nl
+            << incrIndent << patches[patchi] << decrIndent
+            << indent << token::END_BLOCK << endl;
+    }
+
+    os  << decrIndent << token::END_LIST;
+
+    // Check state of IOstream
+    os.check("polyBoundaryMesh::writeData(Ostream& os) const");
+
     return os.good();
 }
 
 
-Ostream& operator<<(Ostream& os, const faBoundaryMesh& patches)
+Ostream& operator<<(Ostream& os, const faBoundaryMesh& bm)
 {
-    os  << patches.size() << nl << token::BEGIN_LIST;
-
-    forAll(patches, patchI)
-    {
-        patches[patchI].writeDict(os);
-    }
-
-    os  << token::END_LIST;
-
+    bm.writeData(os);
     return os;
 }
 

@@ -50,6 +50,7 @@ defineTypeNameAndDebug(faMesh, 0);
 
 word faMesh::meshSubDir = "faMesh";
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void faMesh::setPrimitiveMeshData()

@@ -23,9 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ETAB
+    Foam::ETAB
 
 Description
+    The Enhanced %TAB model.
+
+    Described in the papers below.
+    @verbatim
+    F.X. Tanner
+        "Liquid Jet Atomization and Droplet Breakup Modeling of
+        Non-Evaporating Diesel Fuel Sprays"
+        SAE 970050,
+        SAE Transactions: Journal of Engines, Vol 106, Sec 3 pp 127-140
+
+    F.X. Tanner and G. Weisser
+        "Simulation of Liquid Jet Atomization for
+        Fuel Sprays by Means of Cascade Drop Breakup Model"
+        SAE 980808
+        SAE Technical Paper Series
+    @endverbatim
+
+See Also
+    The TAB model
 
 SourceFiles
     ETAB.C
@@ -51,7 +70,7 @@ class ETAB
     public breakupModel
 {
 private:
- 
+
     // Private data
 
         dictionary coeffsDict_;

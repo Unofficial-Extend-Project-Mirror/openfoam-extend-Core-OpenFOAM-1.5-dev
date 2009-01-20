@@ -22,16 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-    Evaporation Model that takes into account of:
-    - flash boiling of the liquid core and droplets
-    - superheated vaporization of a boiling droplet 
-    Accurated description in
-    B. Zuo, A.M. Gomes, C.J. Rutland
-    "Modeling Superheated Fuel Spray Vaporization"
-    Int. Journal of Engine Research, 2000. Vol. 1, pp. 321-326
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -206,8 +196,6 @@ scalar RutlandFlashBoil::boilingTime
     const scalar vapourSurfaceEnthalpy,
     const scalar vapourFarEnthalpy,
     const scalar cpGas,
-    const scalar Xs,
-    const scalar Xf,    
     const scalar temperature,
     const scalar kLiq
 ) const

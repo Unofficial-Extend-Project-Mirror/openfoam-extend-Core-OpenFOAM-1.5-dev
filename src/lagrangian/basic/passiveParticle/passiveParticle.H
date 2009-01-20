@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    passiveParticle
+    Foam::passiveParticle
 
 Description
 
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef passiveParticle_H
 #define passiveParticle_H
 
-#include "particle.H"
+#include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 
@@ -52,7 +52,7 @@ namespace Foam
 
 class passiveParticle
 :
-    public particle<passiveParticle>
+    public Particle<passiveParticle>
 {
 
 public:
@@ -67,7 +67,7 @@ public:
             const label celli
         )
         :
-            particle<passiveParticle>(c, position, celli)
+            Particle<passiveParticle>(c, position, celli)
         {}
 
         //- Construct from Istream
@@ -78,7 +78,7 @@ public:
             bool readFields = true
         )
         :
-            particle<passiveParticle>(c, is)
+            Particle<passiveParticle>(c, is)
         {}
 
         //- Construct and return a clone

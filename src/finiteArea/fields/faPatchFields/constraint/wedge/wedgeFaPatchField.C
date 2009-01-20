@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,14 +128,16 @@ tmp<Field<Type> > wedgeFaPatchField<Type>::snGrad() const
 {
     Field<Type> pif = this->patchInternalField();
     return
-        (transform(refCast<const wedgeFaPatch>(this->patch()).faceT(), pif) - pif)
-       *(0.5*this->patch().deltaCoeffs());
+    (
+        transform(refCast<const wedgeFaPatch>(this->patch()).faceT(), pif)
+      - pif
+    )*(0.5*this->patch().deltaCoeffs());
 }
 
 
 // Evaluate the patch field
 template<class Type>
-void wedgeFaPatchField<Type>::evaluate()
+void wedgeFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

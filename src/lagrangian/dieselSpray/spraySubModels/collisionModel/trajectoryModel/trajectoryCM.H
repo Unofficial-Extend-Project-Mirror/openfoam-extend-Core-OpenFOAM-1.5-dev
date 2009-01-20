@@ -8,7 +8,7 @@ scalar magVRel = mag(vRel);
 vector p = p2().position() - p1().position();
 scalar dist = mag(p);
 
-scalar vAlign = vRel & (p/(dist + SMALL));
+scalar vAlign = vRel & (p/dist);
 
 if (vAlign > 0)
 {

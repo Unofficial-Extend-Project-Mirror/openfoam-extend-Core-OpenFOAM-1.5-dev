@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gradientDispersionRAS
+    Foam::gradientDispersionRAS
 
 Description
     The velocity is perturbed in the direction of -grad(k), with a

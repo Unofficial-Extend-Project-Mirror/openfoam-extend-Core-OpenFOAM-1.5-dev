@@ -337,11 +337,17 @@ public:
             }
 
             //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const bool)
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            )
             {}
 
             //- Evaluate the patch field, sets Updated to false
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
 
             //- Return the matrix diagonal coefficients corresponding to the

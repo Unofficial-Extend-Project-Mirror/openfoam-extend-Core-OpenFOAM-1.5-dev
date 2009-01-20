@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    standardDragModel
+    Foam::standardDragModel
 
 Description
     standard drag law model with a lower limit on the Cd-value
@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class standardDragModel Declaration
+                           Class standardDragModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class standardDragModel

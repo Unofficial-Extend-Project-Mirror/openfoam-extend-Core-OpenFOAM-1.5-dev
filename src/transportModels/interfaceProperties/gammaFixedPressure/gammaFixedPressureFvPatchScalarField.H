@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gammaFixedPressureFvPatchScalarField
+    Foam::gammaFixedPressureFvPatchScalarField
 
 Description
+    A fixed-pressure gammaContactAngle boundary
 
 SourceFiles
     gammaFixedPressureFvPatchScalarField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gammaFixedPressureFvPatch Declaration
+                 Class gammaFixedPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class gammaFixedPressureFvPatchScalarField

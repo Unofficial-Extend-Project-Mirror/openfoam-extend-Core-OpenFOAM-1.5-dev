@@ -163,6 +163,7 @@ void processorFaPatch::initGeometry()
     {
         OPstream toNeighbProc
         (
+            Pstream::blocking,
             neighbProcNo(), 
             3*(sizeof(label) + size()*sizeof(vector))
         );
@@ -182,6 +183,7 @@ void processorFaPatch::calcGeometry()
         {
             IPstream fromNeighbProc
             (
+                Pstream::blocking,
                 neighbProcNo(), 
                 3*(sizeof(label) + size()*sizeof(vector))
             );
@@ -271,9 +273,9 @@ void processorFaPatch::initUpdateMesh()
 
         OPstream toNeighbProc
         (
+            Pstream::blocking,
             neighbProcNo(),
-            2*sizeof(label)
-          + 2*nPoints()*sizeof(label)
+            2*sizeof(label) + 2*nPoints()*sizeof(label)
         );
 
         toNeighbProc
@@ -298,6 +300,7 @@ void processorFaPatch::updateMesh()
             // binary entity but as List of edges.
             IPstream fromNeighbProc
             (
+                Pstream::blocking,
                 neighbProcNo()
             );
 
@@ -462,39 +465,41 @@ tmp<labelField> processorFaPatch::interfaceInternalField
 
 void processorFaPatch::initTransfer
 (
-    const unallocLabelList& interfaceData,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& interfaceData
 ) const
 {
-    send(interfaceData, bufferedTransfer);
+    send(commsType, interfaceData);
 }
 
 
 tmp<labelField> processorFaPatch::transfer
 (
+    const Pstream::commsTypes commsType,
     const unallocLabelList&
 ) const
 {
-    return receive<label>(this->size());
+    return receive<label>(commsType, this->size());
 }
 
 
 void processorFaPatch::initInternalFieldTransfer
 (
-    const unallocLabelList& iF,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& iF
 ) const
 {
-    send(patchInternalField(iF)(), bufferedTransfer);
+    send(commsType, patchInternalField(iF)());
 }
 
 
 tmp<labelField> processorFaPatch::internalFieldTransfer
 (
+    const Pstream::commsTypes commsType,
     const unallocLabelList&
 ) const
 {
-    return receive<label>(this->size());
+    return receive<label>(commsType, this->size());
 }
 
 
@@ -502,28 +507,12 @@ tmp<labelField> processorFaPatch::internalFieldTransfer
 void processorFaPatch::write(Ostream& os) const
 {
     faPatch::write(os);
-
-    os  << nl << myProcNo_ << token::SPACE << neighbProcNo_;
+    os.writeKeyword("myProcNo") << myProcNo_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("neighbProcNo") << neighbProcNo_
+        << token::END_STATEMENT << nl;
 }
 
-
-void processorFaPatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << ';' << nl;
-
-    patchIdentifier::writeDict(os);
-
-    os  << "    edgeLabels " << static_cast<const labelList&>(*this) << ';'
-        << nl;
-
-    os  << "    ngbPolyPatchIndex " << ngbPolyPatchIndex() << ';' << nl;
-//         << token::END_BLOCK << endl;
-
-    os  << "    myProcNo " << myProcNo_ << token::END_STATEMENT << nl
-        << "    neighbProcNo " << neighbProcNo_ << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

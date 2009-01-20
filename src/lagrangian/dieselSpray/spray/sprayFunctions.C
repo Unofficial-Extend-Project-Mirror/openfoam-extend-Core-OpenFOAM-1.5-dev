@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -234,13 +234,35 @@ scalar spray::injectedLiquidKineticEnergy() const
 }
 
 
+scalar spray::liquidPenetration(const scalar prc) const
+{
+    return liquidPenetration(0, prc);
+}
+
+
 scalar spray::liquidPenetration
 (
-    const scalar frac,
-    const label nozzlei
+    const label nozzlei,
+    const scalar prc
 ) const
 {
-    vector ip = injectors_[nozzlei].properties()->position();
+
+    label nHoles = injectors_[nozzlei].properties()->nHoles();
+    vector ip(vector::zero);
+    if (nHoles > 1)
+    {
+        for(label i=0;i<nHoles;i++)
+        {
+            ip += injectors_[nozzlei].properties()->position(i);
+        }
+        ip /= nHoles;
+    }
+    else
+    {
+        ip = injectors_[nozzlei].properties()->position(0);
+    }
+
+//    vector ip = injectors_[nozzlei].properties()->position();
     scalar d = 0.0;
     scalar mTot = 0.0;
 
@@ -310,10 +332,10 @@ scalar spray::liquidPenetration
 
     if (Np > 1)
     {
-        scalar mLimit = frac*mTot;
-        scalar mOff = (1.0 - frac)*mTot;
+        scalar mLimit = prc*mTot;
+        scalar mOff = (1.0 - prc)*mTot;
 
-        // 'frac' is large enough that the parcel most far
+        // 'prc' is large enough that the parcel most far
         // away will be used, no need to loop...
         if (mLimit > mTot - m[Np-1])
         {

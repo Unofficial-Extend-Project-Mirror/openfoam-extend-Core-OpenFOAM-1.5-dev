@@ -36,7 +36,7 @@ Foam::solidParticle::solidParticle
     bool readFields
 )
 :
-    particle<solidParticle>(cloud, is)
+    Particle<solidParticle>(cloud, is)
 {
     if (readFields)
     {
@@ -67,34 +67,19 @@ template<>
 void Cloud<solidParticle>::readFields()
 {
     IOField<scalar> d(fieldIOobject("d"));
+    checkFieldIOobject(*this, d);
+
     IOField<vector> U(fieldIOobject("U"));
-
-    if (d.size() != size())
-    {
-        FatalErrorIn("Cloud<solidParticle>::readFields()")
-            << "Size of d field does not match the number of particles"
-            << abort(FatalError);
-    }
-
-    if (U.size() != size())
-    {
-        FatalErrorIn("Cloud<solidParticle>::readFields()")
-            << "Size of U field does not match the number of particles"
-            << abort(FatalError);
-    }
+    checkFieldIOobject(*this, U);
 
     label i = 0;
-    for
-    (
-        Cloud<solidParticle>::iterator iter = begin();
-        iter != end();
-        ++iter, ++i
-    )
+    forAllIter(Cloud<solidParticle>::iterator, *this, iter)
     {
         solidParticle& p = iter();
 
         p.d_ = d[i];
         p.U_ = U[i];
+        i++;
     }
 }
 
@@ -108,17 +93,13 @@ void Cloud<solidParticle>::writeFields() const
     IOField<vector> U(fieldIOobject("U"), np);
 
     label i = 0;
-    for
-    (
-        Cloud<solidParticle>::const_iterator iter = begin();
-        iter != end();
-        ++iter, ++i
-    )
+    forAllConstIter(Cloud<solidParticle>, *this, iter)
     {
         const solidParticle& p = iter();
 
         d[i] = p.d_;
         U[i] = p.U_;
+        i++;
     }
 
     d.write();
@@ -134,13 +115,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const solidParticle& p)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const particle<solidParticle>&>(p)
+        os  << static_cast<const Particle<solidParticle>&>(p)
             << token::SPACE << p.d_
             << token::SPACE << p.U_;
     }
     else
     {
-        os  << static_cast<const particle<solidParticle>&>(p);
+        os  << static_cast<const Particle<solidParticle>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.d_),

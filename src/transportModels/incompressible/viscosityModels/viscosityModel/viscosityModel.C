@@ -22,29 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    viscosityModel
-
 \*---------------------------------------------------------------------------*/
 
 #include "viscosityModel.H"
 #include "volFields.H"
-#include "fvc.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(viscosityModel, 0);
-defineRunTimeSelectionTable(viscosityModel, dictionary);
+namespace Foam
+{
+    defineTypeNameAndDebug(viscosityModel, 0);
+    defineRunTimeSelectionTable(viscosityModel, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-viscosityModel::viscosityModel
+Foam::viscosityModel::viscosityModel
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -61,22 +56,18 @@ viscosityModel::viscosityModel
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<volScalarField> viscosityModel::strainRate() const
+Foam::tmp<Foam::volScalarField> Foam::viscosityModel::strainRate() const
 {
-    return mag(fvc::grad(U_));
+    return mag(symm(fvc::grad(U_)));
 }
 
 
-bool viscosityModel::read(const dictionary& viscosityProperties)
+bool Foam::viscosityModel::read(const dictionary& viscosityProperties)
 {
     viscosityProperties_ = viscosityProperties;
 
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

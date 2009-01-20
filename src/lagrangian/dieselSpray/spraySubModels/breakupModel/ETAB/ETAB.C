@@ -22,22 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-    ETAB is the Enhanced TAB model, described in the papers below.
-
-    F.X. Tanner 
-        "Liquid Jet Atomization and Droplet Breakup Modeling of
-        Non-Evaporating Diesel Fuel Sprays"
-        SAE 970050, 
-        SAE Transactions: Journal of Engines, Vol 106, Sec 3 pp 127-140
-
-    F.X. Tanner and G. Weisser 
-        "Simulation of Liquid Jet Atomization for
-        Fuel Sprays by Means of Cascade Drop Breakup Model"
-        SAE 980808
-        SAE Technical Paper Series
-
 \*---------------------------------------------------------------------------*/
 
 #include "ETAB.H"
@@ -100,7 +84,7 @@ void ETAB::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-    
+
     scalar T  = p.T();
     scalar pc  = spray_.p()[p.cell()];
     scalar r  = 0.5*p.d();
@@ -110,10 +94,10 @@ void ETAB::breakupParcel
     scalar rho   = fuels.rho(pc, T, p.X());
     scalar sigma = fuels.sigma(pc, T, p.X());
     scalar mu    = fuels.mu(pc, T, p.X());
-    
+
     // inverse of characteristic viscous damping time
     scalar rtd = 0.5*Cmu_*mu/(rho*r2);
-    
+
     // oscillation frequency (squared)
     scalar omega2 = Comega_*sigma/(rho*r3) - rtd*rtd;
 
@@ -146,13 +130,13 @@ void ETAB::breakupParcel
             {
                 phi = 2*mathematicalConstant::pi - phit;
             }
-            
+
             scalar tb = 0;
-            
+
             if (mag(p.dev()) < 1.0)
             {
                 scalar theta = acos((1.0 - Wetmp)/a);
-                
+
                 if (theta < phi)
                 {
                     if (2*mathematicalConstant::pi-theta >= phi)
@@ -182,7 +166,7 @@ void ETAB::breakupParcel
                     sqrtWe = sqrt(We);
                     Kbr =k2_*omega*sqrtWe;
                 }
-                
+
                 scalar rWetmp = 1.0/Wetmp;
                 scalar cosdtbu = max(-1.0, min(1.0, 1.0-rWetmp));
                 scalar dtbu = romega*acos(cosdtbu);

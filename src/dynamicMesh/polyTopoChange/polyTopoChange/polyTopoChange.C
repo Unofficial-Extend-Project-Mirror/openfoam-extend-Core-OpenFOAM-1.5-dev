@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Class accumulates information on how to perform mesh refinement.
-    Once the refinement info is completed, polyMesh modifies the mesh
-    topology.
-
 \*---------------------------------------------------------------------------*/
 
 #include "polyTopoChange.H"

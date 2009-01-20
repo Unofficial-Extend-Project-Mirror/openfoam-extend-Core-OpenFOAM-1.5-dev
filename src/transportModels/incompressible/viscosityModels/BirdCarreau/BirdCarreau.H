@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    BirdCarreau
+    Foam::viscosityModels::BirdCarreau
 
 Description
-    Bird-Carreau non-Newtonian viscosity model.
+    An incompressible Bird-Carreau non-Newtonian viscosity model.
 
 SourceFiles
     BirdCarreau.C
@@ -100,7 +100,7 @@ public:
     // Member Functions
 
         //- Return the laminar viscosity
-        tmp<volScalarField> nu() const
+        const volScalarField& nu() const
         {
             return nu_;
         }

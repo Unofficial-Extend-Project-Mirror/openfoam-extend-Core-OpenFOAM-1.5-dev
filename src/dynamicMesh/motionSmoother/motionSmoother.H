@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    motionSmoother
+    Foam::motionSmoother
 
 Description
     Given a displacement moves the mesh by scaling the displacement back
@@ -32,7 +32,9 @@ Description
     and optional patch number on which to scale back displacement.
 
     E.g.
-        
+
+    E.g.
+    @verbatim
         // Construct iterative mesh mover.
         motionSmoother meshMover(mesh, labelList(1, patchI));
 
@@ -47,6 +49,7 @@ Description
                 return true;
             }
         }
+    @envverbatim
 
 
     Note: shared points (parallel). A processor can have points which are
@@ -56,6 +59,10 @@ Description
     has faces of pp get priority. This is currently handled in setDisplacement
     by resetting the internal displacement to zero before doing anything else.
     The combine operator used will give preference to non-zero values.
+
+    Note: various routines take baffles. These are sets of boundary faces
+    that are treated as a single internal face. This is a hack used to apply
+    movement to internal faces.
 
 SourceFiles
     motionSmoother.C
@@ -79,6 +86,7 @@ namespace Foam
 {
 
 class polyMeshGeometry;
+class faceSet;
 
 /*---------------------------------------------------------------------------*\
                            Class motionSmoother Declaration
@@ -152,9 +160,13 @@ class motionSmoother
         //- Is mesh point on boundary or not
         PackedList<1> isInternalPoint_;
 
+        //- Is edge master (always except if on coupled boundary and on
+        //  lower processor)
+        PackedList<1> isMasterEdge_;
+
         //- 2-D motion corrector
         twoDPointCorrector twoDCorrector_;
-        
+
         // Muli-patch constraints (from pointPatchInterpolation)
 
             labelList patchPatchPointConstraintPoints_;
@@ -162,31 +174,6 @@ class motionSmoother
 
 
     // Private Member Functions
-
-        ////- (unweighted) average of all values on points connected via edges
-        ////  to pointI
-        //template <class Type>
-        //static Type avg
-        //(
-        //    const GeometricField<Type, pointPatchField, pointMesh>&,
-        //    const edgeList& edges,
-        //    const pointField& points,
-        //    const labelList& edgeLabels,
-        //    const label pointI
-        //);
-        //
-        ////- Distance weighted average. Is average with inverse distance
-        ////  weighting and varying edge-diffusivity.
-        //template <class Type>
-        //static Type avg
-        //(
-        //    const GeometricField<Type, pointPatchField, pointMesh>&,
-        //    const scalarField& edgeGamma,
-        //    const edgeList& edges,
-        //    const pointField& points,
-        //    const labelList& edgeLabels,
-        //    const label pointI
-        //);
 
         //- Average of connected points.
         template <class Type>
@@ -229,12 +216,18 @@ class motionSmoother
         //- Get points used by given faces
         labelHashSet getPoints(const labelHashSet&) const;
 
-        //- explicit smoothing and min on all internal points
-        void minSmooth(const pointScalarField&, pointScalarField&) const;
+        //- explicit smoothing and min on all affected internal points
+        void minSmooth
+        (
+            const PackedList<1>& isAffectedPoint,
+            const pointScalarField& fld,
+            pointScalarField& newFld
+        ) const;
 
         //- same but only on selected points (usually patch points)
         void minSmooth
         (
+            const PackedList<1>& isAffectedPoint,
             const labelList& meshPoints,
             const pointScalarField& fld,
             pointScalarField& newFld
@@ -260,6 +253,18 @@ class motionSmoother
 
         //- Helper function. Is point internal?
         bool isInternalPoint(const label pointI) const;
+
+        //- Given a set of faces that cause smoothing and a number of
+        //  iterations determine the maximum set of points who are affected
+        //  and the accordingly affected faces.
+        void getAffectedFacesAndPoints
+        (
+            const label nPointIter,
+            const faceSet& wrongFaces,
+
+            labelList& affectedFaces,
+            PackedList<1>& isAffectedPoint
+        ) const;
 
         //- Disallow default bitwise copy construct
         motionSmoother(const motionSmoother&);
@@ -375,6 +380,16 @@ public:
             //  across patches)
             bool scaleMesh
             (
+                labelList& checkFaces,
+                const bool smoothMesh = true,
+                const label nAllow = 0
+            );
+
+            //- Move mesh (with baffles) with given scale.
+            bool scaleMesh
+            (
+                labelList& checkFaces,
+                const List<labelPair>& baffles,
                 const bool smoothMesh = true,
                 const label nAllow = 0
             );
@@ -393,6 +408,31 @@ public:
                 labelHashSet& wrongFaces
             );
 
+            //- Check (subset of mesh) with mesh settings in dict.
+            //  Collects incorrect faces in set. Returns true if one
+            //  or more faces in error. Parallel ok.
+            static bool checkMesh
+            (
+                const bool report,
+                const polyMesh& mesh,
+                const dictionary& dict,
+                const labelList& checkFaces,
+                labelHashSet& wrongFaces
+            );
+
+            //- Check (subset of mesh including baffles) with mesh settings 
+            //  in dict. Collects incorrect faces in set. Returns true if one
+            //  or more faces in error. Parallel ok.
+            static bool checkMesh
+            (
+                const bool report,
+                const polyMesh& mesh,
+                const dictionary& dict,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet& wrongFaces
+            );
+
             //- Check part of mesh with mesh settings in dict.
             //  Collects incorrect faces in set. Returns true if one or
             //  more faces in error. Parallel ok.
@@ -405,14 +445,20 @@ public:
                 labelHashSet& wrongFaces
             );
 
-            // Helper functions to manipulate displacement vector.
+            //- Check part of mesh including baffles with mesh settings in dict.
+            //  Collects incorrect faces in set. Returns true if one or
+            //  more faces in error. Parallel ok.
+            static bool checkMesh
+            (
+                const bool report,
+                const dictionary& dict,
+                const polyMeshGeometry&,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet& wrongFaces
+            );
 
-                ////- Point-jacobi smoothing of internal points
-                //template <class Type>
-                //void smooth
-                //(
-                //    GeometricField<Type, pointPatchField, pointMesh>&
-                //) const;
+            // Helper functions to manipulate displacement vector.
 
                 //- Fully explicit smoothing of internal points with varying
                 //  diffusivity.

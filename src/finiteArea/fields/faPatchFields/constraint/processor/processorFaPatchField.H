@@ -162,10 +162,10 @@ public:
         // Evaluation functions
 
             //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const bool bufferdTransfer);
+            virtual void initEvaluate(const Pstream::commsTypes commsType);
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate(const Pstream::commsTypes commsType);
 
             //- Return patch-normal gradient
             virtual tmp<Field<Type> > snGrad() const;
@@ -178,7 +178,7 @@ public:
                 const lduMatrix& m,
                 const scalarField& coeffs,
                 const direction cmpt,
-                const bool bufferdTransfer
+                const Pstream::commsTypes commsType
             ) const;
 
             //- Update result field based on interface functionality
@@ -188,7 +188,8 @@ public:
                 scalarField& result,
                 const lduMatrix& m,
                 const scalarField& coeffs,
-                const direction cmpt
+                const direction cmpt,
+                const Pstream::commsTypes commsType
             ) const;
 
         //- Processor coupled interface functions

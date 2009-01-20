@@ -239,28 +239,30 @@ public:
             //- Initialise interface data transfer
             virtual void initTransfer
             (
-                const unallocLabelList& interfaceData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
             ) const
             {}
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const = 0;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (
-                unallocLabelList& iF,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                unallocLabelList& iF
             ) const
             {}
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& iF
             ) const = 0;
 };

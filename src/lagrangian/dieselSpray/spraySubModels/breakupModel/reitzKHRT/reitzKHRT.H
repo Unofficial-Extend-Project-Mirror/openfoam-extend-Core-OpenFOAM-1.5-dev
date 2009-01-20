@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    reitzKHRT
+    Foam::reitzKHRT
 
 Description
     secondary breakup model which uses the Kelvin-Helmholtz

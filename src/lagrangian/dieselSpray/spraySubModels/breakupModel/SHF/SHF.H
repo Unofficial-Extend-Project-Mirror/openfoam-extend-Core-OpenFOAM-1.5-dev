@@ -23,18 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SHF
+    Foam::SHF
 
 Description
-    
-    Secondary Breakup Model to take account of the different breakUp regimes,
+    Secondary Breakup Model to take account of the different breakup regimes,
     bag, molutimode, shear....
+
     Accurate description in
+    @verbatim
     R. Schmehl, G. Maier, S. Witting
     "CFD Analysis of Fuel Atomization, Secondary Droplet Breakup and Spray
     Dispersion in the Premix Duct of a LPP Combustor".
     Eight International Conference on Liquid Atomization and Spray Systems, 2000
-    
+    @endverbatim
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef SHF_H
@@ -68,21 +70,21 @@ private:
         Random& rndGen_;
 
         // model constants
-        
+
         scalar weCorrCoeff_;
-        
+
         scalar weBuCrit_;
         scalar weBuBag_;
         scalar weBuMM_;
-        
+
         scalar ohnCoeffCrit_;
         scalar ohnCoeffBag_;
         scalar ohnCoeffMM_;
-        
+
         scalar ohnExpCrit_;
         scalar ohnExpBag_;
         scalar ohnExpMM_;
-        
+
         scalar cInit_;
 
         scalar c1_;
@@ -92,22 +94,22 @@ private:
         scalar cExp1_;
         scalar cExp2_;
         scalar cExp3_;
-        
+
         scalar weConst_;
         scalar weCrit1_;
         scalar weCrit2_;
-        
+
         scalar coeffD_;
-        scalar onExpD_;        
-        scalar weExpD_;        
-        
+        scalar onExpD_;
+        scalar weExpD_;
+
         scalar mu_;
         scalar sigma_;
-        
+
         scalar d32Coeff_;
         scalar cDmaxBM_;
         scalar cDmaxS_;
-        
+
         scalar corePerc_;
 
 public:

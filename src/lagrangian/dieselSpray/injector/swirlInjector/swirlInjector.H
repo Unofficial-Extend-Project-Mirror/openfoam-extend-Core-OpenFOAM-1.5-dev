@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    swirlInjector
+    Foam::swirlInjector
 
 Description
+    The swirl injector
 
 SourceFiles
     swirlInjectorI.H
@@ -145,11 +146,12 @@ public:
         ) const;
 
         //- Return the injection position
-        const vector position() const;
+        const vector position(const label n) const;
 
         //- Return the injection position
         vector position
         (
+            const label n,
             const scalar time,
             const bool twoD,
             const scalar angleOfWedge,
@@ -159,11 +161,18 @@ public:
             Random& rndGen
         ) const;
     
+        //- Return the number of holes
+        label nHoles() const;
+
         //- Return the injector diameter
         scalar d() const;
 
         //- Return the injection direction
-        const vector& direction() const;
+        const vector& direction
+        (
+            const label i,
+            const scalar time
+        ) const;
 
         //- Return the mass of the injected particle
         scalar mass
@@ -218,6 +227,9 @@ public:
 
         //- Return the injected liquid mass
         scalar injectedMass(const scalar t) const;
+
+        vector tan1(const label n) const;
+        vector tan2(const label n) const;
 
         void correctProfiles
         (

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Cloud
+    Foam::Cloud
 
 Description
 
@@ -41,19 +41,21 @@ SourceFiles
 #include "IDLList.H"
 #include "IOField.H"
 
+#include "polyMeshInfo.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<class particleType>
+template<class ParticleType>
 class Cloud;
 
-template<class particleType>
+template<class ParticleType>
 Ostream& operator<<
 (
     Ostream&,
-    const Cloud<particleType>&
+    const Cloud<ParticleType>&
 );
 
 
@@ -61,16 +63,16 @@ Ostream& operator<<
                            Class Cloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class particleType>
+template<class ParticleType>
 class Cloud
 :
     public cloud,
-    public IDLList<particleType>
+    public IDLList<ParticleType>
 {
+
     // Private data
 
         const polyMesh& polyMesh_;
-
         const faceList& allFaces_;
         const vectorField& points_;
         const cellList& cellFaces_;
@@ -78,17 +80,28 @@ class Cloud
         const unallocLabelList& owner_;
         const unallocLabelList& neighbour_;
 
+        //- Mesh information object
+        const polyMeshInfo meshInfo_;
+
+
+    // Private member functions
+
+        //- Initialise cloud on IO constructor
+        void initCloud(const bool checkClass);
+
 
 public:
 
-    template<class particleT>
-    friend class particle;
+    template<class ParticleT>
+    friend class Particle;
 
-    typedef typename IDLList<particleType>::iterator iterator;
-    typedef typename IDLList<particleType>::const_iterator const_iterator;
+    typedef ParticleType particleType;
 
-    //- Return the lagrangian sub-directory name ("lagrangian")
-    static fileName lagrangianSubDir;
+    typedef typename IDLList<ParticleType>::iterator iterator;
+    typedef typename IDLList<ParticleType>::const_iterator const_iterator;
+
+    //-Runtime type information
+    TypeName("Cloud");
 
 
     // Constructors
@@ -97,13 +110,33 @@ public:
         Cloud
         (
             const polyMesh& mesh,
-            const IDLList<particleType>& particles
+            const IDLList<ParticleType>& particles
+        );
+
+        //- Construct from mesh, cloud name, and a list of particles
+        Cloud
+        (
+            const polyMesh& mesh,
+            const word& cloudName,
+            const IDLList<ParticleType>& particles
         );
 
         //- Construct from mesh by reading from file
+        //  Optionally disable checking of class name for post-processing
         Cloud
         (
-            const polyMesh& mesh
+            const polyMesh& mesh,
+            const bool checkClass = true
+        );
+
+
+        //- Construct from mesh by reading from file with given cloud instance
+        //  Optionally disable checking of class name for post-processing
+        Cloud
+        (
+            const polyMesh& pMesh,
+            const word& cloudName,
+            const bool checkClass = true
         );
 
 
@@ -141,14 +174,50 @@ public:
                 return polyMesh_.boundaryMesh()[patchi].whichFace(facei);
             }
 
+            //- Return reference to the mesh information object
+            const polyMeshInfo& meshInfo() const
+            {
+                return meshInfo_;
+            }
+
+            label size() const
+            {
+                return IDLList<ParticleType>::size();
+            };
+
+            const const_iterator begin() const
+            {
+                return IDLList<ParticleType>::begin();
+            };
+
+            const const_iterator end() const
+            {
+                return IDLList<ParticleType>::end();
+            };
+
+            iterator begin()
+            {
+                return IDLList<ParticleType>::begin();
+            };
+
+            iterator end()
+            {
+                return IDLList<ParticleType>::end();
+            };
+
+            void clear()
+            {
+                return IDLList<ParticleType>::clear();
+            };
+
 
         // Edit
 
             //- Transfer particle to cloud
-            void addParticle(particleType* pPtr);
+            void addParticle(ParticleType* pPtr);
 
             //- Remove particle from cloud and delete
-            void deleteParticle(particleType&);
+            void deleteParticle(ParticleType&);
 
             //- Move the particles
             //  passing the TrackingData to the track function
@@ -163,6 +232,15 @@ public:
         // Read
 
             //- Read and return a lagrangian data field
+            //  Checks that data is valid
+            template<class DataType>
+            void checkFieldIOobject
+            (
+                const Cloud<ParticleType>& c,
+                const IOField<DataType>& data
+            ) const;
+
+            //- Read and return a lagrangian data field
             IOobject fieldIOobject(const word& fieldName) const;
 
             //- Read and return a lagrangian data field
@@ -174,8 +252,6 @@ public:
 
 
         // Write
-
-            virtual bool writeData(Ostream&) const;
 
             //- Write the field data for the cloud of particles
             virtual void writeFields() const;
@@ -192,10 +268,10 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <particleType>
+        friend Ostream& operator<< <ParticleType>
         (
             Ostream&,
-            const Cloud<particleType>&
+            const Cloud<ParticleType>&
         );
 };
 

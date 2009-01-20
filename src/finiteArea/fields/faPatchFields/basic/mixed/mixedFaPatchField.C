@@ -141,7 +141,7 @@ void mixedFaPatchField<Type>::rmap
 
 
 template<class Type>
-void mixedFaPatchField<Type>::evaluate()
+void mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

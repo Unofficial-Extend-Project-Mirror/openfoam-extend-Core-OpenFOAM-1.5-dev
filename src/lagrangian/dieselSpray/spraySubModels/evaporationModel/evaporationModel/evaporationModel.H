@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    evaporationModel
+    Foam::evaporationModel
 
 Description
+    Base class for selecting an evaporation model
 
 \*---------------------------------------------------------------------------*/
 
@@ -142,8 +143,6 @@ public:
             const scalar vapourSurfaceEnthalpy,
             const scalar vapourFarEnthalpy,
             const scalar cpGas,
-            const scalar Xs,
-            const scalar Xf,
             const scalar temperature,
             const scalar kLiq
         ) const = 0;

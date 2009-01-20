@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    reitzDiwakar
+    Foam::reitzDiwakar
 
 Description
     secondary breakup model for the spray

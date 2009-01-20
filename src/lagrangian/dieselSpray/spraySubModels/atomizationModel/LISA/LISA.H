@@ -23,23 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    LISA
+    Foam::LISA
 
 Description
-
     Primary Breakup Model for pressure swirl atomizers.
-    Accurate description in
 
+    Accurate description in
+    @verbatim
     P.K. Senecal, D.P. Shmidt, I. Nouar, C.J. Rutland, R.D. Reitz, M. Corradini
     "Modeling high-speed viscous liquid sheet atomization"
-    International Journal of Multiphase Flow 25 (1999) pags. 1073-1097   
+    International Journal of Multiphase Flow 25 (1999) pags. 1073-1097
+    @endverbatim
 
     and
 
+    @verbatim
     D.P. Schmidt, I. Nouar, P.K. Senecal, C.J. Rutland, J.K. Martin, R.D. Reitz
     "Pressure-Swirl Atomization in the Near Field"
     SAE Techical Paper Series 1999-01-0496
-    
+    @endverbatim
+
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,7 +74,7 @@ private:
         scalar cTau_;
         scalar Q_;
         scalar J_;
-        
+
 public:
 
     //- Runtime type information

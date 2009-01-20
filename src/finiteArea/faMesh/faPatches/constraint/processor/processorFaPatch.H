@@ -244,34 +244,33 @@ public:
             //- Initialise interface data transfer
             virtual void initTransfer
             (
-                const unallocLabelList& interfaceData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
             ) const;
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (
-                const unallocLabelList& internalData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& internalData
             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& internalData
             ) const;
 
-            //- Write
+            //- Write the patch data as a dictionary
             virtual void write(Ostream&) const;
-
-            //- Write dictionary
-            virtual void writeDict(Ostream&) const;
 };
 
 

@@ -22,10 +22,17 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    viscosityModel
+Namespace
+    Foam::viscosityModels
 
 Description
+    A namespace for various incompressible viscosityModel implementations.
+
+Class
+    Foam::viscosityModel
+
+Description
+    An abstract base class for incompressible viscosityModels
 
 SourceFiles
     viscosityModel.C
@@ -51,7 +58,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class viscosityModel Declaration
+                         Class viscosityModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class viscosityModel
@@ -142,7 +149,7 @@ public:
         tmp<volScalarField> strainRate() const;
 
         //- Return the laminar viscosity
-        virtual tmp<volScalarField> nu() const = 0;
+        virtual const volScalarField& nu() const = 0;
 
         //- Correct the laminar viscosity
         virtual void correct() = 0;

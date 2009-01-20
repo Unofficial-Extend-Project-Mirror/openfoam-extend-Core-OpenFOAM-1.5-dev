@@ -22,40 +22,35 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    BirdCarreau
-
 \*---------------------------------------------------------------------------*/
 
 #include "BirdCarreau.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace viscosityModels
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(BirdCarreau, 0);
-
-addToRunTimeSelectionTable
-(
-    viscosityModel,
-    BirdCarreau,
-    dictionary
-);
+    defineTypeNameAndDebug(BirdCarreau, 0);
+    addToRunTimeSelectionTable
+    (
+        viscosityModel,
+        BirdCarreau,
+        dictionary
+    );
+}
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-//- Calculate and return the laminar viscosity
-tmp<volScalarField> BirdCarreau::calcNu() const
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::BirdCarreau::calcNu() const
 {
-    return 
+    return
         nuInf_
       + (nu0_ - nuInf_)
        *pow(scalar(1) + sqr(k_*strainRate()), (n_ - 1.0)/2.0);
@@ -64,8 +59,7 @@ tmp<volScalarField> BirdCarreau::calcNu() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
-BirdCarreau::BirdCarreau
+Foam::viscosityModels::BirdCarreau::BirdCarreau
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -96,7 +90,10 @@ BirdCarreau::BirdCarreau
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool BirdCarreau::read(const dictionary& viscosityProperties)
+bool Foam::viscosityModels::BirdCarreau::read
+(
+    const dictionary& viscosityProperties
+)
 {
     viscosityModel::read(viscosityProperties);
 
@@ -110,10 +107,5 @@ bool BirdCarreau::read(const dictionary& viscosityProperties)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace viscosityModels
-} // End namespace Foam
 
 // ************************************************************************* //

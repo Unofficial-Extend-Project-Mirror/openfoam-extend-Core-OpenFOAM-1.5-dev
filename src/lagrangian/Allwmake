@@ -2,5 +2,9 @@
 set -x
 
 wmake libso basic
-wmake libso dieselSpray
 wmake libso solidParticle
+wmake libso intermediate
+wmake libso dieselSpray
+(cd molecularDynamics && wmake libso potential)
+(cd molecularDynamics && wmake libso molecule)
+

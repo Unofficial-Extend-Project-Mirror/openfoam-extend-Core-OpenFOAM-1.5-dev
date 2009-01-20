@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    motionSolver
+    Foam::motionSolver
 
 Description
     Virtual base class for mesh motion solver.
@@ -130,7 +130,7 @@ public:
         virtual void solve() = 0;
 
         //- Update topology
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh&) = 0;
 };
 
 

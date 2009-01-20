@@ -38,20 +38,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineParticleTypeNameAndDebug(parcel, 0);
+defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-parcel::parcel
+Foam::parcel::parcel
 (
     const Cloud<parcel>& cloud,
     const vector& position,
-    const label celli,
+    const label cellI,
     const vector& n,
     const scalar d,
     const scalar T,
@@ -66,14 +66,13 @@ parcel::parcel
     const vector& U,
     const vector& Uturb,
     const scalarField& X,
-    const List<word>& fuelNames
+    const List<word>& liquidNames
 )
 :
-    particle<parcel>(cloud, position, celli),
- 
-    fuelNames_
+    Particle<parcel>(cloud, position, cellI),
+    liquidComponents_
     (
-        fuelNames
+        liquidNames
     ),
     d_(d),
     T_(T),
@@ -95,7 +94,7 @@ parcel::parcel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool parcel::move(spray& sDB)
+bool Foam::parcel::move(spray& sDB)
 {
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
@@ -112,12 +111,11 @@ bool parcel::move(spray& sDB)
     scalar rhog = sDB.rhoInterpolator().interpolate(position(), cell());
     scalar pg = sDB.pInterpolator().interpolate(position(), cell());
     scalar Tg = sDB.TInterpolator().interpolate(position(), cell());
-    
+
     scalarField Yfg(Nf, 0.0);
 
     scalar cpMixture = 0.0;
-
-    for(label i = 0; i < Ns; i++)
+    for(label i=0; i<Ns; i++)
     {
         const volScalarField& Yi = sDB.composition().Y()[i];
         if (sDB.isLiquidFuel()[i])
@@ -189,7 +187,7 @@ bool parcel::move(spray& sDB)
         )
     )/sDB.subCycles();
 
-    // prevent the number of subcycles from being too many 
+    // prevent the number of subcycles from being too many
     // (10 000 seems high enough)
     dtMax = max(dtMax, 1.0e-4*tEnd);
 
@@ -242,10 +240,10 @@ bool parcel::move(spray& sDB)
 
         // **** calculate the lagrangian source terms ****
         // First we get the 'old' properties.
-        // and then 'update' them to get the 'new' 
+        // and then 'update' them to get the 'new'
         // properties.
         // The difference is then added to the source terms.
-        
+
         scalar oRho = fuels.rho(p, T(), X());
         scalarField oMass(Nf, 0.0);
         scalar oHg = 0.0;
@@ -297,6 +295,7 @@ bool parcel::move(spray& sDB)
         {
             sDB.srhos()[i][celli] += oMass[i] - nMass[i];
         }
+        sDB.sms()[celli]   += oMom - nMom;
 
         sDB.sms()[celli] += oMom - nMom;
 
@@ -341,7 +340,7 @@ bool parcel::move(spray& sDB)
 }
 
 
-void parcel::updateParcelProperties
+void Foam::parcel::updateParcelProperties
 (
     const scalar dt,
     spray& sDB,
@@ -374,7 +373,8 @@ void parcel::updateParcelProperties
     scalar cpMix = 0.0;
     for(label i=0; i<Ns; i++)
     {
-        cpMix += sDB.composition().Y()[i][celli]*sDB.gasProperties()[i].Cp(T());
+        cpMix += sDB.composition().Y()[i][celli]
+                *sDB.gasProperties()[i].Cp(T());
     }
     scalar cellV            = sDB.mesh().V()[celli];
     scalar rho              = sDB.rho()[celli];
@@ -457,7 +457,7 @@ void parcel::updateParcelProperties
     scalarField mi(mi0);
 
     scalar oldhg = 0.0;
-   for(label i=0; i<Nf; i++)
+    for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
         oldhg += Yf0[i]*sDB.gasProperties()[j].H(T());
@@ -594,7 +594,7 @@ void parcel::updateParcelProperties
             // Prevent droplet temperature to go above critial value
             Tnew = min(Tnew, fuels.Tc(X()));
 
-            // Prevent droplet temperature to go too low 
+            // Prevent droplet temperature to go too low
             // Mainly a numerical stability issue
             Tnew = max(200.0, Tnew);
         }
@@ -615,10 +615,10 @@ void parcel::updateParcelProperties
                 else
                 {
                     scalar Td = min(Tnew, 0.999*fuels.properties()[i].Tc());
-                    
+
                     scalar pAtSurface = fuels.properties()[i].pv(pg, Td);
                     scalar boiling = pAtSurface >= 0.999*pg;
-                    
+
                     if (!boiling)
                     {
                         scalar fr = dt/tauEvaporation[i];
@@ -633,7 +633,7 @@ void parcel::updateParcelProperties
             }
 
             scalar mTot = sum(mi);
-            if (mTot > sDB.minimumParcelMass())
+            if (mTot > VSMALL)
             {
                 scalarField Ynew(mi/mTot);
                 scalarField Xnew(sDB.fuels().X(Ynew));
@@ -679,18 +679,16 @@ void parcel::updateParcelProperties
 }
 
 
-void parcel::transformProperties(const tensor& T)
+void Foam::parcel::transformProperties(const tensor& T)
 {
     U_ = transform(T, U_);
 }
 
 
-void parcel::transformProperties(const vector&)
+void Foam::parcel::transformProperties(const vector&)
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -465,25 +465,13 @@ void faPatch::movePoints(const pointField& points)
 
 void faPatch::write(Ostream& os) const
 {
-    os  << nl << type()
-        << static_cast<const patchIdentifier&>(*this) << endl
-        << static_cast<const labelList&>(*this) << endl
-        << ngbPolyPatchIndex_;
-}
+    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    patchIdentifier::write(os);
 
-
-void faPatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << ';' << nl;
-
-    patchIdentifier::writeDict(os);
-
-    os  << "    edgeLabels " << static_cast<const labelList&>(*this) << ';'
-        << nl;
-
-    os  << "    ngbPolyPatchIndex " << ngbPolyPatchIndex_ << ';' << nl
-        << token::END_BLOCK << endl;
+    const labelList& edgeLabels = *this;
+    edgeLabels.writeEntry("edgeLabels", os);
+    os.writeKeyword("ngbPolyPatchIndex") << ngbPolyPatchIndex_
+        << token::END_STATEMENT << nl;
 }
 
 
@@ -492,7 +480,7 @@ void faPatch::writeDict(Ostream& os) const
 Ostream& operator<<(Ostream& os, const faPatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const faPatch& p");
+    os.check("Ostream& operator<<(Ostream& f, const faPatch& p)");
     return os;
 }
 

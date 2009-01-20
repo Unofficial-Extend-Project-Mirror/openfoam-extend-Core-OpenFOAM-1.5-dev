@@ -33,12 +33,23 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = cloud().pMesh().time().deltaT().value();
+    const polyMesh& mesh = cloud().pMesh();
+    const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+
+    scalar deltaT = mesh.time().deltaT().value();
     scalar tEnd = (1.0 - stepFraction())*deltaT;
     scalar dtMax = tEnd;
 
     while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
     {
+        if (debug)
+        {
+            Info<< "Time = " << mesh.time().timeName()
+                << " deltaT = " << deltaT
+                << " tEnd = " << tEnd
+                << " steptFraction() = " << stepFraction() << endl;
+        }
+
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
@@ -51,7 +62,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
         tEnd -= dt;
         stepFraction() = 1.0 - tEnd/deltaT;
 
-        cellPointWeight cpw(td.spc().pMesh(), position(), celli, face());
+        cellPointWeight cpw(mesh, position(), celli, face());
         scalar rhoc = td.rhoInterp().interpolate(cpw);
         vector Uc = td.UInterp().interpolate(cpw);
         scalar nuc = td.nuInterp().interpolate(cpw);
@@ -70,6 +81,17 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
         scalar Dc = (24.0*nuc/d_)*ReFunc*(3.0/4.0)*(rhoc/(d_*rhop));
 
         U_ = (U_ + dt*(Dc*Uc + (1.0 - rhoc/rhop)*td.g()))/(1.0 + dt*Dc);
+
+        if (onBoundary() && td.keepParticle)
+        {
+            if (face() > -1)
+            {
+                if (isType<processorPolyPatch>(pbMesh[patch(face())]))
+                {
+                    td.switchProcessor = true;
+                }
+            }
+        }
     }
 
     return td.keepParticle;
@@ -110,7 +132,7 @@ void Foam::solidParticle::hitWallPatch
     {
         U_ -= (1.0 + td.spc().e())*Un*nw;
     }
-        
+
     U_ -= td.spc().mu()*Ut;
 }
 
@@ -139,6 +161,19 @@ void Foam::solidParticle::hitPatch
     int&
 )
 {}
+
+
+void Foam::solidParticle::transformProperties (const tensor& T)
+{
+    Particle<solidParticle>::transformProperties(T);
+    U_ = transform(T, U_);
+}
+
+
+void Foam::solidParticle::transformProperties(const vector& separation)
+{
+    Particle<solidParticle>::transformProperties(separation);
+}
 
 
 // ************************************************************************* //

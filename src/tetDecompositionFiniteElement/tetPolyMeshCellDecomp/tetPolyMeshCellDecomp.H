@@ -31,7 +31,7 @@ Description
     basis.
 
     This class will be used as the underlying structure for FEM mesh motion
-    and therefore it needs to be able to create and store tet poing-edge
+    and therefore it needs to be able to create and store tet point-edge
     addressing for the solver.
 
     Note on addressing:
@@ -46,8 +46,7 @@ Description
         calcTetPolyMeshAddressing.C.
 
         The second issue is the construction of the FEM matrix.
-        A fast method by Sanjay Mathur (Fluent Wavre 19/Sep/2003) is
-        currently used:
+        A fast method (Wavre 19/Sep/2003) is currently used:
 
         1) take a group of elements.  The discretisation will be done
         over a group.  A goup should be such that I can allocate a
@@ -208,6 +207,12 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return the object registry
+            virtual const objectRegistry& db() const
+            {
+                return GeoMesh<polyMesh>::db();
+            }
 
             //- Return number of points in decomposition
             label nPoints() const;

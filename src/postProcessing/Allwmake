@@ -1,4 +1,9 @@
 #!/bin/sh
+set -x
 
-wmake libso incompressible
-#wmake libso compressible
+wmake libo postCalc
+wmake libso forces
+wmake libso fieldAverage
+wmake libso foamCalcFunctions
+
+

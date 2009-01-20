@@ -103,7 +103,7 @@ basicTetPolyPatchFields = $(tetPolyPatchFields)/basic
 $(basicTetPolyPatchFields)/calculated/calculatedTetPolyPatchFields.C
 $(basicTetPolyPatchFields)/coupled/coupledTetPolyPatchFields.C
 $(basicTetPolyPatchFields)/coupledFace/coupledFaceTetPolyPatchFields.C
-$(basicTetPolyPatchFields)/default/defaultTetPolyPatchFields.C
+$(basicTetPolyPatchFields)/generic/genericTetPolyPatchFields.C
 $(basicTetPolyPatchFields)/value/valueTetPolyPatchFields.C
 $(basicTetPolyPatchFields)/fixedValue/fixedValueTetPolyPatchFields.C
 $(basicTetPolyPatchFields)/mixed/mixedTetPolyPatchFields.C
@@ -114,9 +114,9 @@ $(constraintTetPolyPatchFields)/empty/emptyTetPolyPatchFields.C
 $(constraintTetPolyPatchFields)/wedge/wedgeTetPolyPatchFields.C
 $(constraintTetPolyPatchFields)/symmetry/symmetryTetPolyPatchFields.C
 $(constraintTetPolyPatchFields)/processor/processorTetPolyPatchFields.C
-$(constraintTetPolyPatchFields)/global/globalTetPolyPatchFields.C
 
 derivedTetPolyPatchFields = $(tetPolyPatchFields)/derived
+$(derivedTetPolyPatchFields)/global/globalTetPolyPatchFields.C
 $(derivedTetPolyPatchFields)/componentMixed/componentMixedTetPolyPatchVectorField.C
 $(derivedTetPolyPatchFields)/oscillatingFixedValue/oscillatingFixedValueTetPolyPatchFields.C
 $(derivedTetPolyPatchFields)/slip/slipTetPolyPatchFields.C

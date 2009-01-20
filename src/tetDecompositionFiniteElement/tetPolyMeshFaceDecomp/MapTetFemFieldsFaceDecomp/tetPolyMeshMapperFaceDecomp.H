@@ -60,7 +60,7 @@ class tetPolyMeshMapperFaceDecomp
     // Private data
 
         //- Reference to mesh
-        const polyMesh& mesh_;
+        const tetPolyMeshFaceDecomp& mesh_;
 
         //- Point mapper
         pointMapper pointMap_;
@@ -98,7 +98,7 @@ public:
             const mapPolyMesh& meshMap
         )
         :
-            mesh_(mesh()),
+            mesh_(mesh),
             pointMap_(meshMap),
             faceMap_(meshMap),
             cellMap_(meshMap),
@@ -110,9 +110,16 @@ public:
     // Member Functions
 
         //- Return mesh
-        const polyMesh& mesh() const
+        const tetPolyMeshFaceDecomp& mesh() const
         {
             return mesh_;
+        }
+
+        //- Return reference to objectRegistry storing fields
+        //  Needed in mappers.  HJ, 16/Oct/2008
+        const objectRegistry& db() const
+        {
+            return mesh_();
         }
 
         //- Return point mapper

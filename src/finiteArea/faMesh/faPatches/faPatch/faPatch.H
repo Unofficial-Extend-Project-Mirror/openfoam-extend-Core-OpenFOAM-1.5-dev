@@ -256,9 +256,6 @@ public:
         //- Write
         virtual void write(Ostream&) const;
 
-        //- Write dictionary
-        virtual void writeDict(Ostream&) const;
-
 
         // Acces functions for geometrical data
 

@@ -23,9 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    TAB
+    Foam::TAB
 
 Description
+    The TAB Method for Numerical Calculation of Spray Droplet Breakup.
+
+    @verbatim
+        O'Rourke, P.J. and Amsden, A.A.,
+        "The TAB Method for Numerical Calculation of Spray Droplet Breakup,"
+        1987 SAE International Fuels and Lubricants Meeting and Exposition,
+        Toronto, Ontario, November 2-5, 1987,
+        Los Alamos National Laboratory document LA-UR-87-2105;
+        SAE Technical Paper Series, Paper 872089.
+    @endverbatim
+
+    This implementation follows the kiva version.
+
+See Also
+    The Enhanced %TAB model - ETAB
 
 SourceFiles
     TABI.H
@@ -53,13 +68,13 @@ class TAB
     public breakupModel
 {
 private:
- 
+
     // Private data
 
         dictionary coeffsDict_;
 
-    // inverse function approximation 
-    // of the Rossin-Rammler Distribution 
+    // inverse function approximation
+    // of the Rossin-Rammler Distribution
     // used when calculating the droplet size after breakup
         scalar rrd_[100];
 

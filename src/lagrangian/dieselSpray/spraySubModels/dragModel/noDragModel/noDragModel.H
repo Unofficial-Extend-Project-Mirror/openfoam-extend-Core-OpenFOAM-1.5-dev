@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    noDragModel
+    Foam::noDragModel
 
 Description
     standard drag law model with a lower limit on the Cd-value

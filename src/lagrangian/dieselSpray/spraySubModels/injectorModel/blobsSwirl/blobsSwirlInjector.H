@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    blobsSwirlInjector
+    Foam::blobsSwirlInjector
 
 Description
+    Model for parcels injection in pressure Swirl Atomizers.
 
-    Model for parcels injection in pressure Swirl Atomizers. 
     Accurate description in:
-    
-    Z. Han, S. Parrish, P.V. Farrell, R.D. Reitz
-    "Modeling Atomization Processes Of Pressure Swirl Hollow-Cone Fuel Sprays"
-    Atomization and Sprays, vol. 7, pp. 663-684, 1997
-    
+    @verbatim
+        Z. Han, S. Parrish, P.V. Farrell, R.D. Reitz
+        "Modeling Atomization Processes Of Pressure Swirl Hollow-Cone Fuel Sprays"
+        Atomization and Sprays, vol. 7, pp. 663-684, 1997
+    @endverbatim
     and
-
-    L. Allocca, G. Bella, A. De Vita, L. Di Angelo
-    "Experimental Validation of a GDI Spray Model"
-    SAE Technical Paper Series, 2002-01-1137
+    @verbatim
+        L. Allocca, G. Bella, A. De Vita, L. Di Angelo
+        "Experimental Validation of a GDI Spray Model"
+        SAE Technical Paper Series, 2002-01-1137
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 
@@ -70,39 +71,35 @@ private:
 
         scalarList coneAngle_;
         scalarList coneInterval_;
-        
+
         scalarList cD_;
         scalarList cTau_;
         scalarList A_;
-        
-    // The initial spray angle for the parcels    
+
+    // The initial spray angle for the parcels
         mutable scalar angle_;
-        
-    // The initial velocity for the parcels           
+
+    // The initial velocity for the parcels
         mutable scalar u_;
 
     // The orifice-air cone area ratio
-        
+
         mutable scalar x_;
 
     // The initial sheet tickness
-        
+
         mutable scalar h_;
-    
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
 
     // private member functions
-        
+
         scalar kv
         (
-            const label inj 
+            const label inj
         ) const;
-        
+
         scalar deltaPressureInj(const scalar time, const label inj) const;
         scalar averagePressure(const label inj) const;
-        
+
         void calculateHX
         (
             const label inj,
@@ -140,22 +137,23 @@ public:
         //- Return the spray angle of the injector
         vector direction
         (
-            const label injector, 
+            const label injector,
+            const label hole,
             const scalar time,
             const scalar d
         ) const;
-    
+
         scalar velocity
         (
             const label i,
             const scalar time
         ) const;
-        
+
         scalar averageVelocity
         (
             const label i
         ) const;
-        
+
 
 };
 

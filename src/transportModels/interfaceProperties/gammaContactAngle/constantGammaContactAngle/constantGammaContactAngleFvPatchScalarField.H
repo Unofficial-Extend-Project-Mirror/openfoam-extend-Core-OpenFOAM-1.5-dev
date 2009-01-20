@@ -23,9 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    constantGammaContactAngleFvPatchScalarField
+    Foam::constantGammaContactAngleFvPatchScalarField
 
 Description
+    A constant gammaContactAngle scalar boundary condition 
+    (gammaContactAngleFvPatchScalarField)
 
 SourceFiles
     constantGammaContactAngleFvPatchScalarField.C

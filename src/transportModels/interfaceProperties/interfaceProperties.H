@@ -23,12 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    interfaceProperties
+    Foam::interfaceProperties
 
 Description
-    Properties to aid interFoam :
-    1. Correct the gamma boundary condition for dynamic contact angle.
-    2. Calculate interface curvature.
+    Contains the interface properties.
+
+    Properties to aid interFoam:
+    -# Correct the gamma boundary condition for dynamic contact angle.
+    -# Calculate interface curvature.
 
 SourceFiles
     interfaceProperties.C

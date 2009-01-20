@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ tmp<scalarField> wedgeFaPatchField<scalar>::snGrad() const
 
 // Evaluate the patch field
 template<>
-void wedgeFaPatchField<scalar>::evaluate()
+void wedgeFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
 {
     if (!updated())
     {

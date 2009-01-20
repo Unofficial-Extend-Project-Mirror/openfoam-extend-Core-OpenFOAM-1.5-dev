@@ -41,13 +41,13 @@ void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
     const lduMatrix&,
     const scalarField&,
     const direction,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType
 ) const
 {
     procPatch_.compressedSend
     (
-        patch().patchInternalField(psiInternal)(),
-        bufferedTransfer
+        commsType,
+        patch().patchInternalField(psiInternal)()
     );
 }
 
@@ -59,10 +59,14 @@ void processorFaPatchField<scalar>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction
+    const direction,
+    const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf(procPatch_.compressedReceive<scalar>(this->size())());
+    scalarField pnf
+    (
+        procPatch_.compressedReceive<scalar>(commsType, this->size())()
+    );
 
     const unallocLabelList& edgeFaces = patch().edgeFaces();
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    reflectParcel
+    Foam::reflectParcel
 
 Description
     The parcels are reflected back from the wall in an inelastic collision.

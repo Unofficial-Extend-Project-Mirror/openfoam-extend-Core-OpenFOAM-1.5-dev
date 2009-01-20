@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    spray
+    Foam::spray
 
 Description
+    A spray is a cloud of parcels
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,7 +62,7 @@ class wallModel;
 class combustionMixture;
 
 /*---------------------------------------------------------------------------*\
-                           Class spray Declaration
+                        Class spray Declaration
 \*---------------------------------------------------------------------------*/
 
 class spray
@@ -170,13 +171,12 @@ class spray
 
             //- The (total added) injected kinetic energy of the liquid
             scalar injectedLiquidKE_;
-        
+
             //- Ambient Pressure
             scalar ambientPressure_;
-        
+
             //- Ambient Temperature
             scalar ambientTemperature_;
-        
 
 
     // Private Member Functions
@@ -298,7 +298,7 @@ public:
             inline const PtrList<scalarField>& srhos() const;
 
             inline const scalar& ambientPressure() const;
-            
+
             inline const scalar& ambientTemperature() const;
 
 
@@ -335,21 +335,31 @@ public:
             //  Fraction is defined between 0 and 1, where 1 represents 100%
             scalar liquidPenetration
             (
-                const scalar frac,
-                const label nozzlei = 0
+                const label nozzlei,
+                const scalar prc
             ) const;
+
+            //- Returns the droplet penetration for 'prc' percent of the
+            //  liquid from nozzle 0
+            scalar liquidPenetration(const scalar prc) const;
 
             //- Return Sauter Mean Diameter
             scalar smd() const;
 
             //- Return Maximum Diameter
             scalar maxD() const;
-            
+
             //- Return Ambient Pressure
             void calculateAmbientPressure();
-            
+
             //- Return Ambient Temperature
             void calculateAmbientTemperature();
+
+
+    // I/O
+
+            //- Write fields
+            void writeFields() const;
 };
 
 

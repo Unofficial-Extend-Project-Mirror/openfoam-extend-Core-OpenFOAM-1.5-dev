@@ -22,31 +22,27 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Newtonian
-
 \*---------------------------------------------------------------------------*/
 
 #include "Newtonian.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace viscosityModels
 {
+    defineTypeNameAndDebug(Newtonian, 0);
+    addToRunTimeSelectionTable(viscosityModel, Newtonian, dictionary);
+}
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Newtonian, 0);
-
-addToRunTimeSelectionTable(viscosityModel, Newtonian, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Newtonian::Newtonian
+Foam::viscosityModels::Newtonian::Newtonian
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -74,7 +70,10 @@ Newtonian::Newtonian
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Newtonian::read(const dictionary& viscosityProperties)
+bool Foam::viscosityModels::Newtonian::read
+(
+    const dictionary& viscosityProperties
+)
 {
     viscosityModel::read(viscosityProperties);
 
@@ -84,10 +83,5 @@ bool Newtonian::read(const dictionary& viscosityProperties)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace viscosityModels
-} // End namespace Foam
 
 // ************************************************************************* //

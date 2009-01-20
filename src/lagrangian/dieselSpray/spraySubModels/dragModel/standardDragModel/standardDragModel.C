@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -82,13 +80,14 @@ scalar standardDragModel::Cd
 
     if (Re < ReLimiter_)
     {
-        drag = 24.0*(1.0 + preReFactor_*pow(Re, ReExponent_))/Re;
+        drag =  24.0*(1.0 + preReFactor_*pow(Re, ReExponent_))/Re;
     }
 
-    // Correct for deviation from sphericity
+    // correct for deviation from sphericity
     drag *= (1.0 + Cdistort_*dev);
 
     return drag;
+
 }
 
 
@@ -103,20 +102,25 @@ scalar standardDragModel::relaxationTime
 ) const
 {
 
+    scalar time = GREAT;
     scalar Re = mag(URel)*diameter/nu;
 
     if (Re > 0.1)
     {
-        return 4.0*liquidDensity*diameter/(3.0*rho*Cd(Re, dev)*mag(URel));
+        time = 4.0*liquidDensity*diameter /
+        (
+            3.0*rho*Cd(Re, dev)*mag(URel)
+        );
     }
     else
     {
-        // For small Re number, the relative velocity is both in
-        // the numerator and denominator.
-        // Use Cd = 24/Re and remove the SMALL/SMALL
+        // for small Re number, the relative velocity is both in
+        // the nominator and denominator
+        // use Cd = 24/Re and remove the SMALL/SMALL
         // expression for the velocities
-        return liquidDensity*sqr(diameter)/(18*rho*nu*(1.0 + Cdistort_*dev));
+        time = liquidDensity*diameter*diameter/(18*rho*nu*(1.0 + Cdistort_*dev));
     }
+    return time;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

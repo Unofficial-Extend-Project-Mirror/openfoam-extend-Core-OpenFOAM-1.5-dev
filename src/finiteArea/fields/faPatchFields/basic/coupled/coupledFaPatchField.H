@@ -139,10 +139,16 @@ public:
             virtual tmp<Field<Type> > snGrad() const;
 
             //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const bool);
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType
+            );
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType
+            );
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights
@@ -176,7 +182,8 @@ public:
                 scalarField& result,
                 const lduMatrix&,
                 const scalarField& coeffs,
-                const direction
+                const direction,
+                const Pstream::commsTypes commsType
             ) const = 0;
 
         //- Write

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    polyTopoChanger
+    Foam::polyTopoChanger
 
 Description
     List of mesh modifiers defining the mesh dynamics.
@@ -52,7 +52,7 @@ class mapPolyMesh;
 class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
-                        Class polyTopoChanger Declaration
+                      Class polyTopoChanger Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyTopoChanger

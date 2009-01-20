@@ -128,7 +128,7 @@ void fixedGradientFaPatchField<Type>::rmap
 
 
 template<class Type>
-void fixedGradientFaPatchField<Type>::evaluate()
+void fixedGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

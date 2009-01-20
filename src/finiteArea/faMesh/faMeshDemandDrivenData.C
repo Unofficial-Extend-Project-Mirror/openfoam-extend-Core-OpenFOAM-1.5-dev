@@ -37,8 +37,6 @@ Description
 #include "wedgeFaPatch.H"
 // #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
-#include "Matrix.H"
-#include "scalarMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -645,9 +643,7 @@ void faMesh::calcFaceCurvatures() const
                 "faceCurvatures",
                 mesh_.pointsInstance(),
                 meshSubDir,
-                mesh_,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
+                mesh_
             ),
             *this,
             dimless/dimLength
@@ -960,7 +956,7 @@ void faMesh::calcPointAreaNormals() const
               - points[curPoint];
 
             vector n = (d1^d2)/mag(d1^d2);
-            
+
             scalar sinAlpha = mag(d1^d2)/(mag(d1)*mag(d2));
 
             scalar w = sinAlpha/(mag(d1)*mag(d2));
@@ -1067,6 +1063,8 @@ void faMesh::calcPointAreaNormals() const
                       &result[wedgePatch.axisPoint()]
                     );
             }
+
+            break;
         }
     }
 
@@ -1122,6 +1120,7 @@ void faMesh::calcPointAreaNormals() const
             {
             OPstream::write
             (
+                Pstream::blocking,
                 procPatch.neighbProcNo(),
                 reinterpret_cast<const char*>(patchPointNormals.begin()),
                 patchPointNormals.byteSize()
@@ -1137,6 +1136,7 @@ void faMesh::calcPointAreaNormals() const
             {
             IPstream::read
             (
+                Pstream::blocking,
                 procPatch.neighbProcNo(),
                 reinterpret_cast<char*>(ngbPatchPointNormals.begin()),
                 ngbPatchPointNormals.byteSize()

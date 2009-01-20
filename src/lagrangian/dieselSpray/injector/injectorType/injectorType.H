@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    injectorType
+    Foam::injectorType
 
 Description
+    Base class for injectors
 
 SourceFiles
     injectorTypeI.H
@@ -57,7 +58,7 @@ namespace Foam
 
 class injectorType
 {
-    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
 public:
 
@@ -113,11 +114,12 @@ public:
         ) const = 0;
 
         //- Return the injection position
-        virtual const vector position() const = 0;
+        virtual const vector position(const label n) const = 0;
 
         //- Return the injection position
         virtual vector position
         (
+            const label n,
             const scalar time,
             const bool twoD,
             const scalar angleOfWedge,
@@ -126,12 +128,19 @@ public:
             const vector& axisOfWedgeNormal,
             Random& rndGen
         ) const = 0;
+
+        //- Return the number of holes
+        virtual label nHoles() const = 0;
     
         //- Return the injector diameter
         virtual scalar d() const = 0;
 
-        //- Return the injection direction
-        virtual const vector& direction() const = 0;
+        //- Return the injection direction for hole i
+        virtual const vector& direction
+        (
+            const label i, 
+            const scalar time
+        ) const = 0;
 
         //- Return the mass of the injected liquid between times
         virtual scalar mass
@@ -187,6 +196,12 @@ public:
         virtual scalar injectedMass(const scalar t) const = 0;
 
         virtual bool pressureIndependentVelocity() const = 0;
+
+        //- Return a vector perpendicular to the injection direction and tan2 for hole n
+        virtual vector tan1(const label n) const = 0;
+
+        //- Return a vector perpendicular to the injection direction and tan1 for hole n
+        virtual vector tan2(const label n) const = 0;
 
         scalar getTableValue
         (

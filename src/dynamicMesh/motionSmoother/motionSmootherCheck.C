@@ -48,6 +48,29 @@ bool Foam::motionSmoother::checkMesh
     const bool report,
     const polyMesh& mesh,
     const dictionary& dict,
+    const labelList& checkFaces,
+    labelHashSet& wrongFaces
+)
+{
+    List<labelPair> emptyBaffles;
+    return checkMesh
+    (
+        report,
+        mesh,
+        dict,
+        checkFaces,
+        emptyBaffles,
+        wrongFaces
+    );
+}
+
+bool Foam::motionSmoother::checkMesh
+(
+    const bool report,
+    const polyMesh& mesh,
+    const dictionary& dict,
+    const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet& wrongFaces
 )
 {
@@ -58,10 +81,10 @@ bool Foam::motionSmoother::checkMesh
     const scalar maxIntSkew(readScalar(dict.lookup("maxInternalSkewness")));
     const scalar maxBounSkew(readScalar(dict.lookup("maxBoundarySkewness")));
     const scalar minWeight(readScalar(dict.lookup("minFaceWeight")));
+    const scalar minVolRatio(readScalar(dict.lookup("minVolRatio")));
     const scalar minTwist(readScalar(dict.lookup("minTwist")));
+    const scalar minTriangleTwist(readScalar(dict.lookup("minTriangleTwist")));
     const scalar minDet(readScalar(dict.lookup("minDeterminant")));
-
-    const labelList allFaces(identity(mesh.nFaces()));
 
     label nWrongFaces = 0;
 
@@ -77,7 +100,8 @@ bool Foam::motionSmoother::checkMesh
             mesh,
             mesh.cellCentres(),
             mesh.faceAreas(),
-            allFaces,
+            checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -100,7 +124,8 @@ bool Foam::motionSmoother::checkMesh
             mesh,
             mesh.cellCentres(),
             mesh.points(),
-            allFaces,
+            checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -122,7 +147,7 @@ bool Foam::motionSmoother::checkMesh
             mesh,
             mesh.faceAreas(),
             mesh.points(),
-            allFaces,
+            checkFaces,
             &wrongFaces
         );
 
@@ -144,7 +169,7 @@ bool Foam::motionSmoother::checkMesh
             minArea,
             mesh,
             mesh.faceAreas(),
-            allFaces,
+            checkFaces,
             &wrongFaces
         );
 
@@ -169,7 +194,8 @@ bool Foam::motionSmoother::checkMesh
             mesh.cellCentres(),
             mesh.faceCentres(),
             mesh.faceAreas(),
-            allFaces,
+            checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -193,15 +219,39 @@ bool Foam::motionSmoother::checkMesh
             mesh.cellCentres(),
             mesh.faceCentres(),
             mesh.faceAreas(),
-            allFaces,
+            checkFaces,
+            baffles,
             &wrongFaces
         );
 
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with interpolation weights (0..1)  < "
-            << setw(4) << minWeight
-            << "        : "
+            << setw(5) << minWeight
+            << "       : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minVolRatio >= 0)
+    {
+        polyMeshGeometry::checkVolRatio
+        (
+            report,
+            minVolRatio,
+            mesh,
+            mesh.cellVolumes(),
+            checkFaces,
+            baffles,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with volume ratio of neighbour cells < "
+            << setw(5) << minVolRatio
+            << "     : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -216,10 +266,11 @@ bool Foam::motionSmoother::checkMesh
             report,
             minTwist,
             mesh,
+            mesh.cellCentres(),
             mesh.faceAreas(),
             mesh.faceCentres(),
             mesh.points(),
-            allFaces,
+            checkFaces,
             &wrongFaces
         );
 
@@ -233,18 +284,42 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
+    if (minTriangleTwist > -1)
+    {
+        //Pout<< "Checking triangle twist: dot product of consecutive triangle"
+        //    << " normals resulting from face-centre decomposition" << endl;
+        polyMeshGeometry::checkTriangleTwist
+        (
+            report,
+            minTriangleTwist,
+            mesh,
+            mesh.faceAreas(),
+            mesh.faceCentres(),
+            mesh.points(),
+            checkFaces,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with triangle twist < "
+            << setw(5) << minTriangleTwist
+            << "                      : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
     if (minDet > -1)
     {
-        labelList allCells(identity(mesh.nCells()));
-
         polyMeshGeometry::checkCellDeterminant
         (
             report,
             minDet,
             mesh,
             mesh.faceAreas(),
-            allFaces,
-            allCells,
+            checkFaces,
+            polyMeshGeometry::affectedCells(mesh, checkFaces),
             &wrongFaces
         );
 
@@ -266,9 +341,51 @@ bool Foam::motionSmoother::checkMesh
 bool Foam::motionSmoother::checkMesh
 (
     const bool report,
+    const polyMesh& mesh,
+    const dictionary& dict,
+    labelHashSet& wrongFaces
+)
+{
+    return checkMesh
+    (
+        report,
+        mesh,
+        dict,
+        identity(mesh.nFaces()),
+        wrongFaces
+    );
+}
+
+bool Foam::motionSmoother::checkMesh
+(
+    const bool report,
     const dictionary& dict,
     const polyMeshGeometry& meshGeom,
     const labelList& checkFaces,
+    labelHashSet& wrongFaces
+)
+{
+    List<labelPair> emptyBaffles;
+
+    return checkMesh
+    (
+        report,
+        dict,
+        meshGeom,
+        checkFaces,
+        emptyBaffles,
+        wrongFaces
+     );
+}
+
+
+bool Foam::motionSmoother::checkMesh
+(
+    const bool report,
+    const dictionary& dict,
+    const polyMeshGeometry& meshGeom,
+    const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet& wrongFaces
 )
 {
@@ -279,7 +396,9 @@ bool Foam::motionSmoother::checkMesh
     const scalar maxIntSkew(readScalar(dict.lookup("maxInternalSkewness")));
     const scalar maxBounSkew(readScalar(dict.lookup("maxBoundarySkewness")));
     const scalar minWeight(readScalar(dict.lookup("minFaceWeight")));
+    const scalar minVolRatio(readScalar(dict.lookup("minVolRatio")));
     const scalar minTwist(readScalar(dict.lookup("minTwist")));
+    const scalar minTriangleTwist(readScalar(dict.lookup("minTriangleTwist")));
     const scalar minDet(readScalar(dict.lookup("minDeterminant")));
 
     label nWrongFaces = 0;
@@ -294,6 +413,7 @@ bool Foam::motionSmoother::checkMesh
             report,
             maxNonOrtho,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -315,6 +435,7 @@ bool Foam::motionSmoother::checkMesh
             minVol,
             meshGeom.mesh().points(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -370,6 +491,7 @@ bool Foam::motionSmoother::checkMesh
             maxIntSkew,
             maxBounSkew,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -390,14 +512,36 @@ bool Foam::motionSmoother::checkMesh
             report,
             minWeight,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with interpolation weights (0..1)  < "
-            << setw(4) << minWeight
-            << "        : "
+            << setw(5) << minWeight
+            << "       : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minVolRatio >= 0)
+    {
+        meshGeom.checkVolRatio
+        (
+            report,
+            minVolRatio,
+            checkFaces,
+            baffles,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with volume ratio of neighbour cells < "
+            << setw(5) << minVolRatio
+            << "     : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -426,6 +570,29 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
+    if (minTriangleTwist > -1)
+    {
+        //Pout<< "Checking triangle twist: dot product of consecutive triangle"
+        //    << " normals resulting from face-centre decomposition" << endl;
+        meshGeom.checkTriangleTwist
+        (
+            report,
+            minTriangleTwist,
+            meshGeom.mesh().points(),
+            checkFaces,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with triangle twist < "
+            << setw(5) << minTriangleTwist
+            << "                      : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
     if (minDet > -1)
     {
         meshGeom.checkCellDeterminant
@@ -433,7 +600,7 @@ bool Foam::motionSmoother::checkMesh
             report,
             minDet,
             checkFaces,
-            meshGeom.affectedCells(checkFaces),
+            meshGeom.affectedCells(meshGeom.mesh(), checkFaces),
             &wrongFaces
         );
 

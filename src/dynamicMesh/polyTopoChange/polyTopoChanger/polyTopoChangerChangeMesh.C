@@ -429,8 +429,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     // Gather the internal faces by looping through the cell list and
     // collecting faces
 
-    const labelList& allOwn = mesh.allOwner();
-    const labelList& allNei = mesh.allNeighbour();
+    const labelList& allOwn = mesh.faceOwner();
+    const labelList& allNei = mesh.faceNeighbour();
 
     List<DynamicList<face, primitiveMesh::facesPerCell_, 1> >
         cf(cells.size() + ref.addedCells().size());
@@ -1028,7 +1028,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     // - renumberFaces: from old to new face
     // - faceMap: from new to old face
 
-
     // Calculate face map and rotation so coupled faces are matched
     // correctly
 
@@ -1364,7 +1363,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
         }
     }
 
-
     // Reset the size of face mapping lists
     faceFromPoint.setSize(nFaceFromPoint);
     faceFromEdge.setSize(nFaceFromEdge);
@@ -1604,11 +1602,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
 
             labelList cellsAroundFace(2, -1);
 
-            cellsAroundFace[0] = mesh.allOwner()[ac[acI].masterFaceID()];
+            cellsAroundFace[0] = mesh.faceOwner()[ac[acI].masterFaceID()];
 
-            if (mesh.allNeighbour()[ac[acI].masterFaceID()] >= 0)
+            if (mesh.isInternalFace(ac[acI].masterFaceID()))
             {
-                cellsAroundFace[1] = mesh.allNeighbour()[ac[acI].masterFaceID()];
+                cellsAroundFace[1] =
+                    mesh.faceNeighbour()[ac[acI].masterFaceID()];
             }
             else
             {
@@ -1983,9 +1982,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
 
         curFzFaceRnb.setSize(newZoneAddr.size());
 
-        forAll(newZoneAddr, faceI)
+        forAll (newZoneAddr, faceI)
         {
-            if (newZoneAddr[faceI] < faceMap.size())
+            // HJ, change: can this index legally be -1?
+            // HJ, 9/Jan/2009
+            if (newZoneAddr[faceI] > -1 && newZoneAddr[faceI] < faceMap.size())
             {
                 curFzFaceRnb[faceI] =
                     oldZone.whichFace(faceMap[newZoneAddr[faceI]]);
@@ -2171,6 +2172,38 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
                 nUsedFaces = faceI;
                 break;
             }
+        }
+
+        // Truncate owner array to the number of used faces
+        // HJ, 23/Oct/2008
+        allOwn.setSize(nUsedFaces);
+
+        // Count internal faces
+        label nInternalFaces = allOwn.size();
+
+        forAll (allNei, faceI)
+        {
+            if (allNei[faceI] < 0)
+            {
+                nInternalFaces = faceI;
+                break;
+            }
+        }
+
+        // Truncate neighbour array to the size of internal faces
+        // HJ, 23/Oct/2008
+        allNei.setSize(nInternalFaces);
+
+        if (debug)
+        {
+            Info<< " nOldPoints: " << points.size()
+                << " nPoints: " << newPointsZeroVol.size()
+                << " nUsedFaces: " << nUsedFaces
+                << " newFaces: " << newFaces.size()
+                << " allOwn: " << allOwn.size()
+                << " allNei: " << allNei.size()
+                << " patchSizes: " << patchSizes
+                << " patchStarts: " << patchStarts << endl;
         }
 
         mesh.resetPrimitives

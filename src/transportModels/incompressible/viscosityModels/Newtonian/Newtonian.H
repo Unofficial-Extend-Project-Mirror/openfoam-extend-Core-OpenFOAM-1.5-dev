@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Newtonian
+    Foam::viscosityModels::Newtonian
 
 Description
-    Newtonian viscosity model.
+    An incompressible Newtonian viscosity model.
 
 SourceFiles
     Newtonian.C
@@ -89,7 +89,7 @@ public:
     // Member Functions
 
         //- Return the laminar viscosity
-        tmp<volScalarField> nu() const
+        const volScalarField& nu() const
         {
             return nu_;
         }

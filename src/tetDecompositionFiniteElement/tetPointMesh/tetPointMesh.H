@@ -34,6 +34,7 @@ Description
 #ifndef tetPointMesh_H
 #define tetPointMesh_H
 
+#include "GeoMesh.H"
 #include "tetPolyMesh.H"
 #include "tetPolyBoundaryMesh.H"
 
@@ -47,26 +48,17 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class tetPointMesh
+:
+    public GeoMesh<tetPolyMesh>
 {
-    // Private data
-
-        //- Reference to tetPolyMesh
-        const tetPolyMesh& mesh_;
-
-
 public:
-
-    // Public typedefs
-
-        typedef tetPolyMesh Mesh;
-        typedef tetPolyBoundaryMesh BoundaryMesh;
 
     // Constructors
 
         //- Construct from tetPolyMesh
         tetPointMesh(const tetPolyMesh& mesh)
         :
-            mesh_(mesh)
+            GeoMesh<tetPolyMesh>(mesh)
         {}
 
 

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -111,8 +109,6 @@ scalar saturateEvaporationModel::boilingTime
     const scalar Nusselt,
     const scalar deltaTemp,
     const scalar diameter,
-    const scalar, 
-    const scalar, 
     const scalar, 
     const scalar, 
     const scalar, 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,12 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    definedPressureSwirlInjector
+    Foam::definedPressureSwirlInjector
 
 Description
-
-    Pressure Swirl injector model with user defined
-    - cone angle/interval vs. time         
+    Pressure swirl injector model with user-defined 
+    cone-angle/interval vs. time
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,27 +64,23 @@ private:
         List<pair> coneInterval_;
 
         List<pair>  maxKv_;
-        
-    // The initial spray angle for the parcels    
+
+    // The initial spray angle for the parcels
         mutable scalar angle_;
-        
-    // The initial velocity for the parcels           
+
+    // The initial velocity for the parcels
         mutable scalar u_;
 
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
     // private member functions
-        
+
         scalar kv
         (
-            const label inj, 
+            const label inj,
             const scalar massFlow,
             const scalar dPressure,
             const scalar t
         ) const;
-        
+
         scalar deltaPressureInj(const scalar time, const label inj) const;
         scalar averagePressure(const label inj) const;
 
@@ -118,22 +113,23 @@ public:
         //- Return the spray angle of the injector
         vector direction
         (
-            const label injector, 
+            const label injector,
+            const label hole,
             const scalar time,
             const scalar d
         ) const;
-    
+
         scalar velocity
         (
             const label i,
             const scalar time
         ) const;
-        
+
         scalar averageVelocity
         (
             const label i
         ) const;
-        
+
 
 };
 

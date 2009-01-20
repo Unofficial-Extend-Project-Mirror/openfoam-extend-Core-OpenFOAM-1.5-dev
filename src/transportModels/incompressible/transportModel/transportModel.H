@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    transportModel
+    Foam::transportModel
 
 Description
     Base-class for all transport models used by the incompressible turbulence
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class transportModel Declaration
+                Class transportModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class transportModel
@@ -83,7 +83,7 @@ public:
     // Member Functions
 
         //- Return the laminar viscosity
-        virtual tmp<volScalarField> nu() const = 0;
+        virtual const volScalarField& nu() const = 0;
 
         //- Correct the laminar viscosity
         virtual void correct() = 0;

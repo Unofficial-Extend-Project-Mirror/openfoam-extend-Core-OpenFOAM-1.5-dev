@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    breakupModel
+    Foam::breakupModel
 
 Description
+    Base class for selecting a breakup model
 
 \*---------------------------------------------------------------------------*/
 

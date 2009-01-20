@@ -52,7 +52,7 @@ inline Foam::solidParticle::solidParticle
     const vector& U
 )
 :
-    particle<solidParticle>(c, position, celli),
+    Particle<solidParticle>(c, position, celli),
     d_(d),
     U_(U)
 {}

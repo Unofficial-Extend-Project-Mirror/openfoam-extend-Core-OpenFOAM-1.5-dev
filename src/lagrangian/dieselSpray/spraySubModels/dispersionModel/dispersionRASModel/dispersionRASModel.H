@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dispersionRASModel
+    Foam::dispersionRASModel
 
 Description
+    dispersion RAS model
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,7 +34,7 @@ Description
 #define dispersionRASModel_H
 
 #include "dispersionModel.H"
-#include "turbulenceModel.H"
+#include "RASModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,7 +52,7 @@ class dispersionRASModel
 {
     // Private data
 
-        const compressible::turbulenceModel& turbulence_;
+        const compressible::RASModel& turbulence_;
 
 
 public:
@@ -77,7 +78,7 @@ public:
 
     // Member Functions
 
-        const compressible::turbulenceModel& turbulence() const
+        const compressible::RASModel& turbulence() const
         {
             return turbulence_;
         }

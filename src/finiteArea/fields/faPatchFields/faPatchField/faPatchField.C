@@ -194,7 +194,7 @@ void faPatchField<Type>::rmap
 
 
 template<class Type>
-void faPatchField<Type>::evaluate()
+void faPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!updated_)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,21 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-Description
-
-    Primary Breakup Model for pressure swirl atomizers.
-    Accurate description in
-
-    Z. Han, S. Parrish, P.V. Farrell, R.D. Reitz
-    "Modeling Atomization Processes Of Pressure Swirl Hollow-Cone Fuel Sprays"
-    Atomization and Sprays, vol. 7, pp. 663-684, 1997
-    
-    and
-
-    L. Allocca, G. Bella, A. De Vita, L. Di Angelo
-    "Experimental Validation of a GDI Spray Model"
-    SAE Technical Paper Series, 2002-01-1137
 
 \*---------------------------------------------------------------------------*/
 
@@ -124,16 +109,31 @@ void blobsSheetAtomization::atomizeParcel
 
     scalar U = mag(p.Urel(vel));
 
-    const injectorType& it = 
+    const injectorType& it =
         spray_.injectors()[label(p.injector())].properties();
 
-    const vector itPosition = it.position();
-    
+    vector itPosition(vector::zero);
+    label nHoles = it.nHoles();
+    if (nHoles > 1)
+    {
+        for(label i=0; i<nHoles;i++)
+        {
+            itPosition += it.position(i);
+        }
+        itPosition /= nHoles;
+    }
+    else
+    {
+        itPosition = it.position(0);
+    }
+//    const vector itPosition = it.position();
+
+
     scalar lBU = B_ * sqrt
     (
         rhoFuel * sigma * p.d() * cos(angle_*mathematicalConstant::pi/360.0)
-      / sqr(rhoAverage*U)  
-    );    
+      / sqr(rhoAverage*U)
+    );
 
     scalar pWalk = mag(p.position() - itPosition);
 

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "dispersionRASModel.H"
@@ -49,9 +47,9 @@ dispersionRASModel::dispersionRASModel
     dispersionModel(dict, sm),
     turbulence_
     (
-        sm.mesh().lookupObject<compressible::turbulenceModel>
+        sm.mesh().lookupObject<compressible::RASModel>
         (
-            "turbulenceProperties"
+            "RASProperties"
         )
     )
 {}

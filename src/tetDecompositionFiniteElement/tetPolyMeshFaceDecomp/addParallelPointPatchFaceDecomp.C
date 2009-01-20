@@ -360,7 +360,7 @@ void Foam::tetPolyMeshFaceDecomp::addParallelPointPatch()
                 }
 
                 // Send the list to the first slave
-                OPstream toFirstSlave(Pstream::firstSlave());
+                OPstream toFirstSlave(Pstream::blocking, Pstream::firstSlave());
                 toFirstSlave << globalCutEdges;
             }
             else
@@ -386,7 +386,7 @@ void Foam::tetPolyMeshFaceDecomp::addParallelPointPatch()
                             receiveFrom = Pstream::masterNo();
                         }
 
-                        IPstream rf(receiveFrom);
+                        IPstream rf(Pstream::blocking, receiveFrom);
 
                         SLList<edge> globalCutEdges(rf);
 
@@ -432,7 +432,7 @@ void Foam::tetPolyMeshFaceDecomp::addParallelPointPatch()
                         // Re-transmit the list to the next processor
                         if (slave < Pstream::lastSlave())
                         {
-                            OPstream passOnEdges(sendTo);
+                            OPstream passOnEdges(Pstream::blocking, sendTo);
                             passOnEdges << globalCutEdges;
                         }
                     }

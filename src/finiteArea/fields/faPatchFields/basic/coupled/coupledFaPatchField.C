@@ -120,7 +120,7 @@ tmp<Field<Type> > coupledFaPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void coupledFaPatchField<Type>::initEvaluate(const bool)
+void coupledFaPatchField<Type>::initEvaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -130,7 +130,7 @@ void coupledFaPatchField<Type>::initEvaluate(const bool)
 
 
 template<class Type>
-void coupledFaPatchField<Type>::evaluate()
+void coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     Field<Type>::operator=
     (

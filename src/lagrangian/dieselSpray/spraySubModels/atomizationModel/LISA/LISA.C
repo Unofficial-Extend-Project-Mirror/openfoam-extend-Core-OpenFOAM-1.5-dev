@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,21 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-Description
-
-    Primary Breakup Model for pressure swirl atomizers.
-    Accurate description in
-
-    P.K. Senecal, D.P. Shmidt, I. Nouar, C.J. Rutland, R.D. Reitz, M. Corradini
-    "Modeling high-speed viscous liquid sheet atomization"
-    International Journal of Multiphase Flow 25 (1999) pags. 1073-1097   
-
-    and
-
-    D.P. Schmidt, I. Nouar, P.K. Senecal, C.J. Rutland, J.K. Martin, R.D. Reitz
-    "Pressure-Swirl Atomization in the Near Field"
-    SAE Techical Paper Series 1999-01-0496
 
 \*---------------------------------------------------------------------------*/
 
@@ -155,12 +140,18 @@ void LISA::atomizeParcel
     const injectorType& it = 
         spray_.injectors()[label(p.injector())].properties();
 
-    const vector itPosition = it.position();
+    if (it.nHoles() > 1)
+    {
+        Info << "Warning: This atomization model is not suitable for multihole injector." << endl
+             << "Only the first hole will be used." << endl;
+    }
+
+    const vector itPosition = it.position(0);
     scalar pWalk = mag(p.position() - itPosition);
 
 //  Updating liquid sheet tickness... that is the droplet diameter
-
-    const vector direction = it.direction();
+ 
+    const vector direction = it.direction(0, spray_.runTime().value());
     
     scalar h = (p.position() - itPosition) & direction;
 

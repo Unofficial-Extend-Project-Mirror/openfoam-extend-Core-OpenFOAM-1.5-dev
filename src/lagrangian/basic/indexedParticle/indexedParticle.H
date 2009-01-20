@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    indexedParticle
+    Foam::indexedParticle
 
 Description
 
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef indexedParticle_H
 #define indexedParticle_H
 
-#include "particle.H"
+#include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 
@@ -52,7 +52,7 @@ namespace Foam
 
 class indexedParticle
 :
-    public particle<indexedParticle>
+    public Particle<indexedParticle>
 {
     // Private data
 
@@ -72,7 +72,7 @@ public:
             const label index = 0
         )
         :
-            particle<indexedParticle>(c, position, celli),
+            Particle<indexedParticle>(c, position, celli),
             index_(index)
         {}
 
@@ -84,7 +84,7 @@ public:
             bool readFields = true
         )
         :
-            particle<indexedParticle>(c, is)
+            Particle<indexedParticle>(c, is)
         {}
 
         //- Construct and return a clone

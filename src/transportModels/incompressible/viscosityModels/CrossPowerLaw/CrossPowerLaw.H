@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    CrossPowerLaw
+    Foam::viscosityModels::CrossPowerLaw
 
 Description
-     Cross power law non-Newtonian viscosity model.
+    An incompressible Cross-Power law non-Newtonian viscosity model.
 
 SourceFiles
     CrossPowerLaw.C
@@ -99,7 +99,7 @@ public:
     // Member Functions
 
         //- Return the laminar viscosity
-        tmp<volScalarField> nu() const
+        const volScalarField& nu() const
         {
             return nu_;
         }

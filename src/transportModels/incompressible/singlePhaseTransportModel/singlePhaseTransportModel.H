@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    singlePhaseTransportModel
+    Foam::singlePhaseTransportModel
 
 Description
-    Simple single-phase transport model based on viscosityModel used by the
-    incompressible single-phase solvers like simpleFoam, turbFoam etc.
+    A simple single-phase transport model based on viscosityModel.
+
+    Used by the incompressible single-phase solvers like simpleFoam,
+    turbFoam etc.
 
 SourceFiles
     singlePhaseTransportModel.C
@@ -89,7 +91,7 @@ public:
     // Member Functions
 
         //- Return the laminar viscosity
-        tmp<volScalarField> nu() const;
+        const volScalarField& nu() const;
 
         //- Correct the laminar viscosity
         void correct();

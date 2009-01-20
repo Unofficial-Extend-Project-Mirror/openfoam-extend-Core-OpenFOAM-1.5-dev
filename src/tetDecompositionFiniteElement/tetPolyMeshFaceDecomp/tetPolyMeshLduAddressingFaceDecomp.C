@@ -48,8 +48,8 @@ Foam::tetPolyMeshLduAddressingFaceDecomp::tetPolyMeshLduAddressingFaceDecomp
     patchAddr_(mesh.boundary().size()),
     patchSchedule_(mesh.globalData().patchSchedule())
 {
-    // Get reference to edges and pointEdges
-    const edgeList& meshEdges = mesh().edges();
+    // Get reference to edges
+    const edgeList& meshEdges = mesh().orderedEdges();
 
     // Get references to pointFaces and pointCells
     const labelListList& pointFaces = mesh().pointFaces();
@@ -153,7 +153,8 @@ Foam::tetPolyMeshLduAddressingFaceDecomp::tetPolyMeshLduAddressingFaceDecomp
             "(\n"
             "    const tetPolyMeshFaceDecomp& mesh\n"
             ")" 
-        )   << "Problem with edge counting in lduAddressing."
+        )   << "Problem with edge counting in lduAddressing.  nCreatedEdges: "
+            << nCreatedEdges << " nEdges: " << mesh.nEdges()
             << abort(FatalError);
     }
 }

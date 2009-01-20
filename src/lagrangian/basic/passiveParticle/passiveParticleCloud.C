@@ -37,7 +37,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineParticleTypeNameAndDebug(passiveParticle, 0);
-
+defineTemplateTypeNameAndDebug(Cloud<passiveParticle>, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

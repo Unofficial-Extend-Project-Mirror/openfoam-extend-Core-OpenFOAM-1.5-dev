@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gammaContactAngleFvPatchScalarField
+    Foam::gammaContactAngleFvPatchScalarField
 
 Description
     Abstract base class for gammaContactAngle boundary conditions.
+
     Derived classes must implement the theta() fuction which returns the
     wall contact angle field.
 
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class gammaContactAngleFvPatch Declaration
+                           Class gammaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class gammaContactAngleFvPatchScalarField

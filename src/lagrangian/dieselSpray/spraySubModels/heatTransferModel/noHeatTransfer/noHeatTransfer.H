@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    noHeatTransfer
+    Foam::noHeatTransfer
 
 Description
     no heat transfer. return a negative value to prevent

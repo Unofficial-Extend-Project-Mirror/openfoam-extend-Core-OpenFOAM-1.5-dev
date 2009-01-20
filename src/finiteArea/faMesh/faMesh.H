@@ -61,7 +61,6 @@ namespace Foam
 
 // Class forward declarations
 class faMeshLduAddressing;
-class faGlobalMeshData;
 
 /*---------------------------------------------------------------------------*\
                            Class faMesh Declaration
@@ -158,7 +157,6 @@ class faMesh
 
         //- Whether point normals must be corrected for a patch
         mutable boolList* correctPatchPointNormalsPtr_;
-
 
         // Other mesh-related data
 

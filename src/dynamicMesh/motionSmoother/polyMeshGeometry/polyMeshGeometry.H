@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    polyMeshGeometry
+    Foam::polyMeshGeometry
 
 Description
-    Updateable mesh geometry + checking routines.
+    Updateable mesh geometry and checking routines.
 
     - non-ortho done across coupled faces.
     - faceWeight (delta factors) done across coupled faces.
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class polyMeshGeometry Declaration
+                           Class polyMeshGeometry Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyMeshGeometry
@@ -86,7 +86,7 @@ class polyMeshGeometry
             const labelList& changedFaces
         );
 
-        //- Helper: detect&report non-ortho error for single face.
+        //- Detect&report non-ortho error for single face.
         static scalar checkNonOrtho
         (
             const polyMesh& mesh,
@@ -101,6 +101,13 @@ class polyMeshGeometry
             labelHashSet* setPtr
         );
 
+        //- Calculate skewness given two cell centres and one face centre.
+        static scalar calcSkewness
+        (
+            const point& ownCc,
+            const point& neiCc,
+            const point& fc
+        );
 
 public:
 
@@ -152,12 +159,17 @@ public:
             );
 
             //- Helper function: get affected cells from faces
-            labelList affectedCells(const labelList& changedFaces) const;
+            static labelList affectedCells
+            (
+                const polyMesh&,
+                const labelList& changedFaces
+            );
 
 
         // Checking of selected faces with supplied geometry (mesh only used for
-        // topology). Parallel aware.
+        // topology). Coupled aware (coupled faces treated as internal ones)
 
+            //- See primitiveMesh
             static bool checkFaceDotProduct
             (
                 const bool report,
@@ -166,9 +178,11 @@ public:
                 const vectorField& cellCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
+            //- See primitiveMesh
             static bool checkFacePyramids
             (
                 const bool report,
@@ -177,9 +191,11 @@ public:
                 const vectorField& cellCentres,
                 const pointField& p,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet*
             );
 
+            //- See primitiveMesh
             static bool checkFaceSkewness
             (
                 const bool report,
@@ -190,9 +206,11 @@ public:
                 const vectorField& faceCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
+            //- Interpolation weights (0.5 for regular mesh)
             static bool checkFaceWeights
             (
                 const bool report,
@@ -202,9 +220,23 @@ public:
                 const vectorField& faceCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
+            //- Cell volume ratio of neighbouring cells (1 for regular mesh)
+            static bool checkVolRatio
+            (
+                const bool report,
+                const scalar warnRatio,
+                const polyMesh& mesh,
+                const scalarField& cellVolumes,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet* setPtr
+            );
+
+            //- See primitiveMesh
             static bool checkFaceAngles
             (
                 const bool report,
@@ -216,7 +248,23 @@ public:
                 labelHashSet* setPtr
             );
 
+            //- Triangle (from face-centre decomposition) normal v.s.
+            //  average face normal
             static bool checkFaceTwist
+            (
+                const bool report,
+                const scalar minTwist,
+                const polyMesh&,
+                const vectorField& cellCentres,
+                const vectorField& faceAreas,
+                const vectorField& faceCentres,
+                const pointField& p,
+                const labelList& checkFaces,
+                labelHashSet* setPtr
+            );
+
+            //- Consecutive triangle (from face-centre decomposition) normals
+            static bool checkTriangleTwist
             (
                 const bool report,
                 const scalar minTwist,
@@ -228,6 +276,7 @@ public:
                 labelHashSet* setPtr
             );
 
+            //- Small faces
             static bool checkFaceArea
             (
                 const bool report,
@@ -258,6 +307,7 @@ public:
                 const bool report,
                 const scalar orthWarn,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -267,6 +317,7 @@ public:
                 const scalar minPyrVol,
                 const pointField& p,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -276,6 +327,7 @@ public:
                 const scalar internalSkew,
                 const scalar boundarySkew,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -284,6 +336,16 @@ public:
                 const bool report,
                 const scalar warnWeight,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkVolRatio
+            (
+                const bool report,
+                const scalar warnRatio,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -297,6 +359,15 @@ public:
             ) const;
 
             bool checkFaceTwist
+            (
+                const bool report,
+                const scalar minTwist,
+                const pointField& p,
+                const labelList& checkFaces,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkTriangleTwist
             (
                 const bool report,
                 const scalar minTwist,

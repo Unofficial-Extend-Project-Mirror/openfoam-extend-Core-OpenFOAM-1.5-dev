@@ -27,33 +27,28 @@ License
 #include "parcel.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-parcel::parcel
+Foam::parcel::parcel
 (
     const Cloud<parcel>& cloud,
     Istream& is,
     bool readFields
 )
 :
-    particle<parcel>(cloud, is),
-    
-    fuelNames_
+    Particle<parcel>(cloud, is),
+
+    liquidComponents_
     (
         (cloud.pMesh().lookupObject<dictionary>("thermophysicalProperties"))
-       .lookup("liquidFuelComponents")
+       .lookup("liquidComponents")
     ),
-    X_(fuelNames_.size(), 0.0),
-    
+    X_(liquidComponents_.size(), 0.0),
+
     tMom_(GREAT)
 {
 
-    label nX = fuelNames_.size();
+    label nX = X_.size();
 
     if (readFields)
     {
@@ -72,7 +67,7 @@ parcel::parcel
             is >> U_;
             is >> Uturb_;
             is >> n_;
-            for(label j=0; j<nX; j++)
+            for (label j=0; j<nX; j++)
             {
                 X_[j] = readScalar(is);
             }
@@ -83,8 +78,8 @@ parcel::parcel
             (
                 reinterpret_cast<char*>(&d_),
                 sizeof(d_) + sizeof(T_) + sizeof(m_) + sizeof(y_)
-              + sizeof(yDot_) + sizeof(ct_) + sizeof(ms_) + sizeof(tTurb_) 
-              + sizeof(liquidCore_) + sizeof(injector_) 
+              + sizeof(yDot_) + sizeof(ct_) + sizeof(ms_) + sizeof(tTurb_)
+              + sizeof(liquidCore_) + sizeof(injector_)
               + sizeof(U_) + sizeof(Uturb_) + sizeof(n_)
             );
 
@@ -101,31 +96,57 @@ parcel::parcel
 }
 
 
-template<>
-void Cloud<parcel>::readFields()
+void Foam::parcel::readFields
+(
+    Cloud<parcel>& c
+)
 {
-    IOField<scalar> d(fieldIOobject("d"));
-    IOField<scalar> T(fieldIOobject("T"));
-    IOField<scalar> m(fieldIOobject("m"));
-    IOField<scalar> y(fieldIOobject("y"));
-    IOField<scalar> yDot(fieldIOobject("yDot"));
-    IOField<scalar> ct(fieldIOobject("ct"));
-    IOField<scalar> ms(fieldIOobject("ms"));
-    IOField<scalar> tTurb(fieldIOobject("tTurb"));
-    IOField<scalar> liquidCore(fieldIOobject("liquidCore"));
-    IOField<scalar> injector(fieldIOobject("injector"));
+    if (!c.size())
+    {
+        return;
+    }
 
-    IOField<vector> U(fieldIOobject("U"));
-    IOField<vector> Uturb(fieldIOobject("Uturb"));
-    IOField<vector> n(fieldIOobject("n"));
+    IOField<scalar> d(c.fieldIOobject("d"));
+    c.checkFieldIOobject(c, d);
+
+    IOField<scalar> T(c.fieldIOobject("T"));
+    c.checkFieldIOobject(c, T);
+
+    IOField<scalar> m(c.fieldIOobject("m"));
+    c.checkFieldIOobject(c, m);
+
+    IOField<scalar> y(c.fieldIOobject("y"));
+    c.checkFieldIOobject(c, y);
+
+    IOField<scalar> yDot(c.fieldIOobject("yDot"));
+    c.checkFieldIOobject(c, yDot);
+
+    IOField<scalar> ct(c.fieldIOobject("ct"));
+    c.checkFieldIOobject(c, ct);
+
+    IOField<scalar> ms(c.fieldIOobject("ms"));
+    c.checkFieldIOobject(c, ms);
+
+    IOField<scalar> tTurb(c.fieldIOobject("tTurb"));
+    c.checkFieldIOobject(c, tTurb);
+
+    IOField<scalar> liquidCore(c.fieldIOobject("liquidCore"));
+    c.checkFieldIOobject(c, liquidCore);
+
+    IOField<scalar> injector(c.fieldIOobject("injector"));
+    c.checkFieldIOobject(c, injector);
+
+    IOField<vector> U(c.fieldIOobject("U"));
+    c.checkFieldIOobject(c, U);
+
+    IOField<vector> Uturb(c.fieldIOobject("Uturb"));
+    c.checkFieldIOobject(c, Uturb);
+
+    IOField<vector> n(c.fieldIOobject("n"));
+    c.checkFieldIOobject(c, n);
 
     label i = 0;
-    for
-    (
-        Cloud<parcel>::iterator iter = begin();
-        iter != end();
-        ++iter, ++i
-    )
+    forAllIter(Cloud<parcel>, c, iter)
     {
         parcel& p = iter();
 
@@ -143,66 +164,60 @@ void Cloud<parcel>::readFields()
         p.U_ = U[i];
         p.Uturb_ = Uturb[i];
         p.n_ = n[i];
+
+        i++;
     }
 
-
     // read the liquid molar fractions
-    if (size() > 0)
+    if (c.size() > 0)
     {
-        Cloud<parcel>::const_iterator iter = begin();
+        Cloud<parcel>::const_iterator iter = c.begin();
         const parcel& p0 = iter();
 
         label nX = p0.X().size();
-        List<word> names(p0.fuelNames());
+        const List<word>& names = p0.liquidNames();
 
-        for(label j=0; j<nX; j++)
+        for (label j=0; j<nX; j++)
         {
-
-            IOField<scalar> X(fieldIOobject(names[j]));
+            IOField<scalar> X(c.fieldIOobject(names[j]));
 
             label i = 0;
-            for
-            (
-                Cloud<parcel>::iterator iter = begin();
-                iter != end();
-                ++iter, ++i
-            )
+            forAllIter(Cloud<parcel>, c, iter)
             {
                 parcel& p = iter();
-                p.X_[j] = X[i];
+                p.X_[j] = X[i++];
             }
         }
     }
 }
 
 
-template<>
-void Cloud<parcel>::writeFields() const
+void Foam::parcel::writeFields
+(
+    const Cloud<parcel>& c
+)
 {
-    label np = size();
+    Particle<parcel>::writeFields(c);
 
-    IOField<scalar> d(fieldIOobject("d"), np);
-    IOField<scalar> T(fieldIOobject("T"), np);
-    IOField<scalar> m(fieldIOobject("m"), np);
-    IOField<scalar> y(fieldIOobject("y"), np);
-    IOField<scalar> yDot(fieldIOobject("yDot"), np);
-    IOField<scalar> ct(fieldIOobject("ct"), np);
-    IOField<scalar> ms(fieldIOobject("ms"), np);
-    IOField<scalar> tTurb(fieldIOobject("tTurb"), np);
-    IOField<scalar> liquidCore(fieldIOobject("liquidCore"), np);
-    IOField<scalar> injector(fieldIOobject("injector"), np);
+    label np = c.size();
 
-    IOField<vector> U(fieldIOobject("U"), np);
-    IOField<vector> Uturb(fieldIOobject("Uturb"), np);
-    IOField<vector> n(fieldIOobject("n"), np);
+    IOField<scalar> d(c.fieldIOobject("d"), np);
+    IOField<scalar> T(c.fieldIOobject("T"), np);
+    IOField<scalar> m(c.fieldIOobject("m"), np);
+    IOField<scalar> y(c.fieldIOobject("y"), np);
+    IOField<scalar> yDot(c.fieldIOobject("yDot"), np);
+    IOField<scalar> ct(c.fieldIOobject("ct"), np);
+    IOField<scalar> ms(c.fieldIOobject("ms"), np);
+    IOField<scalar> tTurb(c.fieldIOobject("tTurb"), np);
+    IOField<scalar> liquidCore(c.fieldIOobject("liquidCore"), np);
+    IOField<scalar> injector(c.fieldIOobject("injector"), np);
+
+    IOField<vector> U(c.fieldIOobject("U"), np);
+    IOField<vector> Uturb(c.fieldIOobject("Uturb"), np);
+    IOField<vector> n(c.fieldIOobject("n"), np);
 
     label i = 0;
-    for
-    (
-        Cloud<parcel>::const_iterator iter = begin();
-        iter != end();
-        ++iter, ++i
-    )
+    forAllConstIter(Cloud<parcel>, c, iter)
     {
         const parcel& p = iter();
 
@@ -220,6 +235,8 @@ void Cloud<parcel>::writeFields() const
         U[i] = p.U_;
         Uturb[i] = p.Uturb_;
         n[i] = p.n_;
+
+        i++;
     }
 
     d.write();
@@ -240,27 +257,21 @@ void Cloud<parcel>::writeFields() const
     // write the liquid molar fractions
     if (np > 0)
     {
-        Cloud<parcel>::const_iterator iter = begin();
+        Cloud<parcel>::const_iterator iter = c.begin();
         const parcel& p0 = iter();
 
         label nX = p0.X().size();
+        const List<word>& names = p0.liquidNames();
 
-        List<word> names(p0.fuelNames());
-
-        for(label j=0; j<nX; j++)
+        for (label j=0; j<nX; j++)
         {
-            IOField<scalar> X(fieldIOobject(names[j]), np);
+            IOField<scalar> X(c.fieldIOobject(names[j]), np);
 
             label i = 0;
-            for
-            (
-                Cloud<parcel>::const_iterator iter = begin();
-                iter != end();
-                ++iter, ++i
-            )
+            forAllConstIter(Cloud<parcel>, c, iter)
             {
                 const parcel& p = iter();
-                X[i] = p.X()[j];
+                X[i++] = p.X()[j];
             }
 
             X.write();
@@ -271,12 +282,12 @@ void Cloud<parcel>::writeFields() const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const parcel& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const parcel& p)
 {
 
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const particle<parcel>&>(p)
+        os  << static_cast<const Particle<parcel>&>(p)
             << token::SPACE << p.d_
             << token::SPACE << p.T_
             << token::SPACE << p.m_
@@ -294,12 +305,12 @@ Ostream& operator<<(Ostream& os, const parcel& p)
     }
     else
     {
-        os  << static_cast<const particle<parcel>&>(p);
+        os  << static_cast<const Particle<parcel>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.d_),
             sizeof(p.d_) + sizeof(p.T_) + sizeof(p.m_) + sizeof(p.y_)
-          + sizeof(p.yDot_) + sizeof(p.ct_) + sizeof(p.ms_) + sizeof(p.tTurb_) 
+          + sizeof(p.yDot_) + sizeof(p.ct_) + sizeof(p.ms_) + sizeof(p.tTurb_)
           + sizeof(p.liquidCore_) + sizeof(p.injector_)
           + sizeof(p.U_) + sizeof(p.Uturb_) + sizeof(p.n_)
         );
@@ -317,9 +328,5 @@ Ostream& operator<<(Ostream& os, const parcel& p)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

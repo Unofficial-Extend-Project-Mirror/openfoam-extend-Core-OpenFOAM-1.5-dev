@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    constInjector
+    Foam::constInjector
 
 Description
     Injector model with
@@ -59,10 +59,6 @@ private:
         scalarList dropletNozzleDiameterRatio_;
         scalarList sprayAngle_;
 
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
 public:
 
     //- Runtime type information
@@ -93,6 +89,7 @@ public:
         vector direction
         (
             const label injector, 
+            const label hole,
             const scalar time,
             const scalar d
         ) const;

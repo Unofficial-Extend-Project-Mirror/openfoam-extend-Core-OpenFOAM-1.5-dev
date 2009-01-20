@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    solidParticle
+    Foam::solidParticle
 
 Description
     Simple solid spherical particle class with one-way coupling with the
@@ -39,7 +39,7 @@ SourceFiles
 #ifndef solidParticle_H
 #define solidParticle_H
 
-#include "particle.H"
+#include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "interpolationCellPoint.H"
@@ -58,7 +58,7 @@ class solidParticleCloud;
 
 class solidParticle
 :
-    public particle<solidParticle>
+    public Particle<solidParticle>
 {
     // Private member data
 
@@ -212,6 +212,19 @@ public:
             int&
         );
 
+        //- Transform the physical properties of the particle
+        //  according to the given transformation tensor
+        void transformProperties
+        (
+            const tensor& T
+        );
+
+        //- Transform the physical properties of the particle
+        //  according to the given separation vector
+        void transformProperties
+        (
+            const vector& separation
+        );
 
     // Ostream Operator
 

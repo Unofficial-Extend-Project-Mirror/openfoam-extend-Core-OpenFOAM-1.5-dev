@@ -96,7 +96,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void zeroGradientFaPatchField<Type>::evaluate()
+void zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

@@ -22,16 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    
-    Secondary Breakup Model to take account of the different breakUp regimes,
-    bag, molutimode, shear....
-    Accurate description in
-    R. Schmehl, G. Maier, S. Witting
-    "CFD Analysis of Fuel Atomization, Secondary Droplet Breakup and Spray
-    Dispersion in the Premix Duct of a LPP Combustor".
-    Eight International Conference on Liquid Atomization and Spray Systems, 2000
-    
 \*---------------------------------------------------------------------------*/
 
 #include "SHF.H"
@@ -71,7 +61,7 @@ SHF::SHF
     weCorrCoeff_(readScalar(coeffsDict_.lookup("weCorrCoeff"))),
     weBuCrit_(readScalar(coeffsDict_.lookup("weBuCrit"))),
     weBuBag_(readScalar(coeffsDict_.lookup("weBuBag"))),
-    weBuMM_(readScalar(coeffsDict_.lookup("weBuMM"))),    
+    weBuMM_(readScalar(coeffsDict_.lookup("weBuMM"))),
     ohnCoeffCrit_(readScalar(coeffsDict_.lookup("ohnCoeffCrit"))),
     ohnCoeffBag_(readScalar(coeffsDict_.lookup("ohnCoeffBag"))),
     ohnCoeffMM_(readScalar(coeffsDict_.lookup("ohnCoeffMM"))),
@@ -89,8 +79,8 @@ SHF::SHF
     weCrit1_(readScalar(coeffsDict_.lookup("Wecrit1"))),
     weCrit2_(readScalar(coeffsDict_.lookup("Wecrit2"))),
     coeffD_(readScalar(coeffsDict_.lookup("CoeffD"))),
-    onExpD_(readScalar(coeffsDict_.lookup("OnExpD"))),        
-    weExpD_(readScalar(coeffsDict_.lookup("WeExpD"))),        
+    onExpD_(readScalar(coeffsDict_.lookup("OnExpD"))),
+    weExpD_(readScalar(coeffsDict_.lookup("WeExpD"))),
     mu_(readScalar(coeffsDict_.lookup("mu"))),
     sigma_(readScalar(coeffsDict_.lookup("sigma"))),
     d32Coeff_(readScalar(coeffsDict_.lookup("d32Coeff"))),
@@ -138,47 +128,47 @@ void SHF::breakupParcel
     vector trajectory = p.U()/mag(p.U());
 
     vector vRel = p.Urel(vel);
-    
+
     scalar weGasCorr = weGas/(1.0 + weCorrCoeff_ * ohnesorge);
-    
+
     // droplet deformation characteristic time
-    
+
     scalar tChar = p.d()/mag(vRel)*sqrt(rhoLiquid/rhoGas);
-    
+
     scalar tFirst = cInit_ * tChar;
-    
+
     scalar tSecond = 0;
     scalar tCharSecond = 0;
-    
+
     bool bag = false;
     bool multimode = false;
     bool shear = false;
     bool success = false;
-    
 
-    //  updating the droplet characteristic time   
+
+    //  updating the droplet characteristic time
     p.ct() += deltaT;
-       
+
     if(weGas > weConst_)
     {
         if(weGas < weCrit1_)
         {
-            tCharSecond = c1_*pow((weGas - weConst_),cExp1_); 
+            tCharSecond = c1_*pow((weGas - weConst_),cExp1_);
         }
         else if(weGas >= weCrit1_ && weGas <= weCrit2_)
         {
-            tCharSecond = c2_*pow((weGas - weConst_),cExp2_); 
+            tCharSecond = c2_*pow((weGas - weConst_),cExp2_);
         }
         else
         {
-            tCharSecond = c3_*pow((weGas - weConst_),cExp3_); 
+            tCharSecond = c3_*pow((weGas - weConst_),cExp3_);
         }
     }
 
     scalar weC = weBuCrit_*(1.0+ohnCoeffCrit_*pow(ohnesorge,ohnExpCrit_));
     scalar weB = weBuBag_*(1.0+ohnCoeffBag_*pow(ohnesorge, ohnExpBag_));
     scalar weMM = weBuMM_*(1.0+ohnCoeffMM_*pow(ohnesorge, ohnExpMM_));
-    
+
     if(weGas > weC && weGas < weB)
     {
         bag = true;
@@ -188,20 +178,20 @@ void SHF::breakupParcel
     {
         multimode = true;
     }
-    
+
     if(weGas > weMM)
     {
         shear = true;
     }
-    
+
     tSecond = tCharSecond * tChar;
-    
-    scalar tBreakUP = tFirst + tSecond;    
+
+    scalar tBreakUP = tFirst + tSecond;
     if(p.ct() > tBreakUP)
     {
-    
+
         scalar d32 = coeffD_*p.d()*pow(ohnesorge,onExpD_)*pow(weGasCorr,weExpD_);
-        
+
         if(bag || multimode)
         {
 
@@ -217,26 +207,26 @@ void SHF::breakupParcel
                 d = sqr(x)*d05;
                 y = rndGen_.scalar01();
 
-                scalar p = x/(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)*exp(-0.5*sqr((x-mu_)/sigma_));                
+                scalar p = x/(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)*exp(-0.5*sqr((x-mu_)/sigma_));
 
-                if (y<p) 
+                if (y<p)
                 {
                     success = true;
                 }
             }
-            
-            p.d() = d;                                   
-            p.ct() = 0.0;    
-        }        
-        
+
+            p.d() = d;
+            p.ct() = 0.0;
+        }
+
         if(shear)
         {
             scalar dC = weConst_*sigma/(rhoGas*sqr(mag(vRel)));
             scalar d32Red = 4.0*(d32 * dC)/(5.0 * dC - d32);
             scalar initMass = p.m();
-            
+
             scalar d05 = d32Coeff_ * d32Red;
-          
+
             scalar x = 0.0;
             scalar y = 0.0;
             scalar d = 0.0;
@@ -248,17 +238,17 @@ void SHF::breakupParcel
                 d = sqr(x)*d05;
                 y = rndGen_.scalar01();
 
-                scalar p = x/(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)*exp(-0.5*sqr((x-mu_)/sigma_));                
+                scalar p = x/(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)*exp(-0.5*sqr((x-mu_)/sigma_));
 
-                if (y<p) 
+                if (y<p)
                 {
                     success = true;
                 }
             }
-            
+
             p.d() = dC;
             p.m() = corePerc_ * initMass;
-            
+
             spray_.addParticle
             (
                 new parcel
@@ -283,9 +273,9 @@ void SHF::breakupParcel
                     p.fuelNames()
                 )
             );
-            
+
             p.ct() = 0.0;
-        }        
+        }
     }
 }
 

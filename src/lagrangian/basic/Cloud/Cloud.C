@@ -29,54 +29,69 @@ License
 #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
 #include "mapPolyMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class particleType>
-fileName Cloud<particleType>::lagrangianSubDir = "lagrangian";
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from IOobject, mesh and a list of particles
-template<class particleType>
-Cloud<particleType>::Cloud
+template<class ParticleType>
+Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
-    const IDLList<particleType>& particles
+    const IDLList<ParticleType>& particles
 )
 :
     cloud(pMesh),
-    IDLList<particleType>(particles),
+    IDLList<ParticleType>(particles),
     polyMesh_(pMesh),
     allFaces_(pMesh.faces()),
     points_(pMesh.points()),
     cellFaces_(pMesh.cells()),
     allFaceCentres_(pMesh.faceCentres()),
     owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour())
+    neighbour_(pMesh.faceNeighbour()),
+    meshInfo_(polyMesh_)
+{}
+
+
+template<class ParticleType>
+Foam::Cloud<ParticleType>::Cloud
+(
+    const polyMesh& pMesh,
+    const word& cloudName,
+    const IDLList<ParticleType>& particles
+)
+:
+    cloud(pMesh, cloudName),
+    IDLList<ParticleType>(particles),
+    polyMesh_(pMesh),
+    allFaces_(pMesh.faces()),
+    points_(pMesh.points()),
+    cellFaces_(pMesh.cells()),
+    allFaceCentres_(pMesh.faceCentres()),
+    owner_(pMesh.faceOwner()),
+    neighbour_(pMesh.faceNeighbour()),
+    meshInfo_(polyMesh_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class particleType>
-void Cloud<particleType>::addParticle(particleType* pPtr)
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::addParticle(ParticleType* pPtr)
 {
     append(pPtr);
 }
 
 
-template<class particleType>
-void Cloud<particleType>::deleteParticle(particleType& p)
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 {
     delete(this->remove(&p));
 }
 
+
+namespace Foam
+{
 
 class combineNsTransPs
 {
@@ -95,10 +110,12 @@ public:
     }
 };
 
+} // End namespace Foam
 
-template<class particleType>
+
+template<class ParticleType>
 template<class TrackingData>
-void Cloud<particleType>::move(TrackingData& td)
+void Foam::Cloud<ParticleType>::move(TrackingData& td)
 {
     const globalMeshData& pData = polyMesh_.globalData();
     const labelList& processorPatches = pData.processorPatches();
@@ -107,7 +124,7 @@ void Cloud<particleType>::move(TrackingData& td)
         pData.processorPatchNeighbours();
 
     // Initialise the setpFraction moved for the particles
-    forAllIter(typename Cloud<particleType>, *this, pIter)
+    forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
         pIter().stepFraction() = 0;
     }
@@ -120,16 +137,16 @@ void Cloud<particleType>::move(TrackingData& td)
     {
         // List of lists of particles to be transfered for all the processor
         // patches
-        List<IDLList<particleType> > transferList(processorPatches.size());
+        List<IDLList<ParticleType> > transferList(processorPatches.size());
 
         // Loop over all particles
-        forAllIter (typename Cloud<particleType>, *this, pIter)
+        forAllIter(typename Cloud<ParticleType>, *this, pIter)
         {
-            particleType& p = pIter();
+            ParticleType& p = pIter();
 
             // Move the particle
             bool keepParticle = p.move(td);
-            
+
             // If the particle is to be kept
             // (i.e. it hasn't passed through an inlet or outlet)
             if (keepParticle)
@@ -155,7 +172,7 @@ void Cloud<particleType>::move(TrackingData& td)
                 deleteParticle(p);
             }
         }
-        
+
         if (Pstream::parRun())
         {
             // List of the numbers of particles to be transfered across the
@@ -166,12 +183,11 @@ void Cloud<particleType>::move(TrackingData& td)
             {
                 nsTransPs[i] = transferList[i].size();
             }
-            
+
             // List of the numbers of particles to be transfered across the
             // processor patches for all the processors
             labelListList allNTrans(Pstream::nProcs());
             allNTrans[Pstream::myProcNo()] = nsTransPs;
-
             combineReduce(allNTrans, combineNsTransPs());
 
             transfered = false;
@@ -186,7 +202,7 @@ void Cloud<particleType>::move(TrackingData& td)
                         break;
                     }
                 }
-            }            
+            }
 
             if (!transfered)
             {
@@ -199,6 +215,7 @@ void Cloud<particleType>::move(TrackingData& td)
                 {
                     OPstream particleStream
                     (
+                        Pstream::blocking,
                         refCast<const processorPolyPatch>
                         (
                             pMesh().boundaryMesh()[processorPatches[i]]
@@ -208,39 +225,43 @@ void Cloud<particleType>::move(TrackingData& td)
                     particleStream << transferList[i];
                 }
             }
-            
+
             forAll(processorPatches, i)
             {
                 label patchi = processorPatches[i];
-                
-                const processorPolyPatch& procPatch = 
+
+                const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>
                     (pMesh().boundaryMesh()[patchi]);
-                
+
                 label neighbProci =
                     procPatch.neighbProcNo() - Pstream::masterNo();
-                
+
                 label neighbProcPatchi = processorPatchNeighbours[patchi];
 
                 label nRecPs = allNTrans[neighbProci][neighbProcPatchi];
 
                 if (nRecPs)
                 {
-                    IPstream particleStream(procPatch.neighbProcNo());
-                    IDLList<particleType> newParticles
+                    IPstream particleStream
+                    (
+                        Pstream::blocking,
+                        procPatch.neighbProcNo()
+                    );
+                    IDLList<ParticleType> newParticles
                     (
                         particleStream,
-                        typename particleType::iNew(*this)
+                        typename ParticleType::iNew(*this)
                     );
 
                     forAllIter
                     (
-                        typename Cloud<particleType>,
+                        typename Cloud<ParticleType>,
                         newParticles,
                         newpIter
                     )
                     {
-                        particleType& newp = newpIter();
+                        ParticleType& newp = newpIter();
                         newp.correctAfterParallelTransfer(patchi, td);
                         addParticle(newParticles.remove(&newp));
                     }
@@ -255,19 +276,19 @@ void Cloud<particleType>::move(TrackingData& td)
 }
 
 
-template<class particleType>
-void Cloud<particleType>::autoMap(const mapPolyMesh& mapper)
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
 {
-    if (debug)
+    if (cloud::debug)
     {
-        Info<< "Cloud<particleType>::autoMap(const morphFieldMapper& map) "
-               "for lagrangian cloud " << name() << endl;
+        Info<< "Cloud<ParticleType>::autoMap(const morphFieldMapper& map) "
+               "for lagrangian cloud " << cloud::name() << endl;
     }
 
     const labelList& reverseCellMap = mapper.reverseCellMap();
     const labelList& reverseFaceMap = mapper.reverseFaceMap();
 
-    forAllIter(typename Cloud<particleType>, *this, pIter)
+    forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
         if (reverseCellMap[pIter().celli_] >= 0)
         {
@@ -290,11 +311,15 @@ void Cloud<particleType>::autoMap(const mapPolyMesh& mapper)
 //          when the topology of the mesh is changed
 //          it is necessary to update the cell in which the parcel is,
 //          in particular when cells are removed
-                
-            pIter().celli_ = polyMesh_.findCell(pIter().position());
+
+            // HJ, merge 1.5.x  20/Oct/2008
+            if (trackStartCell < 0)
+            {
+                pIter().celli_ = polyMesh_.findCell(pIter().position());
+            }
                 
             vector p = pIter().position();
-            const_cast<vector&>(pIter().position()) = 
+            const_cast<vector&>(pIter().position()) =
                 polyMesh_.cellCentres()[trackStartCell];
             pIter().stepFraction() = 0;
             pIter().track(p);
@@ -302,10 +327,6 @@ void Cloud<particleType>::autoMap(const mapPolyMesh& mapper)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
