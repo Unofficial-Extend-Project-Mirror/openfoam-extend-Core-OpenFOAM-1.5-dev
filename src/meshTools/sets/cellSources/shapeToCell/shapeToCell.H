@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    shapeToCell
+    Foam::shapeToCell
 
 Description
-    TopoSetSource. Select cells based on cell shape. Handles all ones from
-    cellModeller and splitHex with 10 degrees feature angle.
+    A topoSetSource to select cells based on cell shape.
+
+    Handles all ones from cellModeller and splitHex with 10 degrees
+    feature angle.
 
 SourceFiles
     shapeToCell.C

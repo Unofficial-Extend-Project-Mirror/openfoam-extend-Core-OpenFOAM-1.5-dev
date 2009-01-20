@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octreeDataPoint
+    Foam::octreeDataPoint
 
 Description
-    Holds (reference to) pointField. Encapsulation of data needed for
-    octree searches.
+    Encapsulation of data needed for octree searches.
+
     Used for searching for nearest point. No bounding boxes around points.
     Only overlaps and calcNearest are implemented, rest makes little sense.
+    Holds (reference to) pointField.
 
 SourceFiles
     octreeDataPoint.C
@@ -128,7 +129,7 @@ public:
                 treeBoundBox& tightest
             ) const;
 
-            //- Given index get unit normal and calculate (numerical) sign 
+            //- Given index get unit normal and calculate (numerical) sign
             //  of sample.
             //  Used to determine accuracy of calcNearest or inside/outside.
             //  Note: always returns GREAT since no inside/outside.

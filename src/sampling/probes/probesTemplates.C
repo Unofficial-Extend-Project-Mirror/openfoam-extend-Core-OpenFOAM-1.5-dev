@@ -33,8 +33,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+//- comparison operator for probes class
 template<class T>
 class isNotEqOp
 {
@@ -59,101 +58,161 @@ public:
     }
 };
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class T>
-void probes::findFields(wordList& typeFieldNames, boolList& foundFields)
-{
-    typeFieldNames.setSize(fieldNames_.size());
-    label typeFieldI = 0;
-
-    forAll(fieldNames_, fieldI)
-    {
-        const word& fldName = fieldNames_[fieldI];
-
-        if (obr_.foundObject<T>(fldName))
-        {
-            typeFieldNames[typeFieldI++] = fldName;
-            foundFields[fieldI] = true;
-        }
-    }
-
-    typeFieldNames.setSize(typeFieldI);
 }
 
 
-template <class T>
-void probes::sampleAndWrite(const word& fieldName)
-{
-    const GeometricField<T, fvPatchField, volMesh>& fld =
-        obr_.lookupObject<GeometricField<T, fvPatchField, volMesh> >
-        (
-            fieldName
-        );
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-    // Make sure all processors call sample
-    Field<T> vals(sample<T>(fieldName));
+template<class Type>
+Foam::label Foam::probes::countFields
+(
+    fieldGroup<Type>& fieldList,
+    const wordList& fieldTypes
+) const
+{
+    fieldList.setSize(fieldNames_.size());
+    label nFields = 0;
+
+    forAll(fieldNames_, fieldI)
+    {
+        if
+        (
+            fieldTypes[fieldI]
+         == GeometricField<Type, fvPatchField, volMesh>::typeName
+        )
+        {
+            fieldList[nFields] = fieldNames_[fieldI];
+            nFields++;
+        }
+    }
+
+    fieldList.setSize(nFields);
+
+    return nFields;
+}
+
+
+template<class Type>
+void Foam::probes::sampleAndWrite
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vField
+)
+{
+    Field<Type> values = sample(vField);
 
     if (Pstream::master())
     {
         unsigned int w = IOstream::defaultPrecision() + 7;
+        OFstream& probeStream = *probeFilePtrs_[vField.name()];
 
-        OFstream& probeStream = *probeFilePtrs_[fieldName];
+        probeStream << setw(w) << vField.time().value();
 
-        probeStream << setw(w) << fld.time().value();
-
-        forAll(vals, probeI)
+        forAll(values, probeI)
         {
-            probeStream << setw(w) << vals[probeI];
+            probeStream << ' ' << setw(w) << values[probeI];
         }
-        probeStream << nl;
+        probeStream << endl;
     }
 }
 
 
-template <class T>
-void probes::sampleAndWrite(const wordList& typeFields)
+template <class Type>
+void Foam::probes::sampleAndWrite
+(
+    const fieldGroup<Type>& fields
+)
 {
-    forAll(typeFields, i)
+    forAll(fields, fieldI)
     {
-        sampleAndWrite<T>(typeFields[i]);
+        if (loadFromFiles_)
+        {
+            sampleAndWrite
+            (
+                GeometricField<Type, fvPatchField, volMesh>
+                (
+                    IOobject
+                    (
+                        fields[fieldI],
+                        obr_.time().timeName(),
+                        refCast<const polyMesh>(obr_),
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    refCast<const fvMesh>(obr_)
+                )
+            );
+        }
+        else
+        {
+            objectRegistry::const_iterator iter = obr_.find(fields[fieldI]);
+
+            if
+            (
+                iter != obr_.end()
+             && iter()->type()
+             == GeometricField<Type, fvPatchField, volMesh>::typeName
+            )
+            {
+                sampleAndWrite
+                (
+                    obr_.lookupObject
+                    <GeometricField<Type, fvPatchField, volMesh> >
+                    (
+                        fields[fieldI]
+                    )
+                );
+            }
+        }
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class T>
-Field<T> probes::sample(const word& fieldName) const
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::probes::sample
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vField
+) const
 {
-    const GeometricField<T, fvPatchField, volMesh>& fld =
-        obr_.lookupObject<GeometricField<T, fvPatchField, volMesh> >
-        (
-            fieldName
-        );
+    const Type unsetVal(-VGREAT*pTraits<Type>::one);
 
-    const T unsetVal(-VGREAT*pTraits<T>::one);
+    tmp<Field<Type> > tValues
+    (
+        new Field<Type>(probeLocations_.size(), unsetVal)
+    );
 
-    Field<T> vals(probeLocations_.size(), unsetVal);
+    Field<Type>& values = tValues();
 
     forAll(probeLocations_, probeI)
     {
         if (cellList_[probeI] >= 0)
         {
-            vals[probeI] = fld[cellList_[probeI]];
+            values[probeI] = vField[cellList_[probeI]];
         }
     }
 
-    Pstream::listCombineGather(vals, isNotEqOp<T>());
-    Pstream::listCombineScatter(vals);
+    Pstream::listCombineGather(values, isNotEqOp<Type>());
+    Pstream::listCombineScatter(values);
 
-    return vals;
+    return tValues;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::probes::sample(const word& fieldName) const
+{
+    return sample
+    (
+        obr_.lookupObject<GeometricField<Type, fvPatchField, volMesh> >
+        (
+            fieldName
+        )
+    );
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

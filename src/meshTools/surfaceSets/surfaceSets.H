@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfaceSets
+    Foam::surfaceSets
 
 Description
     Various utilities to handle sets relating mesh to surface.
@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class triSurface;
 class triSurfaceSearch;

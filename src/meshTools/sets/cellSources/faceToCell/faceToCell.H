@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceToCell
+    Foam::faceToCell
 
 Description
-    TopoSetSource. Select cells based on usage in faces.
+    A topoSetSource to select cells based on usage in faces.
 
 SourceFiles
     faceToCell.C
@@ -121,8 +121,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

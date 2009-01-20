@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    meshTools
+    Foam::meshTools
 
 Description
     Collection of static functions to do various simple mesh related things.

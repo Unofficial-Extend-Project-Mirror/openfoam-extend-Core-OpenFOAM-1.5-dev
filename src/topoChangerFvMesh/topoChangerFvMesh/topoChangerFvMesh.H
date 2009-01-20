@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    topoChangerFvMesh
+    Foam::topoChangerFvMesh
 
 Description
+    Abstract base class for a topology changing fvMesh
 
 SourceFiles
     topoChangerFvMesh.C

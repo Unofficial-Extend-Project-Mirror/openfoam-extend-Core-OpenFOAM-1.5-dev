@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    intersectedSurface
+    Foam::intersectedSurface
 
 Description
     Given triSurface and intersection creates the intersected
@@ -72,7 +72,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class surfaceIntersection;
 class edgeSurface;
 

@@ -32,6 +32,7 @@ Description
 #include "long.H"
 #include "cpuTime.H"
 #include "linePointRef.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

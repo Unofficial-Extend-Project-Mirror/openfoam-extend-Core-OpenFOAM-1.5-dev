@@ -57,11 +57,17 @@ class ggiCheckFunctionObject
 {
     // Private data
 
+        //- Name
+        const word name_;
+
         //- Reference to main object registry
         const Time& time_;
 
         //- Region name
         word regionName_;
+
+        //- Name of flux field
+        word phiName_;
 
 
     // Private Member Functions
@@ -84,6 +90,7 @@ public:
         //- Construct from components
         ggiCheckFunctionObject
         (
+            const word& name,
             const Time&,
             const dictionary&
         );

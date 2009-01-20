@@ -28,10 +28,7 @@ Description
 
 #include "orientedSurface.H"
 #include "triSurfaceTools.H"
-#include "triSurfaceSearch.H"
 #include "treeBoundBox.H"
-#include "octree.H"
-#include "octreeDataTriSurface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -191,31 +188,44 @@ void Foam::orientedSurface::propagateOrientation
     //
     // Determine orientation to normal on nearest face
     //
+    triSurfaceTools::sideType side = triSurfaceTools::surfaceSide
+    (
+        s,
+        samplePoint,
+        nearestFaceI,
+        nearestPt
+    );
 
-    vector n = triSurfaceTools::surfaceNormal(s, nearestFaceI, nearestPt);
-
-    if (debug)
+    if (side == triSurfaceTools::UNKNOWN)
     {
-        Pout<< "orientedSurface::propagateOrientation : starting face"
-            << " orientation:" << nl
-            << "     for samplePoint:" << samplePoint << nl
-            << "     starting from point:" << nearestPt << nl
-            << "     on face:" << nearestFaceI << nl
-            << "     with normal:" << n << endl;
+        // Non-closed surface. Do what? For now behave as if no flipping
+        // nessecary
+        flipState[nearestFaceI] = NOFLIP;
     }
-
-    // Check orientation of samplePt.
-    bool sampleOutside = (((samplePoint - nearestPt) & n) > 0);
-
-    if (sampleOutside == orientOutside)
+    else if ((side == triSurfaceTools::OUTSIDE) == orientOutside)
     {
-        // Normals on surface outwards pointing. No need to flip normals
+        // outside & orientOutside or inside & !orientOutside
+        // Normals on surface pointing correctly. No need to flip normals
         flipState[nearestFaceI] = NOFLIP;
     }
     else
     {
         // Need to flip normals.
         flipState[nearestFaceI] = FLIP;
+    }
+
+    if (debug)
+    {
+        vector n = triSurfaceTools::surfaceNormal(s, nearestFaceI, nearestPt);
+
+        Pout<< "orientedSurface::propagateOrientation : starting face"
+            << " orientation:" << nl
+            << "     for samplePoint:" << samplePoint << nl
+            << "     starting from point:" << nearestPt << nl
+            << "     on face:" << nearestFaceI << nl
+            << "     with normal:" << n << nl
+            << "     decided side:" << label(side)
+            << endl;
     }
 
 

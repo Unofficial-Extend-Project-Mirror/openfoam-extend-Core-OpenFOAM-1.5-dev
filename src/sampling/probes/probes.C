@@ -30,18 +30,16 @@ License
 #include "Time.H"
 #include "IOmanip.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-int probes::debug(debug::debugSwitch("probes", 0));
+    defineTypeNameAndDebug(probes, 0);
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void probes::findCells(const fvMesh& mesh)
+void Foam::probes::findCells(const fvMesh& mesh)
 {
     if (cellList_.size() == 0)
     {
@@ -57,22 +55,234 @@ void probes::findCells(const fvMesh& mesh)
                     << " in cell " << cellList_[probeI] << endl;
             }
         }
+
+
+        // Check if all probes have been found.
+        forAll(cellList_, probeI)
+        {
+            label cellI = cellList_[probeI];
+
+            // Check at least one processor with cell.
+            reduce(cellI, maxOp<label>());
+
+            if (cellI == -1)
+            {
+                if (Pstream::master())
+                {
+                    WarningIn("probes::read()")
+                        << "Did not find location " << probeLocations_[probeI]
+                        << " in any cell. Skipping location." << endl;
+                }
+            }
+            else
+            {
+                // Make sure location not on two domains.
+                if (cellList_[probeI] != -1 && cellList_[probeI] != cellI)
+                {
+                    WarningIn("probes::read()")
+                        << "Location " << probeLocations_[probeI]
+                        << " seems to be on multiple domains:"
+                        << " cell " << cellList_[probeI]
+                        << " on my domain " << Pstream::myProcNo()
+                        << " and cell " << cellI << " on some other domain."
+                        << endl
+                        << "This might happen if the probe location is on"
+                        << " a processor patch. Change the location slightly"
+                        << " to prevent this." << endl;
+                }
+            }
+        }
     }
+}
+
+
+bool Foam::probes::checkFieldTypes()
+{
+    wordList fieldTypes(fieldNames_.size());
+
+    // check files for a particular time
+    if (loadFromFiles_)
+    {
+        forAll(fieldNames_, fieldI)
+        {
+            IOobject io
+            (
+                fieldNames_[fieldI],
+                obr_.time().timeName(),
+                refCast<const polyMesh>(obr_),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            );
+
+            if (io.headerOk())
+            {
+                fieldTypes[fieldI] = io.headerClassName();
+            }
+            else
+            {
+                fieldTypes[fieldI] = "(notFound)";
+            }
+        }
+    }
+    else
+    {
+        // check objectRegistry
+        forAll(fieldNames_, fieldI)
+        {
+            objectRegistry::const_iterator iter =
+                obr_.find(fieldNames_[fieldI]);
+
+            if (iter != obr_.end())
+            {
+                fieldTypes[fieldI] = iter()->type();
+            }
+            else
+            {
+                fieldTypes[fieldI] = "(notFound)";
+            }
+        }
+    }
+
+
+    label nFields = 0;
+
+    // classify fieldTypes
+    nFields += countFields(scalarFields_, fieldTypes);
+    nFields += countFields(vectorFields_, fieldTypes);
+    nFields += countFields(sphericalTensorFields_, fieldTypes);
+    nFields += countFields(symmTensorFields_, fieldTypes);
+    nFields += countFields(tensorFields_, fieldTypes);
+
+    // concatenate all the lists into foundFields
+    wordList foundFields(nFields);
+
+    label fieldI = 0;
+    forAll(scalarFields_, i)
+    {
+        foundFields[fieldI++] = scalarFields_[i];
+    }
+    forAll(vectorFields_, i)
+    {
+        foundFields[fieldI++] = vectorFields_[i];
+    }
+    forAll(sphericalTensorFields_, i)
+    {
+        foundFields[fieldI++] = sphericalTensorFields_[i];
+    }
+    forAll(symmTensorFields_, i)
+    {
+        foundFields[fieldI++] = symmTensorFields_[i];
+    }
+    forAll(tensorFields_, i)
+    {
+        foundFields[fieldI++] = tensorFields_[i];
+    }
+
+    if (Pstream::master())
+    {
+        fileName probeDir;
+        if (Pstream::parRun())
+        {
+            // Put in undecomposed case
+            // (Note: gives problems for distributed data running)
+            probeDir = obr_.time().path()/".."/name_/obr_.time().timeName();
+        }
+        else
+        {
+            probeDir = obr_.time().path()/name_/obr_.time().timeName();
+        }
+
+        // Close the file if any fields have been removed.
+        forAllIter(HashPtrTable<OFstream>, probeFilePtrs_, iter)
+        {
+            if (findIndex(foundFields, iter.key()) == -1)
+            {
+                if (debug)
+                {
+                    Pout<< "close stream: " << iter()->name() << endl;
+                }
+
+                delete probeFilePtrs_.remove(iter);
+            }
+        }
+
+        // Open new files for new fields. Keep existing files.
+
+        probeFilePtrs_.resize(2*foundFields.size());
+
+        forAll(foundFields, fieldI)
+        {
+            const word& fldName = foundFields[fieldI];
+
+            // Check if added field. If so open a stream for it.
+
+            if (!probeFilePtrs_.found(fldName))
+            {
+                // Create directory if does not exist.
+                mkDir(probeDir);
+
+                OFstream* sPtr = new OFstream(probeDir/fldName);
+
+                if (debug)
+                {
+                    Pout<< "open  stream: " << sPtr->name() << endl;
+                }
+
+                probeFilePtrs_.insert(fldName, sPtr);
+
+                unsigned int w = IOstream::defaultPrecision() + 7;
+
+                for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+                {
+                    *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
+                        << vector::componentNames[cmpt];
+
+                    forAll(probeLocations_, probeI)
+                    {
+                        *sPtr<< ' ' << setw(w) << probeLocations_[probeI][cmpt];
+                    }
+                    *sPtr << endl;
+                }
+
+                *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
+                    << "Time" << endl;
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Probing fields:" << foundFields << nl
+                << "Probing locations:" << probeLocations_ << nl
+                << endl;
+        }
+    }
+
+
+    return nFields > 0;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-probes::probes(const objectRegistry& obr, const dictionary& dict)
+Foam::probes::probes
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary& dict,
+    const bool loadFromFiles
+)
 :
+    name_(name),
     obr_(obr),
+    loadFromFiles_(loadFromFiles),
     fieldNames_(0),
     probeLocations_(0),
-    scalarFields_(0),
-    vectorFields_(0),
-    sphericalTensorFields_(0),
-    symmTensorFields_(0),
-    tensorFields_(0),
+    scalarFields_(),
+    vectorFields_(),
+    sphericalTensorFields_(),
+    symmTensorFields_(),
+    tensorFields_(),
     cellList_(0),
     probeFilePtrs_(0)
 {
@@ -82,172 +292,41 @@ probes::probes(const objectRegistry& obr, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-probes::~probes()
+Foam::probes::~probes()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void probes::write()
+void Foam::probes::execute()
 {
-    sampleAndWrite<scalar>(scalarFields_);
-    sampleAndWrite<vector>(vectorFields_);
-    sampleAndWrite<sphericalTensor>(sphericalTensorFields_);
-    sampleAndWrite<symmTensor>(symmTensorFields_);
-    sampleAndWrite<tensor>(tensorFields_);
+    // Do nothing - only valid on write
 }
 
 
-void probes::read(const dictionary& dict)
+void Foam::probes::write()
 {
-    fieldNames_ = wordList(dict.lookup("fields"));
-    probeLocations_ = vectorField(dict.lookup("probeLocations"));
+    if (probeLocations_.size() && checkFieldTypes())
+    {
+        sampleAndWrite(scalarFields_);
+        sampleAndWrite(vectorFields_);
+        sampleAndWrite(sphericalTensorFields_);
+        sampleAndWrite(symmTensorFields_);
+        sampleAndWrite(tensorFields_);
+    }
+}
 
-    // Force all cell locations to be redetermined and find them
+
+void Foam::probes::read(const dictionary& dict)
+{
+    dict.lookup("fields") >> fieldNames_;
+    dict.lookup("probeLocations") >> probeLocations_;
+
+    // Force all cell locations to be redetermined
     cellList_.clear();
     findCells(refCast<const fvMesh>(obr_));
-
-    // Check if all probes have been found.
-    forAll(cellList_, probeI)
-    {
-        label cellI = cellList_[probeI];
-
-        // Check at least one processor with cell.
-        reduce(cellI, maxOp<label>());
-
-        if (cellI == -1)
-        {
-            if (Pstream::master())
-            {
-                WarningIn("probes::read()")
-                    << "Did not find location " << probeLocations_[probeI]
-                    << " in any cell. Skipping location." << endl;
-            }
-        }
-        else
-        {
-            // Make sure location not on two domains.
-            if (cellList_[probeI] != -1 && cellList_[probeI] != cellI)
-            { 
-                WarningIn("probes::read()")
-                    << "Location " << probeLocations_[probeI]
-                    << " seems to be on multiple domains:"
-                    << " cell " << cellList_[probeI]
-                    << " on my domain " << Pstream::myProcNo()
-                    << " and cell " << cellI << " on some other domain."
-                    << endl
-                    << "This might happen if the probe location is on"
-                    << " a processor patch. Change the location slightly"
-                    << " to prevent this." << endl;
-            }
-        }
-    }
-
-
-    // Split fieldNames according to type.
-    boolList foundFields(fieldNames_.size(), false);
-    findFields<volScalarField>(scalarFields_, foundFields);
-    findFields<volVectorField>(vectorFields_, foundFields);
-    findFields<volSphericalTensorField>(sphericalTensorFields_, foundFields);
-    findFields<volSymmTensorField>(symmTensorFields_, foundFields);
-    findFields<volTensorField>(tensorFields_, foundFields);
-
-    label validFieldi=0;
-    forAll(fieldNames_, fieldi)
-    {
-        if (foundFields[fieldi])
-        {
-            fieldNames_[validFieldi++] = fieldNames_[fieldi];
-        }
-        else
-        {
-            WarningIn("probes::read()")
-                << "Unknown field " << fieldNames_[fieldi]
-                << " when reading dictionary " << dict.name() << endl
-                << "    Can only probe registered volScalar, volVector, "
-                << "volSphericalTensor, volSymmTensor and volTensor fields"
-                << nl << endl;
-        }
-    }
-    fieldNames_.setSize(validFieldi);
-
-
-    if (Pstream::master())
-    {
-        if (debug)
-        {
-            Pout<< "Probing fields:" << fieldNames_ << nl
-                << "Probing locations:" << probeLocations_ << nl
-                << endl;
-        }
-
-        // Check if any fieldNames have been removed. If so close
-        // the file.
-
-        forAllIter(HashPtrTable<OFstream>, probeFilePtrs_, iter)
-        {
-            if (findIndex(fieldNames_, iter.key()) == -1)
-            {
-                // Field has been removed. Close file
-                delete probeFilePtrs_.remove(iter);
-            }
-        }
-
-        // Open new files for new fields. Keep existing files.
-
-        probeFilePtrs_.resize(2*fieldNames_.size());
-
-        forAll(fieldNames_, fieldI)
-        {
-            const word& fldName = fieldNames_[fieldI];
-
-            // Check if added field. If so open a stream for it.
-
-            if (!probeFilePtrs_.found(fldName))
-            {
-                // Create directory if does not exist.
-
-                fileName probeDir;
-                if (Pstream::parRun())
-                {
-                    // Put in undecomposed case (Note: gives problems for
-                    // distributed data running)
-                    probeDir =
-                        obr_.time().path()
-                        /".."
-                        /"probes"
-                        /obr_.time().timeName();
-                }
-                else
-                {
-                    probeDir =
-                        obr_.time().path()
-                        /"probes"
-                        /obr_.time().timeName();
-                }
-                
-                mkDir(probeDir);
-                    
-                OFstream* sPtr = new OFstream(probeDir/fldName);
-
-                probeFilePtrs_.insert(fldName, sPtr);
-
-                *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
-                     << "Time";
-                
-                forAll(probeLocations_, probeI)
-                {
-                    *sPtr << token::SPACE << probeLocations_[probeI];
-                }
-                *sPtr << nl;
-            }
-        }
-    }
+    checkFieldTypes();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

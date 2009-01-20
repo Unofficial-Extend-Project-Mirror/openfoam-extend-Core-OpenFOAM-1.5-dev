@@ -23,31 +23,33 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octree
+    Foam::octree
 
 Description
-    Octree, templated on type of shapes it refers to. Uses the octreeData class
-    which is a list of 1D, 2D or 3D shapes. Various implementations of
-    octreeData which know about cell&meshes, patches&meshes and points.
+    Octree, templated on type of shapes it refers to.
+
+    Uses the octreeData class, which is a list of 1D, 2D or 3D shapes.
+    Various implementations of octreeData which know about cell&meshes,
+    patches&meshes and points.
 
     The octree can be used to
-    - find the "nearest" shape to a point
-    - find the shape which contains a point (only sensible for 3D shapes)
-    - find intersections of line with shapes
+      - find the "nearest" shape to a point
+      - find the shape which contains a point (only sensible for 3D shapes)
+      - find intersections of line with shapes
 
     The tree consists of
-        - treeNode : holds sub-treeNodes or treeLeaves
-        - treeLeaf : is the one that actually holds data
+      - treeNode : holds sub-treeNodes or treeLeaves
+      - treeLeaf : is the one that actually holds data
 
     The data is stored purely as a list of indices into octreeData.
 
     The construction on the depth of the tree is:
-    - one can specify a minimum depth
-      (though the tree will never be refined if all leaves contain <=1
-       shapes)
-    - after the minimum depth two statistics are used to decide further
-      refinement:
-        - average number of entries per leaf (leafRatio). Since inside a 
+      - one can specify a minimum depth
+        (though the tree will never be refined if all leaves contain <=1
+         shapes)
+      - after the minimum depth two statistics are used to decide further
+        refinement:
+        - average number of entries per leaf (leafRatio). Since inside a
           leaf most algorithms are n or n^2 this value has to be small.
         - average number of leaves a shape is in. Because of bounding boxes,
           a single shape can be in multiple leaves. If the bbs are large
@@ -61,19 +63,21 @@ Description
 
     E.g. octree of face centres of lid driven cavity.
 
-    1. bb exact -> total 1457 leaves (every point in 7.1 leaves)
-    2. bb.max incremented by 1% -> total 80 leaves (every point in exactly
-         1 leaf)
+      -# bb exact -> total 1457 leaves (every point in 7.1 leaves)
+      -# bb.max incremented by 1% -> total 80 leaves
+         (every point in exactly 1 leaf)
 
-    Ideas for parallel implementation: the data inserted into the octree (the 
+    @par Ideas for parallel implementation:
+
+    The data inserted into the octree (the
     'octreeData') has to be local to the processor. The data to be looked
     for (usually a sample point) can be global to the domain.
     The algorithm:
-        - search for all my points
-        - collect results which have to do with a processor patch
-        - global sum all these. If 0 exit.
-        - exchange data on all processor patches
-        - start again
+      - search for all my points
+      - collect results which have to do with a processor patch
+      - global sum all these. If 0 exit.
+      - exchange data on all processor patches
+      - start again
 
     So data transfers one processor per iteration. One could think of having
     an extra search mechanism one level above which does an initial search
@@ -99,10 +103,10 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 template<class Type> class treeNode;
 
-// * * * * * * Forward declaration of template friend functions  * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type>
 Ostream& operator<<(Ostream&, const octree<Type>&);
@@ -165,7 +169,7 @@ class octree
         //- Refinement crit: max number of level
         static const label maxNLevels = 20;
 
-        
+
 
     // Private Member Functions
 
@@ -287,7 +291,7 @@ public:
 
         // Queries
 
-            //- Returns type of sample with respect to nearest shape.        
+            //- Returns type of sample with respect to nearest shape.
             //  Meaning of type is determined by shapes.getSampleType().
             //  Normally based on outwards pointing normal. For e.g.
             //  octreeDataFace returns one of
@@ -371,6 +375,7 @@ public:
         class iterator;
         friend class iterator;
 
+        //- An STL iterator for octree
         class iterator
         {
             // Private data
@@ -418,6 +423,7 @@ public:
         class const_iterator;
         friend class const_iterator;
 
+        //- An STL const_iterator for octree
         class const_iterator
         {
             // Private data

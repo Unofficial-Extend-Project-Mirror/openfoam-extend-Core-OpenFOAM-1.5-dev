@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    directMappedPolyPatch.C
+    Foam::directMappedPolyPatch.C
 
 Description
     Determines a mapping between patch face centres and mesh cell centres and
@@ -41,7 +41,7 @@ SourceFiles
 #define directMappedPolyPatch_H
 
 #include "polyPatch.H"
-#include "dataSchedule.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ class directMappedPolyPatch
 
         // Derived information
 
-            //- Communication schedule
+            //- Communication schedule.
             mutable autoPtr<List<labelPair> > schedulePtr_;
 
             //- Cells to sample per processor
@@ -72,7 +72,6 @@ class directMappedPolyPatch
 
             //- Patch faces to receive per processor
             mutable autoPtr<labelListList> receiveFaceLabelsPtr_;
-
 
 
     // Private Member Functions
@@ -154,14 +153,6 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm
-        );
-
-        //- Construct from Istream
-        directMappedPolyPatch
-        (
-            Istream&,
-            const label index,
-            const polyBoundaryMesh&
         );
 
         //- Construct from dictionary
@@ -256,6 +247,9 @@ public:
             }
             return receiveFaceLabelsPtr_();
         }
+
+        //- Write the polyPatch data as a dictionary
+        virtual void write(Ostream&) const;
 };
 
 

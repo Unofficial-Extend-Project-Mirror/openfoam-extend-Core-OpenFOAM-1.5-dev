@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellDistFuncs
+    Foam::cellDistFuncs
 
 Description
     Collection of functions used in wall distance calculation.
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class polyPatch;
 class polyBoundaryMesh;

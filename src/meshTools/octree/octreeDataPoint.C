@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "octreeDataPoint.H"
@@ -32,7 +30,7 @@ Description
 #include "treeBoundBox.H"
 #include "octree.H"
 #include "linePointRef.H"
-
+#include "pointHit.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

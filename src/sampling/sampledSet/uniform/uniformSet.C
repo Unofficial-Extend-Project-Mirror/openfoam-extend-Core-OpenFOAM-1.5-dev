@@ -86,7 +86,7 @@ bool Foam::uniformSet::nextSample
 // Sample singly connected segment. Returns false if end_ reached.
 bool Foam::uniformSet::trackToBoundary
 (
-    particle<passiveParticle>& singleParticle,
+    Particle<passiveParticle>& singleParticle,
     point& samplePt,
     label& sampleI,
     DynamicList<point>& samplingPts,

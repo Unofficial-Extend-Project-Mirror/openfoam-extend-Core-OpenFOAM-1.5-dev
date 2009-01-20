@@ -27,6 +27,8 @@ License
 #include "regionSplit.H"
 #include "cyclicPolyPatch.H"
 #include "processorPolyPatch.H"
+#include "globalIndex.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,14 +41,74 @@ defineTypeNameAndDebug(regionSplit, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+// Handle (non-processor) coupled faces.
+void Foam::regionSplit::transferCoupledFaceRegion
+(
+    const label faceI,
+    const label otherFaceI,
+
+    labelList& faceRegion,
+    DynamicList<label>& newChangedFaces
+) const
+{
+    if (faceRegion[faceI] >= 0)
+    {
+        if (faceRegion[otherFaceI] == -1)
+        {
+            faceRegion[otherFaceI] = faceRegion[faceI];
+            newChangedFaces.append(otherFaceI);
+        }
+        else if (faceRegion[otherFaceI] == -2)
+        {
+            // otherFaceI blocked but faceI is not. Is illegal for coupled
+            // faces, not for explicit connections.
+        }
+        else if (faceRegion[otherFaceI] != faceRegion[faceI])
+        {
+            FatalErrorIn
+            (
+                  "regionSplit::transferCoupledFaceRegion"
+                  "(const label, const label, labelList&, labelList&) const"
+              )   << "Problem : coupled face " << faceI
+                  << " on patch " << mesh_.boundaryMesh().whichPatch(faceI)
+                  << " has region " << faceRegion[faceI]
+                  << " but coupled face " << otherFaceI
+                  << " has region " << faceRegion[otherFaceI]
+                  << endl
+                  << "Is your blocked faces specification"
+                  << " synchronized across coupled boundaries?"
+                  << abort(FatalError);
+        }
+    }
+    else if (faceRegion[faceI] == -1)
+    {
+        if (faceRegion[otherFaceI] >= 0)
+        {
+            faceRegion[faceI] = faceRegion[otherFaceI];
+            newChangedFaces.append(faceI);
+        }
+        else if (faceRegion[otherFaceI] == -2)
+        {
+            // otherFaceI blocked but faceI is not. Is illegal for coupled
+            // faces, not for explicit connections.
+        }
+    }
+}
+
+
 void Foam::regionSplit::fillSeedMask
 (
+    const List<labelPair>& explicitConnections,
     labelList& cellRegion,
     labelList& faceRegion,
     const label seedCellID,
     const label markValue
 ) const
 {
+    // Do seed cell
+    cellRegion[seedCellID] = markValue;
+
+
     // Collect faces on seed cell
     const cell& cFaces = mesh_.cells()[seedCellID];
 
@@ -60,6 +122,7 @@ void Foam::regionSplit::fillSeedMask
 
         if (faceRegion[faceI] == -1)
         {
+            faceRegion[faceI] = markValue;
             changedFaces[nFaces++] = faceI;
         }
     }
@@ -70,11 +133,11 @@ void Foam::regionSplit::fillSeedMask
 
     while (changedFaces.size() > 0)
     {
-        if (debug)
-        {
-            Pout<< "regionSplit::fillSeedMask : changedFaces:"
-                << changedFaces.size() << endl;
-        }
+        //if (debug)
+        //{
+        //    Pout<< "regionSplit::fillSeedMask : changedFaces:"
+        //        << changedFaces.size() << endl;
+        //}
 
         DynamicList<label> changedCells(changedFaces.size());
 
@@ -103,11 +166,11 @@ void Foam::regionSplit::fillSeedMask
         }
 
 
-        if (debug)
-        {
-            Pout<< "regionSplit::fillSeedMask : changedCells:"
-                << changedCells.size() << endl;
-        }
+        //if (debug)
+        //{
+        //    Pout<< "regionSplit::fillSeedMask : changedCells:"
+        //        << changedCells.size() << endl;
+        //}
 
         // Loop over changedCells and collect faces
         DynamicList<label> newChangedFaces(changedCells.size());
@@ -131,11 +194,11 @@ void Foam::regionSplit::fillSeedMask
         }
 
 
-        if (debug)
-        {
-            Pout<< "regionSplit::fillSeedMask : changedFaces before sync:"
-                << changedFaces.size() << endl;
-        }
+        //if (debug)
+        //{
+        //    Pout<< "regionSplit::fillSeedMask : changedFaces before sync:"
+        //        << changedFaces.size() << endl;
+        //}
 
 
         // Check for changes to any locally coupled face.
@@ -158,45 +221,34 @@ void Foam::regionSplit::fillSeedMask
                     label otherFaceI = refCast<const cyclicPolyPatch>(pp)
                         .transformGlobalFace(faceI);
 
-                    if (faceRegion[faceI] >= 0)
-                    {
-                        if (faceRegion[otherFaceI] == -1)
-                        {
-                            faceRegion[otherFaceI] = faceRegion[faceI];
-                            newChangedFaces.append(otherFaceI);
-                        }
-                        else if
-                        (
-                            faceRegion[otherFaceI] == -2
-                         || faceRegion[otherFaceI] != faceRegion[faceI]
-                        )
-                        {
-                            FatalErrorIn
-                            (
-                                "regionSplit::fillSeedMask"
-                                "(labelList&, labelList&, const label"
-                                ", const label) const"
-                            )   << "Problem : coupled face " << faceI
-                                << " on patch " << pp.name()
-                                << " has region " << faceRegion[faceI]
-                                << " but coupled face " << otherFaceI
-                                << " has region " << faceRegion[otherFaceI]
-                                << endl
-                                << "Is your blocked faces specification"
-                                << " synchronized across coupled boundaries?"
-                                << abort(FatalError);
-                        }
-                    }
+                    transferCoupledFaceRegion
+                    (
+                        faceI,
+                        otherFaceI,
+                        faceRegion,
+                        newChangedFaces
+                    );
+
                     faceI++;
                 }
             }
         }
-
-        if (debug)
+        forAll(explicitConnections, i)
         {
-            Pout<< "regionSplit::fillSeedMask : changedFaces after sync:"
-                << changedFaces.size() << endl;
+            transferCoupledFaceRegion
+            (
+                explicitConnections[i][0],
+                explicitConnections[i][1],
+                faceRegion,
+                newChangedFaces
+            );
         }
+
+        //if (debug)
+        //{
+        //    Pout<< "regionSplit::fillSeedMask : changedFaces after sync:"
+        //        << newChangedFaces.size() << endl;
+        //}
 
         changedFaces.transfer(newChangedFaces.shrink());
         newChangedFaces.clear();
@@ -207,9 +259,35 @@ void Foam::regionSplit::fillSeedMask
 Foam::label Foam::regionSplit::calcRegionSplit
 (
     const boolList& blockedFace,
+    const List<labelPair>& explicitConnections,
+
     labelList& cellRegion
 ) const
 {
+    if (debug)
+    {
+        if (blockedFace.size() > 0)
+        {
+            // Check that blockedFace is synced.
+            boolList syncBlockedFace(blockedFace);
+            syncTools::swapFaceList(mesh_, syncBlockedFace, false);
+
+            forAll(syncBlockedFace, faceI)
+            {
+                if (syncBlockedFace[faceI] != blockedFace[faceI])
+                {
+                    FatalErrorIn
+                    (
+                        "regionSplit::calcRegionSplit(..)"
+                    )   << "Face " << faceI << " not synchronised. My value:"
+                        << blockedFace[faceI] << "  coupled value:"
+                        << syncBlockedFace[faceI]
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
+
     // Region per face.
     // -1 unassigned
     // -2 blocked
@@ -243,7 +321,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
         {
             if (cellRegion[unsetCellI] == -1)
             {
-                break; 
+                break;
             }
         }
 
@@ -252,40 +330,52 @@ Foam::label Foam::regionSplit::calcRegionSplit
             break;
         }
 
-        fillSeedMask(cellRegion, faceRegion, unsetCellI, nRegions);
+        fillSeedMask
+        (
+            explicitConnections,
+            cellRegion,
+            faceRegion,
+            unsetCellI,
+            nRegions
+        );
 
-        // Go to next region
+        // Current unsetCell has now been handled. Go to next region.
         nRegions++;
+        unsetCellI++;
     }
     while(true);
 
 
+    if (debug)
+    {
+        forAll(cellRegion, cellI)
+        {
+            if (cellRegion[cellI] < 0)
+            {
+                FatalErrorIn("regionSplit::calcRegionSplit(..)")
+                    << "cell:" << cellI << " region:" << cellRegion[cellI]
+                    << abort(FatalError);
+            }
+        }
+
+        forAll(faceRegion, faceI)
+        {
+            if (faceRegion[faceI] == -1)
+            {
+                FatalErrorIn("regionSplit::calcRegionSplit(..)")
+                    << "face:" << faceI << " region:" << faceRegion[faceI]
+                    << abort(FatalError);
+            }
+        }
+    }
+
+
+
     // Assign global regions
     // ~~~~~~~~~~~~~~~~~~~~~
-    // Offset local regions to create unique global regions
-    // localToGlobal gives the global region for every local region
+    // Offset local regions to create unique global regions.
 
-    labelList nLocalRegions(Pstream::nProcs(), 0);
-    nLocalRegions[Pstream::myProcNo()] = nRegions;
-    Pstream::gatherList(nLocalRegions);
-    Pstream::scatterList(nLocalRegions);
-
-    label nGlobalRegions = sum(nLocalRegions);
-
-    // Map from local to global region
-    labelList localToGlobal(nRegions, -1);
-
-    // Work out my global region number offset.
-    label globalRegionStart = 0;
-    for (label procI = 0; procI < Pstream::myProcNo(); procI++)
-    {
-        globalRegionStart += nLocalRegions[procI];
-    }
-
-    for (label i = 0; i < nRegions; i++)
-    {
-        localToGlobal[i] = globalRegionStart++;
-    }
+    globalIndex globalRegions(nRegions);
 
 
     // Merge global regions
@@ -296,7 +386,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
     // merged later on)
 
     // Map from global to merged global
-    labelList mergedGlobal(identity(nGlobalRegions));
+    labelList mergedGlobal(identity(globalRegions.size()));
 
 
     // See if any regions get merged. Only nessecary for parallel
@@ -328,8 +418,8 @@ Foam::label Foam::regionSplit::calcRegionSplit
                     }
                     else
                     {
-                        myGlobalRegions[i] =
-                            mergedGlobal[localToGlobal[faceRegion[faceI]]];
+                        myGlobalRegions[i] = mergedGlobal
+                        [globalRegions.toGlobal(faceRegion[faceI])];
                     }
 
                     faceI++;
@@ -337,6 +427,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
 
                 OPstream toProcNbr
                 (
+                    Pstream::blocking,
                     refCast<const processorPolyPatch>(pp).neighbProcNo()
                 );
 
@@ -358,7 +449,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
                 const processorPolyPatch& procPp =
                     refCast<const processorPolyPatch>(pp);
 
-                IPstream fromProcNbr(procPp.neighbProcNo());
+                IPstream fromProcNbr(Pstream::blocking, procPp.neighbProcNo());
 
                 labelList nbrRegions(fromProcNbr);
 
@@ -377,7 +468,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
                     {
                         if (faceRegion[faceI] != nbrRegions[i])
                         {
-                            FatalErrorIn("regionSplit::calcRegionSplit")
+                            FatalErrorIn("regionSplit::calcRegionSplit(..)")
                                 << "On patch:" << pp.name()
                                 << " face:" << faceI
                                 << " my local region:" << faceRegion[faceI]
@@ -391,7 +482,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
                     else
                     {
                         label uncompactGlobal =
-                            localToGlobal[faceRegion[faceI]];
+                            globalRegions.toGlobal(faceRegion[faceI]);
 
                         label myGlobal = mergedGlobal[uncompactGlobal];
 
@@ -446,7 +537,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
     // All procs will have the same global mergedGlobal region.
     // There might be gaps in it however so compact.
 
-    labelList mergedToCompacted(nGlobalRegions, -1);
+    labelList mergedToCompacted(globalRegions.size(), -1);
 
     label compactI = 0;
 
@@ -472,7 +563,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
 
         if (region >= 0)
         {
-            label merged = mergedGlobal[localToGlobal[region]];
+            label merged = mergedGlobal[globalRegions.toGlobal(region)];
 
             cellRegion[cellI] = mergedToCompacted[merged];
         }
@@ -488,7 +579,7 @@ Foam::regionSplit::regionSplit(const polyMesh& mesh)
 :
     labelList(mesh.nCells(), -1),
     mesh_(mesh),
-    nRegions_(calcRegionSplit(boolList(0, false), *this))
+    nRegions_(calcRegionSplit(boolList(0, false), List<labelPair>(0), *this))
 {}
 
 
@@ -500,7 +591,20 @@ Foam::regionSplit::regionSplit
 :
     labelList(mesh.nCells(), -1),
     mesh_(mesh),
-    nRegions_(calcRegionSplit(blockedFace, *this))
+    nRegions_(calcRegionSplit(blockedFace, List<labelPair>(0), *this))
+{}
+
+
+Foam::regionSplit::regionSplit
+(
+    const polyMesh& mesh,
+    const boolList& blockedFace,
+    const List<labelPair>& explicitConnections
+)
+:
+    labelList(mesh.nCells(), -1),
+    mesh_(mesh),
+    nRegions_(calcRegionSplit(blockedFace, explicitConnections, *this))
 {}
 
 

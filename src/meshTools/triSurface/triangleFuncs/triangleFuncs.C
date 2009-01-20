@@ -120,7 +120,9 @@ bool Foam::triangleFuncs::intersectAxesBundle
 
     scalar det = v2*u1 - u2*v1;
 
-    if (Foam::mag(det) < SMALL)
+    // Fix for V0:(-31.71428 0 -15.10714) V10:(-1.285715 8.99165e-16 -1.142858)
+    // V20:(0 0 -1.678573) i0:0
+    if (Foam::mag(det)/max(max(mag(V10),mag(V20)),1) < SMALL)
     {
         // Triangle parallel to dir
         return false;

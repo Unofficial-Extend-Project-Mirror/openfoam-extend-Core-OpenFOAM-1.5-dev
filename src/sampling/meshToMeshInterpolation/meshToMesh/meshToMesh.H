@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshToMesh
+    Foam::meshToMesh
 
 Description
     mesh to mesh interpolation class.
@@ -120,7 +120,7 @@ class meshToMesh
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("meshToMesh");
 
 
@@ -222,6 +222,11 @@ public:
                 return toMesh_;
             }
 
+            //- From toMesh cells to fromMesh cells
+            const labelList& cellAddressing() const
+            {
+                return cellAddressing_;
+            }
 
         // Interpolation
 

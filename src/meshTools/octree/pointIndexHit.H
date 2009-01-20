@@ -22,186 +22,25 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    pointIndexHit
+Typedef
+    Foam::pointIndexHit
 
 Description
-    This class describes the interaction of (usually) a face and a point.
-    It carries the info of a successful hit and (if successful), 
-    returns the interaction point.
-
-    like pointHit but carries face (or cell, edge etc.) index
-
-SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef pointIndexHit_H
 #define pointIndexHit_H
 
-#include "bool.H"
 #include "point.H"
+#include "PointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class pointIndexHit Declaration
-\*---------------------------------------------------------------------------*/
-
-class pointIndexHit
-{
-    // Private data
-
-        //- Hit success
-        bool hit_;
-
-        //- Point of hit; invalid for misses
-        point hitPoint_;
-
-        //- label of face hit
-        label index_;
-
-
-public:
-
-    // Constructors
-
-        //- Construct from components
-        pointIndexHit(const bool success, const point& p, const label index)
-        :
-            hit_(success),
-            hitPoint_(p),
-            index_(index)
-        {}
-
-        //- Construct from point. Hit and distance set later
-        pointIndexHit(const point& p)
-        :
-            hit_(false),
-            hitPoint_(p),
-            index_(-1)
-        {}
-
-        //- Construct null
-        pointIndexHit()
-        :
-            hit_(false),
-            hitPoint_(vector::zero),
-            index_(-1)
-        {}
-
-
-    // Member Functions
-
-        //- Is there a hit
-        bool hit() const
-        {
-            return hit_;
-        }
-
-        //- Return index
-        label index() const
-        {
-            return index_;
-        }
-
-        //- Return hit point
-        const point& hitPoint() const
-        {
-            if (!hit_)
-            {
-                FatalErrorIn("point pointIndexHit::hitPoint() const")
-                    << "requested a hit point for a miss"
-                    << abort(FatalError);
-            }
-
-            return hitPoint_;
-        }
-
-        //- Return miss point
-        const point& missPoint() const
-        {
-            if (hit_)
-            {
-                FatalErrorIn("pointIndexHit::missPoint() const")
-                    << "requested a miss point for a hit"
-                    << abort(FatalError);
-            }
-
-            return hitPoint_;
-        }
-
-        //- Return point with no checking
-        const point& rawPoint() const
-        {
-            return hitPoint_;
-        }
-
-        void setHit()
-        {
-            hit_ = true;
-        }
-
-        void setMiss()
-        {
-            hit_ = false;
-        }
-
-        void setPoint(const point& p)
-        {
-            hitPoint_ = p;
-        }
-
-        void setIndex(const label index)
-        {
-            index_ = index;
-        }
-
-        bool operator==(const pointIndexHit& rhs) const
-        {
-            return
-                hit_ == rhs.hit()
-             && hitPoint_ == rhs.rawPoint()
-             && index_ == rhs.index();
-        }
-
-        bool operator!=(const pointIndexHit& rhs) const
-        {
-            return !operator==(rhs);
-        }
-
-        void write(Ostream& os)
-        {
-            if (hit())
-            {
-                os << "hit:" << hitPoint() << " index:" << index();
-            }
-            else
-            {
-                os << "miss:" << missPoint() << " index:" << index();
-            }
-        }
-
-        friend Ostream& operator<< (Ostream& os, const pointIndexHit& pHit)
-        {
-            return os << pHit.hit_ << token::SPACE << pHit.hitPoint_
-                << token::SPACE << pHit.index_;
-        }
-
-        friend Istream& operator>>(Istream& is, pointIndexHit& pHit)
-        {
-            return is >> pHit.hit_ >> pHit.hitPoint_ >> pHit.index_;
-        }
-
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef PointIndexHit<point> pointIndexHit;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    treeDataTriSurface
+    Foam::treeDataTriSurface
 
 Description
     Encapsulates data for (indexedOc)tree searches on triSurface.
@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class treeBoundBox;
 class treeDataTriSurface;
 template<class Type> class indexedOctree;

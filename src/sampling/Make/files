@@ -1,9 +1,9 @@
 probes/probes.C
-probes/probesFunctionObject/probesFunctionObject.C
-probes/IOprobes.C
+probes/probesFunctionObject.C
 
 minMaxField/minMaxField.C
 ggiCheckFunctionObject/ggiCheckFunctionObject.C
+meshCheckFunctionObject/meshCheckFunctionObject.C
 
 sampledSet/coordSet/coordSet.C
 sampledSet/sampledSet/sampledSet.C
@@ -16,9 +16,6 @@ sampledSet/midPointAndFace/midPointAndFaceSet.C
 sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSetsFunctionObject/sampledSetsFunctionObject.C
 
-samplingLine/pointAddressing.C
-samplingLine/samplingLine.C
-
 sampledSet/writers/writer/writers.C
 sampledSet/writers/xmgr/xmgrWriters.C
 sampledSet/writers/gnuplot/gnuplotWriters.C
@@ -26,6 +23,20 @@ sampledSet/writers/jplot/jplotWriters.C
 sampledSet/writers/raw/rawWriters.C
 
 cuttingPlane/cuttingPlane.C
+
+sampledSurface/patch/sampledPatch.C
+sampledSurface/plane/sampledPlane.C
+sampledSurface/sampledSurface/sampledSurface.C
+sampledSurface/sampledSurfaces/sampledSurfaces.C
+sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C
+
+sampledSurface/writers/surfaceWriters.C
+sampledSurface/writers/foamFile/foamFileWriters.C
+sampledSurface/writers/dx/dxWriters.C
+sampledSurface/writers/raw/rawSurfaceWriters.C
+sampledSurface/writers/vtk/vtkWriters.C
+sampledSurface/writers/stl/stlWriters.C
+sampledSurface/writers/null/nullWriters.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
@@ -35,7 +46,5 @@ meshToMesh = meshToMeshInterpolation/meshToMesh
 $(meshToMesh)/meshToMesh.C
 $(meshToMesh)/calculateMeshToMeshAddressing.C
 $(meshToMesh)/calculateMeshToMeshWeights.C
-
-surfaceGraph/surfaceGraph.C
 
 LIB = $(FOAM_LIBBIN)/libsampling

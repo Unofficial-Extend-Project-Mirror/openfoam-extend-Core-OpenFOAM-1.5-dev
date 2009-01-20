@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    nbrToCell
+    Foam::nbrToCell
 
 Description
-    TopoSetSource. Select cells based on number of neighbouring cells
+    A topoSetSource to select cells based on number of neighbouring cells
     (i.e. number of internal faces)
 
 SourceFiles
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class nbrToCell Declaration
+                         Class nbrToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class nbrToCell
@@ -103,8 +103,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

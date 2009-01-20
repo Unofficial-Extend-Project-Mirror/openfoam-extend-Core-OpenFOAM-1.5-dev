@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    treeNode
+    Foam::treeNode
 
 Description
     Class to implement octree.
+
     Holds the pointers to subcubes. These are either other treeNodes or
     treeLeafs. treeLeafs hold the actual data as a list of indices into
     octreeData.
@@ -56,13 +57,13 @@ SourceFiles
 namespace Foam
 {
 
-//class intersection;
+// class intersection;
 
 template<class Type> class octree;
 template<class Type> class treeLeaf;
 template<class Type> class treeNode;
 
-// * * * * * * Forward declaration of template friend functions  * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type> Istream& operator>>(Istream&, treeNode<Type>&);
 template<class Type> Ostream& operator<<(Ostream&, const treeNode<Type>&);

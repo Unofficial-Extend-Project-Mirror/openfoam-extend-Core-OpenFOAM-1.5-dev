@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octreeDataCell
+    Foam::octreeDataCell
 
 Description
-    Encapsulation of data needed to search in/for cells. Used to find the
-    cell containing a point (e.g. cell-cell mapping).
+    Encapsulation of data needed to search in/for cells.
+
+    Used to find the cell containing a point (e.g. cell-cell mapping).
 
 SourceFiles
     octreeDataCell.C
@@ -46,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 template<class Type> class octree;
 

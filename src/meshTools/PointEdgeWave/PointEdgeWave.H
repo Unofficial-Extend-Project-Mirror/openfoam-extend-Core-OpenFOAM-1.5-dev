@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PointEdgeWave
+    Foam::PointEdgeWave
 
 Description
     Wave propagation of information through grid. Every iteration
     information goes through one layer of edges. Templated on information
     that is transferred.
 
+    Templated on information that is transferred.
     Handles parallel and cyclics. Only parallel reasonably tested. Cyclics
     hardly tested.
 
@@ -38,10 +39,11 @@ Description
     certain tolerance.
 
     Note: parallel is done in two steps:
-    1. transfer patch points in offset notation, i.e. every patch point is
-    denoted by a patchface label and an index in this face. Receiving end uses
-    that fact that f[0] is shared and order is reversed.
-    2. do all non-local shared points by means of reduce of data on them.
+      -# transfer patch points in offset notation, i.e. every patch
+         point is denoted by a patchface label and an index in this face.
+         Receiving end uses that fact that f[0] is shared and order is
+         reversed.
+      -# do all non-local shared points by means of reduce of data on them.
 
     Note: cyclics is with offset in patchface as well. Patch is divided into
     two sub patches and the point-point addressing is never explicitly
@@ -71,7 +73,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class pointMesh;
 
 
@@ -129,9 +131,6 @@ class PointEdgeWave
 
         //- For every cyclic patch two primitivePatches
         PtrList<primitivePatch> cycHalves_;
-
-        //- Contains processor patches
-        bool hasProcPatches_;
 
         //- Number of evaluations
         label nEvals_;
@@ -337,7 +336,7 @@ public:
                         Class listUpdateOp Declaration
 \*---------------------------------------------------------------------------*/
 
-
+//- List update operation
 template <class Type>
 class listUpdateOp
 {
@@ -352,10 +351,6 @@ public:
         }
     }
 };
-
-
-
-
 
 } // End namespace Foam
 

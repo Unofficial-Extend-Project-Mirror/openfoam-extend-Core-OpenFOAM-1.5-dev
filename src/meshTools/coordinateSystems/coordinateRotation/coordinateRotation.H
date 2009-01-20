@@ -23,16 +23,48 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coordinateRotation
+    Foam::coordinateRotation
 
 Description
-    Base class for coordinate rotation.
+    A coordinate rotation specified per local axes and the base class for
+    other rotation specifications
 
-    The rotation is defined by a combination of local vectors.
-    The local vectors can be specified by an 'axis' (usually the z-axis)
-    and a 'direction' (effectively the x-axis), or by another combination
-    of local vectors (e1/e2), (e2/e3) or (e3/e1).
-    Any nonorthogonality will absorbed into the second vector.
+    The rotation is defined by a combination of local vectors (e1/e2), (e2/e3)
+    or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
+
+    For convenience, the dictionary constructor forms allow a few shortcuts:
+    - if the @c type is not otherwise specified, the type @c axes
+      is implicit
+    - if an axes specification (eg, e3/e1) is used, the coordinateRotation
+      sub-dictionary can be dropped.
+
+    Specifying the rotation by an EulerCoordinateRotation
+    (type "EulerRotation") or by a STARCDCoordinateRotation
+    (type "STARCDRotation") requires the coordinateRotation sub-dictionary.
+
+    @verbatim
+        coordinateRotation
+        {
+            type        STARCDRotation
+            rotation    (0 0 90);
+        }
+    @endverbatim
+
+    - the rotation angles are in degrees, unless otherwise explictly specified:
+
+    @verbatim
+        coordinateRotation
+        {
+            type        STARCDRotation
+            degrees     false;
+            rotation    (0 0 3.141592654);
+        }
+    @endverbatim
+
+Deprecated
+    Specifying the local vectors as an @c axis (corresponding to e3) and a
+    @c direction (corresponding to e1), is allowed for backwards
+    compatibility, but this terminology is generally a bit confusing.
 
 \*---------------------------------------------------------------------------*/
 

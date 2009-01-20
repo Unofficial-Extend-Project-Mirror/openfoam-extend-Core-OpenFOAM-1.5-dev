@@ -23,22 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octreeLine
+    Foam::octreeLine
 
 Description
     Iterates over intersections of line with octree leaf elements.
+
     Used as in
+    @code
+        octree<octreeDataFace> oc( .. );
 
-    octree<octreeDataFace> oc( .. );
+        octreeLine<octreeDataFace> lineSearch(oc, pStart, pEnd);
 
-    octreeLine<octreeDataFace> lineSearch(oc, pStart, pEnd);
-
-    while (lineSearch.getIntersection())
-    {
-        const point& pt = lineSearch.hitInfo().hitPoint();
-        ..
-    }
-
+        while (lineSearch.getIntersection())
+        {
+            const point& pt = lineSearch.hitInfo().hitPoint();
+            ..
+        }
+    @endcode
 
 SourceFiles
     octreeLine.C
@@ -58,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 template<class Type> class octree;
 template<class Type> class treeLeaf;
 
@@ -106,7 +107,7 @@ class octreeLine
         void calcSortedIntersections();
 
         //- Searches for leaf with intersected elements.
-        //  Return true if found; false otherwise. 
+        //  Return true if found; false otherwise.
         //  Sets currentLeaf_ and sortedIntersections_
         bool getNextLeaf();
 

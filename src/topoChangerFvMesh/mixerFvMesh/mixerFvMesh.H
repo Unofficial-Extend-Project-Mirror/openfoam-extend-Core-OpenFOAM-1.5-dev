@@ -64,7 +64,7 @@ class mixerFvMesh
         scalar rpm_;
 
         //- Rotating region marker point
-        point rotatingRegionMarkerPoint_;
+        point rotatingRegionMarker_;
 
         //- Attach-detach action
         Switch attachDetach_;
@@ -88,8 +88,8 @@ class mixerFvMesh
         //- Return true if sliding interface is attached
         bool attached() const;
 
-        //- Calculate moving masks
-        void calcMovingMasks() const;
+        //- Calculate moving mask
+        void calcMovingMask() const;
 
         //- Return moving points mask
         const scalarField& movingPointsMask() const;

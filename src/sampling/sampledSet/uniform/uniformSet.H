@@ -45,7 +45,7 @@ namespace Foam
 
 // Forward declaration of classes
 class passiveParticle;
-template<class Type> class particle;
+template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                            Class uniformSet Declaration
@@ -86,7 +86,7 @@ class uniformSet
         //  reached
         bool trackToBoundary
         (
-            particle<passiveParticle>& singleParticle,
+            Particle<passiveParticle>& singleParticle,
             point& samplePt,
             label& sampleI,
             DynamicList<point>& samplingPts,

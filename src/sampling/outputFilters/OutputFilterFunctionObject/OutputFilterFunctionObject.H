@@ -95,7 +95,7 @@ public:
         //- Construct from components
         OutputFilterFunctionObject
         (
-//             const word& name,
+            const word& name,
             const Time&,
             const dictionary&
         );
@@ -109,10 +109,10 @@ public:
             return name_;
         }
 
-        //- Start is called at the start of the time-loop
+        //- start is called at the start of the time-loop
         virtual bool start();
 
-        //- Execute is called at each ++ or += of the time-loop
+        //- execute is called at each ++ or += of the time-loop
         virtual bool execute();
 
         //- Switch the function object on

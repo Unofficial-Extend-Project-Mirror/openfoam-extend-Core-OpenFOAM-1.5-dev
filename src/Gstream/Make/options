@@ -1,2 +1,0 @@
-EXE_INC = $(XINC)
-LIB_LIBS = $(XLIBS)

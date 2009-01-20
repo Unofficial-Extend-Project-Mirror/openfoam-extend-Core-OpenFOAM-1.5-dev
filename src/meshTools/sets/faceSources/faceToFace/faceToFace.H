@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceToFace
+    Foam::faceToFace
 
 Description
-    TopoSetSource. Select faces based on usage in other faceSet.
+    A topoSetSource to select faces based on usage in another faceSet.
 
 SourceFiles
     faceToFace.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faceToFace Declaration
+                        Class faceToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceToFace
@@ -95,8 +95,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

@@ -318,7 +318,7 @@ void Foam::surfaceIntersection::classifyHit
     label nearType;
     label nearLabel;
 
-    triPointRef
+    (void)triPointRef
     (
         surf2Pts[f2[0]],
         surf2Pts[f2[1]],

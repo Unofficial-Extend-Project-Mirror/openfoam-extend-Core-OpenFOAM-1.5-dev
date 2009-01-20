@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octreeDataEdges
+    Foam::octreeDataEdges
 
 Description
     Holds data for octree to work on an edges subset.
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 template<class Type> class octree;
 
 /*---------------------------------------------------------------------------*\
@@ -79,7 +79,7 @@ class octreeDataEdges
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("octreeDataEdges");
 
     // Constructors

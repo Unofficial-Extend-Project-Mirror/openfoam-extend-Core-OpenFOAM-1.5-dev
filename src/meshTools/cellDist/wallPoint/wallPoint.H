@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wallPoint
+    Foam::wallPoint
 
 Description
     Holds information regarding nearest wall point. Used in wall distance
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyPatch;
 class polyMesh;
 

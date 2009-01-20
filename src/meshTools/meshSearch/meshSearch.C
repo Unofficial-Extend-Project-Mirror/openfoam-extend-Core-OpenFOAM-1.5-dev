@@ -30,10 +30,9 @@ Description
 #include "meshSearch.H"
 #include "triPointRef.H"
 #include "octree.H"
-#include "Cloud.H"
-#include "passiveParticle.H"
 #include "pointIndexHit.H"
 #include "DynamicList.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -270,6 +269,7 @@ Foam::meshSearch::meshSearch(const polyMesh& mesh, const bool faceDecomp)
 :
     mesh_(mesh),
     faceDecomp_(faceDecomp),
+    cloud_(mesh_, IDLList<passiveParticle>()),
     boundaryTreePtr_(NULL),
     cellTreePtr_(NULL),
     cellCentreTreePtr_(NULL)
@@ -423,7 +423,7 @@ bool Foam::meshSearch::pointInCell(const point& p, label cellI) const
 
         intersection::setPlanarTol(oldTol);
 
-        // No face inbetween point and cell centre so point is inside.
+        // No face in between point and cell centre so point is inside.
         return true;
     }
     else
@@ -518,9 +518,7 @@ Foam::label Foam::meshSearch::findCell
             do
             {
                 // Walk neighbours (using tracking) to get closer
-                Cloud<passiveParticle> cloud(mesh_, IDLList<passiveParticle>());
-
-                passiveParticle tracker(cloud, curPoint, nearCellI);
+                passiveParticle tracker(cloud_, curPoint, nearCellI);
 
                 if (debug)
                 {
@@ -698,8 +696,9 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
 
         if (bHit.hit())
         {
-            //- Verify if this hit point has not been visited before
-            //  Otherwise, we are entering an infinite loop.
+            // Verify if this hit point has not been visited before
+            // Otherwise, we are entering an infinite loop.
+            // HJ, bug fix  10/Nov/2008
             bool alreadyVisitedPoint = false;
             forAll(hits, hI)
             {
@@ -757,24 +756,9 @@ bool Foam::meshSearch::isInside(const point& p) const
 // Delete all storage
 void Foam::meshSearch::clearOut()
 {
-    if (boundaryTreePtr_)
-    {
-        delete boundaryTreePtr_;
-
-        boundaryTreePtr_ = NULL;
-    }
-    if (cellTreePtr_)
-    {
-        delete cellTreePtr_;
-
-        cellTreePtr_ = NULL;
-    }
-    if (cellCentreTreePtr_)
-    {
-        delete cellCentreTreePtr_;
-
-        cellCentreTreePtr_ = NULL;
-    }
+    deleteDemandDrivenData(boundaryTreePtr_);
+    deleteDemandDrivenData(cellTreePtr_);
+    deleteDemandDrivenData(cellCentreTreePtr_);
 }
 
 

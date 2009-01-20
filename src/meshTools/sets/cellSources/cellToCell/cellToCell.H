@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellToCell
+    Foam::cellToCell
 
 Description
-    Copy from one cellset to the other.
+    A topoSetSource to select the cells from another cellSet.
 
 SourceFiles
     cellToCell.C
@@ -95,8 +95,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

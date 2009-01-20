@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    labelToFace
+    Foam::labelToFace
 
 Description
-    TopoSetSource. Select faces given explicitly provided face labels.
+    A topoSetSource to select faces given explicitly provided face labels.
 
 SourceFiles
     labelToFace.C
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

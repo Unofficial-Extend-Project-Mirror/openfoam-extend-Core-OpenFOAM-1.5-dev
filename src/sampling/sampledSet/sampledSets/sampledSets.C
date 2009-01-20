@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ bool Foam::sampledSets::checkFieldTypes()
     nFields += grep(symmTensorFields_, fieldTypes);
     nFields += grep(tensorFields_, fieldTypes);
 
-    if (Pstream::master)
+    if (Pstream::master())
     {
         if (debug)
         {
@@ -289,16 +289,10 @@ void Foam::sampledSets::read(const dictionary& dict)
     fieldNames_ = wordList(dict_.lookup("fields"));
 
     interpolationScheme_ = "cell";
-    if (dict_.found("interpolationScheme"))
-    {
-        dict_.lookup("interpolationScheme") >> interpolationScheme_;
-    }
+    dict_.readIfPresent("interpolationScheme", interpolationScheme_);
 
     writeFormat_ = "null";
-    if (dict_.found("setFormat"))
-    {
-        dict_.lookup("setFormat") >> writeFormat_;
-    }
+    dict_.readIfPresent("setFormat", writeFormat_);
 
     scalarFields_.clear();
     vectorFields_.clear();

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointToCell
+    Foam::pointToCell
 
 Description
-    TopoSetSource. Select cells based on usage of points.
+    A topoSetSource to select cells based on usage of points.
 
 SourceFiles
     pointToCell.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pointToCell Declaration
+                        Class pointToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointToCell
@@ -117,8 +117,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

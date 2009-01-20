@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellToFace
+    Foam::cellToFace
 
 Description
-    Source of faceSet from cells. Either all faces of cell or some other
-    criterion. See implementation.
+    A topoSetSource to select a faceSet from cells.
+
+    Either all faces of cell or some other criterion.
+    See implementation.
 
 SourceFiles
     cellToFace.C
@@ -119,8 +121,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

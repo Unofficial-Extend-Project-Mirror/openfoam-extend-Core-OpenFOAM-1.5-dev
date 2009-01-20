@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    boxToFace
+    Foam::boxToFace
 
 Description
-    Select faces based on face centres inside box.
+    A topoSetSource to select faces based on face centres inside box.
 
 SourceFiles
     boxToFace.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class boxToFace Declaration
+                         Class boxToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class boxToFace
@@ -103,8 +103,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

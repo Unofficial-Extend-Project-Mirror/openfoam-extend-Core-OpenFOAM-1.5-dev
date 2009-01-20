@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceToPoint
+    Foam::faceToPoint
 
 Description
-    TopoSetSource. Select points based on usage in faces.
+    A topoSetSource to select points based on usage in faces.
 
 SourceFiles
     faceToPoint.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faceToPoint Declaration
+                        Class faceToPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceToPoint
@@ -117,8 +117,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

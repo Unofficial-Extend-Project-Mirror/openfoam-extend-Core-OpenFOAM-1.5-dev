@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    probes
+    Foam::probes
 
 Description
     Set of locations to sample.
-    Call probes.write() to sample&write files.
+
+    Call write() to sample and write files.
 
 SourceFiles
     probes.C
@@ -37,29 +38,64 @@ SourceFiles
 #ifndef probes_H
 #define probes_H
 
-#include "OFstream.H"
 #include "HashPtrTable.H"
-#include "vectorField.H"
-#include "boolList.H"
+#include "OFstream.H"
+#include "polyMesh.H"
+#include "pointField.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
 class objectRegistry;
 class dictionary;
 class fvMesh;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                          Class probes Declaration
 \*---------------------------------------------------------------------------*/
 
 class probes
 {
+    // Private classes
+
+        //- Class used for grouping field types
+        template<class Type>
+        class fieldGroup
+        :
+            public wordList
+        {
+        public:
+            //- Construct null
+            fieldGroup()
+            :
+                wordList()
+            {}
+
+            //- Construct for a list of field names
+            fieldGroup(const wordList& fieldNames)
+            :
+                wordList(fieldNames)
+            {}
+        };
+
+
     // Private data
 
+        //- Name of this set of probes,
+        //  Also used as the name of the probes directory.
+        word name_;
+
+        //- Const reference to objectRegistry
         const objectRegistry& obr_;
+
+        //- Load fields from files (not from objectRegistry)
+        bool loadFromFiles_;
+
 
         // Read from dictonary
 
@@ -72,14 +108,14 @@ class probes
 
         // Calculated
 
-            //- Indices (into fieldNames_) of scalar/vector/tensor fields
-            wordList scalarFields_;
-            wordList vectorFields_;
-            wordList sphericalTensorFields_;
-            wordList symmTensorFields_;
-            wordList tensorFields_;
+            //- Categorized scalar/vector/tensor fields
+            fieldGroup<scalar> scalarFields_;
+            fieldGroup<vector> vectorFields_;
+            fieldGroup<sphericalTensor> sphericalTensorFields_;
+            fieldGroup<symmTensor> symmTensorFields_;
+            fieldGroup<tensor> tensorFields_;
 
-            //- Cells to be probed (obtained from the locations)
+            // Cells to be probed (obtained from the locations)
             labelList cellList_;
 
             //- Current open files
@@ -91,33 +127,52 @@ class probes
         //- Find cells containing probes
         void findCells(const fvMesh&);
 
-        //- Find the fields in the list of the given type
-        template<class T>
-        void findFields(wordList& typeFieldNames, boolList& foundFields);
+        //- classify field types, return true if nFields > 0
+        bool checkFieldTypes();
 
-        //- Sample and write field
-        template<class T>
-        void sampleAndWrite(const word& fieldName);
+        //- Find the fields in the list of the given type, return count
+        template<class Type>
+        label countFields
+        (
+            fieldGroup<Type>& fieldList,
+            const wordList& fieldTypes
+        ) const;
+
+        //- Sample and write a particular volume field
+        template<class Type>
+        void sampleAndWrite
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        );
 
         //- Sample and write all the fields of the given type
-        template <class T>
-        void sampleAndWrite(const wordList& typeFields);
+        template <class Type>
+        void sampleAndWrite(const fieldGroup<Type>&);
 
-        //- Disallow default bitwise copy construct and assignment
+        //- Disallow default bitwise copy construct
         probes(const probes&);
+
+        //- Disallow default bitwise assignment
         void operator=(const probes&);
 
 
 public:
 
-    //- Debug switch
-    static int debug;
+    //- Runtime type information
+    TypeName("probes");
 
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        probes(const objectRegistry&, const dictionary&);
+        //- Construct for given objectRegistry and dictionary.
+        //  Allow the possibility to load fields from files
+        probes
+        (
+            const word& name,
+            const objectRegistry&,
+            const dictionary&,
+            const bool loadFromFiles = false
+        );
 
 
     // Destructor
@@ -127,15 +182,49 @@ public:
 
     // Member Functions
 
-        //- Sample single field on all sample locations
-        template <class T>
-        Field<T> sample(const word& fieldName) const;
+        //- Return name of the set of probes
+        virtual const word& name() const
+        {
+            return name_;
+        }
+
+        //- Cells to be probed (obtained from the locations)
+        const labelList& cells() const
+        {
+            return cellList_;
+        }
 
         //- Sample and write
-        void write();
+        virtual void write();
 
         //- Read the probes
-        void read(const dictionary&);
+        virtual void read(const dictionary&);
+
+        //- Execute
+        virtual void execute();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
+
+        //- Update for changes of mesh due to readUpdate
+        virtual void readUpdate(const polyMesh::readUpdateState state)
+        {}
+
+        //- Sample a volume field at all locations
+        template<class Type>
+        tmp<Field<Type> > sample
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        ) const;
+
+        //- Sample a single field on all sample locations
+        template <class Type>
+        tmp<Field<Type> > sample(const word& fieldName) const;
 };
 
 

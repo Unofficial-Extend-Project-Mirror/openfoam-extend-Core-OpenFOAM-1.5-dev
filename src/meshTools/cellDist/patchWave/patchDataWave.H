@@ -23,13 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    patchDataWave
+    Foam::patchDataWave
 
 Description
-    Takes a set of patches to start MeshWave from. See patchWave.
-    Like patchWave holds after
-    construction distance at cells and distance at patches but also
-    additional transported data. Is e.g. used in y+ calculation.
+    Takes a set of patches to start MeshWave from.
+
+    Holds after construction distance at cells and distance at patches
+    (like patchWave), but also additional transported data.
+    It is used, for example, in the y+ calculation.
+
+See Also
+   The patchWave class.
 
 SourceFiles
     patchDataWave.C
@@ -48,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class wallPoint;
 template<class Type> class MeshWave;

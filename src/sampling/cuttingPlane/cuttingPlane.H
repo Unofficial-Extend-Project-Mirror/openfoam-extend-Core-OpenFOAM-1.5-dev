@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cuttingPlane
+    Foam::cuttingPlane
 
 Description
-    Constructs plane through mesh. No attempt at resolving degenerate
-    cases.
+    Constructs plane through mesh.
+
+    No attempt at resolving degenerate cases.
 
 SourceFiles
     cuttingPlane.C

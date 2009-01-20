@@ -43,8 +43,6 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
-
 /*---------------------------------------------------------------------------*\
                        Class attachDetachFvMesh Declaration
 \*---------------------------------------------------------------------------*/

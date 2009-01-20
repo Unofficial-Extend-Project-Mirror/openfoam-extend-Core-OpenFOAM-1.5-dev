@@ -154,7 +154,7 @@ Foam::tmp<Foam::vectorField> Foam::toroidalCS::globalToLocal
         "toroidalCS::globalToLocal(const vectorField&, bool) const"
     );
 
-    return tmp<vectorField>(&vectorField::null());
+    return tmp<vectorField>(vectorField::null());
 }
 
 

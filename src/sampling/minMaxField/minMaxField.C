@@ -53,11 +53,13 @@ namespace Foam
 
 Foam::minMaxField::minMaxField
 (
+    const word& name,
     const Time& t,
     const dictionary& dict
 )
 :
     functionObject(),
+    name_(name),
     time_(t),
     regionName_(polyMesh::defaultRegion),
     fieldName_(dict.lookup("name"))

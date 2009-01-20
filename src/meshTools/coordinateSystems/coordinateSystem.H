@@ -23,15 +23,85 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coordinateSystem
+    Foam::coordinateSystem
 
 Description
-    Base class for coordinate systems.
-    All systems are defined by an origin and a coordinate rotation.
+    A cartesian coordinate system and the base class for
+    other coordinate system specifications
+
+    All systems are defined by an origin point and a coordinateRotation.
+    For convenience, the dictionary constructor forms allow a few shortcuts:
+    - the default origin corresponds to <em>(0 0 0)</em>
+    - if the @c type is not otherwise specified, a Cartesian coordinateSystem
+      is implicit
+
+    @verbatim
+        flipped
+        {
+            type    cartesian;
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type        STARCDRotation;
+                rotation    (0 0 90);
+            }
+        }
+    @endverbatim
+
+    - if an axes specification (eg, e3/e1) is used, the coordinateRotation
+      sub-dictionary can be dropped.
+
+    @verbatim
+        flipped     // the same, specified as axes
+        {
+            type    cartesian;
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type    axes;
+                e3      (1 0 0);
+                e1      (0 0 -1);
+            }
+        }
+        flipped     // the same, using all the shortcuts
+        {
+            e3      (1 0 0);
+            e1      (0 0 -1);
+        }
+    @endverbatim
+
+    - if a sub-dictionary coordinateSystem is found within the dictionary, it
+      will be used. This provides a convenient means of embedding the
+      coordinateSystem information in another dictionary.
+      This is used, for example, in the porousZones:
+
+    @verbatim
+        1
+        (
+        cat1
+        {
+            coordinateSystem
+            {
+                origin  (0 0 0);
+                coordinateRotation
+                {
+                    type        STARCDRotation;
+                    rotation    (0 0 90);
+                }
+            }
+            porosity        0.781;
+            Darcy
+            {
+                d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
+                f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
+            }
+        }
+        )
+    @endverbatim
 
 SourceFiles
     coordinateSystem.C
-
+    newCoordinateSystem.C
 \*---------------------------------------------------------------------------*/
 
 #ifndef coordinateSystem_H
@@ -99,6 +169,7 @@ protected:
             bool translate
         ) const;
 
+
 public:
 
     //- Runtime type information
@@ -134,6 +205,7 @@ public:
         coordinateSystem(const word& name, const dictionary&);
 
         //- Construct from Istream
+        //  The Istream contains a word followed by a dictionary
         coordinateSystem(Istream&);
 
         //- Return clone
@@ -273,20 +345,24 @@ public:
         {
            return Rtr_.z();
         }
-   
+
         //- Return axis (e3: local Cartesian z-axis)
+        // @deprecated method e3 is preferred
         const vector& axis() const
         {
            return Rtr_.z();
         }
 
         //- Return direction (e1: local Cartesian x-axis)
+        // @deprecated method e1 is preferred
         const vector& direction() const
         {
             return Rtr_.x();
         }
 
         //- Return as dictionary of entries
+        //  @param [in] ignoreType drop type (cartesian, cylindrical, etc)
+        //  when generating the dictionary
         virtual dictionary dict(bool ignoreType = false) const;
 
 

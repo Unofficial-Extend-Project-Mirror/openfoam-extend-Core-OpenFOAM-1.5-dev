@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointEdgePoint
+    Foam::pointEdgePoint
 
 Description
     Holds information regarding nearest wall point. Used in pointEdgeWave.
@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyPatch;
 class polyMesh;
 

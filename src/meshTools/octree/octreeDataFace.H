@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    octreeDataFace
+    Foam::octreeDataFace
 
 Description
-    Holds data for octree to work on mesh faces. E.g. calculate
-    (in calcNearest) the correct intersection point with a face.
+    Holds data for octree to work on mesh faces.
+
+    For example, calculate (in calcNearest) the correct intersection point
+    with a face.
 
 SourceFiles
     octreeDataFace.C
@@ -48,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class primitiveMesh;
 template<class Type> class octree;
 class polyPatch;
@@ -84,7 +86,7 @@ class octreeDataFace
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("octreeDataFace");
 
     // Constructors

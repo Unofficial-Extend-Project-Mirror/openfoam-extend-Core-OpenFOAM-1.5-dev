@@ -49,7 +49,7 @@ namespace Foam
 // Sample till hits boundary.
 bool Foam::curveSet::trackToBoundary
 (
-    particle<passiveParticle>& singleParticle,
+    Particle<passiveParticle>& singleParticle,
     label& sampleI,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,

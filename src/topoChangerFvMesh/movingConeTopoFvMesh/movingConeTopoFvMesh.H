@@ -23,9 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    staticTopoFvMesh
+    Foam::movingConeTopoFvMesh
 
 Description
+    Sample topoChangerFvMesh that moves an object in x direction
+    and introduces/removes layers.
 
 SourceFiles
     movingConeTopoFvMesh.C

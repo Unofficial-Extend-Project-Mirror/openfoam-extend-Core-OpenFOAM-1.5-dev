@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    orientedSurface
+    Foam::orientedSurface
 
 Description
     Given point flip all faces such that normals point in same direction.
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class orientedSurface Declaration

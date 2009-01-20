@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    triSurfaceSearch
+    Foam::triSurfaceSearch
 
 Description
     Helper class to search on triSurface.
@@ -40,17 +40,18 @@ SourceFiles
 #include "pointField.H"
 #include "boolList.H"
 #include "pointIndexHit.H"
-#include "treeBoundBox.H"
+#include "indexedOctree.H"
+#include "treeDataTriSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class triSurface;
-class octreeDataTriSurface;
-template<class Type> class octree;
+class treeDataTriSurface;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                            Class triSurfaceSearch Declaration
@@ -64,7 +65,7 @@ class triSurfaceSearch
         const triSurface& surface_;
 
         //- Octree for searches
-        const octree<octreeDataTriSurface>* treePtr_;
+        autoPtr<indexedOctree<treeDataTriSurface> > treePtr_;
 
 
     // Private Member Functions
@@ -89,16 +90,13 @@ public:
         //- Construct from surface. Holds reference to surface!
         triSurfaceSearch(const triSurface&);
 
-    // Destructor
-
-        ~triSurfaceSearch();
 
 
     // Member Functions
 
-        const octree<octreeDataTriSurface>& tree() const
+        const indexedOctree<treeDataTriSurface>& tree() const
         {
-            return *treePtr_;
+            return treePtr_();
         }
 
         const triSurface& surface() const

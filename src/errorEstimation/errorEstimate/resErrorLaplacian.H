@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    resError
+InNamespace
+    Foam::resError
 
 Description
     Residual error estimate for the fv laplacian operators

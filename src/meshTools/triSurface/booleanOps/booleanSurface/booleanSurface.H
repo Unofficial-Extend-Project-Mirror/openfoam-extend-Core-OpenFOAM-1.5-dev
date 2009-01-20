@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    booleanSurface
+    Foam::booleanSurface
 
 Description
     Surface-surface intersection. Given two surfaces construct combined surface.
+
     Called 'boolean' since the volume of resulting surface will encompass
     the volumes of the original surface according to some boolean operation:
     - all which is in surface1 AND in surface2 (intersection)
@@ -34,12 +35,12 @@ Description
     - all which is in surface1 OR in surface2 (union)
 
     Algorithm:
-    1 find edge-surface intersection. Class 'surfaceIntersection'.
-    2 combine intersection with both surfaces. Class 'intersectedSurface'.
-    3 subset surfaces upto intersection. The 'side' of the surface to include
-      is based on the faces that can be reached from a user supplied face
-      index.
-    4 merge surfaces. Only the points on the intersection are shared.
+    -# find edge-surface intersection. Class 'surfaceIntersection'.
+    -# combine intersection with both surfaces. Class 'intersectedSurface'.
+    -# subset surfaces upto intersection. The 'side' of the surface to
+       include is based on the faces that can be reached from a
+       user-supplied face index.
+    -# merge surfaces. Only the points on the intersection are shared.
 
 SourceFiles
     booleanSurface.C
@@ -58,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class triSurfaceSearch;
 class intersectedSurface;
 

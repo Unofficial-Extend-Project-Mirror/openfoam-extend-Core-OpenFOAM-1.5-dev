@@ -23,12 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    STARCDCoordinateRotation
+    Foam::STARCDCoordinateRotation
 
 Description
+    A coordinateRotation defined by the STAR-CD convention.
+
     The 3 rotations are defined in the STAR-CD convention
     (around Z, around X' and around Y'').
-    The order of parameter arguments matches this rotation order.
+    The order of the parameter arguments matches this rotation order.
+
+    - the rotation angles are in degrees, unless otherwise explictly specified:
+
+    @verbatim
+        coordinateRotation
+        {
+            type        STARCDRotation;
+            degrees     false;
+            rotation    (0 0 3.141592654);
+        }
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 

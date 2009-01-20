@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfaceIntersection
+    Foam::surfaceIntersection
 
 Description
     Basic surface-surface intersection description. Constructed from two
@@ -63,16 +63,16 @@ SourceFiles
 #include "labelPairLookup.H"
 #include "typeInfo.H"
 #include "edgeList.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class triSurfaceSearch;
 class triSurface;
-class pointIndexHit;
 class edgeIntersections;
 
 /*---------------------------------------------------------------------------*\

@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    parabolicCylindricalCS
+    Foam::parabolicCylindricalCS
 
 Description
     Parabolic cylindrical coordinate system.
+
     Notation: u = a.x() v = a.y() z = a.z();
 
 SourceFiles

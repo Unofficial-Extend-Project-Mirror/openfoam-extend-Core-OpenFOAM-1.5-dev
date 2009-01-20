@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    boundaryToFace
+    Foam::boundaryToFace
 
 Description
-    TopoSetSource. Select all external (boundary) faces.
+    A topoSetSource to select all external (boundary) faces.
 
 SourceFiles
     boundaryToFace.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class boundaryToFace Declaration
+                      Class boundaryToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryToFace
@@ -94,8 +94,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

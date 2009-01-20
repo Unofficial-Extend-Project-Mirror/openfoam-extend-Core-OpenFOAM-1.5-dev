@@ -22,12 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    resError
+Namespace
+    Foam::resError
 
 Description
     Namespace for residual error estimate operators.
-
 
 \*---------------------------------------------------------------------------*/
 

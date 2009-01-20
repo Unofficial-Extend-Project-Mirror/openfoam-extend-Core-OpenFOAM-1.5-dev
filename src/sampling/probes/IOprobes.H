@@ -22,15 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    probes
+Typedef
+    Foam::IOprobes
 
 Description
-    Set of locations to sample.
-    Call probes.write() to sample&write files.
-
-SourceFiles
-    probes.C
+    Instance of the generic IOOutputFilter for probes.
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,68 +34,14 @@ SourceFiles
 #define IOprobes_H
 
 #include "probes.H"
-#include "IOdictionary.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class probes Declaration
-\*---------------------------------------------------------------------------*/
-
-class IOprobes
-:
-    public IOdictionary,
-    public probes
-{
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct and assignment
-        IOprobes(const IOprobes&);
-        void operator=(const IOprobes&);
-
-
-public:
-
-    // Constructors
-
-        //- Construct for given objectRegistry and dictionary
-        IOprobes
-        (
-            const objectRegistry& obr,
-            const fileName& dictName = "probesDict"
-        );
-
-
-    // Destructor
-
-        virtual ~IOprobes();
-
-
-    // Member Functions
-
-        //- Read the probes
-        virtual bool read();
-
-        //- Update for changes of mesh
-        void updateMesh(const mapPolyMesh&)
-        {
-            read();
-        }
-
-        //- Update for changes of mesh
-        void movePoints(const pointField&)
-        {
-            read();
-        }
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef IOOutputFilter<probes> IOprobes;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

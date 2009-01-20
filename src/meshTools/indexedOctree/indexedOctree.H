@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    indexedOctree
+    Foam::indexedOctree
 
 Description
+    Non-pointer based hierarchical recursive searching
 
 SourceFiles
     indexedOctree.C
@@ -48,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 template<class Type> class indexedOctree;
 template<class Type> Ostream& operator<<(Ostream&, const indexedOctree<Type>&);
 class Istream;
@@ -298,7 +299,7 @@ private:
                 return labelBits(i + 1, octant);
             }
 
-            //- Fempty to subNodes_ entry
+            //- From empty to subNodes_ entry
             static labelBits emptyPlusOctant
             (
                 const direction octant
@@ -336,6 +337,14 @@ public:
         //- Construct from Istream
         indexedOctree(const Type& shapes, Istream& is);
 
+        //- Clone
+        autoPtr<indexedOctree<Type> > clone() const
+        {
+            return autoPtr<indexedOctree<Type> >
+            (
+                new indexedOctree<Type>(*this)
+            );
+        }
 
     // Member Functions
 
@@ -388,17 +397,17 @@ public:
             {
                 return i.val() > 0;
             }
- 
+
             static label getContent(const labelBits i)
             {
                 if (!isContent(i))
-                {   
+                {
                     FatalErrorIn("getContent(const label)")
                         << abort(FatalError);
                 }
                 return -i.val()-1;
             }
- 
+
             static label getNode(const labelBits i)
             {
                 if (!isNode(i))
@@ -477,6 +486,14 @@ public:
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)
             volumeType getVolumeType(const point&) const;
+
+            //- Helper function to return the side. Returns outside if
+            //  outsideNormal&vec >= 0, inside otherwise
+            static volumeType getSide
+            (
+                const vector& outsideNormal,
+                const vector& vec
+            );
 
             //- Helper: does bb intersect a sphere around sample? Or is any
             //  corner point of bb closer than nearestDistSqr to sample.

@@ -49,7 +49,7 @@ Foam::cartesianCS::cartesianCS()
 Foam::cartesianCS::cartesianCS
 (
     const word& name,
-    const vector& origin,
+    const point& origin,
     const vector& axis,
     const vector& dir
 )
@@ -61,7 +61,7 @@ Foam::cartesianCS::cartesianCS
 Foam::cartesianCS::cartesianCS
 (
     const word& name,
-    const vector& origin,
+    const point& origin,
     const coordinateRotation& cr
 )
 :

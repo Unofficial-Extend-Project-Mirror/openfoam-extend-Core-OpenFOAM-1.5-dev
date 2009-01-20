@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,25 +34,10 @@ License
 template<class OutputFilter>
 void Foam::OutputFilterFunctionObject<OutputFilter>::readDict()
 {
-    if (dict_.found("region"))
-    {
-        dict_.lookup("region") >> regionName_;
-    }
-
-    if (dict_.found("dictionary"))
-    {
-        dict_.lookup("dictionary") >> dictName_;
-    }
-
-    if (dict_.found("interval"))
-    {
-        dict_.lookup("interval") >> interval_;
-    }
-
-    if (dict_.found("enabled"))
-    {
-        dict_.lookup("enabled") >> execution_;
-    }
+    dict_.readIfPresent("region", regionName_);
+    dict_.readIfPresent("dictionary", dictName_);
+    dict_.readIfPresent("interval", interval_);
+    dict_.readIfPresent("enabled", execution_);
 }
 
 
@@ -61,13 +46,13 @@ void Foam::OutputFilterFunctionObject<OutputFilter>::readDict()
 template<class OutputFilter>
 Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
 (
-//     const word& name,
+    const word& name,
     const Time& t,
     const dictionary& dict
 )
 :
     functionObject(),
-    name_("outputFilter"),
+    name_(name),
     time_(t),
     dict_(dict),
     regionName_(polyMesh::defaultRegion),
@@ -94,6 +79,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
             (
                 new IOOutputFilter<OutputFilter>
                 (
+                    name_,
                     time_.lookupObject<objectRegistry>(regionName_),
                     dictName_
                 )

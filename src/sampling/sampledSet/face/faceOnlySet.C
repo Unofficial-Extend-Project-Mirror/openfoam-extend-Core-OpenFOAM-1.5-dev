@@ -50,7 +50,7 @@ namespace Foam
 // Sample singly connected segment. Returns false if end_ reached.
 bool Foam::faceOnlySet::trackToBoundary
 (
-    particle<passiveParticle>& singleParticle,
+    Particle<passiveParticle>& singleParticle,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    zoneToPoint
+    Foam::zoneToPoint
 
 Description
-    TopoSetSource. Select points based on pointZone.
+    A topoSetSource to select points based on pointZone.
 
 SourceFiles
     zoneToPoint.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class zoneToPoint Declaration
+                        Class zoneToPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToPoint
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

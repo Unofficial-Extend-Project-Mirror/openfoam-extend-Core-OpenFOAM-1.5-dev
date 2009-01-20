@@ -51,13 +51,16 @@ namespace Foam
 
 Foam::ggiCheckFunctionObject::ggiCheckFunctionObject
 (
+    const word& name,
     const Time& t,
     const dictionary& dict
 )
 :
     functionObject(),
+    name_(name),
     time_(t),
-    regionName_(polyMesh::defaultRegion)
+    regionName_(polyMesh::defaultRegion),
+    phiName_(dict.lookup("phi"))
 {
     if (dict.found("region"))
     {
@@ -82,7 +85,7 @@ bool Foam::ggiCheckFunctionObject::execute()
         time_.lookupObject<objectRegistry>(regionName_);
 
     const surfaceScalarField& phi =
-        mesh.lookupObject<surfaceScalarField>("phi");
+        mesh.lookupObject<surfaceScalarField>(phiName_);
 
     boolList visited(phi.boundaryField().size(), false);
 
@@ -96,11 +99,12 @@ bool Foam::ggiCheckFunctionObject::execute()
 
                 // Calculate local and shadow flux
                 scalar localFlux = sum(phi.boundaryField()[patchI]);
+                scalar localFluxMag = sumMag(phi.boundaryField()[patchI]);
 
-                const ggiFvPatch& ggiPatch =
-                    refCast<const ggiFvPatch>
+                const ggiPolyPatch& ggiPatch =
+                    refCast<const ggiPolyPatch>
                     (
-                        phi.boundaryField()[patchI].patch()
+                        phi.boundaryField()[patchI].patch().patch()
                     );
 
                 const label shadowPatchI = ggiPatch.shadowIndex();
@@ -108,12 +112,14 @@ bool Foam::ggiCheckFunctionObject::execute()
                 visited[shadowPatchI] = true;
 
                 scalar shadowFlux = sum(phi.boundaryField()[shadowPatchI]);
+                scalar shadowFluxMag =
+                    sumMag(phi.boundaryField()[shadowPatchI]);
 
                 Info<< "GGI pair (" << ggiPatch.name() << ", "
                     << ggiPatch.shadow().name()
-                    << ") : " << localFlux << " " << shadowFlux
+                    << ") : " << localFluxMag << " " << shadowFluxMag
                     << " Diff = " << localFlux + shadowFlux << " or "
-                    << mag(localFlux + shadowFlux)/mag(localFlux)*100 << " %"
+                    << mag(localFlux + shadowFlux)/mag(localFluxMag)*100 << " %"
                     << endl;
             }
         }

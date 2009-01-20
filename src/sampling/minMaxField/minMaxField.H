@@ -58,6 +58,9 @@ class minMaxField
 {
     // Private data
 
+        //- Name
+        const word name_;
+
         //- Reference to main object registry
         const Time& time_;
 
@@ -91,6 +94,7 @@ public:
         //- Construct from components
         minMaxField
         (
+            const word& name,
             const Time&,
             const dictionary&
         );

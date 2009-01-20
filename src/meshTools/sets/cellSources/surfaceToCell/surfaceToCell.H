@@ -23,15 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfaceToCell
+    Foam::surfaceToCell
 
 Description
-    Selects cells based on relation to surface. Selects:
+    A topoSetSource to select cells based on relation to surface.
+
+    Selects:
     - all cells inside/outside/cut by surface
     - cells with centre nearer than XXX to surface
-    - cells with centre nearer than XXX to surface AND
-      with normal at nearest point to centre and cell-corners differing
-      by more than YYY (i.e. point of high curvature)
+    - cells with centre nearer than XXX to surface @b and with normal
+      at nearest point to centre and cell-corners differing by
+      more than YYY (i.e., point of high curvature)
 
 SourceFiles
     surfaceToCell.C
@@ -122,7 +124,6 @@ class surfaceToCell
             const vector& span,
             const label cellI,
             const label cellTriI,
-
             Map<label>& pointToNearest
         ) const;
 
@@ -196,8 +197,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

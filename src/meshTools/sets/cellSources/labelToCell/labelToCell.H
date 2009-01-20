@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    labelToCell
+    Foam::labelToCell
 
 Description
-    TopoSetSource. Select cells based on explicitly given labels.
+    A topoSetSource to select cells based on explicitly given labels.
 
 SourceFiles
     labelToCell.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class labelToCell Declaration
+                        Class labelToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class labelToCell
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

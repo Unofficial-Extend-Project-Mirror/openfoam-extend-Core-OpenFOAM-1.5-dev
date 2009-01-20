@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    topoSetSource
+    Foam::topoSetSource
 
 Description
-    Base class of source for a topoSet. Implementer has to modify
-    the given set (see applyToSet) according to its function and the
-    setAction (one of add/delete/new) 
+    Base class of a source for a topoSet.
+
+    Implementer has to modify the given set (see applyToSet) according to
+    its function and the setAction (one of add/delete/new)
 
 SourceFiles
     topoSetSource.C
@@ -53,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class topoSet;
 
@@ -81,9 +82,10 @@ public:
 
 protected:
 
-        //- Class with constructor to add usage string to table.
+        //- A table of usage strings
         static HashTable<string>* usageTablePtr_;
 
+        //- Class with constructor to add usage string to table
         class addToUsageTable
         {
         public:
@@ -194,7 +196,7 @@ public:
             autoPtr<topoSetSource> operator()(Istream& is) const
             {
                 word topoSetSourceType(is);
-                dictionary dict(is);                    
+                dictionary dict(is);
                 return topoSetSource::New(topoSetSourceType, mesh_, dict);
             }
         };

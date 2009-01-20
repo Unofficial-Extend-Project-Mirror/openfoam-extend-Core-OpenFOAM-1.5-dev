@@ -45,7 +45,7 @@ namespace Foam
 
 // Forward declaration of classes
 class passiveParticle;
-template<class Type> class particle;
+template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                            Class faceOnlySet Declaration
@@ -72,7 +72,7 @@ class faceOnlySet
         //  reached
         bool trackToBoundary
         (
-            particle<passiveParticle>& singleParticle,
+            Particle<passiveParticle>& singleParticle,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,

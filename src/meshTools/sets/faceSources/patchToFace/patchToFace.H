@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    patchToFace
+    Foam::patchToFace
 
 Description
-    TopoSetSource. Select faces based on usage in patches.
+    A topoSetSource to select faces based on usage in patches.
 
 SourceFiles
     patchToFace.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class patchToFace Declaration
+                        Class patchToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchToFace
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

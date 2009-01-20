@@ -166,7 +166,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     regionSplit rs(*this);
 
     // Get the region of the cell containing the origin.
-    label originRegion = rs[findNearestCell(rotatingRegionMarkerPoint_)];
+    label originRegion = rs[findNearestCell(rotatingRegionMarker_)];
 
     labelList movingCells(nCells());
     label nMovingCells = 0;
@@ -222,18 +222,24 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 }
 
 
-void Foam::mixerFvMesh::calcMovingMasks() const
+bool Foam::mixerFvMesh::attached() const
+{
+    return refCast<const slidingInterface>(topoChanger_[0]).attached();
+}
+
+
+void Foam::mixerFvMesh::calcMovingMask() const
 {
     if (debug)
     {
-        Info<< "void mixerFvMesh::calcMovingMasks() const : "
+        Info<< "void mixerFvMesh::calcMovingMask() const : "
             << "Calculating point and cell masks"
             << endl;
     }
 
     if (movingPointsMaskPtr_)
     {
-        FatalErrorIn("void mixerFvMesh::calcMovingMasks() const")
+        FatalErrorIn("void mixerFvMesh::calcMovingMask() const")
             << "point mask already calculated"
             << abort(FatalError);
     }
@@ -304,9 +310,15 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 }
 
 
-bool Foam::mixerFvMesh::attached() const
+// Return moving points mask.  Moving points marked with 1
+const Foam::scalarField& Foam::mixerFvMesh::movingPointsMask() const
 {
-    return refCast<const slidingInterface>(topoChanger_[0]).attached();
+    if (!movingPointsMaskPtr_)
+    {
+        calcMovingMask();
+    }
+
+    return *movingPointsMaskPtr_;
 }
 
 
@@ -342,32 +354,25 @@ Foam::mixerFvMesh::mixerFvMesh
         )
     ),
     rpm_(readScalar(dict_.lookup("rpm"))),
-    rotatingRegionMarkerPoint_(csPtr_->origin()),
-    attachDetach_(false),
+    rotatingRegionMarker_
+    (
+        dict_.lookupOrDefault<point>("rotatingRegionMarker", csPtr_->origin())
+    ),
+    attachDetach_(dict_.lookupOrDefault<bool>("attachDetach", false)),
     movingPointsMaskPtr_(NULL)
 {
-    if (dict_.found("rotatingRegionMarkerPoint"))
-    {
-        rotatingRegionMarkerPoint_ =
-            point(dict_.lookup("rotatingRegionMarkerPoint"));
-
-        Info<< "Rotating region marker point: " << rotatingRegionMarkerPoint_
-            << endl;
-    }
-
-    if (dict_.found("attachDetach"))
-    {
-        attachDetach_ = Switch(dict_.lookup("attachDetach"));
-
-        Info << "Attach-detach action = " << attachDetach_ << endl;
-    }
+    Info<< "Rotating region marker point: " << rotatingRegionMarker_
+        << "  Attach-detach action = " << attachDetach_ << endl;
 
     addZonesAndModifiers();
 
     Info<< "Mixer mesh" << nl
-        << "    origin: " << cs().origin() << nl
-        << "    axis  : " << cs().axis() << nl
-        << "    rpm   : " << rpm_ << endl;
+        << "    origin       : " << cs().origin() << nl
+        << "    axis         : " << cs().axis() << nl
+        << "    rpm          : " << rpm_
+        << "    marker       : " << rotatingRegionMarker_
+        << "    attach-detach: " << attachDetach_
+        << endl;
 }
 
 
@@ -381,24 +386,12 @@ Foam::mixerFvMesh::~mixerFvMesh()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return moving points mask.  Moving points marked with 1
-const Foam::scalarField& Foam::mixerFvMesh::movingPointsMask() const
-{
-    if (!movingPointsMaskPtr_)
-    {
-        calcMovingMasks();
-    }
-
-    return *movingPointsMaskPtr_;
-}
-
-
 bool Foam::mixerFvMesh::update()
 {
     if (attached() && attachDetach_)
     {
         // Detach mesh
-        Info << "Detaching" << endl;
+        Info << "Detaching rotors" << endl;
         autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
@@ -420,15 +413,7 @@ bool Foam::mixerFvMesh::update()
 
     if (morphing)
     {
-        if (!attached())
-        {
-            Info << "Attaching" << endl;
-        }
-
-        if (debug)
-        {
-            Info << "Mesh topology is changing" << endl;
-        }
+        Info << "Attaching rotors" << endl;
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
 

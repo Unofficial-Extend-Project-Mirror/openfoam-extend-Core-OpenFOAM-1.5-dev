@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshSearch
+    Foam::meshSearch
 
 Description
     Various searches on polyMesh; uses (demand driven) octree to search.
@@ -41,13 +41,15 @@ SourceFiles
 #include "octreeDataPoint.H"
 #include "pointIndexHit.H"
 #include "className.H"
+#include "Cloud.H"
+#include "passiveParticle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -63,6 +65,9 @@ class meshSearch
 
         //- Whether to use face decomposition for all geometric tests
         const bool faceDecomp_;
+
+        //- Dummy cloud to put particles on for tracking.
+        Cloud<passiveParticle> cloud_;
 
         //- demand driven octrees
 
@@ -117,7 +122,7 @@ class meshSearch
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("meshSearch");
 
 

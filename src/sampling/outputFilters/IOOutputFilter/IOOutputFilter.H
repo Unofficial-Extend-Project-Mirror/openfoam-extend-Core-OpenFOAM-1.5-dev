@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ class IOOutputFilter
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
+        // Disallow default bitwise copy construct and assignment
         IOOutputFilter(const IOOutputFilter&);
         void operator=(const IOOutputFilter&);
 
@@ -70,18 +70,20 @@ public:
     // Constructors
 
         //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
+        //  Allow dictionary to be optional
+        //  Allow the possibility to load fields from files
         IOOutputFilter
         (
+            const word& outputFilterName,
             const objectRegistry&,
             const fileName& dictName = OutputFilter::typeName() + "Dict",
+            const IOobject::readOption rOpt = IOobject::MUST_READ,
             const bool loadFromFile = false
         );
 
 
-    // Destructor
-
-        virtual ~IOOutputFilter();
+    //- Destructor
+    virtual ~IOOutputFilter();
 
 
     // Member Functions

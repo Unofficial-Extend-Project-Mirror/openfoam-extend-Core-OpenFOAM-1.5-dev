@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cylindricalCS
+    Foam::cylindricalCS
 
 Description
-    Cylindrical coordinate system.
+    Cylindrical coordinate system
 
 SourceFiles
     cylindricalCS.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cylindricalCS Declaration
+                       Class cylindricalCS Declaration
 \*---------------------------------------------------------------------------*/
 
 class cylindricalCS

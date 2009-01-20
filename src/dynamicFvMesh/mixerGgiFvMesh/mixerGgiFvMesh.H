@@ -26,6 +26,10 @@ Class
     mixerGgiFvMesh
 
 Description
+    Simple mixer mesh using a GGI interface
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     mixerGgiFvMesh.C

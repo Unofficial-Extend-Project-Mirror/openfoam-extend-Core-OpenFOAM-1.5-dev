@@ -180,7 +180,7 @@ Foam::tmp<Foam::vectorField> Foam::parabolicCylindricalCS::globalToLocal
         "parabolicCylindricalCS::globalToLocal(const vectorField&, bool) const"
     );
 
-    return tmp<vectorField>(&vectorField::null());
+    return tmp<vectorField>(vectorField::null());
 }
 
 

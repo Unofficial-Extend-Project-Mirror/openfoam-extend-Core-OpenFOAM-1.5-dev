@@ -20,34 +20,30 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*---------------------------------------------------------------------------*/
 
 #include "directMappedPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "polyMesh.H"
 #include "ListListOps.H"
 #include "meshSearch.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(directMappedPolyPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(directMappedPolyPatch, 0);
-
-addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, word);
-addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, Istream);
-addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, dictionary);
+    addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, word);
+    addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, dictionary);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Collect single list of samples and originating processor+face.
-void directMappedPolyPatch::collectSamples
+void Foam::directMappedPolyPatch::collectSamples
 (
     pointField& samples,
     labelList& patchFaceProcs,
@@ -103,7 +99,7 @@ void directMappedPolyPatch::collectSamples
 
 // Find the processor/cell containing the samples. Does not account
 // for samples being found in two processors.
-void directMappedPolyPatch::findSamples
+void Foam::directMappedPolyPatch::findSamples
 (
     const pointField& samples,
     labelList& sampleCellProcs,
@@ -195,13 +191,23 @@ void directMappedPolyPatch::findSamples
     }
 }
 
-void directMappedPolyPatch::calcMapping() const
+void Foam::directMappedPolyPatch::calcMapping() const
 {
     if (sendCellLabelsPtr_.valid())
     {
         FatalErrorIn("directMappedPolyPatch::calcMapping() const")
             << "Mapping already calculated" << exit(FatalError);
     }
+
+    if (offset_ == vector::zero)
+    {
+        FatalErrorIn("directMappedPolyPatch::calcMapping() const")
+            << "Invalid offset " << offset_ << endl
+            << "Offset is the vector added to the patch face centres to"
+            << " find the cell supplying the data."
+            << exit(FatalError);
+    }
+
 
     // Get global list of all samples and the processor and face they come from.
     pointField samples;
@@ -221,26 +227,22 @@ void directMappedPolyPatch::calcMapping() const
     // - cell sample is in (so source when mapping)
     //   sampleCells, sampleCellProcs.
 
+    // Determine schedule.
+    mapDistribute distMap(sampleCellProcs, patchFaceProcs);
 
-    // Determine the schedule
-    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Rework the schedule to cell data to send, face data to receive.
+    schedulePtr_.reset(new List<labelPair>(distMap.schedule()));
 
-    dataSchedule mySchedule(sampleCellProcs, patchFaceProcs);
-
-    // Extract the scedule itself (reuse storage)
-    schedulePtr_.reset(new List<labelPair>(mySchedule, true));
-
-    const labelListList& sendOrder = mySchedule.sendOrder();
-    const labelListList& receiveOrder = mySchedule.receiveOrder();
+    const labelListList& subMap = distMap.subMap();
+    const labelListList& constructMap = distMap.constructMap();
 
     // Extract the particular data I need to send and receive.
-    sendCellLabelsPtr_.reset(new labelListList(sendOrder.size()));
+    sendCellLabelsPtr_.reset(new labelListList(subMap.size()));
     labelListList& sendCellLabels = sendCellLabelsPtr_();
 
-    forAll(sendOrder, procI)
+    forAll(subMap, procI)
     {
-        sendCellLabels[procI] =
-            IndirectList<label>(sampleCells, sendOrder[procI]);
+        sendCellLabels[procI] = IndirectList<label>(sampleCells, subMap[procI]);
 
         if (debug)
         {
@@ -249,13 +251,13 @@ void directMappedPolyPatch::calcMapping() const
         }
     }
 
-    receiveFaceLabelsPtr_.reset(new labelListList(receiveOrder.size()));
+    receiveFaceLabelsPtr_.reset(new labelListList(constructMap.size()));
     labelListList& receiveFaceLabels = receiveFaceLabelsPtr_();
 
-    forAll(receiveOrder, procI)
+    forAll(constructMap, procI)
     {
         receiveFaceLabels[procI] =
-            IndirectList<label>(patchFaces, receiveOrder[procI]);
+            IndirectList<label>(patchFaces, constructMap[procI]);
 
         if (debug)
         {
@@ -268,7 +270,7 @@ void directMappedPolyPatch::calcMapping() const
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedPolyPatch::directMappedPolyPatch
 (
     const word& name,
     const label size,
@@ -285,22 +287,7 @@ directMappedPolyPatch::directMappedPolyPatch
 {}
 
 
-directMappedPolyPatch::directMappedPolyPatch
-(
-    Istream& is,
-    const label index,
-    const polyBoundaryMesh& bm
-)
-:
-    polyPatch(is, index, bm),
-    offset_(is),
-    schedulePtr_(NULL),
-    sendCellLabelsPtr_(NULL),
-    receiveFaceLabelsPtr_(NULL)
-{}
-
-
-directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedPolyPatch::directMappedPolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -316,7 +303,7 @@ directMappedPolyPatch::directMappedPolyPatch
 {}
 
 
-directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedPolyPatch::directMappedPolyPatch
 (
     const directMappedPolyPatch& pp,
     const polyBoundaryMesh& bm
@@ -330,7 +317,7 @@ directMappedPolyPatch::directMappedPolyPatch
 {}
 
 
-directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedPolyPatch::directMappedPolyPatch
 (
     const directMappedPolyPatch& pp,
     const polyBoundaryMesh& bm,
@@ -349,7 +336,7 @@ directMappedPolyPatch::directMappedPolyPatch
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-directMappedPolyPatch::~directMappedPolyPatch()
+Foam::directMappedPolyPatch::~directMappedPolyPatch()
 {
     clearOut();
 }
@@ -357,7 +344,7 @@ directMappedPolyPatch::~directMappedPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void directMappedPolyPatch::clearOut()
+void Foam::directMappedPolyPatch::clearOut()
 {
     schedulePtr_.clear();
     sendCellLabelsPtr_.clear();
@@ -365,8 +352,11 @@ void directMappedPolyPatch::clearOut()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::directMappedPolyPatch::write(Ostream& os) const
+{
+    polyPatch::write(os);
+    os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

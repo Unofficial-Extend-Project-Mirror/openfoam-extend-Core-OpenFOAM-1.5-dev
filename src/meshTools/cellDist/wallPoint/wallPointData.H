@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wallPointData
+    Foam::wallPointData
 
 Description
     Holds information (coordinate and normal) regarding nearest wall point.
+
     Is like wallPoint but transfer extra (passive) data.
     Used e.g. in wall distance calculation with wall reflection vectors.
 
@@ -48,7 +49,7 @@ namespace Foam
 
 template<class Type> class wallPointData;
 
-// * * * * * * Forward declaration of template friend functions  * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type> Istream& operator>>(Istream&, wallPointData<Type>&);
 template<class Type> Ostream& operator<<(Ostream&, const wallPointData<Type>&);

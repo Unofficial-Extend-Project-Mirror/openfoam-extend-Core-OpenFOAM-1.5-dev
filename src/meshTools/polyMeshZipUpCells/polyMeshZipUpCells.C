@@ -759,8 +759,8 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
             patchStarts[bMesh.size()-1] + patchSizes[bMesh.size()-1],
             mesh.allPoints(),
             newFaces,
-            mesh.allOwner(),
-            mesh.allNeighbour(),
+            mesh.faceOwner(),
+            mesh.faceNeighbour(),
             patchSizes,
             patchStarts,
             true                // boundary forms valid boundary mesh.

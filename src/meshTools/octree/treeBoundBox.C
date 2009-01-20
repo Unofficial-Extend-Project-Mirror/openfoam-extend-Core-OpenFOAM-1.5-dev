@@ -22,38 +22,95 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "treeBoundBox.H"
-#include "point.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-treeBoundBox treeBoundBox::greatBox
+const Foam::treeBoundBox Foam::treeBoundBox::greatBox
 (
     vector(-GREAT, -GREAT, -GREAT),
     vector(GREAT, GREAT, GREAT)
 );
 
 
+//! @cond - skip documentation : local scope only
+const Foam::label facesArray[6][4] =
+{
+    {0, 4, 6, 2}, // left
+    {1, 3, 7, 5}, // right
+    {0, 1, 5, 4}, // bottom
+    {2, 6, 7, 3}, // top
+    {0, 2, 3, 1}, // back
+    {4, 5, 7, 6}  // front
+};
+//! @endcond
+
+
+const Foam::faceList Foam::treeBoundBox::faces
+(
+    initListList<face, label, 6, 4>(facesArray)
+);
+
+
+//! @cond - skip documentation : local scope only
+const Foam::label edgesArray[12][2] =
+{
+    {0, 1}, // 0
+    {1, 3},
+    {2, 3}, // 2
+    {0, 2},
+    {4, 5}, // 4
+    {5, 7},
+    {6, 7}, // 6
+    {4, 6},
+    {0, 4}, // 8
+    {1, 5},
+    {3, 7}, // 10
+    {2, 6}
+};
+//! @endcond
+
+
+const Foam::edgeList Foam::treeBoundBox::edges
+(
+    initListList<edge, label, 12, 2>(edgesArray)
+);
+
+
+const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
+(
+    calcFaceNormals()
+);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::calcFaceNormals()
+{
+    FixedList<vector, 6> normals;
+    normals[LEFT]   = vector(-1,  0,  0);
+    normals[RIGHT]  = vector( 1,  0,  0);
+    normals[BOTTOM] = vector( 0, -1,  0);
+    normals[TOP]    = vector( 0,  1,  0);
+    normals[BACK]   = vector( 0,  0, -1);
+    normals[FRONT]  = vector( 0,  0,  1);
+    return normals;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct as the bounding box of the given pointField
-treeBoundBox::treeBoundBox(const pointField& points)
+Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 :
     boundBox()
 {
     if (points.size() == 0)
     {
-        WarningIn("treeBoundBox::treeBoundBox(const pointField& points)")
+        WarningIn("treeBoundBox::treeBoundBox(const UList<point>&)")
             << "cannot find bounding box for zero sized pointField"
             << "returning zero" << endl;
 
@@ -63,7 +120,7 @@ treeBoundBox::treeBoundBox(const pointField& points)
     min() = points[0];
     max() = points[0];
 
-    forAll(points, i)
+    for (label i = 1; i < points.size(); i++)
     {
         min() = ::Foam::min(min(), points[i]);
         max() = ::Foam::max(max(), points[i]);
@@ -71,8 +128,39 @@ treeBoundBox::treeBoundBox(const pointField& points)
 }
 
 
+// Construct as the bounding box of the given pointField
+Foam::treeBoundBox::treeBoundBox
+(
+    const UList<point>& points,
+    const labelList& meshPoints
+)
+:
+    boundBox()
+{
+    if (meshPoints.size() == 0)
+    {
+        WarningIn
+        (
+            "treeBoundBox::treeBoundBox(const UList<point>&, const labelList)"
+        )   << "cannot find bounding box for zero sized pointField"
+            << "returning zero" << endl;
+
+        return;
+    }
+
+    min() = points[meshPoints[0]];
+    max() = points[meshPoints[0]];
+
+    for (label i = 1; i < meshPoints.size(); i++)
+    {
+        min() = ::Foam::min(min(), points[meshPoints[i]]);
+        max() = ::Foam::max(max(), points[meshPoints[i]]);
+    }
+}
+
+
 // Construct from Istream
-treeBoundBox::treeBoundBox(Istream& is)
+Foam::treeBoundBox::treeBoundBox(Istream& is)
 :
     boundBox(is)
 {}
@@ -80,105 +168,19 @@ treeBoundBox::treeBoundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar treeBoundBox::minDim() const
-{
-    return ::Foam::min
-    (
-        max().x() - min().x(),
-        ::Foam::min
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-scalar treeBoundBox::maxDim() const
-{
-    return ::Foam::max
-    (
-        max().x() - min().x(),
-        ::Foam::max
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-scalar treeBoundBox::avgDim() const
-{
-    return
-    (
-        (max().x() - min().x()) +
-        (max().y() - min().y()) +
-        (max().z() - min().z())
-    )/3.0;
-}
-
-
-scalar treeBoundBox::typDim() const
-{
-    return avgDim();
-}
-
-
-point treeBoundBox::mid() const
-{
-    return 0.5*(min() + max());
-}
-
-
-pointField treeBoundBox::points() const
+Foam::pointField Foam::treeBoundBox::points() const
 {
     pointField points(8);
-    label pointI = 0;
+    forAll(points, octant)
+    {
+        points[octant] = corner(octant);
 
-    points[pointI++] = min();
-    points[pointI++] = point(min().x(), max().y(), min().z());
-    points[pointI++] = point(max().x(), max().y(), min().z());
-    points[pointI++] = point(max().x(), min().y(), min().z());
-
-    points[pointI++] = point(min().x(), min().y(), max().z());
-    points[pointI++] = point(min().x(), max().y(), max().z());
-    points[pointI++] = max();
-    points[pointI++] = point(max().x(), min().y(), max().z());
-
+    }
     return points;
 }
 
 
-edgeList treeBoundBox::edges() const
-{
-    edgeList edges(12);
-    label edgeI = 0;
-
-    // bottom face
-    edges[edgeI++] = edge(0, 1);
-    edges[edgeI++] = edge(1, 2);
-    edges[edgeI++] = edge(2, 3);
-    edges[edgeI++] = edge(3, 0);
-
-    // top face
-    edges[edgeI++] = edge(4, 5);
-    edges[edgeI++] = edge(5, 6);
-    edges[edgeI++] = edge(6, 7);
-    edges[edgeI++] = edge(7, 4);
-
-    // side edges
-    edges[edgeI++] = edge(0, 4);
-    edges[edgeI++] = edge(1, 5);
-    edges[edgeI++] = edge(2, 6);
-    edges[edgeI++] = edge(3, 7);
-
-    return edges;
-}
-
-
-// Octant to bounding box
-treeBoundBox treeBoundBox::subBbox(const direction octant) const
+Foam::treeBoundBox Foam::treeBoundBox::subBbox(const direction octant) const
 {
     if (octant > 7)
     {
@@ -241,8 +243,11 @@ treeBoundBox treeBoundBox::subBbox(const direction octant) const
 
 
 // Octant to bounding box using permutation only.
-treeBoundBox treeBoundBox::subBbox(const point& mid, const direction octant)
- const
+Foam::treeBoundBox Foam::treeBoundBox::subBbox
+(
+    const point& mid,
+    const direction octant
+) const
 {
     if (octant > 7)
     {
@@ -310,7 +315,7 @@ treeBoundBox treeBoundBox::subBbox(const point& mid, const direction octant)
 //   - sets coordinate to exact position: e.g. pt.x() = min().x()
 //     since plane intersect routine might have truncation error.
 //     This makes sure that posBits tests 'inside'
-bool treeBoundBox::intersects
+bool Foam::treeBoundBox::intersects
 (
     const point& start,
     const point& end,
@@ -362,7 +367,7 @@ bool treeBoundBox::intersects
             }
         }
 
-        if (ptBits & BELOWBIT)
+        if (ptBits & BOTTOMBIT)
         {
             // Intersect with plane V=min, n=0,-1,0
             if (Foam::mag(vec.y()) > VSMALL)
@@ -373,7 +378,7 @@ bool treeBoundBox::intersects
                 pt.z() = pt.z() + vec.z()*s;
             }
         }
-        if (ptBits & ABOVEBIT)
+        if (ptBits & TOPBIT)
         {
             // Intersect with plane V=max, n=0,1,0
             if (Foam::mag(vec.y()) > VSMALL)
@@ -385,7 +390,7 @@ bool treeBoundBox::intersects
             }
         }
 
-        if (ptBits & BEHINDBIT)
+        if (ptBits & BACKBIT)
         {
             // Intersect with plane V=min, n=0,0,-1
             if (Foam::mag(vec.z()) > VSMALL)
@@ -396,7 +401,7 @@ bool treeBoundBox::intersects
                 pt.z() = min().z();
             }
         }
-        if (ptBits & INFRONTBIT)
+        if (ptBits & FRONTBIT)
         {
             // Intersect with plane V=max, n=0,0,1
             if (Foam::mag(vec.z()) > VSMALL)
@@ -412,13 +417,13 @@ bool treeBoundBox::intersects
 
 
 // this.bb fully contains bb
-bool treeBoundBox::contains(const treeBoundBox& bb) const
+bool Foam::treeBoundBox::contains(const treeBoundBox& bb) const
 {
     return contains(bb.min()) && contains(bb.max());
 }
 
 
-bool treeBoundBox::containsNarrow(const point& sample) const
+bool Foam::treeBoundBox::containsNarrow(const point& sample) const
 {
     return
     (
@@ -431,7 +436,7 @@ bool treeBoundBox::containsNarrow(const point& sample) const
     );
 }
 
-bool treeBoundBox::contains(const vector& dir, const point& sample) const
+bool Foam::treeBoundBox::contains(const vector& dir, const point& sample) const
 {
     //
     // Compare all components against min and max of bb
@@ -472,7 +477,7 @@ bool treeBoundBox::contains(const vector& dir, const point& sample) const
 
 
 // Code position of point relative to box
-direction treeBoundBox::posBits(const point& pt) const
+Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
 {
     direction posBits = 0;
 
@@ -487,20 +492,20 @@ direction treeBoundBox::posBits(const point& pt) const
 
     if (pt.y() < min().y())
     {
-        posBits |= BELOWBIT;
+        posBits |= BOTTOMBIT;
     }
     if (pt.y() > max().y())
     {
-        posBits |= ABOVEBIT;
+        posBits |= TOPBIT;
     }
 
     if (pt.z() < min().z())
     {
-        posBits |= BEHINDBIT;
+        posBits |= BACKBIT;
     }
     if (pt.z() > max().z())
     {
-        posBits |= INFRONTBIT;
+        posBits |= FRONTBIT;
     }
     return posBits;
 }
@@ -508,7 +513,7 @@ direction treeBoundBox::posBits(const point& pt) const
 
 // nearest and furthest corner coordinate.
 // !names of treeBoundBox::min() and treeBoundBox::max() are confusing!
-void treeBoundBox::calcExtremities
+void Foam::treeBoundBox::calcExtremities
 (
     const point& sample,
     point& nearest,
@@ -556,7 +561,7 @@ void treeBoundBox::calcExtremities
 }
 
 
-scalar treeBoundBox::maxDist(const point& sample) const
+Foam::scalar Foam::treeBoundBox::maxDist(const point& sample) const
 {
     point near, far;
     calcExtremities(sample, near, far);
@@ -568,7 +573,7 @@ scalar treeBoundBox::maxDist(const point& sample) const
 // Distance comparator
 // Compare all vertices of bounding box against all of other bounding
 // box to see if all vertices of one are nearer
-label treeBoundBox::distanceCmp
+Foam::label Foam::treeBoundBox::distanceCmp
 (
     const point& sample,
     const treeBoundBox& other
@@ -583,11 +588,11 @@ label treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     calcExtremities(sample, nearThis, farThis);
 
-    const scalar minDistThis = 
+    const scalar minDistThis =
         sqr(nearThis.x() - sample.x())
      +  sqr(nearThis.y() - sample.y())
      +  sqr(nearThis.z() - sample.z());
-    const scalar maxDistThis = 
+    const scalar maxDistThis =
         sqr(farThis.x() - sample.x())
      +  sqr(farThis.y() - sample.y())
      +  sqr(farThis.z() - sample.z());
@@ -601,11 +606,11 @@ label treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     other.calcExtremities(sample, nearOther, farOther);
 
-    const scalar minDistOther = 
+    const scalar minDistOther =
         sqr(nearOther.x() - sample.x())
      +  sqr(nearOther.y() - sample.y())
      +  sqr(nearOther.z() - sample.z());
-    const scalar maxDistOther = 
+    const scalar maxDistOther =
         sqr(farOther.x() - sample.x())
      +  sqr(farOther.y() - sample.y())
      +  sqr(farOther.z() - sample.z());
@@ -633,13 +638,13 @@ label treeBoundBox::distanceCmp
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-bool operator==(const treeBoundBox& a, const treeBoundBox& b)
+bool Foam::operator==(const treeBoundBox& a, const treeBoundBox& b)
 {
     return (a.min() == b.min()) && (a.max() == b.max());
 }
 
 
-bool operator!=(const treeBoundBox& a, const treeBoundBox& b)
+bool Foam::operator!=(const treeBoundBox& a, const treeBoundBox& b)
 {
     return !(a == b);
 }
@@ -647,15 +652,11 @@ bool operator!=(const treeBoundBox& a, const treeBoundBox& b)
 
 // * * * * * * * * * * * * * * * IOstream Operator  * * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, treeBoundBox& bb)
+Foam::Istream& Foam::operator>>(Istream& is, treeBoundBox& bb)
 {
     is >> bb.min() >> bb.max();
     return is;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

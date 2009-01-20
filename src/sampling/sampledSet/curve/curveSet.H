@@ -45,7 +45,7 @@ namespace Foam
 
 // Forward declaration of classes
 class passiveParticle;
-template<class Type> class particle;
+template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                            Class curveSet Declaration
@@ -68,7 +68,7 @@ class curveSet
         //  Returns false if end of samples reached.
         bool trackToBoundary
         (
-            particle<passiveParticle>& singleParticle,
+            Particle<passiveParticle>& singleParticle,
             label& sampleI,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    nearestToCell
+    Foam::nearestToCell
 
 Description
-    TopoSetSource. Select cells nearest to points.
+    A topoSetSource to select cells nearest to points.
 
 SourceFiles
     nearestToCell.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class nearestToCell Declaration
+                       Class nearestToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class nearestToCell
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

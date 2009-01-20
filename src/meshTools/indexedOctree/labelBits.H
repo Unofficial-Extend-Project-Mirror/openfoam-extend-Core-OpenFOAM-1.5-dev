@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    labelBits
+    Foam::labelBits
 
 Description
-    29bits label + 3bits packed into single label
+    A 29bits label and 3bits packed into single label
 
 SourceFiles
 
@@ -46,7 +46,7 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                           Class labelBits Declaration
+                         Class labelBits Declaration
 \*---------------------------------------------------------------------------*/
 
 class labelBits

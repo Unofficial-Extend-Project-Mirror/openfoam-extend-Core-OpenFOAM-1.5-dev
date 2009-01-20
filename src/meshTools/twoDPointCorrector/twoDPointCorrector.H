@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    twoDPointCorrector
+    Foam::twoDPointCorrector
 
 Description
     Class applies a two-dimensional correction to mesh motion point field.
+ 
     The correction guarantees that the mesh does not get twisted during motion
     and thus introduce a third dimension into a 2-D problem.
 

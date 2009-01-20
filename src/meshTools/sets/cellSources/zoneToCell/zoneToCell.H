@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    zoneToCell
+    Foam::zoneToCell
 
 Description
-    TopoSetSource. Select faces based on cellZone.
+    A topoSetSource to select faces based on cellZone.
 
 SourceFiles
     zoneToCell.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class zoneToCell Declaration
+                        Class zoneToCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToCell
@@ -102,8 +102,11 @@ public:
 
     // Member Functions
 
-        virtual void applyToSet(const topoSetSource::setAction action, topoSet&)
-         const;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 
