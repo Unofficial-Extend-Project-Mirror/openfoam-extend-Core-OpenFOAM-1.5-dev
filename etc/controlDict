@@ -366,7 +366,7 @@ DebugSwitches
     edgeSurface         0;
     empty               0;
     engineMesh          0;
-    enrichedPatch       2;
+    enrichedPatch       0;
     errorDrivenRefinement   0;
     evaporationModel    0;
     exponential         0;
@@ -673,7 +673,7 @@ DebugSwitches
     skewCorrected       0;
     skewCorrectionVectors 0;
     sliced              0;
-    slidingInterface    2;
+    slidingInterface    0;
     slip                0;
     smooth              0;
     smoothSolver        0;
