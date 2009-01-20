@@ -20,10 +20,10 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    GidaspowSchillerNaumann
+    Foam::GidaspowSchillerNaumann
 
 Description
     H, Enwald, E. Peirano, A-E Almstedt
@@ -31,10 +31,10 @@ Description
     Int. J. Multiphase Flow, Vol. 22, Suppl, pp. 21-66 (1996)
     Eq. 86-87, p. 40
 
-    This is identical to the Wen and Yu, Rowe model Table 3.6 p.56  in 
+    This is identical to the Wen and Yu, Rowe model Table 3.6 p.56  in
     the Ph.D. thesis of Berend van Wachem
-    'Derivation, Implementation and Validation 
-                    of 
+    'Derivation, Implementation and Validation
+                    of
           Computer Simulation Models
          for Gas-Solid Fluidized Beds'
 
@@ -80,9 +80,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GidaspowSchillerNaumann();
+    //- Destructor
+    virtual ~GidaspowSchillerNaumann();
 
 
     // Member Functions

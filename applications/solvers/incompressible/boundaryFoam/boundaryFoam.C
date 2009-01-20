@@ -38,7 +38,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASModel/RASModel.H"
 #include "wallFvPatch.H"
 #include "makeGraph.H"
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        fvVectorMatrix divR = turbulence->divR(U);
+        fvVectorMatrix divR = turbulence->divDevReff(U);
         divR.source() = flowMask & divR.source();
 
         fvVectorMatrix UEqn
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
             flowDirection & turbulence->R()()[0] & wallNormal;
 
         scalar yplusWall
-            = ::sqrt(mag(wallShearStress))*y[0]/laminarTransport.nu()()[0];
+            = Foam::sqrt(mag(wallShearStress))*y[0]/laminarTransport.nu()[0];
 
         Info<< "Uncorrected Ubar = " << (flowDirection & UbarStar.value())<< tab
             << "pressure gradient = " << (flowDirection & gradP.value()) << tab

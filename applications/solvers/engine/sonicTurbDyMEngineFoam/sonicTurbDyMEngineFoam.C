@@ -37,7 +37,7 @@ Description
 #include "dynamicFvMesh.H"
 #include "engineTopoChangerMesh.H"
 #include "basicThermo.H"
-#include "turbulenceModel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "Switch.H"
 #include "OFstream.H"
 
@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 #   include "initContinuityErrs.H"
 #   include "readEngineTimeControls.H"
+#   include "CourantNo.H"
 #   include "setInitialDeltaT.H"
 #   include "startSummary.H"
 #   include "createEngineOutput.H"

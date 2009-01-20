@@ -34,7 +34,7 @@ Description
 #include "engineTime.H"
 #include "engineMesh.H"
 #include "basicThermo.H"
-#include "turbulenceModel.H"
+#include "RASModel.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 #   include "initContinuityErrs.H"
 #   include "readEngineTimeControls.H"
+#   include "compressibleCourantNo.H"
 #   include "setInitialDeltaT.H"
 #   include "startSummary.H"
 

@@ -26,8 +26,11 @@ Application
     rasInterFoam
 
 Description
-    Solver for 2 incompressible fluids capturing the interface.  Turbulence is
-    modelled using a runtime selectable incompressible RAS model.
+    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    (volume of fluid) phase-fraction based interface capturing approach.
+    The momentum and other fluid properties are of the "mixture" and a single
+    momentum equation is solved.  Turbulence is modelled using a run-time
+    selectable incompressible RAS model.
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,13 +39,12 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 #   include "readTimeControls.H"
 #   include "correctPhi.H"
+#   include "CourantNo.H"
 #   include "setInitialDeltaT.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

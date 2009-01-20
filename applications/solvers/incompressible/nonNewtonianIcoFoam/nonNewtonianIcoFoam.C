@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    icoFoam
+    nonNewtonianIcoFoam
 
 Description
     Transient solver for incompressible, laminar flow of non-Newtonian fluids.
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             volScalarField rUA = 1.0/UEqn.A();
 
             U = rUA*UEqn.H();
-            phi = (fvc::interpolate(U) & mesh.Sf()) 
+            phi = (fvc::interpolate(U) & mesh.Sf())
                 + fvc::ddtPhiCorr(rUA, U, phi);
 
             adjustPhi(phi, U, p);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
                 (
                     fvm::laplacian(rUA, p) == fvc::div(phi)
                 );
-                
+
                 pEqn.setReference(pRefCell, pRefValue);
                 pEqn.solve();
 

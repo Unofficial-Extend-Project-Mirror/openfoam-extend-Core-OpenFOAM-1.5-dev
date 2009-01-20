@@ -20,10 +20,10 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dragModel
+    Foam::dragModel
 
 Description
 
@@ -118,7 +118,7 @@ public:
         //    ddt(beta*rhob*Ub) + ...  = ... alpha*beta*K*(Ub-Ua)
         // ********************************** NB ! *****************************
         // for numerical reasons alpha and beta has been
-        // extracted from the dragFunction K, 
+        // extracted from the dragFunction K,
         // so you MUST divide K by alpha*beta when implemnting the drag function
         // ********************************** NB ! *****************************
         virtual tmp<volScalarField> K(const volScalarField& Ur) const = 0;

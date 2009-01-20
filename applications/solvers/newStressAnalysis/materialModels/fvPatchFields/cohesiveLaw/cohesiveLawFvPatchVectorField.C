@@ -47,8 +47,7 @@ cohesiveLawFvPatchVectorField::cohesiveLawFvPatchVectorField
     fixedGradientFvPatchVectorField(p, iF),
     cohesiveLawPtr_(NULL),
     relaxationFactor_(1.0),
-    traction_(p.size(), vector::zero),
-    isDeadCellFace_(p.size(), false)
+    traction_(p.size(), vector::zero)
 {}
 
 
@@ -65,8 +64,7 @@ cohesiveLawFvPatchVectorField::cohesiveLawFvPatchVectorField
         cohesiveLaw::New(dict.lookup("cohesiveLaw"), dict).ptr()
     ),
     relaxationFactor_(readScalar(dict.lookup("relaxationFactor"))),
-    traction_(p.size(), vector::zero),
-    isDeadCellFace_(p.size(), false)
+    traction_(p.size(), vector::zero)
 {
     fvPatchVectorField::operator=(patchInternalField());
     gradient() = vector::zero;
@@ -81,8 +79,7 @@ cohesiveLawFvPatchVectorField::cohesiveLawFvPatchVectorField
     fixedGradientFvPatchVectorField(cpf),
     cohesiveLawPtr_(cpf.cohesiveLawPtr_->clone().ptr()),
     relaxationFactor_(cpf.relaxationFactor_),
-    traction_(cpf.traction_),
-    isDeadCellFace_(cpf.isDeadCellFace_)
+    traction_(cpf.traction_)
 {}
 
 
@@ -97,8 +94,7 @@ cohesiveLawFvPatchVectorField::cohesiveLawFvPatchVectorField
     fixedGradientFvPatchVectorField(cpf, p, iF, mapper),
     cohesiveLawPtr_(cpf.cohesiveLawPtr_->clone().ptr()),
     relaxationFactor_(cpf.relaxationFactor_),
-    traction_(cpf.traction_, mapper),
-    isDeadCellFace_(p.size(), false)
+    traction_(cpf.traction_, mapper)
 {}
 
 
@@ -111,8 +107,7 @@ cohesiveLawFvPatchVectorField::cohesiveLawFvPatchVectorField
     fixedGradientFvPatchVectorField(cpf, iF),
     cohesiveLawPtr_(cpf.cohesiveLawPtr_->clone().ptr()),
     relaxationFactor_(cpf.relaxationFactor_),
-    traction_(cpf.traction_),
-    isDeadCellFace_(cpf.isDeadCellFace_)
+    traction_(cpf.traction_)
 {}
 
 
@@ -147,7 +142,6 @@ void cohesiveLawFvPatchVectorField::autoMap
     fixedGradientFvPatchVectorField::autoMap(m);
 
     traction_.autoMap(m);
-//     isDeadCellFace_.autoMap(m);
 }
 
 
@@ -172,7 +166,6 @@ void cohesiveLawFvPatchVectorField::rmap
     }
 
     traction_.rmap(dmptf.traction_, addr);
-//     isDeadCellFace_.rmap(dmptf.isDeadCellFace_, addr);
 }
 
 
@@ -183,29 +176,6 @@ void cohesiveLawFvPatchVectorField::updateCoeffs()
     {
         return;
     }
-
-    // Find dead cell faces
-    const cellList& cells = patch().boundaryMesh().mesh().cells();
-    label nIntFaces = patch().boundaryMesh().mesh().nInternalFaces();
-    const unallocLabelList& faceCells = patch().faceCells();
-
-    forAll(faceCells, faceI)
-    {
-        const labelList& curCellFaces = cells[faceCells[faceI]];
-        label nBndFaces = 0;
-        forAll(curCellFaces, fI)
-        {
-            if(curCellFaces[fI] >= nIntFaces)
-            {
-                nBndFaces++;
-            }
-        }
-        if(nBndFaces == curCellFaces.size())
-        {
-            isDeadCellFace_[faceI] = true;
-        }
-    }
-
 
     // Looking up rheology
 
@@ -235,29 +205,14 @@ void cohesiveLawFvPatchVectorField::updateCoeffs()
 
     for(label i = 0; i < sizeByTwo; i++)
     {
+        scalar tmp = delta[i];
         delta[i] += delta[sizeByTwo + i];
-        delta[sizeByTwo + i] = delta[i];
+        delta[sizeByTwo + i] += tmp;
     }
 
     forAll (traction_, faceI)
     {
-        label f0 = faceI;
-        label f1 = faceI;
-        if(faceI < sizeByTwo)
-        {
-            f1 = sizeByTwo + faceI;
-        }
-        else
-        {
-            f1 = faceI - sizeByTwo;
-        }
-
-        if (isDeadCellFace_[f0] || isDeadCellFace_[f1])
-        {
-            // Traction free
-            traction_[faceI] = vector::zero;            
-        }
-        else if (delta[faceI] < 0)
+        if (delta[faceI] < 0)
         {
             // Return from traction to symmetryPlane??
             traction_[faceI] = law().sigmaMax().value()*n[faceI];
@@ -280,31 +235,9 @@ void cohesiveLawFvPatchVectorField::updateCoeffs()
       - (n & (mu*gradU.T() - (mu + lambda)*gradU))
       - n*lambda*tr(gradU)
     )/(2.0*mu + lambda);
- 
+
     fixedGradientFvPatchVectorField::updateCoeffs();
 }
-
-
-labelList cohesiveLawFvPatchVectorField::deadCells() const
-{
-    labelHashSet deadCellSet;
-
-    const unallocLabelList& faceCells = patch().faceCells();
-
-    forAll(isDeadCellFace_, faceI)
-    {
-        if (isDeadCellFace_[faceI])
-        {
-            if (!deadCellSet.found(faceCells[faceI]))
-            {
-                deadCellSet.insert(faceCells[faceI]);
-            }
-        }
-    }
-
-    return deadCellSet.toc();
-}
-
 
 
 // Write

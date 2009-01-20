@@ -44,7 +44,7 @@
 
     Info<< "Reading transportProperties\n" << endl;
     twoPhaseMixture twoPhaseProperties(U, phi, "gamma");
-    
+
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
 
@@ -87,14 +87,29 @@
 
 
     Info<< "Calculating field g.h\n" << endl;
+    volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("gh", g & mesh.Cf());
+
+
+    volScalarField p
+    (
+        IOobject
+        (
+            "p",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pd + rho*gh
+    );
 
 
     // Construct interface from gamma distribution
     interfaceProperties interface(gamma, U, twoPhaseProperties);
 
     // Construct LES model
-    autoPtr<LESmodel> turbulence
+    autoPtr<incompressible::LESModel> turbulence
     (
-        LESmodel::New(U, phi, twoPhaseProperties)
+        incompressible::LESModel::New(U, phi, twoPhaseProperties)
     );

@@ -100,12 +100,6 @@ public:
 
     // Member Functions
 
-        //- Return reference to stress field
-        const volSymmTensorField& sigma() const
-        {
-            return sigma_;
-        }
-
         //- Return true for plane stress
         const Switch& planeStress() const
         {
@@ -144,18 +138,6 @@ public:
 
         //- Return second Lame's coefficient
         tmp<volScalarField> lambda(scalar t) const;
-
-        //- Return yield stress
-        tmp<volScalarField> sigmaY() const
-        {
-            return lawPtr_->sigmaY();
-        }
-
-        //- Return plastic modulus
-        tmp<volScalarField> Ep() const
-        {
-            return lawPtr_->Ep();
-        }
 
         //- Correct the rheological model
         void correct();

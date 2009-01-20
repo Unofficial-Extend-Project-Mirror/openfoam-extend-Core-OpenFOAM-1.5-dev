@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    tractionDisplacementFvPatchVectorField
+    Foam::tractionDisplacementFvPatchVectorField
 
 Description
     Fixed traction boundary condition for the standard linear elastic, fixed

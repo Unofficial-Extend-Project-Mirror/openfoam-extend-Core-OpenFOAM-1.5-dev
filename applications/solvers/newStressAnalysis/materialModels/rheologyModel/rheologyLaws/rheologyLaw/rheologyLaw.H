@@ -168,12 +168,6 @@ public:
         //- Return creep compliance
         virtual tmp<volScalarField> J(scalar t) const = 0;
 
-        //- Return yield stress
-        virtual tmp<volScalarField> sigmaY() const = 0;
-
-        //- Return plastic modulus
-        virtual tmp<volScalarField> Ep() const = 0;
-
         //- Correct the rheological model
         virtual void correct() = 0;
 };

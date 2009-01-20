@@ -130,13 +130,6 @@ public:
             return 1.0/E(t);
         }
 
-        //- Return modulus of plasticity
-        virtual tmp<volScalarField> Ep() const;
-
-        //- Return yield stress
-        virtual tmp<volScalarField> sigmaY() const;
-
-
         //- Correct the rheological model
         virtual void correct();
 };

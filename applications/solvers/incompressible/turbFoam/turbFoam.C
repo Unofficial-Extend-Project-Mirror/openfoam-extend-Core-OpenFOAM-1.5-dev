@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
             (
                 fvm::ddt(U)
               + fvm::div(phi, U)
-              + turbulence->divR(U)
+              + turbulence->divDevReff(U)
             );
 
             if (momentumPredictor)

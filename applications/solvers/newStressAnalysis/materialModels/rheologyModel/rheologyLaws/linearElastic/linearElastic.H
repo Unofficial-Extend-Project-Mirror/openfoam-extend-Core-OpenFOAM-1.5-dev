@@ -62,6 +62,7 @@ class linearElastic
         //- Poisson's ratio
         dimensionedScalar nu_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -69,6 +70,7 @@ class linearElastic
 
         //- Disallow default bitwise assignment
         void operator=(const linearElastic&);
+
 
 public:
 
@@ -130,11 +132,6 @@ public:
 
             return 1.0/E(t);
         }
-
-        //- Return modulus of plasticity
-        virtual tmp<volScalarField> Ep() const;
-
-        virtual tmp<volScalarField> sigmaY() const;
 
         //- Correct the rheological model
         virtual void correct()

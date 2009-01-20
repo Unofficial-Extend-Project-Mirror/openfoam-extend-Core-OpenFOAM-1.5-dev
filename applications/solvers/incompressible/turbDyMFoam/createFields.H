@@ -37,9 +37,9 @@
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
-    autoPtr<turbulenceModel> turbulence
+    autoPtr<incompressible::RASModel> turbulence
     (
-        turbulenceModel::New(U, phi, laminarTransport)
+        incompressible::RASModel::New(U, phi, laminarTransport)
     );
 
     Info<< "Reading field rAU if present\n" << endl;

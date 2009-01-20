@@ -1,13 +1,10 @@
 rheologyModel/rheologyModel.C
-rheologyLaws = rheologyModel/rheologyLaws
+rheologyLaws         = rheologyModel/rheologyLaws
 
 $(rheologyLaws)/rheologyLaw/rheologyLaw.C
 $(rheologyLaws)/rheologyLaw/newRheologyLaw.C
 
-plasticityModel/plasticityModel.C
-
 $(rheologyLaws)/linearElastic/linearElastic.C
-$(rheologyLaws)/elasticPlastic/elasticPlastic.C
 $(rheologyLaws)/multiMaterial/multiMaterial.C
 $(rheologyLaws)/MaxwellViscoelastic/MaxwellViscoelastic.C
 $(rheologyLaws)/BurgersViscoelastic/BurgersViscoelastic.C
@@ -17,7 +14,7 @@ $(rheologyLaws)/MaxwellElasticViscoelastic/MaxwellElasticViscoelastic.C
 $(rheologyLaws)/PronyViscoelastic/PronyViscoelastic.C
 
 thermalModel/thermalModel.C
-thermalLaws = thermalModel/thermalLaws
+thermalLaws          = thermalModel/thermalLaws
 
 $(thermalLaws)/thermalLaw/thermalLaw.C 
 $(thermalLaws)/thermalLaw/newThermalLaw.C
@@ -30,13 +27,9 @@ cohesiveLaws/linear/linearCohesiveLaw.C
 
 fvPatchFields/tractionDisplacement/tractionDisplacementFvPatchVectorField.C
 fvPatchFields/tractionDisplacementThermo/tractionDisplacementThermoFvPatchVectorField.C
-fvPatchFields/tractionDisplacementIncrement/tractionDisplacementIncrementFvPatchVectorField.C
 fvPatchFields/nusselt/nusseltFvPatchScalarField.C
 fvPatchFields/newDirectionMixed/newDirectionMixedFvPatchFields.C
 fvPatchFields/cohesiveLaw/cohesiveLawFvPatchVectorField.C
 fvPatchFields/cohesiveZone/cohesiveZoneFvPatchVectorField.C
-fvPatchFields/cohesiveZoneIncremental/cohesiveZoneIncrementalFvPatchVectorField.C
-
-
 
 LIB = $(FOAM_LIBBIN)/libmaterialModels

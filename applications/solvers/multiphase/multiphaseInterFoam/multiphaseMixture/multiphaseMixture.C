@@ -20,7 +20,7 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*---------------------------------------------------------------------------*/
 
@@ -68,6 +68,20 @@ Foam::multiphaseMixture::multiphaseMixture
     mesh_(U.mesh()),
     U_(U),
     phi_(phi),
+
+    nu_
+    (
+        IOobject
+        (
+            "nu",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("nu", sqr(dimLength)/dimTime, 0.0)
+    ),
 
     rhoPhi_
     (
@@ -167,9 +181,9 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixture::muf() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::nu() const
+const Foam::volScalarField& Foam::multiphaseMixture::nu() const
 {
-    return mu()/rho();
+    return nu_;
 }
 
 
@@ -295,6 +309,8 @@ void Foam::multiphaseMixture::correct()
     {
         solveAlphas(nAlphaCorr, cycleAlpha, cAlpha);
     }
+
+    nu_ = mu()/rho();
 }
 
 
@@ -313,7 +329,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseMixture::nHatfv
     surfaceVectorField gradAlphaf = fvc::interpolate(gradAlpha);
     */
 
-    surfaceVectorField gradAlphaf = 
+    surfaceVectorField gradAlphaf =
         fvc::interpolate(alpha2)*fvc::interpolate(fvc::grad(alpha1))
       - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2));
 
@@ -354,7 +370,7 @@ void Foam::multiphaseMixture::correctContactAngle
     {
         if (typeid(gbf[patchi]) == typeid(alphaContactAngleFvPatchScalarField))
         {
-            const alphaContactAngleFvPatchScalarField& acap = 
+            const alphaContactAngleFvPatchScalarField& acap =
                 refCast<const alphaContactAngleFvPatchScalarField>(gbf[patchi]);
 
             vectorField& nHatPatch = nHatb[patchi];
@@ -471,7 +487,7 @@ void Foam::multiphaseMixture::solveAlphas
     tmp<fv::convectionScheme<scalar> > mvConvection
     (
         fv::convectionScheme<scalar>::New
-        ( 
+        (
             mesh_,
             alphaTable_,
             phi_,

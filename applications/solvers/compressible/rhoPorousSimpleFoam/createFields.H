@@ -49,9 +49,9 @@
     );
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::turbulenceModel> turbulence
+    autoPtr<compressible::RASModel> turbulence
     (
-        compressible::turbulenceModel::New
+        compressible::RASModel::New
         (
             rho,
             U,
@@ -63,10 +63,23 @@
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 
     porousZones pZones(mesh);
-    Switch pressureImplicitPorousity(false);
+    Switch pressureImplicitPorosity(false);
 
+    int nUCorr = 0;
     if (pZones.size())
     {
-        mesh.solutionDict().subDict("SIMPLE")
-       .lookup("pressureImplicitPorousity") >> pressureImplicitPorousity;
+        // nUCorrectors for pressureImplicitPorosity
+        if (mesh.solutionDict().subDict("SIMPLE").found("nUCorrectors"))
+        {
+            nUCorr = readInt
+            (
+                mesh.solutionDict().subDict("SIMPLE").lookup("nUCorrectors")
+            );
+        }
+
+        if (nUCorr > 0)
+        {
+            pressureImplicitPorosity = true;
+        }
     }
+

@@ -1,3 +1,0 @@
-icoMovingMeshFoam.C
-
-EXE = $(FOAM_APPBIN)/icoMovingMeshFoam

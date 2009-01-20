@@ -3,15 +3,16 @@ rho = thermo->rho();
 volScalarField rUA = 1.0/UEqn.A();
 U = rUA*UEqn.H();
 
-if (transSonic)
+if (transonic)
 {
     surfaceScalarField phid
     (
         "phid",
-        (
-            (fvc::interpolate(rho*U) & mesh.Sf())
+        fvc::interpolate(thermo->psi())
+       *(
+            (fvc::interpolate(U) & mesh.Sf())
           + fvc::ddtPhiCorr(rUA, rho, U, phi)
-        )/fvc::interpolate(p)
+        )
     );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -33,8 +34,12 @@ if (transSonic)
 }
 else
 {
-    phi = (fvc::interpolate(rho*U) & mesh.Sf())
-        + fvc::ddtPhiCorr(rUA, rho, U, phi);
+    phi = 
+        fvc::interpolate(rho)*
+        (
+            (fvc::interpolate(U) & mesh.Sf())
+          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+        );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {

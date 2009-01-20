@@ -4,9 +4,14 @@
     (
         fvm::div(phi, U)
       - fvm::Sp(fvc::div(phi), U)
-      + turbulence->divRhoR(U)
+      + turbulence->divDevRhoReff(U)
     );
 
     UEqn().relax();
 
-    solve(UEqn() == -fvc::grad(p));
+    eqnResidual = solve
+    (
+        UEqn() == -fvc::grad(p)
+    ).initialResidual();
+
+    maxResidual = max(eqnResidual, maxResidual);

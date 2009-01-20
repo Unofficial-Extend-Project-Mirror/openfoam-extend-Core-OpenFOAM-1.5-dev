@@ -27,7 +27,7 @@ Application
 
 Description
     Transient solver for trans-sonic/supersonic, laminar flow of a 
-    compressible gas with mesh motion.
+    compressible gas with mesh motion..
 
 \*---------------------------------------------------------------------------*/
 
@@ -92,18 +92,21 @@ int main(int argc, char *argv[])
         {
             U = UEqn.H()/UEqn.A();
 
-            surfaceScalarField phid =
+            surfaceScalarField phid
+            (
+                "phid",
                 fvc::interpolate(psi)*
                 (
                     (fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U)
-                );
+                )
+            );
 
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             {
                 fvScalarMatrix pEqn
                 (
                     fvm::ddt(psi, p)
-                  + fvm::div(phid, p, "div(phid,p)")
+                  + fvm::div(phid, p)
                   - fvm::laplacian(rho/UEqn.A(), p)
                 );
 

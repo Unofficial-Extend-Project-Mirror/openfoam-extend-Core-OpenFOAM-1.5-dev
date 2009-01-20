@@ -26,7 +26,7 @@ Application
     XiFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence 
+    Compressible premixed/partially-premixed combustion solver with turbulence
     modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
@@ -52,7 +52,7 @@ Description
 
 #include "fvCFD.H"
 #include "hhuCombustionThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
 #include "Switch.H"
@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
 #   include "readPISOControls.H"
 #   include "initContinuityErrs.H"
 #   include "readTimeControls.H"
+#   include "compressibleCourantNo.H"
 #   include "setInitialDeltaT.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

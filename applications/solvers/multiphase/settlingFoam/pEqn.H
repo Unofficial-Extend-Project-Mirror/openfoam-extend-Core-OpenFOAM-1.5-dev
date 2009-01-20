@@ -7,8 +7,12 @@ surfaceScalarField rUAf
 );
 
 U = rUA*UEqn.H();
-phi = (fvc::interpolate(rho*U) & mesh.Sf())
-    + fvc::ddtPhiCorr(rUA, rho, U, phi);
+phi =
+    fvc::interpolate(rho)
+   *(
+       (fvc::interpolate(U) & mesh.Sf())
+     + fvc::ddtPhiCorr(rUA, rho, U, phi)
+    );
 
 surfaceScalarField phiU("phiU", phi);
 phi -= ghf*fvc::snGrad(rho)*rUAf*mesh.magSf();

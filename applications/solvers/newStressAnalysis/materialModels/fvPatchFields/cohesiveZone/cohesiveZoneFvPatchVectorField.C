@@ -258,7 +258,7 @@ void cohesiveZoneFvPatchVectorField::updateCoeffs()
             {
                 // Return from traction to symmetryPlane
                 refValue()[faceI] = vector::zero;
-                refGrad()[faceI] = vector::zero;
+                refGrad() = vector::zero;
                 valueFraction()[faceI] = sqr(n[faceI]);
                 Info << "Face removed from crack: " << faceI << endl;
             }

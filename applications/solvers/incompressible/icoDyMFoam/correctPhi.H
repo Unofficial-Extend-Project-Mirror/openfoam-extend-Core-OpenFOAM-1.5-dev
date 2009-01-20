@@ -3,7 +3,7 @@
 
     for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if (p.boundaryField()[i].fixesValue())
+        if(p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -24,13 +24,11 @@
         pcorrTypes
     );
 
-#   include "continuityErrs.H"
-
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(rUA, pcorr) == fvc::div(phi)
+            fvm::laplacian(rAU, pcorr) == fvc::div(phi)
         );
 
         pcorrEqn.setReference(pRefCell, pRefValue);
@@ -43,4 +41,4 @@
     }
 }
 
-
+#include "continuityErrs.H"

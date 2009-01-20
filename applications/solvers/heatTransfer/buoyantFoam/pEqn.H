@@ -1,16 +1,17 @@
-bool closedVolume = false;
-
-pd.boundaryField() ==
-    p.boundaryField() - rho.boundaryField()*gh.boundaryField() - pRef.value();
+bool closedVolume = pd.needReference();
 
 rho = thermo->rho();
 
 volScalarField rUA = 1.0/UEqn.A();
 U = rUA*UEqn.H();
 
-phi = (fvc::interpolate(rho*U) & mesh.Sf())
-    + fvc::ddtPhiCorr(rUA, rho, U, phi)
-    - fvc::interpolate(rUA*rho*gh)*fvc::snGrad(rho)*mesh.magSf();
+phi =
+    fvc::interpolate(rho)
+   *(
+        (fvc::interpolate(U) & mesh.Sf())
+      + fvc::ddtPhiCorr(rUA, rho, U, phi)
+    )
+  - fvc::interpolate(rho*rUA*gh)*fvc::snGrad(rho)*mesh.magSf();
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
@@ -23,8 +24,14 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
       - fvm::laplacian(rho*rUA, pd)
     );
 
-    closedVolume = pd.needReference();
-    pdEqn.solve();
+    if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
+    {
+        pdEqn.solve(mesh.solver(pd.name() + "Final"));
+    }
+    else
+    {
+        pdEqn.solve(mesh.solver(pd.name()));
+    }
 
     if (nonOrth == nNonOrthCorr)
     {
@@ -32,7 +39,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     }
 }
 
-p = pd + rho*gh + pRef;
+p == pd + rho*gh + pRef;
 dpdt = fvc::ddt(p);
 
 #include "rhoEqn.H"

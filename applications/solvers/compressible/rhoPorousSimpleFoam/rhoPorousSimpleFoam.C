@@ -23,18 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    rhoSimpleFoam
+    rhoPorousSimpleFoam
 
 Description
-    Steady-state solver for turbulent flow of compressible fluids for
-    ventilation and heat-transfer.
+    Steady-state solver for turbulent flow of compressible fluids with
+    implicit or explicit porosity treatment
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
-#include "fixedGradientFvPatchFields.H"
+#include "compressible/RASModel/RASModel.H"
 #include "porousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,6 +56,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "readSIMPLEControls.H"
+#       include "initConvergenceCheck.H"
 
         p.storePrevIter();
         rho.storePrevIter();
@@ -71,10 +71,11 @@ int main(int argc, char *argv[])
         turbulence->correct();
 
         runTime.write();
-
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
+
+#       include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;

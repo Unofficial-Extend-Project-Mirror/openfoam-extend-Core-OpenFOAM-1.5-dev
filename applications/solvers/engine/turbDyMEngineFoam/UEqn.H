@@ -2,7 +2,7 @@
     (
         fvm::ddt(U)
       + fvm::div(phi, U)
-      + turbulence->divR(U)
+      + turbulence->divDevReff(U)
     );
 
     if (momentumPredictor)

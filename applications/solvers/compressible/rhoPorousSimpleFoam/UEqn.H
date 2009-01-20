@@ -4,7 +4,7 @@
     (
         fvm::div(phi, U)
       - fvm::Sp(fvc::div(phi), U)
-      + turbulence->divRhoR(U)
+      + turbulence->divDevRhoReff(U)
     );
 
     UEqn().relax();
@@ -16,21 +16,31 @@
     tmp<volScalarField> trAU;
     tmp<volTensorField> trTU;
 
-    if (pressureImplicitPorousity)
+    if (pressureImplicitPorosity)
     {
         tmp<volTensorField> tTU = tensor(I)*UEqn().A();
         pZones.addResistance(UEqn(), tTU());
-        trTU = inv(tTU);
+        trTU = inv(tTU());
         trTU().rename("rAU");
 
-        U = trTU() & (UEqn().H() - fvc::grad(p));
+        volVectorField gradp = fvc::grad(p);
+
+        for (int UCorr=0; UCorr<nUCorr; UCorr++)
+        {
+            U = trTU() & (UEqn().H() - gradp);
+        }
         U.correctBoundaryConditions();
     }
     else
     {
         pZones.addResistance(UEqn());
 
-        solve(UEqn() == -fvc::grad(p));
+        eqnResidual = solve
+        (
+            UEqn() == -fvc::grad(p)
+        ). initialResidual();
+
+        maxResidual = max(eqnResidual, maxResidual);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

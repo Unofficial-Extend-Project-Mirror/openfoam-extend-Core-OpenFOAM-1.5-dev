@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    phase
+    Foam::phase
 
 Description
     Single incompressible phase derived from the phase-fraction.
@@ -100,7 +100,7 @@ public:
 
             autoPtr<phase> operator()(Istream& is) const
             {
-                dictionaryEntry ent(is);
+                dictionaryEntry ent(dictionary::null, is);
                 return autoPtr<phase>(new phase(ent.keyword(), ent, U_, phi_));
             }
         };

@@ -144,50 +144,5 @@ Foam::tmp<Foam::volScalarField> Foam::linearElastic::nu() const
     return tresult;
 }
 
-Foam::tmp<Foam::volScalarField> Foam::linearElastic::Ep() const
-{
-//     notImplemented(type() + "::Ep()");
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "Ep",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh(),
-            dimensionedScalar("zeroEp", dimForce/dimArea, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-}
-
-Foam::tmp<Foam::volScalarField> Foam::linearElastic::sigmaY() const
-{
-//     notImplemented(type() + "::sigmaY()");
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "sigmaY",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh(),
-            dimensionedScalar("zeroSigmaY", dimForce/dimArea, GREAT),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-}
 
 // ************************************************************************* //

@@ -12,4 +12,18 @@ fvVectorMatrix UEqn
   - fvm::laplacian(mu, U, "laplacian(muEff,U)")
 );
 
-//solve(UEqn == -fvc::grad(p) - fvc::grad(rho)*gh);
+if (momentumPredictor)
+{
+    solve
+    (
+        UEqn
+     ==
+        fvc::reconstruct
+        (
+            (
+              - ghf*fvc::snGrad(rho)
+              - fvc::snGrad(p)
+            )*mesh.magSf()
+        )
+    );
+}

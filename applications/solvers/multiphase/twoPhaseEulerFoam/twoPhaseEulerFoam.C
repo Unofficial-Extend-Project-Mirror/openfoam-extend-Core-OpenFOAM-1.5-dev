@@ -20,13 +20,13 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
     twoPhaseEulerFoam
 
 Description
-    Solver for a system of 2 incompressible fluid phases with one phase 
+    Solver for a system of 2 incompressible fluid phases with one phase
     dispersed, e.g. gas bubbles in a liquid.
 
 \*---------------------------------------------------------------------------*/
@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 #   include "readEnvironmentalProperties.H"
 #   include "createFields.H"
-#   include "createAverages.H"
 #   include "readPPProperties.H"
 #   include "initContinuityErrs.H"
 #   include "readTimeControls.H"
+#   include "CourantNo.H"
 #   include "setInitialDeltaT.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,9 +99,7 @@ int main(int argc, char *argv[])
             kineticTheory.solve();
             nuEffa += kineticTheory.mua()/rhoa;
         }
-#       include "calculateAverages.H"
 #       include "write.H"
-#       include "writeNaveragingSteps.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

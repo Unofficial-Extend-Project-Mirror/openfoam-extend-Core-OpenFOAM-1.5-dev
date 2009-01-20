@@ -58,9 +58,9 @@ volScalarField kappa
 );
 
 Info << "Creating turbulence model.\n" << nl;
-autoPtr<compressible::turbulenceModel> turbulence
+autoPtr<compressible::RASModel> turbulence
 (
-    compressible::turbulenceModel::New
+    compressible::RASModel::New
     (
         rho,
         U,

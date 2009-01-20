@@ -66,8 +66,6 @@ class cohesiveLawFvPatchVectorField
         //- Traction
         vectorField traction_;
 
-        //- Does bondary face belong to the dead cell?
-        boolList isDeadCellFace_;
 
 public:
 
@@ -144,9 +142,6 @@ public:
             //- Return cohesive law
             const cohesiveLaw& law() const;
 
-            //- Return dead cells list
-            labelList deadCells() const;
-    
 
         // Mapping functions
 

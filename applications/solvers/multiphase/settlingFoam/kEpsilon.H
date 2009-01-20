@@ -1,6 +1,6 @@
 if(turbulence)
 {
-    if (mesh.moving())
+    if (mesh.changing())
     {
         y.correct();
     }

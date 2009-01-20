@@ -3,18 +3,21 @@ rho = thermo->rho();
 volScalarField A = UEqn.A();
 U = UEqn.H()/A;
 
-if (transSonic)
+if (transonic)
 {
-    surfaceScalarField phid =
+    surfaceScalarField phid
+    (
+        "phid",
         fvc::interpolate(thermo->psi())
-       *((fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U));
+       *((fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U))
+    );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
-          + fvm::div(phid, p, "div(phid,p)")
+          + fvm::div(phid, p)
           - fvm::laplacian(rho/A, p)
          ==
             Sevap

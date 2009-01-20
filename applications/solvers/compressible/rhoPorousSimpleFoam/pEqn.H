@@ -1,4 +1,4 @@
-if (pressureImplicitPorousity)
+if (pressureImplicitPorosity)
 {
     U = trTU()&UEqn().H();
 }
@@ -16,7 +16,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
     tmp<fvScalarMatrix> tpEqn;
 
-    if (pressureImplicitPorousity)
+    if (pressureImplicitPorosity)
     {
         tpEqn = (fvm::laplacian(rho*trTU(), p) == fvc::div(phi));
     }
@@ -26,7 +26,16 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     }
 
     tpEqn().setReference(pRefCell, pRefValue);
-    tpEqn().solve();
+    // retain the residual from the first iteration
+    if (nonOrth == 0)
+    {
+        eqnResidual = tpEqn().solve().initialResidual();
+        maxResidual = max(eqnResidual, maxResidual);
+    }
+    else
+    {
+        tpEqn().solve();
+    }
 
     if (nonOrth == nNonOrthCorr)
     {
@@ -39,7 +48,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-if (pressureImplicitPorousity)
+if (pressureImplicitPorosity)
 {
     U -= trTU()&fvc::grad(p);
 }

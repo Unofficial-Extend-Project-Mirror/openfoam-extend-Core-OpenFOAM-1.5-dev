@@ -33,7 +33,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASModel/RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         (
             fvm::ddt(rho, U)
           + fvm::div(phi, U)
-          + turbulence->divRhoR(U)
+          + turbulence->divDevRhoReff(U)
         );
 
         solve(UEqn == -fvc::grad(p));
@@ -79,11 +79,15 @@ int main(int argc, char *argv[])
             volScalarField rUA = 1.0/UEqn.A();
             U = rUA*UEqn.H();
 
-            surfaceScalarField phid =
+            surfaceScalarField phid
             (
-                (fvc::interpolate(rho*U) & mesh.Sf())
-              + fvc::ddtPhiCorr(rUA, rho, U, phi)
-            )/fvc::interpolate(p);
+                "phid",
+                fvc::interpolate(thermo->psi())
+               *(
+                   (fvc::interpolate(U) & mesh.Sf())
+                 + fvc::ddtPhiCorr(rUA, rho, U, phi)
+               )
+            );
 
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             {

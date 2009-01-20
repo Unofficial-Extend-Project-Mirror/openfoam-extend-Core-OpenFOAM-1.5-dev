@@ -26,14 +26,13 @@ Application
     rhoSimpleFoam
 
 Description
-    Steady-state solver for turbulent flow of compressible fluids for
-    ventilation and heat-transfer.
+    Steady-state solver for turbulent flow of compressible fluids
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,6 +55,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "readSIMPLEControls.H"
+#       include "initConvergenceCheck.H"
 
         p.storePrevIter();
         rho.storePrevIter();
@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
+
+#       include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;

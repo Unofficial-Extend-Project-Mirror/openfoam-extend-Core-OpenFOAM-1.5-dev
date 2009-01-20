@@ -53,7 +53,7 @@ Description
 #include "engineTime.H"
 #include "engineMesh.H"
 #include "hhuCombustionThermo.H"
-#include "turbulenceModel.H"
+#include "RASModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
 #include "Switch.H"
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 #   include "initContinuityErrs.H"
 #   include "readEngineTimeControls.H"
+#   include "compressibleCourantNo.H"
 #   include "setInitialDeltaT.H"
 #   include "startSummary.H"
 
