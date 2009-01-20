@@ -28,6 +28,8 @@ License
 #include "Limited01.H"
 #include "vanLeer.H"
 
+#include "DeferredCorrectionLimitedScheme.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -54,6 +56,11 @@ namespace Foam
         magSqr,
         scalar
     )
+
+
+    // Deferred correction schemes
+    makeDeferredSurfaceInterpolationScheme(vanLeerDC, vanLeerLimiter)
+    makeDeferredVSurfaceInterpolationScheme(vanLeerVDC, vanLeerLimiter)
 }
 
 // ************************************************************************* //

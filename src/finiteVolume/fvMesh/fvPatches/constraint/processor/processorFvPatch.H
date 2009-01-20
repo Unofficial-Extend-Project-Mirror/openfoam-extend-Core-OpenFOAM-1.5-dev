@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    processorFvPatch
+    Foam::processorFvPatch
 
 Description
     Processor patch.
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class processorFvPatch Declaration
+                           Class processorFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorFvPatch
@@ -141,26 +141,28 @@ public:
             //- Initialise interface data transfer
             virtual void initTransfer
             (
-                const unallocLabelList& interfaceData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
             ) const;
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (
-                const unallocLabelList& internalData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& internalData
             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& internalData
             ) const;
 };

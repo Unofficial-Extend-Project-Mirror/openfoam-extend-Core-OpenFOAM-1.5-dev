@@ -148,7 +148,7 @@ tmp<Field<Type> > wedgeFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void wedgeFvPatchField<Type>::evaluate()
+void wedgeFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

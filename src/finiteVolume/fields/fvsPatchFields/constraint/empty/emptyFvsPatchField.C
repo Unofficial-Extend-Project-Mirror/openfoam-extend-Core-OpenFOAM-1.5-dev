@@ -94,7 +94,7 @@ emptyFvsPatchField<Type>::emptyFvsPatchField
             "emptyFvsPatchField<Type>::emptyFvsPatchField\n"
             "(\n"
             "    const fvPatch& p,\n"
-            "    const DimensionedField<Type, surfaceMesh>& field,\n"
+            "    const Field<Type>& field,\n"
             "    const dictionary& dict\n"
             ")\n",
             dict

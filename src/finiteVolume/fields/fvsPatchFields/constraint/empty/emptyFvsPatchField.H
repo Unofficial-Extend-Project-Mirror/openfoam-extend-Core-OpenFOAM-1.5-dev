@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    emptyFvsPatchField
+    Foam::emptyFvsPatchField
 
 Description
+    Foam::emptyFvsPatchField
 
 SourceFiles
     emptyFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class emptyFvsPatchField Declaration
+                         Class emptyFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -134,7 +135,7 @@ public:
             //- Reverse map the given fvsPatchField onto this fvsPatchField
             virtual void rmap
             (
-                const fvsPatchField<Type>&,
+                const fvPatchField<Type>&,
                 const labelList&
             )
             {}

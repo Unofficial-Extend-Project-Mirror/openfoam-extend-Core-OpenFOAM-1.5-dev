@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SLTSDdtScheme
+    Foam::fv::SLTSDdtScheme
 
 Description
     Stabilised local time-step first-order Euler implicit/explicit ddt.

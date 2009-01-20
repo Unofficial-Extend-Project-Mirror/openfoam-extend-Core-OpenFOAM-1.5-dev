@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    filteredLinear2VLimiter
+    Foam::filteredLinear2VLimiter
 
 Description
     Class to generate weighting factors for the filteredLinear2V differencing

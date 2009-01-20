@@ -41,10 +41,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#ifdef darwin
-#define pow10(x) pow(10,x)
-#endif
-
 // Do weird things to extract number
 static scalar parseNASCoord(const string& s)
 {
@@ -59,7 +55,7 @@ static scalar parseNASCoord(const string& s)
         {
             exp = -exp;
         }
-        return mantissa*pow10(exp);
+        return mantissa*pow(10, exp);
     }
     else
     {
@@ -178,9 +174,13 @@ bool triSurface::readNAS(const fileName& OBJfileName)
 
         if (cmd == "CTRIA3")
         {
-            label index, group, a, b, c;
+            //label index, group, a, b, c;
+            //lineStream >> index >> group >> a >> b >> c;
+            label group = readLabel(IStringStream(line.substr(16,8))());
+            label a = readLabel(IStringStream(line.substr(24,8))());
+            label b = readLabel(IStringStream(line.substr(32,8))());
+            label c = readLabel(IStringStream(line.substr(40,8))());
 
-            lineStream >> index >> group >> a >> b >> c;
 
             // Convert group into patch
             Map<label>::const_iterator iter = groupToPatch.find(group);
@@ -204,9 +204,13 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         }
         else if (cmd == "CQUAD4")
         {
-            label index, group, a, b, c, d;
-
-            lineStream >> index >> group >> a >> b >> c >> d;
+            //label index, group, a, b, c, d;
+            //lineStream >> index >> group >> a >> b >> c >> d;
+            label group = readLabel(IStringStream(line.substr(16,8))());
+            label a = readLabel(IStringStream(line.substr(24,8))());
+            label b = readLabel(IStringStream(line.substr(32,8))());
+            label c = readLabel(IStringStream(line.substr(40,8))());
+            label d = readLabel(IStringStream(line.substr(48,8))());
 
             // Convert group into patch
             Map<label>::const_iterator iter = groupToPatch.find(group);
@@ -232,8 +236,9 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         else if (cmd == "PSHELL")
         {
             // Read shell type since gives patchnames.
-            label group;
-            lineStream >> group;
+            //label group;
+            //lineStream >> group;
+            label group = readLabel(IStringStream(line.substr(8,8))());
 
             if (group == ansaID && ansaType == "PSHELL")
             {
@@ -244,8 +249,9 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         }
         else if (cmd == "GRID")
         {
-            label index;
-            lineStream >> index;
+            //label index;
+            //lineStream >> index;
+            label index = readLabel(IStringStream(line.substr(8,8))());
             indices.append(index);
 
             scalar x = parseNASCoord(line.substr(24, 8));

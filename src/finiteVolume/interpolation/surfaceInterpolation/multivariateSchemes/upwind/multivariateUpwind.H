@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    multivariateUpwind
+    Foam::multivariateUpwind
 
 Description
     Upwind-difference form of the multivariate surfaceInterpolationScheme.

@@ -32,12 +32,9 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-OPstream::~OPstream()
+Foam::OPstream::~OPstream()
 {
     notImplemented("OPstream::~OPstream()");
 }
@@ -45,31 +42,40 @@ OPstream::~OPstream()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool OPstream::write
+bool Foam::OPstream::write
 (
+    const commsTypes commsType,
     const int toProcNo,
     const char* buf,
-    const std::streamsize bufSize,
-    const bool bufferedTransfer
+    const std::streamsize bufSize
 )
 {
-    notImplemented
-    (
-        "bool OPstream::write\n"
-        "(\n"
-        "    const int toProcNo,\n"
-        "    const char* buf,\n"
-        "    const std::streamsize bufSize,\n"
-        "    const bool bufferedTransfer\n"
-        ")"
-    );
+     notImplemented
+     (
+         "IPstream::write"
+         "("
+             "const commsTypes commsType,"
+             "const int fromProcNo,"
+             "char* buf,"
+             "const label bufSize"
+         ")"
+     );
 
+     return false;
+}
+
+
+void Foam::OPstream::waitRequests()
+{}
+
+
+bool Foam::OPstream::finishedRequest(const label)
+{
+    notImplemented("OPstream::finishedRequest()");
     return false;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -105,15 +105,12 @@ coupledSolverPerformance coupledFvMatrix<scalar>::solve(Istream& solverControls)
     coupledSolverPerformance solverPerf = coupledLduSolver::New
     (
         this->coupledPsiName(),
-        psi,
         *this,
-        source,
         bouCoeffs,
         intCoeffs,
         interfaces,
-        0,
         solverControls
-    )->solve();
+    )->solve(psi, source, 0);
 
     solverPerf.print();
 

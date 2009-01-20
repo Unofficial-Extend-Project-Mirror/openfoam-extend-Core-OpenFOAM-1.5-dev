@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    rotatingTotalPressureFvPatchScalarField
+    Foam::rotatingTotalPressureFvPatchScalarField
 
 Description
+    Foam::rotatingTotalPressureFvPatchScalarField
 
 SourceFiles
     rotatingTotalPressureFvPatchScalarField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class rotatingTotalPressureFvPatchField Declaration
+                           Class rotatingTotalPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingTotalPressureFvPatchScalarField

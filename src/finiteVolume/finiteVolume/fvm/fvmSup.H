@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    fvm
+InNamespace
+    Foam::fvm
 
 Description
     Calculate the matrix for implicit and explicit sources.
@@ -55,7 +55,14 @@ namespace fvm
         template<class Type>
         tmp<fvMatrix<Type> > Su
         (
-            const GeometricField<Type, fvPatchField, volMesh>&,
+            const DimensionedField<Type, volMesh>&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        template<class Type>
+        tmp<fvMatrix<Type> > Su
+        (
+            const tmp<DimensionedField<Type, volMesh> >&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -67,9 +74,9 @@ namespace fvm
         );
 
         template<class Type>
-        Zero Su
+        zeroField Su
         (
-            const Zero&,
+            const zeroField&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -79,7 +86,14 @@ namespace fvm
         template<class Type>
         tmp<fvMatrix<Type> > Sp
         (
-            const volScalarField&,
+            const DimensionedField<scalar, volMesh>&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        template<class Type>
+        tmp<fvMatrix<Type> > Sp
+        (
+            const tmp<DimensionedField<scalar, volMesh> >&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -100,9 +114,9 @@ namespace fvm
 
 
         template<class Type>
-        Zero Sp
+        zeroField Sp
         (
-            const Zero&,
+            const zeroField&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -112,7 +126,14 @@ namespace fvm
         template<class Type>
         tmp<fvMatrix<Type> > SuSp
         (
-            const volScalarField&,
+            const DimensionedField<scalar, volMesh>&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        template<class Type>
+        tmp<fvMatrix<Type> > SuSp
+        (
+            const tmp<DimensionedField<scalar, volMesh> >&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -124,9 +145,9 @@ namespace fvm
         );
 
         template<class Type>
-        Zero SuSp
+        zeroField SuSp
         (
-            const Zero&,
+            const zeroField&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 }

@@ -93,7 +93,7 @@ slicedFvPatchField<Type>::slicedFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    fvPatchField<Type>(p, iF, dict)
 {
     notImplemented
     (
@@ -160,7 +160,7 @@ tmp<fvPatchField<Type> > slicedFvPatchField<Type>::clone
 template<class Type>
 slicedFvPatchField<Type>::~slicedFvPatchField<Type>()
 {
-    // Set the fvPatchField storage pointer to NULL before it's destruction
+    // Set the fvPatchField storage pointer to NULL before its destruction
     // to protect the field it a slice of.
     UList<Type>::operator=(UList<Type>(NULL, 0));
 }
@@ -231,28 +231,6 @@ tmp<Field<Type> > slicedFvPatchField<Type>::patchNeighbourField() const
     );
 
     return Field<Type>::null();
-}
-
-
-template<class Type>
-void slicedFvPatchField<Type>::initEvaluate(const bool)
-{
-    notImplemented
-    (
-        "slicedFvPatchField<Type>::"
-        "initEvaluate(const bool)"
-    );
-}
-
-
-template<class Type>
-void slicedFvPatchField<Type>::evaluate()
-{
-    notImplemented
-    (
-        "slicedFvPatchField<Type>::"
-        "evaluate()"
-    );
 }
 
 

@@ -57,7 +57,9 @@ namespace Foam
         scalar
     )
 
+    // Deferred correction schemes
     makeDeferredSurfaceInterpolationScheme(GammaDC, GammaLimiter)
+    makeDeferredVSurfaceInterpolationScheme(GammaVDC, GammaLimiter)
 }
 
 // ************************************************************************* //

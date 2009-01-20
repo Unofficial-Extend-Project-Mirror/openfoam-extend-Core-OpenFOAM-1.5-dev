@@ -115,7 +115,7 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    vectorField::autoMap(m);
+    mixedFvPatchVectorField::autoMap(m);
     inletDir_.autoMap(m);
 }
 

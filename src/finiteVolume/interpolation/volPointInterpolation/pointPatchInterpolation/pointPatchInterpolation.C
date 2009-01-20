@@ -96,6 +96,7 @@ void pointPatchInterpolation::makePatchPatchAddressing()
                 {
                     patchPatchPointSet.insert(ppp, pppi);
                     patchPatchPoints_[pppi] = ppp;
+
                     pbm[patchi].applyConstraint
                     (
                         bp[pointi],
@@ -153,7 +154,6 @@ void pointPatchInterpolation::makePatchPatchAddressing()
             new primitivePatchInterpolation(bm[patchi].patch())
         );
     }
-
 
     if (debug)
     {

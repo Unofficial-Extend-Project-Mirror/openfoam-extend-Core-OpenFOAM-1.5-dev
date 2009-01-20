@@ -23,13 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceMDLimitedGrad
+    Foam::fv::faceMDLimitedGrad
 
 Description
     faceMDLimitedGrad gradient scheme applied to a runTime selected
-    base gradient scheme.  The scalar limiter based on limiting the
-    extrapolated face values between the face-neighbour cell values 
-    and is applied to the gradient in each face direction separately.
+    base gradient scheme.
+
+    The scalar limiter based on limiting the extrapolated face values
+    between the face-neighbour cell values and is applied to the gradient
+    in each face direction separately.
 
 SourceFiles
     faceMDLimitedGrad.C

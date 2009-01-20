@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    rotatingPressureInletOutletVelocityFvPatchVectorField
+    Foam::rotatingPressureInletOutletVelocityFvPatchVectorField
 
 Description
+    Foam::rotatingPressureInletOutletVelocityFvPatchVectorField
 
 SourceFiles
     rotatingPressureInletOutletVelocityFvPatchVectorField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-       Class rotatingPressureInletOutletVelocityFvPatchField Declaration
+              Class rotatingPressureInletOutletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingPressureInletOutletVelocityFvPatchVectorField

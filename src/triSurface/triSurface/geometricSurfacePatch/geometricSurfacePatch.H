@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    geometricSurfacePatch
+    Foam::geometricSurfacePatch
 
 Description
-    (like patchIdentifier but for surfaces). Holds type, name and index.
+    The geometricSurfacePatch is like patchIdentifier but for surfaces.
+    Holds type, name and index.
 
 SourceFiles
     geometricSurfacePatch.C

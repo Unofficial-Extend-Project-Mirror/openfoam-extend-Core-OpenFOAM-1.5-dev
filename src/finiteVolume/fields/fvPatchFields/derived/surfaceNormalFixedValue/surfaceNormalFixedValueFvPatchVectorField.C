@@ -109,7 +109,7 @@ void surfaceNormalFixedValueFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    vectorField::autoMap(m);
+    fixedValueFvPatchVectorField::autoMap(m);
     refValue_.autoMap(m);
 }
 

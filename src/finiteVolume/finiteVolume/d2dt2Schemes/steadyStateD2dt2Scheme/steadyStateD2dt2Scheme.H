@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    steadyStateD2dt2Scheme
+    Foam::fv::steadyStateD2dt2Scheme
 
 Description
     SteadyState d2dt2 which returns 0.

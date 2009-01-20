@@ -29,6 +29,9 @@ Description
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
+Contributor
+    Martin Beaudoin, Hydro-Quebec, (2008)
+
 \*---------------------------------------------------------------------------*/
 
 #include "ggiFvPatch.H"
@@ -52,7 +55,7 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
     // Calculation of weighting factors is performed from the master
     // position, using reconstructed shadow cell centres
     // HJ, 2/Aug/2007
-    if (master())
+    if (ggiPolyPatch_.master())
     {
         vectorField n = nf();
         scalarField nfc = n & (ggiPolyPatch_.reconFaceCellCentres() - Cf());
@@ -65,7 +68,10 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
         scalarField masterWeights(shadow().size());
         shadow().makeWeights(masterWeights);
 
-        w = interpolate(1 - masterWeights);
+        //HJ, change 1: partial coverage in cyclic GGI. HJ, 18/Jan/2009
+        //    Experimental: avoiding zeros in uncovered faces
+//         w = interpolate(1 - masterWeights);
+        w = 1 - interpolate(masterWeights);
     }
 }
 
@@ -73,9 +79,9 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
 // Make patch face - neighbour cell distances
 void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-    if (master())
+    if (ggiPolyPatch_.master())
     {
-        dc = (1.0 - weights())/(nf() & fvPatch::delta());
+        dc = 1.0/max(nf() & fvPatch::delta(), 0.05*mag(fvPatch::delta()));
     }
     else
     {
@@ -88,9 +94,18 @@ void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 
 void Foam::ggiFvPatch::makeCorrVecs(vectorField& cv) const
 {
-    // No non-orthogonality correction on a GGI interface
+    // No non-orthogonality correction on a ggi interface
     // HJ, 2/Aug/2007
     cv = vector::zero;
+
+    // Full non-orthogonality treatment
+
+    // Calculate correction vectors on coupled patches
+//     const scalarField& patchDeltaCoeffs = deltaCoeffs();
+
+//     vectorField patchDeltas = delta();
+//     vectorField n = nf();
+//     cv = n - patchDeltas*patchDeltaCoeffs;
 }
 
 
@@ -105,7 +120,7 @@ const Foam::ggiFvPatch& Foam::ggiFvPatch::shadow() const
 // Return delta (P to N) vectors across coupled patch
 Foam::tmp<Foam::vectorField> Foam::ggiFvPatch::delta() const
 {
-    if (master())
+    if (ggiPolyPatch_.master())
     {
         return ggiPolyPatch_.reconFaceCellCentres() - Cn();
     }
@@ -130,6 +145,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::interfaceInternalField
 
 Foam::tmp<Foam::labelField> Foam::ggiFvPatch::transfer
 (
+    const Pstream::commsTypes,
     const unallocLabelList& interfaceData
 ) const
 {
@@ -145,6 +161,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::transfer
 
 Foam::tmp<Foam::labelField> Foam::ggiFvPatch::internalFieldTransfer
 (
+    const Pstream::commsTypes,
     const unallocLabelList& iF
 ) const
 {

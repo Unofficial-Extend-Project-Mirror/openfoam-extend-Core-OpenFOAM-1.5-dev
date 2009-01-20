@@ -103,25 +103,26 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
     const fvPatch& p = patch();
     const polyPatch& pp = p.patch();
     const fvMesh& mesh = dimensionedInternalField().mesh();
-
-    const pointField& oldAllPoints = mesh.oldAllPoints();
+    const pointField& oldPoints = mesh.oldPoints();
 
     vectorField oldFc(pp.size());
 
     forAll(oldFc, i)
     {
-        oldFc[i] = pp[i].centre(oldAllPoints);
+        oldFc[i] = pp[i].centre(oldPoints);
     }
 
     vectorField Up = (pp.faceCentres() - oldFc)/mesh.time().deltaT().value();
 
-    const volVectorField& U = db().lookupObject<volVectorField>("U");
+    const volVectorField& U =
+        db().lookupObject<volVectorField>(dimensionedInternalField().name());
     scalarField phip = 
         p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
 
     vectorField n = p.nf();
     const scalarField& magSf = p.magSf();
     scalarField Un = phip/(magSf + VSMALL);
+
 
     vectorField::operator=(Up + n*(Un - (n & Up)));
 

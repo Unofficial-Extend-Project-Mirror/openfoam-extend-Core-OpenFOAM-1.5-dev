@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    nearWallDistNoSearch
+    Foam::nearWallDistNoSearch
 
 Description
     Distance calculation for cells with face on a wall. Does not search

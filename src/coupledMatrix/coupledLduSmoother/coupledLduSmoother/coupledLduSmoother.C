@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Coupled LDU matrix smoother virtual base class
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*----------------------------------------------------------------------------*/
 
@@ -51,8 +51,7 @@ Foam::autoPtr<Foam::coupledLduSmoother> Foam::coupledLduSmoother::New
     const coupledLduMatrix& matrix,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
-    const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt
+    const lduInterfaceFieldPtrsListList& interfaces
 )
 {
     wordConstructorTable::iterator constructorIter =
@@ -67,8 +66,7 @@ Foam::autoPtr<Foam::coupledLduSmoother> Foam::coupledLduSmoother::New
             "    const coupledLduMatrix& matrix,\n"
             "    const PtrList<FieldField<Field, scalar> >& bouCoeffs,\n"
             "    const PtrList<FieldField<Field, scalar> >& intCoeffs,\n"
-            "    const lduInterfaceFieldPtrsListList& interfaces,\n"
-            "    const direction cmpt\n"
+            "    const lduInterfaceFieldPtrsListList& interfaces\n"
             ")"
         )   << "Unknown matrix smoother " << smootherName
             << endl << endl
@@ -84,8 +82,7 @@ Foam::autoPtr<Foam::coupledLduSmoother> Foam::coupledLduSmoother::New
             matrix,
             bouCoeffs,
             intCoeffs,
-            interfaces,
-            cmpt
+            interfaces
         )
     );
 }

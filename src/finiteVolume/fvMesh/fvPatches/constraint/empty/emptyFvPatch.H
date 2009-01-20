@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    emptyFvPatch
+    Foam::emptyFvPatch
 
 Description
     A patch which will not exist in the fvMesh. Typical example is a front and

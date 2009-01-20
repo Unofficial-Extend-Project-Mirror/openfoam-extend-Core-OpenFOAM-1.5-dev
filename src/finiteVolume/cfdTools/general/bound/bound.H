@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    bound
+InNamespace
+    Foam::bound
 
 Description
     Bound the given scalar field if it has gone unbounded.  Used extensively
@@ -47,7 +47,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
+//- Bound the given scalar field if it has gone unbounded.
+//  Used extensively in RAS and LES turbulence models.
 void bound(volScalarField& vsf, const dimensionedScalar& vsf0);
+
+//- Bound the given scalar field if it has gone unbounded for min and max
+void boundMinMax
+(
+    volScalarField& vsf,
+    const dimensionedScalar& vsf0,
+    const dimensionedScalar& vsf1
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

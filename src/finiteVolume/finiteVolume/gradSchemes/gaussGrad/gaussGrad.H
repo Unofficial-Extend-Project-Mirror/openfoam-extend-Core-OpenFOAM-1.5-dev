@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gaussGrad
+    Foam::fv::gaussGrad
 
 Description
     Basic second-order gradient scheme using face-interpolation

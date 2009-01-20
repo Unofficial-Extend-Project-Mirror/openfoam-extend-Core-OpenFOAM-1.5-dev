@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    EulerD2dt2Scheme
+    Foam::fv::EulerD2dt2Scheme
 
 Description
     First-order Euler implicit d2dt2 using the current and two previous

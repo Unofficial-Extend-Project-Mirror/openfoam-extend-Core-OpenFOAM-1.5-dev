@@ -74,7 +74,7 @@ domainIntegrate
     (
         "domainIntegrate(" + vf.name() + ')',
         dimVol*vf.dimensions(),
-        sum(fvc::volumeIntegrate(vf))
+        gSum(fvc::volumeIntegrate(vf))
     );
 }
 

@@ -17,6 +17,7 @@
 
 #include "OSspecific.H"
 #include "argList.H"
+#include "timeSelector.H"
 
 #ifndef namespaceFoam
 #define namespaceFoam

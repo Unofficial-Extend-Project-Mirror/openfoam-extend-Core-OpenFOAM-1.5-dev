@@ -84,7 +84,7 @@ Foam::scalarField& Foam::fineAmgLevel::x()
         << abort(FatalError);
 
     // Dummy return
-    return scalarField::null();
+    return const_cast<scalarField&>(scalarField::null());
 }
 
 
@@ -95,7 +95,7 @@ Foam::scalarField& Foam::fineAmgLevel::b()
         << abort(FatalError);
 
     // Dummy return
-    return scalarField::null();
+    return const_cast<scalarField&>(scalarField::null());
 }
 
 

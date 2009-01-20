@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    inletOutletFvPatchField
+    Foam::inletOutletFvPatchField
 
 Description
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     inletOutletFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class inletOutletFvPatchField Declaration
+                     Class inletOutletFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

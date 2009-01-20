@@ -607,11 +607,12 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
                         phi.oldTime()/fvc::interpolate(rho.oldTime())
                     )
                    *(
-                        fvc::interpolate(rDeltaT*rA*rho)*phi.oldTime()
+                        fvc::interpolate(rDeltaT*rA*rho.oldTime())
+                       *phi.oldTime()/fvc::interpolate(rho.oldTime())
                       - (
                             fvc::interpolate
                             (
-                                rDeltaT*rA*rho*rho.oldTime()*U.oldTime()
+                                rDeltaT*rA*rho.oldTime()*U.oldTime()
                             ) & mesh().Sf()
                         )
                     )

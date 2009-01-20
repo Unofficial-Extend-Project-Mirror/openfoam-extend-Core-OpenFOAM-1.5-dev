@@ -30,17 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fvc
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const volVectorField& vf
 )
@@ -53,7 +43,7 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const dimensionedScalar& rho,
     const volVectorField& vf
@@ -67,7 +57,7 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const volScalarField& rho,
     const volVectorField& vf
@@ -81,7 +71,7 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const volVectorField& U
@@ -93,7 +83,7 @@ void makeRelative
     }
 }
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const dimensionedScalar& rho,
@@ -106,7 +96,7 @@ void makeRelative
     }
 }
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const volScalarField& rho,
@@ -120,7 +110,7 @@ void makeRelative
 }
 
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const volVectorField& U
@@ -132,7 +122,7 @@ void makeAbsolute
     }
 }
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const dimensionedScalar& rho,
@@ -145,7 +135,7 @@ void makeAbsolute
     }
 }
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const volScalarField& rho,
@@ -158,13 +148,5 @@ void makeAbsolute
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fvc
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshCutSurface
+    Foam::meshCutSurface
 
 Description
     Description of surface resulting from cuts through mesh. Region on
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class primitiveMesh;
 class cellAddressing;
 class faceDecompCuts;

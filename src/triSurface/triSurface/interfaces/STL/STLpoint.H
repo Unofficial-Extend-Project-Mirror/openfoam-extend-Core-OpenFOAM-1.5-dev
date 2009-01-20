@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    STLpoint
+    Foam::STLpoint
 
 Description
+    A vertex point representation for STL files.
 
 SourceFiles
     STLpointI.H

@@ -100,7 +100,7 @@ Foam::nearWallDistNoSearch::~nearWallDistNoSearch()
 
 void Foam::nearWallDistNoSearch::correct()
 {
-    if (mesh_.moving())
+    if (mesh_.changing())
     {
         // Update size of GeometricBoundaryField
         forAll(mesh_.boundary(), patchI)

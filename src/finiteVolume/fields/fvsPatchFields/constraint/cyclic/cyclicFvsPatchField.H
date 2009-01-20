@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cyclicFvsPatchField
+    Foam::cyclicFvsPatchField
 
 Description
+    Foam::cyclicFvsPatchField
 
 SourceFiles
     cyclicFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class cyclicFvsPatchField Declaration
+                           Class cyclicFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

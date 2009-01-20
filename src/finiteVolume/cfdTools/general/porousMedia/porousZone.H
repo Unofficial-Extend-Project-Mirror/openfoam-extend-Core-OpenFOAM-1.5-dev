@@ -23,25 +23,41 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    porousZone
+    Foam::porousZone
 
 Description
-    porous zone definition based on cell zones and parameters obtained
-    from a control dictionary constructed from the given stream.
-    The orientation of the porous region is defined either by the local
-    e1/e2 vectors, or by axis (e3) and direction (e1) as per coordinateSystems.
+    Porous zone definition based on cell zones.
+
+    Porous zone definition based on cell zones and parameters obtained from a
+    control dictionary constructed from the given stream. The orientation of
+    the porous region is defined with the same notation as a coordinateSystem,
+    but only a Cartesian coordinate system is valid.
+
     Implemented porosity models:
 
-        powerLaw (C0/C1 parameters)
-            S = - rho * C0 * |U|^((C1 - 1) / 2) * U
+    powerLaw (@e C0 and @e C1 parameters)
+    @f[
+        S = - \rho C_0 |U|^{(C_1 - 1)/2} U
+    @f]
 
-        Darcy-Forchheimer (d/f parameters)
-            S = - (mu * U * d + rho/2 * |U| * f) * U
+    Darcy-Forchheimer (@e d and @e f parameters)
+    @f[
+        S = - (\mu \, d \, U + \frac{\rho |U|}{2} \, f) U
+    @f]
 
-    The model does not include correction of the temporal terms.
+
+    Since negative Darcy/Forchheimer parameters are invalid, they can be used
+    to specify a multiplier (of the max component).
+
+    The porousZones method porousZones::ddt() mirrors the normal fvm::ddt()
+    method, but accounts for the effective volume of the cells.
+
+See Also
+    porousZones and coordinateSystems
 
 SourceFiles
     porousZone.C
+    porousZoneTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,6 +65,8 @@ SourceFiles
 #define porousZone_H
 
 #include "dictionary.H"
+#include "coordinateSystem.H"
+#include "coordinateSystems.H"
 #include "wordList.H"
 #include "labelList.H"
 #include "dimensionedScalar.H"
@@ -56,6 +74,8 @@ SourceFiles
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "fvMatricesFwd.H"
+
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +85,7 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class porousZone Declaration
+                        Class porousZone Declaration
 \*---------------------------------------------------------------------------*/
 
 class porousZone
@@ -84,13 +104,21 @@ class porousZone
         //- Cell zone ID
         label cellZoneID_;
 
+        //- Coordinate system (Cartesian)
+        coordinateSystem coordSys_;
+
+        //- porosity of the zone (0 < porosity <= 1)
+        //  Placeholder for treatment of temporal terms.
+        //  Currently unused.
+        scalar porosity_;
+
         //- powerLaw coefficient C0
-        dimensionedScalar C0_;
+        scalar C0_;
 
         //- powerLaw coefficient C1
-        dimensionedScalar C1_;
+        scalar C1_;
 
-        //- Darcy coefficient 
+        //- Darcy coefficient
         dimensionedTensor D_;
 
         //- Forchheimer coefficient
@@ -98,6 +126,9 @@ class porousZone
 
 
     // Private Member Functions
+
+        //- adjust negative resistance values to be multiplier of max value
+        static void adjustNegativeResistance(dimensionedVector& resist);
 
         //- Power-law resistance
         template<class RhoFieldType>
@@ -157,8 +188,8 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh and Istream
-        porousZone(const fvMesh& mesh, Istream& is);
+        //- Construct from components
+        porousZone(const fvMesh&, const word& name, const dictionary&);
 
         //- Return clone
         autoPtr<porousZone> clone() const
@@ -167,22 +198,38 @@ public:
             return autoPtr<porousZone>(NULL);
         }
 
+
         //- Return a pointer to a new porousZone created on freestore
         //  from Istream
+        //  Has the ability to rewrite coordinate systems as required
         class iNew
+        :
+            public coordinateSystems
         {
+            //- Reference to the finite volume mesh this zone is part of
             const fvMesh& mesh_;
 
         public:
 
             iNew(const fvMesh& mesh)
             :
+                coordinateSystems(),
+                mesh_(mesh)
+            {}
+
+            iNew(const fvMesh& mesh, const coordinateSystems& cs)
+            :
+                coordinateSystems(cs),
                 mesh_(mesh)
             {}
 
             autoPtr<porousZone> operator()(Istream& is) const
             {
-                return autoPtr<porousZone>(new porousZone(mesh_, is));
+                word name(is);
+                dictionary dict(is);
+                rewriteDict(dict, true);
+
+                return autoPtr<porousZone>(new porousZone(mesh_, name, dict));
             }
         };
 
@@ -191,21 +238,58 @@ public:
 
         // Access
 
+            //- cellZone name
             const word& zoneName() const
             {
                 return name_;
             }
 
+            //- cellZone number
             label zoneId() const
             {
                 return cellZoneID_;
             }
 
+            //- dictionary values used for the porousZone
             const dictionary& dict() const
             {
                 return dict_;
             }
 
+            //- Return coordinate system
+            const coordinateSystem& coordSys() const
+            {
+                return coordSys_;
+            }
+
+            //- Return origin
+            const point& origin() const
+            {
+                return coordSys_.origin();
+            }
+
+            //- Return axis
+            const vector& axis() const
+            {
+                return coordSys_.axis();
+            }
+
+            //- Return porosity
+            const scalar& porosity() const
+            {
+                return porosity_;
+            }
+
+            //- Edit access to porosity
+            scalar& porosity()
+            {
+                return porosity_;
+            }
+
+
+        //- modify time derivative elements according to porosity
+        template<class Type>
+        void modifyDdt(fvMatrix<Type>&) const;
 
         //- Add the viscous and inertial resistance force contribution
         //  to the momentum equation
@@ -218,7 +302,7 @@ public:
         (
             const fvVectorMatrix& UEqn,
             volTensorField& AU,
-            bool correctAUpBC = true
+            bool correctAUprocBC = true
         ) const;
 
         //- Write the porousZone dictionary

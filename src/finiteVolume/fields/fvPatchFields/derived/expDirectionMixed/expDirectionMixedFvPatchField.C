@@ -71,7 +71,7 @@ expDirectionMixedFvPatchField<Type>::expDirectionMixedFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF),
+    fvPatchField<Type>(p, iF, dict),
     refValue_("refValue", dict, p.size()),
     refGrad_("refGradient", dict, p.size()),
     valueFraction_("valueFraction", dict, p.size())
@@ -115,10 +115,10 @@ void expDirectionMixedFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    Field<Type>::autoMap((const FieldMapper&)m);
-    refValue_.autoMap((const FieldMapper&)m);
-    refGrad_.autoMap((const FieldMapper&)m);
-    valueFraction_.autoMap((const FieldMapper&)m);
+    fvPatchField<Type>::autoMap(m);
+    refValue_.autoMap(m);
+    refGrad_.autoMap(m);
+    valueFraction_.autoMap(m);
 }
 
 
@@ -161,7 +161,7 @@ tmp<Field<Type> > expDirectionMixedFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void expDirectionMixedFvPatchField<Type>::evaluate()
+void expDirectionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!updated())
     {

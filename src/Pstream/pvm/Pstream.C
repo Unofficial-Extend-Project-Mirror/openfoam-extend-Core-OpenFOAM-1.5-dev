@@ -63,7 +63,7 @@ bool Pstream::init(int& argc, char**& argv)
     // Get the size of the NULL group
     procIDs_.setSize(pvm_gsize(NULL));
 
-    // For each processor of the NULL group get it's ID
+    // For each processor of the NULL group get its ID
     for (int proci=0; proci<ProcIDs.size(); proci++)
     {
         procIDs_[proci] = pvm_gettid(NULL, proci);

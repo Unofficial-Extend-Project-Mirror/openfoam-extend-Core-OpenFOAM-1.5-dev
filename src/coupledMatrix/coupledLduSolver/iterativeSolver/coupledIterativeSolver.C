@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-6 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Description
     Virtual base class for coupled iterative solvers
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*---------------------------------------------------------------------------*/
 
@@ -34,36 +34,32 @@ Author
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from matrix and solver data stream
 Foam::coupledIterativeSolver::coupledIterativeSolver
 (
     const word& fieldName,
-    FieldField<Field, scalar>& x,
     const coupledLduMatrix& matrix,
-    const FieldField<Field, scalar>& b,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
     const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt,
     Istream& solverData
 )
 :
     coupledLduSolver
     (
         fieldName,
-        x,
         matrix,
-        b,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     ),
     dict_(solverData),
-    tolerance_(readScalar(dict_.lookup("tolerance"))),
-    relTolerance_(readScalar(dict_.lookup("relativeTolerance"))),
-    maxIter_(readLabel(dict().lookup("maxIterations")))
-{}
+    tolerance_(1e-6),
+    relTolerance_(0),
+    minIter_(0),
+    maxIter_(1000)
+{
+    readControls();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -74,38 +70,91 @@ const Foam::dictionary& Foam::coupledIterativeSolver::dict() const
 }
 
 
-Foam::scalar Foam::coupledIterativeSolver::normFactor() const
+void Foam::coupledIterativeSolver::readControls()
+{
+    dict().readIfPresent("minIter", minIter_);
+    dict().readIfPresent("maxIter", maxIter_);
+    dict().readIfPresent("tolerance", tolerance_);
+    dict().readIfPresent("relTol", relTolerance_);
+}
+
+
+Foam::scalar Foam::coupledIterativeSolver::normFactor
+(
+    const FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const FieldField<Field, scalar>& Ax,
+    FieldField<Field, scalar>& tmpField,
+    const direction cmpt
+) const
 {
     typedef FieldField<Field, scalar> scalarFieldField;
 
     // Calculate reference value of x
-    scalar xRef = gAverage(x_);
+    scalar xRef = gAverage(x);
 
-    scalarFieldField pA(x_.size());
-    scalarFieldField wA(x_.size());
-    scalarFieldField xRefField(x_.size());
+    scalarFieldField pA(x.size());
 
-    forAll (x_, rowI)
+    forAll (x, rowI)
     {
-        pA.set(rowI, new scalarField(x_[rowI].size(), 0));
-        wA.set(rowI, new scalarField(x_[rowI].size(), 0));
-        xRefField.set(rowI, new scalarField(x_[rowI].size(), xRef));
+        pA.set(rowI, new scalarField(x[rowI].size(), xRef));
     }
 
-    // Calculate A.x and A.xRefField
-    matrix_.Amul(wA, x_, bouCoeffs_, interfaces_, cmpt_);
-    matrix_.Amul(pA, xRefField, bouCoeffs_, interfaces_, cmpt_);
+    // Calculate A.xRefField
+    matrix_.Amul(tmpField, pA, bouCoeffs_, interfaces_, cmpt);
 
     // Calculate the normalisation factor
-    scalar normFactor =
-        gSum(mag(wA - pA) + mag(b_ - pA)) + lduMatrix::small_;
+    return gSum(mag(Ax - tmpField) + mag(b - tmpField)) + lduMatrix::small_;
+}
 
-    if (coupledLduMatrix::debug >= 2)
+
+Foam::scalar Foam::coupledIterativeSolver::normFactor
+(
+    const FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
+) const
+{
+    typedef FieldField<Field, scalar> scalarFieldField;
+
+    scalarFieldField wA(x.size());
+    scalarFieldField tmpField(x.size());
+
+    forAll (x, rowI)
     {
-        Info<< "Iterative solver normalisation factor = " << normFactor << endl;
+        wA.set(rowI, new scalarField(x[rowI].size(), 0));
+        tmpField.set(rowI, new scalarField(x[rowI].size()));
     }
 
-    return normFactor;
+    // Calculate A.x
+    matrix_.Amul(wA, x, bouCoeffs_, interfaces_, cmpt);
+
+    return normFactor(x, b, wA, tmpField, cmpt);
+}
+
+
+bool Foam::coupledIterativeSolver::stop
+(
+    coupledSolverPerformance& solverPerf
+) const
+{
+    if (solverPerf.nIterations() < minIter_)
+    {
+        return false;
+    }
+
+    if
+    (
+        solverPerf.nIterations() >= maxIter_
+     || solverPerf.checkConvergence(tolerance_, relTolerance_)
+    )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

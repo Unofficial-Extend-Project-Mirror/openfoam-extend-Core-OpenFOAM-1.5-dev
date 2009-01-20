@@ -20,7 +20,7 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,7 +78,7 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 
@@ -111,7 +111,7 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 
@@ -173,7 +173,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
         if (Pstream::myProcNo() == sendProc)
         {
-            OPstream toProc(recvProc, 0, false);
+            OPstream toProc(Pstream::blocking, recvProc);
             toProc<< IndirectList<Type>
             (
                 this->internalField(),
@@ -183,7 +183,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
         else
         {
             // I am receiver. Receive from sendProc.
-            IPstream fromProc(sendProc);
+            IPstream fromProc(Pstream::blocking, sendProc);
 
             Field<Type> fromFld(fromProc);
 

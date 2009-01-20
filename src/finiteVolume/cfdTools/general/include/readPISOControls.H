@@ -14,20 +14,20 @@
         momentumPredictor = Switch(piso.lookup("momentumPredictor"));
     }
 
-    bool fluxGradp = false;
-    if (piso.found("fluxGradp"))
+    bool transonic = false;
+    if (piso.found("transonic"))
     {
-        fluxGradp = Switch(piso.lookup("fluxGradp"));
-    }
-
-    bool transSonic = false;
-    if (piso.found("transSonic"))
-    {
-        transSonic = Switch(piso.lookup("transSonic"));
+        transonic = Switch(piso.lookup("transonic"));
     }
 
     int nOuterCorr = 1;
     if (piso.found("nOuterCorrectors"))
     {
         nOuterCorr = readInt(piso.lookup("nOuterCorrectors"));
+    }
+
+    bool ddtPhiCorr = false;
+    if (piso.found("ddtPhiCorr"))
+    {
+        ddtPhiCorr = Switch(piso.lookup("ddtPhiCorr"));
     }

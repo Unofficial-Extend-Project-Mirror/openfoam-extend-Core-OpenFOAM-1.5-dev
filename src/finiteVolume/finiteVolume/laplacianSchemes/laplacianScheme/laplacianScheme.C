@@ -22,14 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Abstract base class for finite volume calculus laplacian schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fv.H"
 #include "HashTable.H"
 #include "linear.H"
+#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,8 +41,8 @@ namespace fv
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-template<class Type>
-tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
+template<class Type, class GType>
+tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
 (
     const fvMesh& mesh,
     Istream& schemeData
@@ -52,8 +50,8 @@ tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
 {
     if (fv::debug)
     {
-        Info<< "laplacianScheme<Type>::New(const fvMesh&, Istream&) : "
-               "constructing laplacianScheme<Type>"
+        Info<< "laplacianScheme<Type, GType>::New(const fvMesh&, Istream&) : "
+               "constructing laplacianScheme<Type, GType>"
             << endl;
     }
 
@@ -61,7 +59,7 @@ tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
     {
         FatalIOErrorIn
         (
-            "laplacianScheme<Type>::New(const fvMesh&, Istream&)",
+            "laplacianScheme<Type, GType>::New(const fvMesh&, Istream&)",
             schemeData
         )   << "Laplacian scheme not specified" << endl << endl
             << "Valid laplacian schemes are :" << endl
@@ -78,7 +76,7 @@ tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
     {
         FatalIOErrorIn
         (
-            "laplacianScheme<Type>::New(const fvMesh&, Istream&)",
+            "laplacianScheme<Type, GType>::New(const fvMesh&, Istream&)",
             schemeData
         )   << "unknown laplacian scheme " << schemeName << endl << endl
             << "Valid laplacian schemes are :" << endl
@@ -92,18 +90,18 @@ tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class Type>
-laplacianScheme<Type>::~laplacianScheme()
+template<class Type, class GType>
+laplacianScheme<Type, GType>::~laplacianScheme()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class GType>
 tmp<fvMatrix<Type> >
-laplacianScheme<Type>::fvmLaplacian
+laplacianScheme<Type, GType>::fvmLaplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -111,39 +109,15 @@ laplacianScheme<Type>::fvmLaplacian
 }
 
 
-template<class Type>
-tmp<fvMatrix<Type> >
-laplacianScheme<Type>::fvmLaplacian
-(
-    const volTensorField& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    return fvmLaplacian(tinterpTensorGammaScheme_().interpolate(gamma)(), vf);
-}
-
-
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacianScheme<Type>::fvcLaplacian
+laplacianScheme<Type, GType>::fvcLaplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvcLaplacian(tinterpGammaScheme_().interpolate(gamma)(), vf);
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacianScheme<Type>::fvcLaplacian
-(
-    const volTensorField& gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    return fvcLaplacian(tinterpTensorGammaScheme_().interpolate(gamma)(), vf);
 }
 
 

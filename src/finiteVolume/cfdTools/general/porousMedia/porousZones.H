@@ -23,11 +23,32 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    porousZones
+    Foam::porousZones
 
 Description
+    A centralized porousZone collection.
+
     Container class for a set of porousZones with the porousZone member
     functions implemented to loop over the functions for each porousZone.
+
+    The input file @c constant/porousZone is implemented as
+    IOPtrList\<porousZone\> and contains the following type of data:
+
+    @verbatim
+    1
+    (
+    cat1
+    {
+        coordinateSystem    system_10;
+        porosity        0.781;
+        Darcy
+        {
+            d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
+            f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
+        }
+    }
+    )
+    @endverbatim
 
 SourceFiles
     porousZones.C
@@ -39,6 +60,11 @@ SourceFiles
 
 #include "porousZone.H"
 #include "IOPtrList.H"
+
+#include "volFieldsFwd.H"
+#include "fvMatrix.H"
+#include "oneField.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +84,8 @@ class porousZones
         //- Reference to the finite volume mesh this zone is part of
         const fvMesh& mesh_;
 
+        //- Reference to constant coordinate systems
+        coordinateSystems csList_;
 
     // Private Member Functions
 
@@ -68,15 +96,54 @@ class porousZones
         void operator=(const porousZones&);
 
 
+        //- modify time derivative elements
+        template<class Type>
+        void modifyDdt(fvMatrix<Type>&) const;
+
 public:
 
     // Constructors
 
+        //- Construct from fvMesh and coordinate systems list
+        porousZones(const fvMesh& mesh, const coordinateSystems& cs);
+
         //- Construct from fvMesh
+        //  with automatically constructed coordinate systems list
         porousZones(const fvMesh& mesh);
 
 
     // Member Functions
+
+        //- mirror fvm::ddt with porosity
+        template<class Type>
+        tmp<fvMatrix<Type> > ddt
+        (
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        //- mirror fvm::ddt with porosity
+        template<class Type>
+        tmp<fvMatrix<Type> > ddt
+        (
+            const oneField&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        //- mirror fvm::ddt with porosity
+        template<class Type>
+        tmp<fvMatrix<Type> > ddt
+        (
+            const dimensionedScalar&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
+
+        //- mirror fvm::ddt with porosity
+        template<class Type>
+        tmp<fvMatrix<Type> > ddt
+        (
+            const volScalarField&,
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
 
         //- Add the viscous and inertial resistance force contribution
         //  to the momentum equation
@@ -92,12 +159,21 @@ public:
 
         //- read modified data
         virtual bool readData(Istream&);
+
+        //- write data
+        bool writeData(Ostream&, bool subDict = true) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "porousZonesTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    transformFvPatchField
+    Foam::transformFvPatchField
 
 Description
+    Foam::transformFvPatchField
 
 SourceFiles
     transformFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class transformFvPatchField Declaration
+                        Class transformFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

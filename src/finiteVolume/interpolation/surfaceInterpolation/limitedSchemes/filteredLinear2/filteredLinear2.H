@@ -23,14 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    filteredLinear2Limiter
+    Foam::filteredLinear2Limiter
 
 Description
-    Class to generate weighting factors for the filtered-linear-2 differencing
-    scheme.  The aim is to remove high-frequency modes with "staggering"
-    characteristics by comparing the face gradient with both neighbouring cell
-    gradients and introduce small amounts of upwind in order to damp these
-    modes.
+    Class to generate weighting factors for the filtered-linear-2
+    differencing scheme.
+
+    The aim is to remove high-frequency modes with "staggering"
+    characteristics by comparing the face gradient with both neighbouring
+    cell gradients and introduce small amounts of upwind in order to damp
+    these modes.
 
     Used in conjunction with the template class LimitedScheme.
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,9 @@ License
 
 Description
     Preconditioned Conjugate Gradient solver
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,26 +50,20 @@ namespace Foam
 Foam::coupledCgSolver::coupledCgSolver
 (
     const word& fieldName,
-    FieldField<Field, scalar>& x,
     const coupledLduMatrix& matrix,
-    const FieldField<Field, scalar>& b,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
     const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt,
     Istream& solverData
 )
 :
     coupledIterativeSolver
     (
         fieldName,
-        x,
         matrix,
-        b,
         bouCoeffs,
         intCoeffs,
         interfaces,
-        cmpt,
         solverData
     ),
     preconPtr_
@@ -77,7 +74,6 @@ Foam::coupledCgSolver::coupledCgSolver
             bouCoeffs,
             intCoeffs,
             interfaces,
-            cmpt,
             dict().subDict("preconditioner")
         )
     )
@@ -86,26 +82,51 @@ Foam::coupledCgSolver::coupledCgSolver
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
+Foam::coupledSolverPerformance Foam::coupledCgSolver::solve
+(
+    FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
+) const
 {
     // Prepare solver performance
-    coupledSolverPerformance solverPerf(typeName, fieldName_);
+    coupledSolverPerformance solverPerf(typeName, fieldName());
 
-    scalar norm = this->normFactor();
+    FieldField<Field, scalar> wA(x.size());
+    FieldField<Field, scalar> rA(x.size());
 
-    FieldField<Field, scalar> wA(x_.size());
-
-    forAll (x_, rowI)
+    forAll (x, rowI)
     {
-        wA.set(rowI, new scalarField(x_[rowI].size(), 0));
+        wA.set(rowI, new scalarField(x[rowI].size(), 0));
+        rA.set(rowI, new scalarField(x[rowI].size(), 0));
     }
 
 
     // Calculate initial residual
-    matrix_.Amul(wA, x_, bouCoeffs_, interfaces_, cmpt_);
-    FieldField<Field, scalar> rA(b_ - wA);
+    matrix_.Amul(wA, x, bouCoeffs_, interfaces_, cmpt);
 
-    solverPerf.initialResidual() = gSumMag(rA)/norm;
+    // Use rA as scratch space when calculating the normalisation factor
+    scalar normFactor = this->normFactor(x, b, wA, rA, cmpt);
+
+    if (coupledLduMatrix::debug >= 2)
+    {
+        Info<< "   Normalisation factor = " << normFactor << endl;
+    }
+
+    // Optimised looping.  HJ, 19/Jan/2009
+    forAll (rA, i)
+    {
+        const scalarField& bi = b[i];
+        const scalarField& wAi = wA[i];
+        scalarField& rAi = rA[i];
+
+        forAll (rAi, j)
+        {
+            rAi[j] = bi[j] - wAi[j];
+        }
+    }
+
+    solverPerf.initialResidual() = gSumMag(rA)/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     if (!solverPerf.checkConvergence(tolerance_, relTolerance_))
@@ -115,11 +136,11 @@ Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
 
         scalar alpha, beta, wApA;
 
-        FieldField<Field, scalar> pA(x_.size());
+        FieldField<Field, scalar> pA(x.size());
 
         forAll (pA, rowI)
         {
-            pA.set(rowI, new scalarField(x_[rowI].size(), 0));
+            pA.set(rowI, new scalarField(x[rowI].size(), 0));
         }
 
         do
@@ -127,7 +148,7 @@ Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
             rhoOld = rho;
 
             // Execute preconditioning
-            preconPtr_->solve(wA, rA);
+            preconPtr_->precondition(wA, rA, cmpt);
 
             // Update search directions
             rho = gSumProd(wA, rA);
@@ -146,13 +167,13 @@ Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
             }
 
             // Update preconditioned residual
-            matrix_.Amul(wA, pA, bouCoeffs_, interfaces_, cmpt_);
+            matrix_.Amul(wA, pA, bouCoeffs_, interfaces_, cmpt);
 
             wApA = gSumProd(wA, pA);
 
 
             // Check for singularity
-            if (solverPerf.checkSingularity(mag(wApA)/norm))
+            if (solverPerf.checkSingularity(mag(wApA)/normFactor))
             {
                 break;
             }
@@ -160,9 +181,9 @@ Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
             // Update solution and residual
             alpha = rho/wApA;
 
-            forAll (x_, rowI)
+            forAll (x, rowI)
             {
-                scalarField& curX = x_[rowI];
+                scalarField& curX = x[rowI];
                 const scalarField& curPA = pA[rowI];
 
                 forAll (curX, i)
@@ -182,12 +203,9 @@ Foam::coupledSolverPerformance Foam::coupledCgSolver::solve()
                 }
             }
 
-            solverPerf.finalResidual() = gSumMag(rA)/norm;
-        } while
-        (
-            solverPerf.nIterations()++ < maxIter_
-         && !(solverPerf.checkConvergence(tolerance_, relTolerance_))
-        );
+            solverPerf.finalResidual() = gSumMag(rA)/normFactor;
+            solverPerf.nIterations()++;
+        } while (!stop(solverPerf));
     }
 
     return solverPerf;

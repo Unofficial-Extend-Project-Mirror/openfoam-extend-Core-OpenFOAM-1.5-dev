@@ -27,27 +27,29 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include <mpi.h>
+#include "mpi.h"
 
 #include "OPstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+// Outstanding non-blocking operations.
+//! @cond fileScope
+Foam::DynamicList<MPI_Request> OPstream_outstandingRequests_;
+//! @endcond fileScope
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-OPstream::~OPstream()
+Foam::OPstream::~OPstream()
 {
     if
     (
-        !write
+       !write
         (
+            commsType_,
             toProcNo_,
             buf_.begin(),
-            bufPosition_,
-            bufferedTransfer_
+            bufPosition_
         )
     )
     {
@@ -60,17 +62,17 @@ OPstream::~OPstream()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool OPstream::write
+bool Foam::OPstream::write
 (
+    const commsTypes commsType,
     const int toProcNo,
     const char* buf,
-    const std::streamsize bufSize,
-    const bool bufferedTransfer
+    const std::streamsize bufSize
 )
 {
     bool transferFailed = true;
 
-    if (bufferedTransfer)
+    if (commsType == blocking)
     {
         transferFailed = MPI_Bsend
         (
@@ -82,7 +84,7 @@ bool OPstream::write
             MPI_COMM_WORLD
         );
     }
-    else
+    else if (commsType == scheduled)
     {
         transferFailed = MPI_Send
         (
@@ -94,13 +96,87 @@ bool OPstream::write
             MPI_COMM_WORLD
         );
     }
+    else if (commsType == nonBlocking)
+    {
+        MPI_Request request;
+
+        transferFailed = MPI_Isend
+        (
+            const_cast<char*>(buf),
+            bufSize,
+            MPI_PACKED,
+            procID(toProcNo),
+            msgType(),
+            MPI_COMM_WORLD,
+            &request
+        );
+
+        OPstream_outstandingRequests_.append(request);
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "OPstream::write"
+            "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+        )   << "Unsupported communications type " << commsType
+            << Foam::abort(FatalError);
+    }
 
     return !transferFailed;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::OPstream::waitRequests()
+{
+    if (OPstream_outstandingRequests_.size() > 0)
+    {
+        List<MPI_Status> status(OPstream_outstandingRequests_.size());
 
-} // End namespace Foam
+        if
+        (
+            MPI_Waitall
+            (
+                OPstream_outstandingRequests_.size(),
+                OPstream_outstandingRequests_.begin(),
+                status.begin()
+            )
+        )
+        {
+            FatalErrorIn
+            (
+                "OPstream::waitRequests()"
+            )   << "MPI_Waitall returned with error" << Foam::endl;
+        }
+
+        OPstream_outstandingRequests_.clear();
+    }
+}
+
+
+bool Foam::OPstream::finishedRequest(const label i)
+{
+    if (i >= OPstream_outstandingRequests_.size())
+    {
+        FatalErrorIn
+        (
+            "OPstream::finishedRequest(const label)"
+        )   << "There are " << OPstream_outstandingRequests_.size()
+            << " outstanding send requests and you are asking for i=" << i
+            << nl
+            << "Maybe you are mixing blocking/non-blocking comms?"
+            << Foam::abort(FatalError);
+    }
+
+    int flag;
+    MPI_Status status;
+
+    MPI_Test(&OPstream_outstandingRequests_[i], &flag, &status);
+
+    return flag != 0;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Description
     matrix structure.
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,13 +60,10 @@ defineRunTimeSelectionTable
 autoPtr<coupledLduSolver> coupledLduSolver::New
 (
     const word& fieldName,
-    FieldField<Field, scalar>& x,
     const coupledLduMatrix& matrix,
-    const FieldField<Field, scalar>& b,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
     const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt,
     Istream& solverData
 )
 {
@@ -79,13 +76,10 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
             new coupledDiagonalSolver
             (
                 fieldName,
-                x,
                 matrix,
-                b,
                 bouCoeffs,
                 intCoeffs,
-                interfaces,
-                cmpt
+                interfaces
             )
         );
     }
@@ -101,13 +95,10 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
                 "autoPtr<coupledLduSolver> coupledLduSolver::New\n"
                 "(\n"
                 "    const word& fieldName,\n"
-                "    FieldField<Field, scalar>& x,\n"
                 "    const coupledLduMatrix& matrix,\n"
-                "    const FieldField<Field, scalar>& b,\n"
                 "    const PtrList<FieldField<Field, scalar> >& bouCoeffs,\n"
                 "    const PtrList<FieldField<Field, scalar> >& intCoeffs,\n"
                 "    const lduInterfaceFieldPtrsListList& interfaces,\n"
-                "    const direction cmpt,\n"
                 "    Istream& solverData\n"
                 ")",
                 solverData
@@ -123,13 +114,10 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
             constructorIter()
             (
                 fieldName,
-                x,
                 matrix,
-                b,
                 bouCoeffs,
                 intCoeffs,
                 interfaces,
-                cmpt,
                 solverData
             )
         );
@@ -146,13 +134,10 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
                 "autoPtr<coupledLduSolver> coupledLduSolver::New\n"
                 "(\n"
                 "    const word& fieldName,\n"
-                "    FieldField<Field, scalar>& x,\n"
                 "    const coupledLduMatrix& matrix,\n"
-                "    const FieldField<Field, scalar>& b,\n"
                 "    const PtrList<FieldField<Field, scalar> >& bouCoeffs,\n"
                 "    const PtrList<FieldField<Field, scalar> >& intCoeffs,\n"
                 "    const lduInterfaceFieldPtrsListList& interfaces,\n"
-                "    const direction cmpt,\n"
                 "    Istream& solverData\n"
                 ")",
                 solverData
@@ -168,13 +153,10 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
             constructorIter()
             (
                 fieldName,
-                x,
                 matrix,
-                b,
                 bouCoeffs,
                 intCoeffs,
                 interfaces,
-                cmpt,
                 solverData
             )
         );
@@ -186,14 +168,11 @@ autoPtr<coupledLduSolver> coupledLduSolver::New
             "autoPtr<coupledLduSolver> coupledLduSolver::New\n"
             "(\n"
             "    const word& fieldName,\n"
-            "    FieldField<Field, scalar>& x,\n"
             "    const coupledLduMatrix& matrix,\n"
-            "    const FieldField<Field, scalar>& b,\n"
             "    const direction cmpt,\n"
-                "    const PtrList<FieldField<Field, scalar> >& bouCoeffs,\n"
-                "    const PtrList<FieldField<Field, scalar> >& intCoeffs,\n"
-                "    const lduInterfaceFieldPtrsListList& interfaces,\n"
-                "    const direction cmpt,\n"
+            "    const PtrList<FieldField<Field, scalar> >& bouCoeffs,\n"
+            "    const PtrList<FieldField<Field, scalar> >& intCoeffs,\n"
+            "    const lduInterfaceFieldPtrsListList& interfaces,\n"
             "    Istream& solverData\n"
             ")"
         )   << "cannot solve incomplete matrix, "

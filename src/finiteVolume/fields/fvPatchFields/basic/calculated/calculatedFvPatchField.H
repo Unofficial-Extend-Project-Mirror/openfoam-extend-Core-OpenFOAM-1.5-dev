@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    calculatedFvPatchField
+    Foam::calculatedFvPatchField
 
 Description
+    Foam::calculatedFvPatchField
 
 SourceFiles
     calculatedFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class calculatedFvPatchField Declaration
+                      Class calculatedFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -72,7 +73,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired=false
         );
 
         //- Construct by mapping given patchField<Type> onto a new patch

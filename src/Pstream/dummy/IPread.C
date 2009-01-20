@@ -32,32 +32,30 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-IPstream::IPstream
+Foam::IPstream::IPstream
 (
+    const commsTypes commsType,
     const int fromProcNo,
     const label bufSize,
     streamFormat format,
     versionNumber version
 )
 :
-    Pstream(bufSize),
+    Pstream(commsType, bufSize),
     Istream(format, version),
     fromProcNo_(fromProcNo),
     messageSize_(0)
 {
      notImplemented
      (
-         "IPstream::IPstream\n"
-         "(\n"
-             "const int fromProcNo,\n"
-             "const label bufSize,\n"
-             "streamFormat format,\n"
-             "versionNumber version\n"
+         "IPsream::IPstream"
+         "("
+             "const commsTypes,"
+             "const int fromProcNo," 
+             "const label bufSize,"
+             "streamFormat, versionNumber"
          ")"
      );
 }
@@ -65,29 +63,40 @@ IPstream::IPstream
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-int IPstream::read
+int Foam::IPstream::read
 (
+    const commsTypes commsType,
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize
 )
 {
-     notImplemented
-     (
-         "int IPstream::read\n"
-         "(\n"
-         "    const int fromProcNo,\n"
-         "    char* buf,\n"
-         "    const std::streamsize bufSize\n"
-         ")"
+    notImplemented
+    (
+        "IPstream::read"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "char* buf,"
+            "const label bufSize"
+        ")"
      );
 
      return 0;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::IPstream::waitRequests()
+{}
 
-} // End namespace Foam
+
+bool Foam::IPstream::finishedRequest(const label)
+{
+    notImplemented("IPstream::finishedRequest()");
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,9 @@ Class
 
 Description
     GaussSeidel smoother for coupled matrix
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
 SourceFiles
     coupledGaussSeidelSmoother.C
@@ -70,7 +73,7 @@ class coupledGaussSeidelSmoother
 public:
 
     //- Runtime type information
-    TypeName("diagonal");
+    TypeName("GaussSeidel");
 
 
     // Constructors
@@ -81,8 +84,7 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         );
 
 
@@ -95,12 +97,12 @@ public:
     // Member Functions
 
         //- Execute smoothing.
-        //  Buffer is used for residual calculation scratch space
-        virtual void solve
+        virtual void smooth
         (
             FieldField<Field, scalar>& x,
             const FieldField<Field, scalar>& b,
-            FieldField<Field, scalar>& xBuffer
+            const direction cmpt,
+            const label nSweeps
         ) const;
 };
 

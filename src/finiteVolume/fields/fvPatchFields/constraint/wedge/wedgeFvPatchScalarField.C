@@ -42,7 +42,7 @@ tmp<scalarField> wedgeFvPatchField<scalar>::snGrad() const
 
 
 template<>
-void wedgeFvPatchField<scalar>::evaluate()
+void wedgeFvPatchField<scalar>::evaluate(const Pstream::commsTypes)
 {
     if (!updated())
     {

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fluxCorrectedVelocityFvPatchVectorField
+    Foam::fluxCorrectedVelocityFvPatchVectorField
 
 Description
+    Foam::fluxCorrectedVelocityFvPatchVectorField
 
 SourceFiles
     fluxCorrectedVelocityFvPatchVectorField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class fluxCorrectedVelocityFvPatchField Declaration
+                   Class fluxCorrectedVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class fluxCorrectedVelocityFvPatchVectorField
@@ -121,8 +122,14 @@ public:
 
     // Member functions
 
-        //- Evaluate the patch field
-        virtual void evaluate();
+        // Evaluation functions
+
+            //- Evaluate the patch field
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
+
 
         //- Write
         virtual void write(Ostream&) const;

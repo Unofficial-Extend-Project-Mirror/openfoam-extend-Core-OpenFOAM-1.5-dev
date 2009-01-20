@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     GaussSeidel preconditioning
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*----------------------------------------------------------------------------*/
 
@@ -147,6 +147,104 @@ void Foam::coupledGaussSeidelPrecon::reverseSweep
 }
 
 
+void Foam::coupledGaussSeidelPrecon::forwardSweepTranspose
+(
+    const lduMatrix& matrix,
+    scalarField& x,
+    scalarField& bPrime
+) const
+{
+    const scalarField& diag = matrix.diag();
+    const scalarField& lower = matrix.lower();
+    const scalarField& upper = matrix.upper();
+
+    const labelList& upperAddr = matrix.lduAddr().upperAddr();
+    const labelList& ownStartAddr = matrix.lduAddr().ownerStartAddr();
+
+    const label nRows = x.size();
+    label fStart, fEnd;
+
+    for (register label rowI = 0; rowI < nRows; rowI++)
+    {
+        // lRow is equal to rowI
+        scalar& curX = x[rowI];
+
+        // Grab the accumulated neighbour side
+        curX = bPrime[rowI];
+
+        // Start and end of this row
+        fStart = ownStartAddr[rowI];
+        fEnd = ownStartAddr[rowI + 1];
+
+        // Accumulate the owner product side
+        for (register label curCoeff = fStart; curCoeff < fEnd; curCoeff++)
+        {
+            // Transpose multiplication.  HJ, 19/Jan/2009
+            curX -= lower[curCoeff]*x[upperAddr[curCoeff]];
+        }
+
+        // Finish current x
+        curX /= diag[rowI];
+
+        // Distribute the neighbour side using current x
+        for (register label curCoeff = fStart; curCoeff < fEnd; curCoeff++)
+        {
+            // Transpose multiplication.  HJ, 19/Jan/2009
+            bPrime[upperAddr[curCoeff]] -= upper[curCoeff]*curX;
+        }
+    }
+}
+
+
+void Foam::coupledGaussSeidelPrecon::reverseSweepTranspose
+(
+    const lduMatrix& matrix,
+    scalarField& x,
+    scalarField& bPrime
+) const
+{
+    const scalarField& diag = matrix.diag();
+    const scalarField& lower = matrix.lower();
+    const scalarField& upper = matrix.upper();
+
+    const labelList& upperAddr = matrix.lduAddr().upperAddr();
+    const labelList& ownStartAddr = matrix.lduAddr().ownerStartAddr();
+
+    const label nRows = x.size();
+    label fStart, fEnd;
+
+    for (register label rowI = nRows - 1; rowI >= 0; rowI--)
+    {
+        // lRow is equal to rowI
+        scalar& curX = x[rowI];
+
+        // Grab the accumulated neighbour side
+        curX = bPrime[rowI];
+
+        // Start and end of this row
+        fStart = ownStartAddr[rowI];
+        fEnd = ownStartAddr[rowI + 1];
+
+        // Accumulate the owner product side
+        for (register label curCoeff = fStart; curCoeff < fEnd; curCoeff++)
+        {
+            // Transpose multiplication.  HJ, 19/Jan/2009
+            curX -= lower[curCoeff]*x[upperAddr[curCoeff]];
+        }
+
+        // Finish current x
+        curX /= diag[rowI];
+
+        // Distribute the neighbour side using current x
+        for (register label curCoeff = fStart; curCoeff < fEnd; curCoeff++)
+        {
+            // Transpose multiplication.  HJ, 19/Jan/2009
+            bPrime[upperAddr[curCoeff]] -= upper[curCoeff]*curX;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
@@ -154,8 +252,7 @@ Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
     const coupledLduMatrix& matrix,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
-    const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt
+    const lduInterfaceFieldPtrsListList& interfaces
 )
 :
     coupledLduPrecon
@@ -163,8 +260,7 @@ Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
         matrix,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     ),
     mBouCoeffs_(bouCoeffs),
     bPrime_(matrix.size())
@@ -189,7 +285,6 @@ Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
     const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt,
     const dictionary& dict
 )
 :
@@ -198,8 +293,7 @@ Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
         matrix,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     ),
     mBouCoeffs_(bouCoeffs),
     bPrime_(matrix.size())
@@ -220,10 +314,11 @@ Foam::coupledGaussSeidelPrecon::coupledGaussSeidelPrecon
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::coupledGaussSeidelPrecon::solve
+void Foam::coupledGaussSeidelPrecon::precondition
 (
     FieldField<Field, scalar>& x,
-    const FieldField<Field, scalar>& b
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
 ) const
 {
     // Execute preconditioning
@@ -246,7 +341,7 @@ void Foam::coupledGaussSeidelPrecon::solve
                 interfaces_,
                 x,
                 bPrime_,
-                cmpt_
+                cmpt
             );
 
             matrix_.updateMatrixInterfaces
@@ -255,7 +350,7 @@ void Foam::coupledGaussSeidelPrecon::solve
                 interfaces_,
                 x,
                 bPrime_,
-                cmpt_
+                cmpt
             );
         }
 
@@ -269,6 +364,61 @@ void Foam::coupledGaussSeidelPrecon::solve
         forAllReverse (matrix_, rowI)
         {
             reverseSweep(matrix_[rowI], x[rowI], bPrime_[rowI]);
+        }
+    }
+}
+
+
+void Foam::coupledGaussSeidelPrecon::preconditionT
+(
+    FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
+) const
+{
+    // Execute preconditioning
+    if (matrix_.diagonal())
+    {
+        forAll (matrix_, rowI)
+        {
+            x[rowI] = b[rowI]/matrix_[rowI].diag();
+        }
+    }
+    else if (matrix_.symmetric() || matrix_.asymmetric())
+    {
+        bPrime_ = b;
+
+        // Parallel boundary update
+        {
+            matrix_.initMatrixInterfaces
+            (
+                mBouCoeffs_,
+                interfaces_,
+                x,
+                bPrime_,
+                cmpt
+            );
+
+            matrix_.updateMatrixInterfaces
+            (
+                mBouCoeffs_,
+                interfaces_,
+                x,
+                bPrime_,
+                cmpt
+            );
+        }
+
+        // Forward sweep
+        forAll (matrix_, rowI)
+        {
+            forwardSweepTranspose(matrix_[rowI], x[rowI], bPrime_[rowI]);
+        }
+
+        // Reverse sweep
+        forAllReverse (matrix_, rowI)
+        {
+            reverseSweepTranspose(matrix_[rowI], x[rowI], bPrime_[rowI]);
         }
     }
 }

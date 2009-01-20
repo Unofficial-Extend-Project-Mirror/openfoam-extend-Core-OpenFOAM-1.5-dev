@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    diagonalEdge
+    Foam::diagonalEdge
 
 Description
     Implicit description of diagonal edge (from tet decomposition).
     Diangonal edge is edge between two vertices of same face.
+
     Stores
         - face label
         - indices in face
@@ -68,7 +69,7 @@ public:
 
     // Public classes
 
-        // Hash function
+        //- Hash function
         class diagonalEdgeHash
         {
 

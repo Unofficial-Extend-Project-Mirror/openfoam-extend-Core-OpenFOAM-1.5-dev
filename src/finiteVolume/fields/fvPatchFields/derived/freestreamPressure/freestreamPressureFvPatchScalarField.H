@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    freestreamPressureFvPatchScalarField
+    Foam::freestreamPressureFvPatchScalarField
 
 Description
+    Foam::freestreamPressureFvPatchScalarField
 
 SourceFiles
     freestreamPressureFvPatchScalarField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class freestreamPressureFvPatchField Declaration
+                           Class freestreamPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class freestreamPressureFvPatchScalarField

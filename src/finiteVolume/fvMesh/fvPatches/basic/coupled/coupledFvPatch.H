@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledFvPatch
+    Foam::coupledFvPatch
 
 Description
-    coupledFvPatch is an abstract base class for patches that couple regions
-    of the computational domain e.g. cyclic and processor-processor links.
+    An abstract base class for patches that couple regions of the
+    computational domain e.g. cyclic and processor-processor links.
 
 SourceFiles
     coupledFvPatch.C
@@ -148,28 +148,30 @@ public:
             //- Initialise interface data transfer
             virtual void initTransfer
             (
-                const unallocLabelList& interfaceData,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
             ) const
             {}
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const = 0;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (
-                unallocLabelList& iF,
-                const bool bufferedTransfer
+                const Pstream::commsTypes commsType,
+                unallocLabelList& iF
             ) const
             {}
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& iF
             ) const = 0;
 };

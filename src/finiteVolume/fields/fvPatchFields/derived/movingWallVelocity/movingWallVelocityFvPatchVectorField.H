@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    movingWallVelocityFvPatchVectorField
+    Foam::movingWallVelocityFvPatchVectorField
 
 Description
+    Foam::movingWallVelocityFvPatchVectorField
 
 SourceFiles
     movingWallVelocityFvPatchVectorField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class movingWallVelocityFvPatchField Declaration
+                 Class movingWallVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class movingWallVelocityFvPatchVectorField

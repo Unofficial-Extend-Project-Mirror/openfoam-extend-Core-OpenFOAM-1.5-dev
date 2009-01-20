@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceEdge
+    Foam::faceEdge
 
 Description
     Implicit description of face edge (from tet decomposition).
     Face edge is edge between vertex of face and face centre.
+
     Stores
         - face label
         - index in face (gives the mesh vertex)
@@ -48,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class faceEdge Declaration
@@ -68,7 +69,7 @@ public:
 
     // Public classes
 
-        // Hash function
+        //- Hash function
         class faceEdgeHash
         {
 
@@ -115,12 +116,12 @@ public:
     // Member Functions
 
         label faceLabel() const
-        {   
+        {
             return faceLabel_;
         }
 
         label faceIndex() const
-        {   
+        {
             return faceIndex_;
         }
 

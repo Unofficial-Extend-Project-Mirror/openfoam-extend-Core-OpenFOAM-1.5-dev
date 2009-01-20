@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    slipFvPatchField
+    Foam::slipFvPatchField
 
 Description
+    Foam::slipFvPatchField
 
 SourceFiles
     slipFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class slipFvPatchField Declaration
+                           Class slipFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    skewCorrected
+    Foam::skewCorrected
 
 Description
     Skewness-corrected interpolation scheme which applies an explicit

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gaussLaplacianScheme
+    Foam::fv::gaussLaplacianScheme
 
 Description
     Basic second-order laplacian using face-gradients and Gauss' theorem.
@@ -52,10 +52,10 @@ namespace fv
                        Class gaussLaplacianScheme Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
+template<class Type, class GType>
 class gaussLaplacianScheme
 :
-    public fv::laplacianScheme<Type>
+    public fv::laplacianScheme<Type, GType>
 {
     // Private Member Functions
 
@@ -89,24 +89,24 @@ public:
         //- Construct null
         gaussLaplacianScheme(const fvMesh& mesh)
         :
-            laplacianScheme<Type>(mesh)
+            laplacianScheme<Type, GType>(mesh)
         {}
 
         //- Construct from Istream
         gaussLaplacianScheme(const fvMesh& mesh, Istream& is)
         :
-            laplacianScheme<Type>(mesh, is)
+            laplacianScheme<Type, GType>(mesh, is)
         {}
 
         //- Construct from mesh, interpolation and snGradScheme schemes
         gaussLaplacianScheme
         (
             const fvMesh& mesh,
-            const tmp<surfaceInterpolationScheme<scalar> >& igs,
+            const tmp<surfaceInterpolationScheme<GType> >& igs,
             const tmp<snGradScheme<Type> >& sngs
         )
         :
-            laplacianScheme<Type>(mesh, igs, sngs)
+            laplacianScheme<Type, GType>(mesh, igs, sngs)
         {}
 
 
@@ -118,35 +118,51 @@ public:
 
     // Member Functions
 
-        tmp<fvMatrix<Type> > fvmLaplacian
-        (
-            const surfaceScalarField&,
-            GeometricField<Type, fvPatchField, volMesh>&
-        );
-
-        tmp<fvMatrix<Type> > fvmLaplacian
-        (
-            const surfaceTensorField&,
-            GeometricField<Type, fvPatchField, volMesh>&
-        );
-
         tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        tmp<fvMatrix<Type> > fvmLaplacian
         (
-            const surfaceScalarField&,
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
+            GeometricField<Type, fvPatchField, volMesh>&
         );
 
         tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (
-            const surfaceTensorField&,
+            const GeometricField<GType, fvsPatchField, surfaceMesh>&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 };
+
+
+// Use macros to emulate partial-specialisation of the the Laplacian functions
+// for scalar diffusivity gamma
+
+#define defineFvmLaplacianScalarGamma(Type)                                 \
+                                                                            \
+template<>                                                                  \
+tmp<fvMatrix<Type> > gaussLaplacianScheme<Type, scalar>::fvmLaplacian       \
+(                                                                           \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
+    GeometricField<Type, fvPatchField, volMesh>&                            \
+);                                                                          \
+                                                                            \
+template<>                                                                  \
+tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
+gaussLaplacianScheme<Type, scalar>::fvcLaplacian                            \
+(                                                                           \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
+    const GeometricField<Type, fvPatchField, volMesh>&                      \
+);
+
+
+defineFvmLaplacianScalarGamma(scalar);
+defineFvmLaplacianScalarGamma(vector);
+defineFvmLaplacianScalarGamma(sphericalTensor);
+defineFvmLaplacianScalarGamma(symmTensor);
+defineFvmLaplacianScalarGamma(tensor);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,26 +27,31 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include <mpi.h>
+#include "mpi.h"
 
 #include "IPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// Outstanding non-blocking operations.
+//! @cond fileScope
+Foam::DynamicList<MPI_Request> IPstream_outstandingRequests_;
+//! @endcond fileScope
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-IPstream::IPstream
+Foam::IPstream::IPstream
 (
+    const commsTypes commsType,
     const int fromProcNo,
     const label bufSize,
     streamFormat format,
     versionNumber version
 )
 :
-    Pstream(bufSize),
+    Pstream(commsType, bufSize),
     Istream(format, version),
     fromProcNo_(fromProcNo),
     messageSize_(0)
@@ -56,7 +61,7 @@ IPstream::IPstream
 
     MPI_Status status;
 
-    // If the buffer size is not specified probe the incomming message
+    // If the buffer size is not specified, probe the incomming message
     // and set it
     if (!bufSize)
     {
@@ -66,7 +71,7 @@ IPstream::IPstream
         buf_.setSize(messageSize_);
     }
 
-    messageSize_ = read(fromProcNo_, buf_.begin(), buf_.size());
+    messageSize_ = read(commsType, fromProcNo_, buf_.begin(), buf_.size());
 
     if (!messageSize_)
     {
@@ -74,70 +79,166 @@ IPstream::IPstream
         (
             "IPstream::IPstream(const int fromProcNo, "
             "const label bufSize, streamFormat format, versionNumber version)"
-        )   << "read failed" << Foam::abort(FatalError);
+        )   << "read failed"
+            << Foam::abort(FatalError);
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-label IPstream::read
+Foam::label Foam::IPstream::read
 (
+    const commsTypes commsType,
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize
 )
 {
-    MPI_Status status;
+    if (commsType == blocking || commsType == scheduled)
+    {
+        MPI_Status status;
 
-    if
-    (
-        MPI_Recv
+        if
         (
-            buf,
-            bufSize,
-            MPI_PACKED,
-            procID(fromProcNo),
-            msgType(),
-            MPI_COMM_WORLD,
-            &status
+            MPI_Recv
+            (
+                buf,
+                bufSize,
+                MPI_PACKED,
+                procID(fromProcNo),
+                msgType(),
+                MPI_COMM_WORLD,
+                &status
+            )
         )
-    )
+        {
+            FatalErrorIn
+            (
+                "IPstream::read"
+                "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+            )   << "MPI_Recv cannot receive incomming message"
+                << Foam::abort(FatalError);
+
+            return 0;
+        }
+
+
+        // Check size of message read
+
+        label messageSize;
+        MPI_Get_count(&status, MPI_BYTE, &messageSize);
+
+        if (messageSize > bufSize)
+        {
+            FatalErrorIn
+            (
+                "IPstream::read"
+                "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+            )   << "buffer (" << label(bufSize)
+                << ") not large enough for incomming message ("
+                << messageSize << ')'
+                << Foam::abort(FatalError);
+        }
+
+        return messageSize;
+    }
+    else if (commsType == nonBlocking)
+    {
+        MPI_Request request;
+
+        if
+        (
+            MPI_Irecv
+            (
+                buf,
+                bufSize,
+                MPI_PACKED,
+                procID(fromProcNo),
+                msgType(),
+                MPI_COMM_WORLD,
+                &request
+            )
+        )
+        {
+            FatalErrorIn
+            (
+                "IPstream::read"
+                "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+            )   << "MPI_Recv cannot start non-blocking receive"
+                << Foam::abort(FatalError);
+
+            return 0;
+        }
+
+        IPstream_outstandingRequests_.append(request);
+
+        return 1;
+    }
+    else
     {
         FatalErrorIn
         (
             "IPstream::read"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "MPI_Recv cannot receive incomming message"
+        )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
 
         return 0;
     }
+}
 
 
-    // Check size of message read
+void Foam::IPstream::waitRequests()
+{
+    if (IPstream_outstandingRequests_.size() > 0)
+    {
+        List<MPI_Status> status(IPstream_outstandingRequests_.size());
 
-    label messageSize;
-    MPI_Get_count(&status, MPI_BYTE, &messageSize);
+        if
+        (
+            MPI_Waitall
+            (
+                IPstream_outstandingRequests_.size(),
+                IPstream_outstandingRequests_.begin(),
+                status.begin()
+            )
+        )
+        {
+            FatalErrorIn
+            (
+                "IPstream::waitRequests()"
+            )   << "MPI_Waitall returned with error" << endl;
+        }
 
-    if (messageSize > bufSize)
+        IPstream_outstandingRequests_.clear();
+    }
+}
+
+
+bool Foam::IPstream::finishedRequest(const label i)
+{
+    if (i >= IPstream_outstandingRequests_.size())
     {
         FatalErrorIn
         (
-            "IPstream::read"
-            "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "buffer (" << label(bufSize)
-            << ") not large enough for incomming message ("
-            << messageSize << ')'
+            "IPstream::finishedRequest(const label)"
+        )   << "There are " << IPstream_outstandingRequests_.size()
+            << " outstanding send requests and you are asking for i=" << i
+            << nl
+            << "Maybe you are mixing blocking/non-blocking comms?"
             << Foam::abort(FatalError);
     }
 
-    return messageSize;
+    int flag;
+    MPI_Status status;
+
+    MPI_Test(&IPstream_outstandingRequests_[i], &flag, &status);
+
+    return flag != 0;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

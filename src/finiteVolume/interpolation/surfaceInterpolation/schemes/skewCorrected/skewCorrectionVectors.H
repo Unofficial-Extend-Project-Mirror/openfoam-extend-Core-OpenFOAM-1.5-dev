@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    skewCorrectionVectors
+    Foam::skewCorrectionVectors
 
 Description
     Skew-correction vectors for the skewness-corrected interpolation scheme

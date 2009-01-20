@@ -106,7 +106,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
     const volVectorField& C = mesh.C();
     const surfaceScalarField& w = mesh.weights();
-    const surfaceScalarField& magSf = mesh.magSf();
+//     const surfaceScalarField& magSf = mesh.magSf();
 
 
     // Set up temporary storage for the dd tensor (before inversion)
@@ -128,7 +128,9 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
     forAll(lsP.boundaryField(), patchi)
     {
         const fvsPatchScalarField& pw = w.boundaryField()[patchi];
-        const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
+        // Note: least squares in 1.4.1 and other OpenCFD versions
+        // are wrong becaus eof incorrect weighting.  HJ, 23/Oct/2008
+//         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
         const unallocLabelList& faceCells = p.patch().faceCells();
@@ -192,13 +194,15 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         fvsPatchVectorField& patchLsP = lsP.boundaryField()[patchi];
 
         const fvsPatchScalarField& pw = w.boundaryField()[patchi];
-        const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
+        // Note: least squares in 1.4.1 and other OpenCFD versions
+        // are wrong becaus eof incorrect weighting.  HJ, 23/Oct/2008
+//         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
         const unallocLabelList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd = 
+        vectorField pd =
             mesh.Sf().boundaryField()[patchi]
            /(
                mesh.magSf().boundaryField()[patchi]

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cyclicFvPatch
+    Foam::cyclicFvPatch
 
 Description
     Cyclic-plane patch.
@@ -125,12 +125,14 @@ public:
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& internalData
             ) const;
 };

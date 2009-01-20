@@ -158,7 +158,10 @@ public:
             tmp<Field<Type> > patchNeighbourField() const;
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType
+            );
 
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
@@ -168,7 +171,7 @@ public:
                 const lduMatrix& m,
                 const scalarField& coeffs,
                 const direction cmpt,
-                const bool
+                const Pstream::commsTypes commsType
             ) const;
 
             //- Update result field based on interface functionality
@@ -178,7 +181,8 @@ public:
                 scalarField& result,
                 const lduMatrix&,
                 const scalarField& coeffs,
-                const direction cmpt
+                const direction cmpt,
+                const Pstream::commsTypes commsType
             ) const;
 
 

@@ -23,16 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    slicedFvsPatchField
+    Foam::slicedFvsPatchField
 
 Description
-    Special for of fvsPatchField which creates the underlying fvsPatchField
-    as a slice of the given complete field.  The destructor is wrapped
-    to avoid deallocation of the storage of the complete fields when this is
-    destroyed.
+    Specialization of fvsPatchField which creates the underlying
+    fvsPatchField as a slice of the given complete field.
 
-    slicedFvsPatchField should be only used as a template argument for
-    SlicedGeometricField.
+    The destructor is wrapped to avoid deallocation of the storage of the
+    complete fields when this is destroyed.
+
+    Should only used as a template argument for SlicedGeometricField.
 
 SourceFiles
     slicedFvsPatchField.C
@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class slicedFvsPatchField Declaration
+                           Class slicedFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

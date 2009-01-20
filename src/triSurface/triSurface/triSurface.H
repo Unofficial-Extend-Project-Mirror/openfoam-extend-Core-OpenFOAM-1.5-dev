@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    triSurface
+    Foam::triSurface
 
 Description
     Triangulated surface description with patch information.
@@ -108,7 +108,7 @@ class triSurface
         bool read(Istream&);
 
         //- Generic read routine. Chooses reader based on extension.
-        bool read(const fileName&, const word& ext);
+        bool read(const fileName&, const word& ext, const bool check = true);
 
         bool readSTL(const fileName&);
         bool readSTLASCII(const fileName&);
@@ -124,6 +124,7 @@ class triSurface
         void write(const fileName&, const word& ext, const bool sort) const;
 
         //- Write to Ostream in ASCII STL format.
+        //  Each region becomes 'solid' 'endsolid' block.
         void writeSTLASCII(Ostream&) const;
 
         //- Write to std::ostream in BINARY STL format
@@ -147,6 +148,7 @@ class triSurface
         void writeVTK(const bool writeSorted, Ostream&) const;
 
         //- Write to Ostream in TRI (AC3D) format
+        //  Ac3d .tri format (unmerged triangle format)
         void writeTRI(const bool writeSorted, Ostream&) const;
 
         //- Write to Ostream in SMESH (tetgen) format

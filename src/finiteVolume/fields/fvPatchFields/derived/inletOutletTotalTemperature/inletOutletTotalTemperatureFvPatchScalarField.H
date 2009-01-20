@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    inletOutletTotalTemperatureFvPatchScalarField
+    Foam::inletOutletTotalTemperatureFvPatchScalarField
 
 Description
+    Foam::inletOutletTotalTemperatureFvPatchScalarField
 
 SourceFiles
     inletOutletTotalTemperatureFvPatchScalarField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class inletOutletTotalTemperatureFvPatchField Declaration
+             Class inletOutletTotalTemperatureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class inletOutletTotalTemperatureFvPatchScalarField

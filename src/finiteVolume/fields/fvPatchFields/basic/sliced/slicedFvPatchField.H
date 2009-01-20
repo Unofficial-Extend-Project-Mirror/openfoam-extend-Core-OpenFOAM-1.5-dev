@@ -23,16 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    slicedFvPatchField
+    Foam::slicedFvPatchField
 
 Description
-    Special for of fvPatchField which creates the underlying fvPatchField
-    as a slice of the given complete field.  The destructor is wrapped
-    to avoid deallocation of the storage of the complete fields when this is
-    destroyed.
+    Specialization of fvPatchField which creates the underlying
+    fvPatchField as a slice of the given complete field.
 
-    slicedFvPatchField should be only used as a template argument for
-    SlicedGeometricField.
+    The destructor is wrapped to avoid deallocation of the storage of the
+    complete fields when this is destroyed.
+
+    Should only used as a template argument for SlicedGeometricField.
 
 SourceFiles
     slicedFvPatchField.C
@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class slicedFvPatchField Declaration
+                           Class slicedFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -161,11 +161,18 @@ public:
             virtual tmp<Field<Type> > patchNeighbourField() const;
 
             //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const bool=false);
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            )
+            {}
 
             //- Evaluate the patch field, sets Updated to false
-            virtual void evaluate();
-
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            )
+            {}
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights

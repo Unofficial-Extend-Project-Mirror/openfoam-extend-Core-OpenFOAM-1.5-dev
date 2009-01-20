@@ -29,7 +29,7 @@ Description
     Symmetric Gauss-Seidel smoother
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*----------------------------------------------------------------------------*/
 
@@ -41,7 +41,6 @@ Author
 namespace Foam
 {
     defineTypeNameAndDebug(iluSmoother, 0);
-
     addToRunTimeSelectionTable(lduSmoother, iluSmoother, word);
 }
 

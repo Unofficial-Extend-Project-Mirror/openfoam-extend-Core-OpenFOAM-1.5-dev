@@ -23,14 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellPointWeight
+    Foam::cellPointWeight
 
 Description
+    Foam::cellPointWeight
 
 SourceFiles
     cellPointWeight.C
-    findCellPointTet.H
-    findCellPointTriangle.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,35 +53,42 @@ class cellPointWeight
 {
     // Private data
 
-       vector position_;
-       label cellNo_;
-       label face_;
-       FixedList<scalar, 4> weights_;
-       FixedList<label, 3> faceVertices_;
-       label cellFace_;
+       //- Cell index
+       const label cellIndex_;
 
-       
+       //- Weights applied to tet vertices
+       FixedList<scalar, 4> weights_;
+
+       //- Face vertex indices
+       FixedList<label, 3> faceVertices_;
+
+
     // Private Member Functions
 
-        bool findTet
+        void findTetrahedron
         (
             const polyMesh& mesh,
-            const label nFace,
-            vector tetPoints[],
-            label tetLabelCandidate[],
-            scalar phiCandidate[],
-            label& closestFace,
-            scalar& minDistance
+            const vector& position,
+            const label cellIndex
         );
 
-        bool findTriangle
+        void findTriangle
         (
             const polyMesh& mesh,
-            const label nFace
+            const vector& position,
+            const label faceIndex
         );
 
 
 public:
+
+    //- Debug switch
+    static int debug;
+
+    //- Tolerance used in calculating barycentric co-ordinates
+    //  (applied to normailised values)
+    static scalar tol;
+
 
     // Constructors
 
@@ -90,7 +96,7 @@ public:
         cellPointWeight
         (
             const polyMesh& mesh,
-            const vector& position, 
+            const vector& position,
             const label nCell,
             const label facei = -1
         );
@@ -98,34 +104,22 @@ public:
 
     // Member Functions
 
-        //- cell label
+        //- Cell index
         inline label cell() const
         {
-            return cellNo_;
+            return cellIndex_;
         }
 
-        //- face label
-        inline label face() const
-        {
-            return face_;
-        }
-        
         //- interpolation weights
         inline const FixedList<scalar, 4>& weights() const
         {
             return weights_;
         }
-        
+
         //- interpolation addressing for points on face
         inline const FixedList<label, 3>& faceVertices() const
         {
             return faceVertices_;
-        }
-
-        //- face label
-        inline label cellFace() const
-        {
-            return cellFace_;
         }
 };
 

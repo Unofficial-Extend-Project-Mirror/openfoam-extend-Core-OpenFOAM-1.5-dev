@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshTriangulation
+    Foam::meshTriangulation
 
 Description
     Triangulation of mesh faces. Generates (multiply connected) trisurface.
-    All patch faces keep their patchID as triangle region. Internal faces
-    get the supplied region number.
+
+    All patch faces keep their patchID as triangle region.
+    Internal faces get the supplied region number.
 
 SourceFiles
     meshTriangulation.C
@@ -47,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class polyMesh;
 class primitiveMesh;
 

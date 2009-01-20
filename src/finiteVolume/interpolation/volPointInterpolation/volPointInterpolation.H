@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    volPointInterpolation
+    Foam::volPointInterpolation
 
 Description
+    Foam::volPointInterpolation
 
 SourceFiles
     volPointInterpolation.C
@@ -75,7 +76,7 @@ class volPointInterpolation
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("volPointInterpolation");
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Symmetric Gauss-Seidel smoother for coupled diagonal lduMatrices.
+    Symmetric Gauss-Seidel smoother for coupled lduMatrices.
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,8 +55,7 @@ Foam::coupledGaussSeidelSmoother::coupledGaussSeidelSmoother
     const coupledLduMatrix& matrix,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
-    const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt
+    const lduInterfaceFieldPtrsListList& interfaces
 )
 :
     coupledLduSmoother
@@ -61,30 +63,32 @@ Foam::coupledGaussSeidelSmoother::coupledGaussSeidelSmoother
         matrix,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     ),
     gs_
     (
         matrix,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     )
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::coupledGaussSeidelSmoother::solve
+void Foam::coupledGaussSeidelSmoother::smooth
 (
     FieldField<Field, scalar>& x,
     const FieldField<Field, scalar>& b,
-    FieldField<Field, scalar>& xBuffer
+    const direction cmpt,
+    const label nSweeps
 ) const
 {
-    gs_.solve(x, b);
+    for (label sweep = 0; sweep < nSweeps; sweep++)
+    {
+        gs_.precondition(x, b, cmpt);
+    }
 }
 
 

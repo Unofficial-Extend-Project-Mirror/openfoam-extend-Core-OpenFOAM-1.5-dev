@@ -68,7 +68,7 @@ fixedGradientFvPatchField<Type>::fixedGradientFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF),
+    fvPatchField<Type>(p, iF, dict),
     gradient_("gradient", dict, p.size())
 {
     evaluate();
@@ -106,7 +106,7 @@ void fixedGradientFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    Field<Type>::autoMap(m);
+    fvPatchField<Type>::autoMap(m);
     gradient_.autoMap(m);
 }
 
@@ -128,7 +128,7 @@ void fixedGradientFvPatchField<Type>::rmap
 
 
 template<class Type>
-void fixedGradientFvPatchField<Type>::evaluate()
+void fixedGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfacePatchIOList
+    Foam::surfacePatchIOList
 
 Description
+    IOobject for a surfacePatchList
 
 SourceFiles
     surfacePatchIOList.C
@@ -45,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class surfacePatchIOList Declaration

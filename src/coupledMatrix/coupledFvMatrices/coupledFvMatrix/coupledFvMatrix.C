@@ -176,15 +176,12 @@ Foam::coupledFvMatrix<Type>::solve(Istream& solverControls)
         solverPerf = coupledLduSolver::New
         (
             this->coupledPsiName() + pTraits<Type>::componentNames[cmpt],
-            psiCmpt,
             *this,
-            sourceCmpt,
             bouCoeffsCmpt,
             intCoeffsCmpt,
             interfaces,
-            cmpt,
             solverControls.rewind()
-        )->solve();
+        )->solve(psiCmpt, sourceCmpt, cmpt);
 
         solverPerf.print();
 

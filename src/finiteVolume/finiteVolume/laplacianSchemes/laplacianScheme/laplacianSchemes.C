@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Abstract base class for finite volume calculus laplacian schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "laplacianScheme.H"
@@ -42,11 +39,20 @@ namespace fv
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Define the constructor function hash tables
 
-defineTemplateRunTimeSelectionTable(laplacianScheme<scalar>, Istream);
-defineTemplateRunTimeSelectionTable(laplacianScheme<vector>, Istream);
-defineTemplateRunTimeSelectionTable(laplacianScheme<sphericalTensor>, Istream);
-defineTemplateRunTimeSelectionTable(laplacianScheme<symmTensor>, Istream);
-defineTemplateRunTimeSelectionTable(laplacianScheme<tensor>, Istream);
+#define makeLaplacianGTypeScheme(Type, GType)                                 \
+    typedef laplacianScheme<Type, GType> laplacianScheme##Type##GType;        \
+    defineTemplateRunTimeSelectionTable(laplacianScheme##Type##GType, Istream);
+
+#define makeLaplacianScheme(Type)                                             \
+    makeLaplacianGTypeScheme(Type, scalar);                                   \
+    makeLaplacianGTypeScheme(Type, symmTensor);                               \
+    makeLaplacianGTypeScheme(Type, tensor);
+
+makeLaplacianScheme(scalar);
+makeLaplacianScheme(vector);
+makeLaplacianScheme(sphericalTensor);
+makeLaplacianScheme(symmTensor);
+makeLaplacianScheme(tensor);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

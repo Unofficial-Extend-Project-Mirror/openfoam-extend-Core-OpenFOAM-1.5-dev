@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wedgeFvsPatchField
+    Foam::wedgeFvsPatchField
 
 Description
+    Foam::wedgeFvsPatchField
 
 SourceFiles
     wedgeFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class wedgeFvsPatchField Declaration
+                         Class wedgeFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

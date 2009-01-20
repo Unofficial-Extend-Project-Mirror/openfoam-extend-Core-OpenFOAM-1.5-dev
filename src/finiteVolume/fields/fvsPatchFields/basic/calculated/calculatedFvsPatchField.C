@@ -112,7 +112,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
         return patchTypeCstrIter()
         (
             pf.patch(),
-            DimensionedField<Type, surfaceMesh>::null()
+            Field<Type>::null()
         );
     }
     else
@@ -122,7 +122,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
             new calculatedFvsPatchField<Type>
             (
                 pf.patch(),
-                DimensionedField<Type, surfaceMesh>::null()
+                Field<Type>::null()
             )
         );
     }

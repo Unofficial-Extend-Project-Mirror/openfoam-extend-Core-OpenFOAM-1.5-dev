@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    interpolation
+    Foam::interpolation
 
 Description
+    Abstract base class for interpolation
 
 \*---------------------------------------------------------------------------*/
 
@@ -159,6 +160,8 @@ interpolation<Type>::adddictionaryConstructorToTable<SS<Type> >                \
                                                                                \
 makeInterpolationType(SS, scalar)                                              \
 makeInterpolationType(SS, vector)                                              \
+makeInterpolationType(SS, sphericalTensor)                                     \
+makeInterpolationType(SS, symmTensor)                                          \
 makeInterpolationType(SS, tensor)
 
 

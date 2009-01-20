@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    multivariateSelectionScheme
+    Foam::multivariateSelectionScheme
 
 Description
     Generic multi-variate discretisation scheme class for which any of the

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,9 +29,10 @@ Description
     Coupled ldu solver virtual base class
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
+    coupledLduSolver.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,26 +48,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class coupledLduSolver Declaration
+                       Class coupledLduSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class coupledLduSolver
 {
-protected:
-
-    // Protected data
+    // Private data
 
         //- Field name
         word fieldName_;
 
-        //- Variable
-        FieldField<Field, scalar>& x_;
 
-        //- Matrix
+protected:
+
+    // Protected data
+
+        //- Matrix reference
         const coupledLduMatrix& matrix_;
-
-        //- Right-hand side
-        const FieldField<Field, scalar>& b_;
 
         //- Boundary coefficients
         const PtrList<FieldField<Field, scalar> >& bouCoeffs_;
@@ -76,9 +74,6 @@ protected:
 
         //- Interfaces
         const lduInterfaceFieldPtrsListList& interfaces_;
-
-        //- Solving direction
-       const direction cmpt_;
 
 
 public:
@@ -96,24 +91,18 @@ public:
             symMatrix,
             (
                 const word& fieldName,
-                FieldField<Field, scalar>& x,
                 const coupledLduMatrix& matrix,
-                const FieldField<Field, scalar>& b,
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
                 const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt,
                 Istream& solverData
             ),
             (
                 fieldName,
-                x,
                 matrix,
-                b,
                 bouCoeffs,
                 intCoeffs,
                 interfaces,
-                cmpt,
                 solverData
             )
         );
@@ -125,24 +114,18 @@ public:
             asymMatrix,
             (
                 const word& fieldName,
-                FieldField<Field, scalar>& x,
                 const coupledLduMatrix& matrix,
-                const FieldField<Field, scalar>& b,
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
                 const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt,
                 Istream& solverData
             ),
             (
                 fieldName,
-                x,
                 matrix,
-                b,
                 bouCoeffs,
                 intCoeffs,
                 interfaces,
-                cmpt,
                 solverData
             )
         );
@@ -153,23 +136,17 @@ public:
             coupledLduSolver
             (
                 const word& fieldName,
-                FieldField<Field, scalar>& x,
                 const coupledLduMatrix& matrix,
-                const FieldField<Field, scalar>& b,
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
-                const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt
+                const lduInterfaceFieldPtrsListList& interfaces
             )
             :
                 fieldName_(fieldName),
-                x_(x),
                 matrix_(matrix),
-                b_(b),
                 bouCoeffs_(bouCoeffs),
                 intCoeffs_(intCoeffs),
-                interfaces_(interfaces),
-                cmpt_(cmpt)
+                interfaces_(interfaces)
             {}
 
 
@@ -179,13 +156,10 @@ public:
             static autoPtr<coupledLduSolver> New
             (
                 const word& fieldName,
-                FieldField<Field, scalar>& x,
                 const coupledLduMatrix& matrix,
-                const FieldField<Field, scalar>& b,
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
                 const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt,
                 Istream& solverData
             );
 
@@ -198,8 +172,19 @@ public:
 
         // Member functions
 
+            //- Return field name
+            const word& fieldName() const
+            {
+                return fieldName_;
+            }
+
             //- Solve
-            virtual coupledSolverPerformance solve() = 0;
+            virtual coupledSolverPerformance solve
+            (
+                FieldField<Field, scalar>& x,
+                const FieldField<Field, scalar>& b,
+                const direction cmpt = 0
+            ) const = 0;
 };
 
 

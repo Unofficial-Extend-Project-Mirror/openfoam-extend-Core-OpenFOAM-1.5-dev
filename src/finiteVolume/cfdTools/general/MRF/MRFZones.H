@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    MRFZones
+    Foam::MRFZones
 
 Description
     Container class for a set of MRFZones with the MRFZone member functions

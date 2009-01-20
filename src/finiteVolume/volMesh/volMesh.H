@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    volMesh
+    Foam::volMesh
 
 Description
     Mesh data needed to do the Finite Volume discretisation.

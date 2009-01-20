@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Write primitive and binary block from OPstream
+    Write primitive and binary block from OPstream gamma-mpi
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,8 +46,10 @@ namespace Foam
 
 // Largest message sent so far. This tracks the size of the receive
 // buffer on the receiving end. Done so we only send out resize messages
-// if nessecary
+// if necessary
+//! @cond fileScope
 labelList maxSendSize;
+//! @endcond fileScope
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -62,12 +64,12 @@ OPstream::~OPstream()
 
     if
     (
-        !write
+       !write
         (
+            commsType_,
             toProcNo_,
             buf_.begin(),
-            bufPosition_,
-            bufferedTransfer_
+            bufPosition_
         )
     )
     {
@@ -82,10 +84,10 @@ OPstream::~OPstream()
 
 bool OPstream::write
 (
+    const commsTypes commsType,
     const int toProcNo,
     const char* buf,
-    const std::streamsize bufSize,
-    const bool bufferedTransfer
+    const std::streamsize bufSize
 )
 {
     if (PstreamGlobals::getSizeFromHeader(buf, bufSize) != -1)
@@ -148,7 +150,7 @@ bool OPstream::write
     // ~~~~~~~~~~~~~~
 
     // Note: could be put into allocation of buf.
-//    gamma_mlock(const_cast<char*>(buf), bufSize);
+    //gamma_mlock(const_cast<char*>(buf), bufSize);
 
     if (Pstream::debug)
     {
@@ -163,7 +165,7 @@ bool OPstream::write
         bufSize
     );
 
-//    gamma_munlock(const_cast<char*>(buf), bufSize);
+    //gamma_munlock(const_cast<char*>(buf), bufSize);
 
     if (Pstream::debug)
     {

@@ -37,7 +37,7 @@ License
 #include "MapFvFields.H"
 #include "fvMeshMapper.H"
 #include "mapClouds.H"
-#include "MeshObject.H"
+#include "meshObjectBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,6 +121,11 @@ fvMesh::fvMesh(const IOobject& io)
     // and set the storage of V00
     if (file(time().timePath()/"V0"))
     {
+        if (debug)
+        {
+            Info<< "Reading old cell volumes" << endl;
+        }
+
         V0Ptr_ = new DimensionedField<scalar, volMesh>
         (
             IOobject
@@ -141,6 +146,11 @@ fvMesh::fvMesh(const IOobject& io)
     // mesh to be moving
     if (file(time().timePath()/"meshPhi"))
     {
+        if (debug)
+        {
+            Info<< "Reading motion fluxes" << endl;
+        }
+
         phiPtr_ = new surfaceScalarField
         (
             IOobject
@@ -174,7 +184,7 @@ fvMesh::fvMesh(const IOobject& io)
             );
         }
 
-        setMoving();
+        moving(true);
     }
 }
 
@@ -391,7 +401,16 @@ void fvMesh::mapFields(const mapPolyMesh& meshMap)
 
     // Map all the clouds in the objectRegistry
     mapClouds(*this, meshMap);
+}
 
+
+void fvMesh::mapOldVolumes(const mapPolyMesh& meshMap)
+{
+    if (debug)
+    {
+        InfoIn("void fvMesh::(const mapPolyMesh& meshMap)")
+            << "Mapping cell volumes." << endl;
+    }
 
     const labelList& cellMap = meshMap.cellMap();
 
@@ -450,6 +469,9 @@ void fvMesh::updateMesh(const mapPolyMesh& mpm)
     // Map all fields
     mapFields(mpm);
 
+    // Map old-volumes
+    mapOldVolumes(mpm);
+
     clearAddressing();
 
     // handleMorph() should also clear out the surfaceInterpolation.
@@ -501,6 +523,12 @@ tmp<scalarField> fvMesh::movePoints(const pointField& p)
     if (!phiPtr_)
     {
         // Create mesh motion flux
+        if (debug)
+        {
+            InfoIn("tmp<scalarField> fvMesh::movePoints(const pointField& p)")
+                << "Creating null mesh motion fluxes" << endl;
+        }
+
         phiPtr_ = new surfaceScalarField
         (
             IOobject

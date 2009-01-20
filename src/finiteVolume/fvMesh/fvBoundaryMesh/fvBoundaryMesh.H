@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvBoundaryMesh
+    Foam::fvBoundaryMesh
 
 Description
+    Foam::fvBoundaryMesh
 
 SourceFiles
     fvBoundaryMesh.C
@@ -47,7 +48,7 @@ class fvMesh;
 class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class fvBoundaryMesh Declaration
+                           Class fvBoundaryMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvBoundaryMesh

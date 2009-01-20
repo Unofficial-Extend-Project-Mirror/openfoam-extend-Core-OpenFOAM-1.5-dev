@@ -122,7 +122,7 @@ Foam::nearWallDist::~nearWallDist()
 
 void Foam::nearWallDist::correct()
 {
-    if (mesh_.moving())
+    if (mesh_.changing())
     {
         // Update size of GeometricBoundaryField
         forAll(mesh_.boundary(), patchI)

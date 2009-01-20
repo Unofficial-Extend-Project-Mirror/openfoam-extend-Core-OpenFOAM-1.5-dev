@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    findRefCell
+InNamespace
+    Foam
 
 Description
     Find the reference cell nearest (in index) to the given cell but which
@@ -45,6 +45,8 @@ SourceFiles
 namespace Foam
 {
 
+//- Find the reference cell nearest (in index) to the given cell,
+//  but which is not on a cyclic, symmetry or processor patch.
 void setRefCell
 (
     const volScalarField& field,

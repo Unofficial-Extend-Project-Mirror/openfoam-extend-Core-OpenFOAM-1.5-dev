@@ -106,7 +106,10 @@ fluxCorrectedVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fluxCorrectedVelocityFvPatchVectorField::evaluate()
+void fluxCorrectedVelocityFvPatchVectorField::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     if (!updated())
     {

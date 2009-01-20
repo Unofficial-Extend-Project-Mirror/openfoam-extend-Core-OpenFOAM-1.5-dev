@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvMeshSubset
+    Foam::fvMeshSubset
 
 Description
     Post-processing mesh subset tool.  Given the original mesh and the
@@ -56,13 +56,12 @@ SourceFiles
 #define fvMeshSubset_H
 
 #include "fvMesh.H"
+#include "pointMesh.H"
 #include "fvPatchFieldMapper.H"
+#include "PointPatchFieldMapper.H"
 #include "GeometricField.H"
-#include "emptyFvPatchFields.H"
 #include "labelHashSet.H"
-#include "SubField.H"
 #include "surfaceMesh.H"
-#include "regIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -164,6 +163,55 @@ public:
     };
 
 
+    //- Patch-field subset interpolation class
+    class pointPatchFieldSubset
+    :
+        public PointPatchFieldMapper
+    {
+        //- Addressing
+        const labelList& directAddressing_;
+
+
+    public:
+
+        // Constructors
+
+            //- Construct given addressing
+            pointPatchFieldSubset(const labelList& directAddressing)
+            :
+                directAddressing_(directAddressing)
+            {}
+
+        // Destructor
+
+            virtual ~pointPatchFieldSubset()
+            {}
+
+
+        // Member Functions
+
+            label size() const
+            {
+                return directAddressing_.size();
+            }
+
+            label sizeBeforeMapping() const
+            {
+                return directAddressing_.size();
+            }
+
+            bool direct() const
+            {
+                return true;
+            }
+
+            const unallocLabelList& directAddressing() const
+            {
+                return directAddressing_;
+            }
+    };
+
+
 private:
 
     // Private data
@@ -171,8 +219,11 @@ private:
         //- Reference to original mesh
         const fvMesh& baseMesh_;
 
-        //- Subset mesh pointer
+        //- Subset fvMesh pointer
         fvMesh* fvMeshSubsetPtr_;
+
+        //- Subset pointMesh pointer
+        mutable pointMesh* pointMeshSubsetPtr_;
 
         //- Point mapping array
         labelList pointMap_;
@@ -206,7 +257,11 @@ private:
         static void markPoints(const labelList&, labelList&); 
 
         //- Adapt nCellsUsingFace for coupled faces becoming 'uncoupled'.
-        void doCoupledPatches(const bool, labelList& nCellsUsingFace) const;
+        void doCoupledPatches
+        (
+            const bool syncPar,
+            labelList& nCellsUsingFace
+        ) const;
 
         //- Subset of subset
         static labelList subset
@@ -218,6 +273,10 @@ private:
 
         //- Create zones for submesh
         void subsetZones();
+
+        //- Make dictionaries in case they are not present
+        //  Creates fvSchemes and fvSolution copying from base
+        void makeFvDictionaries();
 
 
 public:
@@ -279,7 +338,13 @@ public:
 
             //- Return reference to subset mesh
             const fvMesh& subMesh() const;
+
             fvMesh& subMesh();
+
+            //- Return reference to demand-driven subset pointMesh
+            const pointMesh& subPointMesh() const;
+
+            pointMesh& subPointMesh();
 
             //- Return point map
             const labelList& pointMap() const;
@@ -298,16 +363,37 @@ public:
 
             //- Map volume field
             template<class Type>
-            tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
+            tmp<GeometricField<Type, fvPatchField, volMesh> >
+            interpolate
             (
                 const GeometricField<Type, fvPatchField, volMesh>&
             ) const;
 
             //- Map surface field
             template<class Type>
-            tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > interpolate
+            tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+            interpolate
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>&
+            ) const;
+
+            //- Map point field
+            template<class Type>
+            static tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            interpolate
+            (
+                const GeometricField<Type, pointPatchField, pointMesh>&,
+                const pointMesh& sMesh,
+                const objectRegistry& reg,
+                const labelList& patchMap,
+                const labelList& pointMap
+            );
+
+            template<class Type>
+            tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            interpolate
+            (
+                const GeometricField<Type, pointPatchField, pointMesh>&
             ) const;
 
 

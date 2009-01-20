@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellDecompIsoSurfaceCuts
+    Foam::cellDecompIsoSurfaceCuts
 
 Description
-    cellCuts resulting from isoSurface reconstruction on cellDecomp tet mesh.
+    cellCuts resulting from isoSurface reconstruction on cellDecomp tet mesh
 
 SourceFiles
     cellDecompIsoSurfaceCuts.C
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class volPointInterpolation;
 
 /*---------------------------------------------------------------------------*\

@@ -8,14 +8,16 @@ coupledLduPrecon/CholeskyPrecon/coupledCholeskyPrecon.C
 
 coupledLduSmoother/coupledLduSmoother/coupledLduSmoother.C
 coupledLduSmoother/GaussSeidelSmoother/coupledGaussSeidelSmoother.C
+coupledLduSmoother/iluSmoother/coupledIluSmoother.C
 
 coupledLduSolver/coupledSolverPerformance/coupledSolverPerformance.C
 coupledLduSolver/coupledLduSolver/coupledLduSolver.C
 coupledLduSolver/iterativeSolver/coupledIterativeSolver.C
 coupledLduSolver/diagonalSolver/coupledDiagonalSolver.C
-coupledLduSolver/GaussSeidelSolver/coupledGaussSeidelSolver.C
+coupledLduSolver/smoothSolver/coupledSmoothSolver.C
 coupledLduSolver/cgSolver/coupledCgSolver.C
 coupledLduSolver/bicgSolver/coupledBicgSolver.C
+coupledLduSolver/bicgStabSolver/coupledBicgStabSolver.C
 
 coupledFvMatrices/coupledFvMatrices.C
 coupledFvMatrices/coupledFvScalarMatrix/coupledFvScalarMatrix.C

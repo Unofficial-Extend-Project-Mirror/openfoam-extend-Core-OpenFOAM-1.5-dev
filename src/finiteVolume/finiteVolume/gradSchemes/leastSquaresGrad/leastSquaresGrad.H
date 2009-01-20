@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    leastSquaresGrad
+    Foam::fv::leastSquaresGrad
 
 Description
     Second-order gradient scheme using least-squares.

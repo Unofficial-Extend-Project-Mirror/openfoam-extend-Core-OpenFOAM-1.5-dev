@@ -23,15 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvsPatchField
+    Foam::fvsPatchField
 
 Description
-    fvsPatchField<Type> abstract base class.  This class gives a fat-interface
-    to all derived classes covering all possible ways in which they might be
-    used.  The first level of derivation is to basic patchFields which cover
-    zero-gradient, fixed-gradient, fixed-value and mixed conditions.  The next
-    level of derivation covers all the specialised typed with specific
-    evaluation proceedures, particularly with respect to specific fields.
+    An abstract base class with a fat-interface to all derived classes
+    covering all possible ways in which they might be used.
+
+    The first level of derivation is to basic patchFields which cover
+    zero-gradient, fixed-gradient, fixed-value and mixed conditions.
+
+    The next level of derivation covers all the specialised typed with
+    specific evaluation proceedures, particularly with respect to specific
+    fields.
 
 SourceFiles
     fvsPatchField.C
@@ -50,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 class objectRegistry;
 class dictionary;
@@ -58,7 +61,7 @@ class fvPatchFieldMapper;
 class surfaceMesh;
 
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type>
 class fvsPatchField;
@@ -68,7 +71,7 @@ Ostream& operator<<(Ostream&, const fvsPatchField<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class fvsPatchField Declaration
+                           Class patch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -93,7 +96,7 @@ public:
     //- Runtime type information
     TypeName("fvsPatchField");
 
-    //- Debug switch to disallow the use of 
+    //- Debug switch to disallow the use of
     static int disallowDefaultFvsPatchField;
 
 

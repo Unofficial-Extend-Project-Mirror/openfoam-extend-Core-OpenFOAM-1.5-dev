@@ -71,7 +71,7 @@ mixedFvPatchField<Type>::mixedFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF),
+    fvPatchField<Type>(p, iF, dict),
     refValue_("refValue", dict, p.size()),
     refGrad_("refGradient", dict, p.size()),
     valueFraction_("valueFraction", dict, p.size())
@@ -115,7 +115,7 @@ void mixedFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    Field<Type>::autoMap(m);
+    fvPatchField<Type>::autoMap(m);
     refValue_.autoMap(m);
     refGrad_.autoMap(m);
     valueFraction_.autoMap(m);
@@ -141,7 +141,7 @@ void mixedFvPatchField<Type>::rmap
 
 
 template<class Type>
-void mixedFvPatchField<Type>::evaluate()
+void mixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvPatch.H"
@@ -31,12 +29,11 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<fvPatch> fvPatch::New(const polyPatch& patch, const fvBoundaryMesh& bm)
+Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
+(
+    const polyPatch& patch,
+    const fvBoundaryMesh& bm
+)
 {
     if (debug)
     {
@@ -60,9 +57,5 @@ autoPtr<fvPatch> fvPatch::New(const polyPatch& patch, const fvBoundaryMesh& bm)
     return autoPtr<fvPatch>(cstrIter()(patch, bm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

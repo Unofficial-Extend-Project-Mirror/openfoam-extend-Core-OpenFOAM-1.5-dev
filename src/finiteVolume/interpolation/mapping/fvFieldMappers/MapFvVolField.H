@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    MapFvVolField
+    Foam::MapFvVolField
 
 Description
     Map volume internal field on topology change.  This is a partial

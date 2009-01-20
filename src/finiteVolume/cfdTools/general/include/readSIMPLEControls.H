@@ -18,8 +18,8 @@
         fluxGradp = Switch(simple.lookup("fluxGradp"));
     }
 
-    bool transSonic = false;
-    if (simple.found("transSonic"))
+    bool transonic = false;
+    if (simple.found("transonic"))
     {
-        transSonic = Switch(simple.lookup("transSonic"));
+        transonic = Switch(simple.lookup("transonic"));
     }

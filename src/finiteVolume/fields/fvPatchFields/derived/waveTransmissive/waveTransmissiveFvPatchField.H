@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    waveTransmissiveFvPatchField
+    Foam::waveTransmissiveFvPatchField
 
 Description
+    Foam::waveTransmissiveFvPatchField
 
 SourceFiles
     waveTransmissiveFvPatchField.C
@@ -35,7 +36,7 @@ SourceFiles
 #ifndef waveTransmissiveFvPatchField_H
 #define waveTransmissiveFvPatchField_H
 
-#include "mixedFvPatchFields.H"
+#include "advectiveFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,38 +44,22 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class waveTransmissiveFvPatchField Declaration
+                 Class waveTransmissiveFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
 class waveTransmissiveFvPatchField
 :
-    public mixedFvPatchField<Type>
+    public advectiveFvPatchField<Type>
 {
 
     // Private data
-
-        //- Name of the field
-        word fieldName_;
-
-        //- Name of the flux transporting the field
-        word phiName_;
-
-        //- Name of the density field used to normalise the mass flux
-        //  if neccessary
-        word rhoName_;
 
         //- Name of the compressibility field used to calculate the wave speed
         word psiName_;
 
         //- Heat capacity ratio
         scalar gamma_;
-
-        //- Field value of the far-field
-        Type fieldInf_;
-
-        //- Relaxation length-scale
-        scalar lInf_;
 
 
 public:
@@ -149,18 +134,6 @@ public:
 
         // Access
 
-            //- Return the field at infinity
-            const Type& fieldInf() const
-            {
-                return fieldInf_;
-            }
-
-            //- Return reference to the field at infinity to allow adjustment
-            Type& fieldInf()
-            {
-                return fieldInf_;
-            }
-
             //- Return the heat capacity ratio
             scalar gamma() const
             {
@@ -173,40 +146,11 @@ public:
                 return gamma_;
             }
 
-            //- Return the relaxation length-scale
-            scalar lInf() const
-            {
-                return lInf_;
-            }
-
-            //- Return reference to the relaxation length-scale
-            //  to allow adjustment
-            scalar& lInf()
-            {
-                return lInf_;
-            }
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>&,
-                const labelList&
-            );
-
 
         // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+            //- Calculate and return the advection speed at the boundary
+            virtual tmp<scalarField> advectionSpeed() const;
 
 
         //- Write

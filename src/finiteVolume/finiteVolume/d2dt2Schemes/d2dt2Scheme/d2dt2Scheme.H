@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    d2dt2Scheme
+    Foam::fv::d2dt2Scheme
 
 Description
     Abstract base class for d2dt2 schemes.

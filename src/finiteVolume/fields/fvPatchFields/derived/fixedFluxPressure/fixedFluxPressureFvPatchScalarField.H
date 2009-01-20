@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fixedFluxPressureFvPatchScalarField
+    Foam::fixedFluxPressureFvPatchScalarField
 
 Description
+    Foam::fixedFluxPressureFvPatchScalarField
 
 SourceFiles
     fixedFluxPressureFvPatchScalarField.C
@@ -45,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class fixedFluxPressureFvPatchField Declaration
+                           Class fixedFluxPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedFluxPressureFvPatchScalarField

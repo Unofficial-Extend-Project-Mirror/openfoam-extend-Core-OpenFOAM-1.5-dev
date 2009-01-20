@@ -44,7 +44,7 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
     const lduMatrix&,
     const scalarField&,
     const direction,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType
 ) const;
 
 
@@ -55,7 +55,8 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction
+    const direction,
+    const Pstream::commsTypes commsType
 ) const;
 
 

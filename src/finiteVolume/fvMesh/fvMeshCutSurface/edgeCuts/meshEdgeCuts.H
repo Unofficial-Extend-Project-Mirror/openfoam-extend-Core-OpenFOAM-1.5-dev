@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshEdgeCuts
+    Foam::meshEdgeCuts
 
 Description
     Container for cuts of edges of mesh. Cuts either exactly through existing 
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cubic
+    Foam::cubic
 
 Description
     Cubic interpolation scheme class derived from linear and returns

@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Namespace of functions to calculate explicit derivatives.
-    Time derivatives are calculated using Euler-implicit, backward differencing
-    or Crank-Nicholson. Spatial derivatives are calculated using Gauss' Theorem.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvcLaplacian.H"
@@ -53,7 +48,7 @@ laplacian
     const word& name
 )
 {
-    return fv::laplacianScheme<Type>::New
+    return fv::laplacianScheme<Type, scalar>::New
     (
         vf.mesh(),
         vf.mesh().laplacianScheme(name)
@@ -107,11 +102,11 @@ laplacian
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const dimensionedScalar& gamma,
+    const dimensioned<GType>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
@@ -120,11 +115,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const dimensionedScalar& gamma,
+    const dimensioned<GType>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
     const word& name
 )
@@ -138,11 +133,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const dimensionedScalar& gamma,
+    const dimensioned<GType>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -153,11 +148,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const dimensionedScalar& gamma,
+    const dimensioned<GType>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
@@ -172,16 +167,16 @@ laplacian
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
-    return fv::laplacianScheme<Type>::New
+    return fv::laplacianScheme<Type, GType>::New
     (
         vf.mesh(),
         vf.mesh().laplacianScheme(name)
@@ -189,11 +184,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<volScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
@@ -207,11 +202,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
     const word& name
 )
@@ -225,11 +220,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<volScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
     const word& name
 )
@@ -244,11 +239,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -261,11 +256,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<volScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -278,11 +273,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const volScalarField& gamma,
+    const GeometricField<GType, fvPatchField, volMesh>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
@@ -295,11 +290,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<volScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
@@ -314,16 +309,16 @@ laplacian
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const surfaceScalarField& gamma,
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
-    return fv::laplacianScheme<Type>::New
+    return fv::laplacianScheme<Type, GType>::New
     (
         vf.mesh(),
         vf.mesh().laplacianScheme(name)
@@ -331,11 +326,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<surfaceScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tgamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
@@ -349,11 +344,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const surfaceScalarField& gamma,
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
     const word& name
 )
@@ -367,10 +362,10 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
 (
-    const tmp<surfaceScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tgamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
     const word& name
 )
@@ -385,11 +380,11 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const surfaceScalarField& gamma,
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -402,11 +397,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const tmp<surfaceScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tgamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -419,11 +414,11 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 laplacian
 (
-    const surfaceScalarField& gamma,
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
@@ -436,10 +431,10 @@ laplacian
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
 (
-    const tmp<surfaceScalarField>& tgamma,
+    const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tgamma,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
@@ -448,296 +443,6 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
         fvc::laplacian(tgamma(), tvf())
     );
     tgamma.clear();
-    tvf.clear();
-    return Laplacian;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const volTensorField& Gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const word& name
-)
-{
-    const fvMesh& mesh = vf.mesh();
-
-    return fvc::laplacian
-    (
-        (mesh.Sf() & fvc::interpolate(Gamma) & mesh.Sf())/sqr(mesh.magSf()),
-        vf,
-        name
-    );
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const volTensorField& Gamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(Gamma, tvf(), name)
-    );
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<volTensorField>& tGamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), vf, name)
-    );
-    tGamma.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<volTensorField>& tGamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), tvf(), name)
-    );
-    tGamma.clear();
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const volTensorField& Gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    return laplacian
-    (
-        Gamma, vf, "laplacian(" + Gamma.name() + ',' + vf.name() + ')'
-    );
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const volTensorField& Gamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(Gamma, tvf())
-    );
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<volTensorField>& tGamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), vf)
-    );
-    tGamma.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<volTensorField>& tGamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), tvf())
-    );
-    tGamma.clear();
-    tvf.clear();
-    return Laplacian;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
-(
-    const surfaceTensorField& Gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const word& name
-)
-{
-    const fvMesh& mesh = vf.mesh();
-
-    return fvc::laplacian
-    (
-        (mesh.Sf() & Gamma & mesh.Sf())/sqr(mesh.magSf()),
-        vf,
-        name
-    );
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const surfaceTensorField& Gamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(Gamma, tvf(), name)
-    );
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<surfaceTensorField>& tGamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), vf, name)
-    );
-    tGamma.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<surfaceTensorField>& tGamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
-    const word& name
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), tvf(), name)
-    );
-    tGamma.clear();
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > laplacian
-(
-    const surfaceTensorField& Gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = vf.mesh();
-
-    return fvc::laplacian
-    (
-        Gamma,
-        vf,
-        "laplacian(" + Gamma.name() + ',' + vf.name() + ')'
-    );
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const surfaceTensorField& Gamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(Gamma, tvf())
-    );
-    tvf.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<surfaceTensorField>& tGamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), vf)
-    );
-    tGamma.clear();
-    return Laplacian;
-}
-
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-laplacian
-(
-    const tmp<surfaceTensorField>& tGamma,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
-)
-{
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Laplacian
-    (
-        fvc::laplacian(tGamma(), tvf())
-    );
-    tGamma.clear();
     tvf.clear();
     return Laplacian;
 }

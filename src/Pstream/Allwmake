@@ -3,10 +3,18 @@ set -x
 
 wmake libso dummy
 
-if [ "$WM_MPLIB" = "LAM" -o "$WM_MPLIB" = "OPENMPI"  -o "$WM_MPLIB" = "MPI" -o "$WM_MPLIB" = "MPICH" -o "$WM_MPLIB" = "MPICH-GM" -o "$WM_MPLIB" = "MPIGAMMA" ]
-then
-    export WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
-    wmake libso mpi
-elif [ "$WM_MPLIB" = "GAMMA" ] ; then
-    wmake libso gamma
-fi 
+case "$WM_MPLIB" in
+LAM | OPENMPI | MPI | MPICH | MPICH-GM | HPMPI )
+   export WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
+   set +x
+   echo
+   echo "Note: ignore spurious warnings about missing mpicxx.h headers"
+   set -x
+   wmake libso mpi
+   ;;
+
+GAMMA)
+   wmake libso gamma
+   ;;
+esac
+

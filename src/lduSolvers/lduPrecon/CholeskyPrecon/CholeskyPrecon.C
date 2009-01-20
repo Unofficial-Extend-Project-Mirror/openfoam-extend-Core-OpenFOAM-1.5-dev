@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-6 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,6 +238,7 @@ void Foam::CholeskyPrecon::preconditionT
 
         forAll (lower, coeffI)
         {
+            // Transpose multiplication.  HJ, 19/Jan/2009
             x[upperAddr[coeffI]] -=
                 preconDiag_[upperAddr[coeffI]]*
                 upper[coeffI]*x[lowerAddr[coeffI]];
@@ -247,6 +248,7 @@ void Foam::CholeskyPrecon::preconditionT
         {
             losortCoeff = losortAddr[coeffI];
 
+            // Transpose multiplication.  HJ, 19/Jan/2009
             x[lowerAddr[losortCoeff]] -=
                 preconDiag_[lowerAddr[losortCoeff]]*
                 lower[losortCoeff]*x[upperAddr[losortCoeff]];

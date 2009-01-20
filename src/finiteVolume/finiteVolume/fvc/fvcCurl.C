@@ -47,14 +47,22 @@ template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 curl
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vvf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    word nameCurlVf = "curl(" + vf.name() + ')';
+
     // Gausses theorem curl
-    // return fvc::surfaceIntegrate(vvf.mesh().Sf() ^ fvc::interpolate(vvf));
+    // tmp<GeometricField<Type, fvPatchField, volMesh> > tcurlVf = 
+    //     fvc::surfaceIntegrate(vf.mesh().Sf() ^ fvc::interpolate(vf));
 
     // Calculate curl as the Hodge dual of the skew-symmetric part of grad
-    return 2.0*(*skew(fvc::grad(vvf, "curl("+vvf.name()+')')));
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tcurlVf = 
+        2.0*(*skew(fvc::grad(vf, nameCurlVf)));
+
+    tcurlVf().rename(nameCurlVf);
+
+    return tcurlVf;
 }
 
 
@@ -62,11 +70,11 @@ template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 curl
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvvf
+    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > Curl(fvc::curl(tvvf()));
-    tvvf.clear();
+    tmp<GeometricField<Type, fvPatchField, volMesh> > Curl(fvc::curl(tvf()));
+    tvf.clear();
     return Curl;
 }
 

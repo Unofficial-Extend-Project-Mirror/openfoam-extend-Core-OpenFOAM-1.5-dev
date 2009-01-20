@@ -37,7 +37,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::porousZones::porousZones(const fvMesh& mesh)
+Foam::porousZones::porousZones
+(
+    const fvMesh& mesh,
+    const coordinateSystems& cs
+)
 :
     IOPtrList<porousZone>
     (
@@ -46,14 +50,54 @@ Foam::porousZones::porousZones(const fvMesh& mesh)
             "porousZones",
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
         porousZone::iNew(mesh)
     ),
-    mesh_(mesh)
+    mesh_(mesh),
+    csList_(cs)
 {}
 
+
+Foam::porousZones::porousZones
+(
+    const fvMesh& mesh
+)
+:
+    IOPtrList<porousZone>
+    (
+        IOobject
+        (
+            "porousZones",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        porousZone::iNew(mesh)
+    ),
+    mesh_(mesh),
+    csList_(mesh)
+{
+    clear();
+
+    IOPtrList<porousZone> newList
+    (
+        IOobject
+        (
+            "porousZones",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false     // Don't register new zones with objectRegistry
+        ),
+        porousZone::iNew(mesh_, csList_)
+    );
+
+    transfer(newList);
+}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -79,18 +123,18 @@ void Foam::porousZones::addResistance
         operator[](i).addResistance(UEqn, AU, false);
     }
 
-    // Correct the doundary conditions of the tensorial diagonal to ensure
+    // Correct the boundary conditions of the tensorial diagonal to ensure
     // processor bounaries are correctly handled when AU^-1 is interpolated
     // for the pressure equation.
     AU.correctBoundaryConditions();
 }
 
 
-bool Foam::porousZones::readData(Istream &is)
+bool Foam::porousZones::readData(Istream& is)
 {
     clear();
 
-    IOPtrList<porousZone> newPorousZones
+    IOPtrList<porousZone> newList
     (
         IOobject
         (
@@ -99,14 +143,37 @@ bool Foam::porousZones::readData(Istream &is)
             mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false               // Don't register new zones with objectRegistry
+            false     // Don't register new zones with objectRegistry
         ),
-        porousZone::iNew(mesh_)
+        porousZone::iNew(mesh_, csList_)
     );
 
-    transfer(newPorousZones);
+    transfer(newList);
 
     return is.good();
+}
+
+
+bool Foam::porousZones::writeData(Ostream& os, bool subDict) const
+{
+    // Write size of list
+    os << nl << size();
+
+    // Write beginning of contents
+    os << nl << token::BEGIN_LIST;
+
+    // Write list contents
+    forAll(*this, i)
+    {
+        os << nl;
+        operator[](i).writeDict(os, subDict);
+    }
+
+    // Write end of contents
+    os << token::END_LIST << nl;
+
+    // Check state of IOstream
+    return os.good();
 }
 
 

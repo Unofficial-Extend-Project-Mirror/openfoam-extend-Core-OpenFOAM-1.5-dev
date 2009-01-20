@@ -385,8 +385,6 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     scalarField rDeltaT = CorDeltaT()().internalField();
 
-    Info<< "max/min rDeltaT " << max(rDeltaT) << " " << min(rDeltaT) << endl;
-
     fvm.diag() = rDeltaT*mesh().V();
     
     if (mesh().moving())
@@ -607,11 +605,12 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                         phi.oldTime()/fvc::interpolate(rho.oldTime())
                     )
                    *(
-                        fvc::interpolate(rDeltaT*rA*rho)*phi.oldTime()
+                        fvc::interpolate(rDeltaT*rA*rho.oldTime())
+                       *phi.oldTime()/fvc::interpolate(rho.oldTime())
                       - (
                             fvc::interpolate
                             (
-                                rDeltaT*rA*rho*rho.oldTime()*U.oldTime()
+                                rDeltaT*rA*rho.oldTime()*U.oldTime()
                             ) & mesh().Sf()
                         )
                     )

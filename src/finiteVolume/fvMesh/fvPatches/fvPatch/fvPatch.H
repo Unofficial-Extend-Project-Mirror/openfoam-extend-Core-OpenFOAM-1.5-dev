@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvPatch
+    Foam::fvPatch
 
 Description
+    Foam::fvPatch
 
 SourceFiles
     fvPatch.C
@@ -141,7 +142,7 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
             //- Return the polyPatch
             const polyPatch& patch() const

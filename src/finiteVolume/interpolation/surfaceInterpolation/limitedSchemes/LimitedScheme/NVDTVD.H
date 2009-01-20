@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    NVDTVD
+    Foam::NVDTVD
 
 Description
+    Foam::NVDTVD
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +39,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NVDTVD Declaration
+                           Class LimitedScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 class NVDTVD

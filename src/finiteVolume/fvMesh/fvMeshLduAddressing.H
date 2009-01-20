@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvMeshLduAddressing
+    Foam::fvMeshLduAddressing
 
 Description
+    Foam::fvMeshLduAddressing
 
 SourceFiles
+    fvMeshLduAddressing.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class fvMeshLduAddressing Declaration
+                        Class fvMeshLduAddressing Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvMeshLduAddressing

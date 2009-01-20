@@ -23,13 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    MRFZone
+    Foam::MRFZone
 
 Description
     MRF zone definition based on both cell and face zones and parameters
     obtained from a control dictionary constructed from the given stream.
+
     The rotation of the MRF region is defined by an origin and axis of
-    rotation and a angular speed.
+    rotation and an angular speed.
 
 SourceFiles
     MRFZone.C
@@ -54,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -105,7 +106,7 @@ public:
             return autoPtr<MRFZone>(NULL);
         }
 
-        //- Return a pointer to a new injector created on freestore
+        //- Return a pointer to a new MRFZone created on freestore
         //  from Istream
         class iNew
         {

@@ -147,7 +147,7 @@ void Foam::symGaussSeidelPrecon::precondition
 
         bPrime_ = b;
 
-        // Parallel boundary update
+        // Coupled boundary update
         {
             matrix_.initMatrixInterfaces
             (
@@ -264,7 +264,7 @@ void Foam::symGaussSeidelPrecon::preconditionT
 
         bPrime_ = b;
 
-        // Parallel boundary update
+        // Coupled boundary update
         {
             matrix_.initMatrixInterfaces
             (

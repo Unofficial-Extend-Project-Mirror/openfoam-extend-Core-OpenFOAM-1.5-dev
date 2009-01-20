@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,9 @@ License
 Description
     Direct solver for coupled diagonal lduMatrices.
 
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
+
 \*---------------------------------------------------------------------------*/
 
 #include "coupledDiagonalSolver.H"
@@ -43,47 +46,45 @@ namespace Foam
 Foam::coupledDiagonalSolver::coupledDiagonalSolver
 (
     const word& fieldName,
-    FieldField<Field, scalar>& x,
     const coupledLduMatrix& matrix,
-    const FieldField<Field, scalar>& b,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
-    const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt
+    const lduInterfaceFieldPtrsListList& interfaces
 )
 :
     coupledLduSolver
     (
         fieldName,
-        x,
         matrix,
-        b,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     ),
     dp_
     (
         matrix,
         bouCoeffs,
         intCoeffs,
-        interfaces,
-        cmpt
+        interfaces
     )
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::coupledSolverPerformance Foam::coupledDiagonalSolver::solve()
+Foam::coupledSolverPerformance Foam::coupledDiagonalSolver::solve
+(
+    FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
+) const
 {
-    dp_.solve(x_, b_);
+    dp_.precondition(x, b, cmpt);
 
     return coupledSolverPerformance
     (
         typeName,
-        fieldName_,
+        fieldName(),
         0,
         0,
         0,

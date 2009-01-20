@@ -22,12 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-\*---------------------------------------------------------------------------*/
+\*----------------------------------------------------------------------------*/
 
 #include "porousZone.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::porousZone::modifyDdt(fvMatrix<Type>& m) const
+{
+    if (porosity_ < 1)
+    {
+        const labelList& cells = mesh_.cellZones()[cellZoneID_];
+
+        forAll(cells, i)
+        {
+            m.diag()[cells[i]]   *= porosity_;
+            m.source()[cells[i]] *= porosity_;
+        }
+    }
+}
+
 
 template<class RhoFieldType>
 void Foam::porousZone::addPowerLawResistance
@@ -39,12 +55,12 @@ void Foam::porousZone::addPowerLawResistance
     const vectorField& U
 ) const
 {
-    const scalar C0 = C0_.value();
-    const scalar C1m1b2 = (C1_.value() - 1.0)/2.0;
+    const scalar C0 = C0_;
+    const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
     forAll (cells, i)
     {
-        Udiag[cells[i]] += 
+        Udiag[cells[i]] +=
             V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
     }
 }
@@ -71,7 +87,7 @@ void Foam::porousZone::addViscousInertialResistance
         scalar isoDragCoeff = tr(dragCoeff);
 
         Udiag[cells[i]] += V[cells[i]]*isoDragCoeff;
-        Usource[cells[i]] -= 
+        Usource[cells[i]] -=
             V[cells[i]]*((dragCoeff - I*isoDragCoeff) & U[cells[i]]);
     }
 }
@@ -86,8 +102,8 @@ void Foam::porousZone::addPowerLawResistance
     const vectorField& U
 ) const
 {
-    const scalar C0 = C0_.value();
-    const scalar C1m1b2 = (C1_.value() - 1.0)/2.0;
+    const scalar C0 = C0_;
+    const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
     forAll (cells, i)
     {

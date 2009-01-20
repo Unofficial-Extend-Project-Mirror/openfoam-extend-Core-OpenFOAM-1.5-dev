@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gaussConvectionScheme
+    Foam::fv::gaussConvectionScheme
 
 Description
     Basic second-order convection using face-gradients and Gauss' theorem.

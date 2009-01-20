@@ -23,10 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wallDistReflection
+    Foam::wallDistReflection
 
 Description
-
     Wall distance and reflection vector calculation. See wallDist.H
 
 SourceFiles

@@ -23,18 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceTriangulation
+    Foam::faceTriangulation
 
 Description
     Triangulation of faces. Handles concave polygons as well
-    (ineffeciently)
+    (inefficiently)
+
     Works by trying to subdivide the face at the vertex with 'flattest'
     internal angle (i.e. closest to 180 deg).
 
-    Based on routine 'Diagonal' in 
-
-    "Efficient Triangulation of Simple Polygons"
-    Godfried Toussaint, McGill University.
+    Based on routine 'Diagonal' in
+    @verbatim
+        "Efficient Triangulation of Simple Polygons"
+        Godfried Toussaint, McGill University.
+    @endverbatim
 
     After construction is the list of triangles the face is decomposed into.
     (Or empty list if no valid triangulation could be found).
@@ -56,7 +58,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class faceTriangulation Declaration
@@ -98,7 +100,7 @@ class faceTriangulation
         // Return true and intersection point if intersection between p1 and p2.
         static pointHit rayEdgeIntersect
         (
-            const vector& normal, 
+            const vector& normal,
             const point& rayOrigin,
             const vector& rayDir,
             const point& p1,

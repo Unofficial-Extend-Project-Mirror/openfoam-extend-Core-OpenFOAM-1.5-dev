@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    weighted
+    Foam::weighted
 
 Description
     Interpolation scheme class using weights looked-up from the objectRegistry.

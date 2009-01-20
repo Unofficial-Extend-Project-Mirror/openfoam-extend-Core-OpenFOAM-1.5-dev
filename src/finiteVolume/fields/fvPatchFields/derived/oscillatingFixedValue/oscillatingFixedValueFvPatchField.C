@@ -143,7 +143,7 @@ void oscillatingFixedValueFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    Field<Type>::autoMap(m);
+    fixedValueFvPatchField<Type>::autoMap(m);
     refValue_.autoMap(m);
 }
 

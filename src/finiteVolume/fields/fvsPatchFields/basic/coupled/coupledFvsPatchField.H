@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledFvsPatchField
+    Foam::coupledFvsPatchField
 
 Description
+    Foam::coupledFvsPatchField
 
 SourceFiles
     coupledFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class coupledFvsPatchField Declaration
+                           Class coupledFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

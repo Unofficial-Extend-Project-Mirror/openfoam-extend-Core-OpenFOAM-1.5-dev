@@ -23,23 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellDecompCuts
+    Foam::cellDecompCuts
 
 Description
-    Container for cuts of edges of (implicit) tet decomposition. Used to
-    collect data for meshCut. As much as possible cuts are defined using
-    mesh information:
+    Container for cuts of edges of (implicit) tet decomposition.
+    Used to collect data for meshCut.
 
-    - cut (exactly) through mesh vertex
-    -   ,,              ,,       cell centre
+    As much as possible, cuts are defined using mesh information:
+      - cut (exactly) through mesh vertex
+      - cut (exactly) through cell centre
 
-    - cut through mesh edge. Both edge label and position on edge given.
+      - cut through mesh edge. Both edge label and position on edge given.
 
-    - cut through tet pyramidEdge (edge between vertex and cell centre).
-      Edge and position on edge given.
+      - cut through tet pyramidEdge (edge between vertex and cell centre).
+        Edge and position on edge given.
 
-    - cut through diagonalEdge (edge between vertices of a face)
-      Edge and position on edge given.
+      - cut through diagonalEdge (edge between vertices of a face)
+        Edge and position on edge given.
 
 SourceFiles
 
@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class cellDecompCuts Declaration
@@ -144,7 +144,7 @@ public:
         {
             return
                 meshEdgeCuts::size() + meshCellCentres_.size()
-              + pyrEdges_.size() + diagEdges_.size();       
+              + pyrEdges_.size() + diagEdges_.size();
         }
 
 };

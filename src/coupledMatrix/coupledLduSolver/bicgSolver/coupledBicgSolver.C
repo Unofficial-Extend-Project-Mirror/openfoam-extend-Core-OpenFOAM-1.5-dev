@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Preconditioned Conjugate Gradient solver
+    Preconditioned Bi-Conjugate Gradient solver
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,7 +40,7 @@ namespace Foam
     defineTypeNameAndDebug(coupledBicgSolver, 0);
 
     coupledLduSolver::addasymMatrixConstructorToTable<coupledBicgSolver>
-        addBicgSolverSymMatrixConstructorToTable_;
+        addBicgSolverAsymMatrixConstructorToTable_;
 }
 
 
@@ -47,26 +50,20 @@ namespace Foam
 Foam::coupledBicgSolver::coupledBicgSolver
 (
     const word& fieldName,
-    FieldField<Field, scalar>& x,
     const coupledLduMatrix& matrix,
-    const FieldField<Field, scalar>& b,
     const PtrList<FieldField<Field, scalar> >& bouCoeffs,
     const PtrList<FieldField<Field, scalar> >& intCoeffs,
     const lduInterfaceFieldPtrsListList& interfaces,
-    const direction cmpt,
     Istream& solverData
 )
 :
     coupledIterativeSolver
     (
         fieldName,
-        x,
         matrix,
-        b,
         bouCoeffs,
         intCoeffs,
         interfaces,
-        cmpt,
         solverData
     ),
     preconPtr_
@@ -77,7 +74,6 @@ Foam::coupledBicgSolver::coupledBicgSolver
             bouCoeffs,
             intCoeffs,
             interfaces,
-            cmpt,
             dict().subDict("preconditioner")
         )
     )
@@ -86,26 +82,52 @@ Foam::coupledBicgSolver::coupledBicgSolver
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
+Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve
+(
+    FieldField<Field, scalar>& x,
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
+) const
 {
     // Prepare solver performance
-    coupledSolverPerformance solverPerf(typeName, fieldName_);
+    coupledSolverPerformance solverPerf(typeName, fieldName());
 
-    scalar norm = this->normFactor();
+    FieldField<Field, scalar> wA(x.size());
+    FieldField<Field, scalar> rA(x.size());
 
-    FieldField<Field, scalar> wA(x_.size());
-
-    forAll (x_, rowI)
+    forAll (x, rowI)
     {
-        wA.set(rowI, new scalarField(x_[rowI].size(), 0));
+        wA.set(rowI, new scalarField(x[rowI].size(), 0));
+        rA.set(rowI, new scalarField(x[rowI].size(), 0));
     }
 
 
     // Calculate initial residual
-    matrix_.Amul(wA, x_, bouCoeffs_, interfaces_, cmpt_);
-    FieldField<Field, scalar> rA(b_ - wA);
+    matrix_.Amul(wA, x, bouCoeffs_, interfaces_, cmpt);
 
-    solverPerf.initialResidual() = gSumMag(rA)/norm;
+    // Use rA as scratch space when calculating the normalisation factor
+    scalar normFactor = this->normFactor(x, b, wA, rA, cmpt);
+
+    if (coupledLduMatrix::debug >= 2)
+    {
+        Info<< "   Normalisation factor = " << normFactor << endl;
+    }
+
+    // Calculate residual
+    // Optimised looping.  HJ, 19/Jan/2009
+    forAll (rA, rowI)
+    {
+        const scalarField& curB = b[rowI];
+        const scalarField& curWA = wA[rowI];
+        scalarField& curRA = rA[rowI];
+
+        forAll (curRA, i)
+        {
+            curRA[i] = curB[i] - curWA[i];
+        }
+    }
+
+    solverPerf.initialResidual() = gSumMag(rA)/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     if (!solverPerf.checkConvergence(tolerance_, relTolerance_))
@@ -115,18 +137,18 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
 
         scalar alpha, beta, wApT;
 
-        FieldField<Field, scalar> pA(x_.size());
-        FieldField<Field, scalar> pT(x_.size());
+        FieldField<Field, scalar> pA(x.size());
+        FieldField<Field, scalar> pT(x.size());
 
-        FieldField<Field, scalar> wT(x_.size());
+        FieldField<Field, scalar> wT(x.size());
         FieldField<Field, scalar> rT = rA;
 
         forAll (pA, rowI)
         {
-            pA.set(rowI, new scalarField(x_[rowI].size(), 0));
-            pT.set(rowI, new scalarField(x_[rowI].size(), 0));
+            pA.set(rowI, new scalarField(x[rowI].size(), 0));
+            pT.set(rowI, new scalarField(x[rowI].size(), 0));
 
-            wT.set(rowI, new scalarField(x_[rowI].size(), 0));
+            wT.set(rowI, new scalarField(x[rowI].size(), 0));
         }
 
 
@@ -135,8 +157,8 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
             rhoOld = rho;
 
             // Execute preconditioning
-            preconPtr_->solve(wA, rA);
-            preconPtr_->solve(wT, rT);
+            preconPtr_->precondition(wA, rA, cmpt);
+            preconPtr_->preconditionT(wT, rT, cmpt);
 
             // Update search directions
             rho = gSumProd(wA, rT);
@@ -166,14 +188,14 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
             }
 
             // Update preconditioned residual
-            matrix_.Amul(wA, pA, bouCoeffs_, interfaces_, cmpt_);
-            matrix_.Amul(wT, pT, bouCoeffs_, interfaces_, cmpt_);
+            matrix_.Amul(wA, pA, bouCoeffs_, interfaces_, cmpt);
+            matrix_.Amul(wT, pT, bouCoeffs_, interfaces_, cmpt);
 
             wApT = gSumProd(wA, pT);
 
 
             // Check for singularity
-            if (solverPerf.checkSingularity(mag(wApT)/norm))
+            if (solverPerf.checkSingularity(mag(wApT)/normFactor))
             {
                 break;
             }
@@ -181,9 +203,9 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
             // Update solution and residual
             alpha = rho/wApT;
 
-            forAll (x_, rowI)
+            forAll (x, rowI)
             {
-                scalarField& curX = x_[rowI];
+                scalarField& curX = x[rowI];
                 const scalarField& curPA = pA[rowI];
 
                 forAll (curX, i)
@@ -214,12 +236,9 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve()
                 }
             }
 
-            solverPerf.finalResidual() = gSumMag(rA)/norm;
-        } while
-        (
-            solverPerf.nIterations()++ < maxIter_
-         && !(solverPerf.checkConvergence(tolerance_, relTolerance_))
-        );
+            solverPerf.finalResidual() = gSumMag(rA)/normFactor;
+            solverPerf.nIterations()++;
+        } while (!stop(solverPerf));
     }
 
     return solverPerf;

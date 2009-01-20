@@ -62,7 +62,7 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
         mesh,
         mag
         (
-            scale
+            cmptMultiply
             (
                 fvmesh.Sf().internalField()
                /sqrt(fvmesh.magSf().internalField()),

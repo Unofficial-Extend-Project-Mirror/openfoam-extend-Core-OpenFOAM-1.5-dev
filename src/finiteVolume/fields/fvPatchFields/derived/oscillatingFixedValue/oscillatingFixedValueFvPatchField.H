@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    oscillatingFixedValueFvPatchField
+    Foam::oscillatingFixedValueFvPatchField
 
 Description
+    Foam::oscillatingFixedValueFvPatchField
 
 SourceFiles
     oscillatingFixedValueFvPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-            Class oscillatingFixedValueFvPatchField Declaration
+                     Class oscillatingFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

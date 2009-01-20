@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfaceNormalFixedValueFvPatchVectorField
+    Foam::surfaceNormalFixedValueFvPatchVectorField
 
 Description
     Describes a surface normal vector boundary condition by its magnitude.
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class surfaceNormalFixedValueFvPatchField Declaration
+                 Class surfaceNormalFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceNormalFixedValueFvPatchVectorField

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-6 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Description
     selectable preconditioning
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*---------------------------------------------------------------------------*/
 
@@ -162,7 +162,8 @@ Foam::lduSolverPerformance Foam::bicgStabSolver::solve
                 p[i] = r[i] + beta*p[i] - beta*omega*v[i];
             }
 
-            preconPtr_->precondition(ph, p);
+            // Execute preconditioning
+            preconPtr_->precondition(ph, p, cmpt);
             matrix_.Amul(v, ph, coupleBouCoeffs_, interfaces_, cmpt);
             alpha = rho/gSumProd(rw, v);
 
@@ -171,10 +172,12 @@ Foam::lduSolverPerformance Foam::bicgStabSolver::solve
                 s[i] = r[i] - alpha*v[i];
             }
 
-            preconPtr_->preconditionT(sh, s);
+            // Execute preconditioning transpose
+            preconPtr_->preconditionT(sh, s, cmpt);
             matrix_.Amul(t, sh, coupleBouCoeffs_, interfaces_, cmpt);
             omega = gSumProd(t, s)/gSumProd(t, t);
 
+            // Update solution and residual
             forAll (x, i)
             {
                 x[i] = x[i] + alpha*ph[i] + omega*sh[i];

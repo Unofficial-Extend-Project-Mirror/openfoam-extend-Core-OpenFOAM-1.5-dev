@@ -33,8 +33,6 @@ Description
 
 if (adjustTimeStep)
 {
-#   include "CourantNo.H"
-
     if (CoNum > SMALL)
     {
         runTime.setDeltaT

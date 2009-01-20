@@ -22,13 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    GTS writing.
-
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
-#include "triSurfaceTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,16 +94,11 @@ void triSurface::writeGTS(const bool writeSorted, Ostream& os) const
             {
                 const label faceI = faceMap[faceIndex++];
 
-                FixedList<label, 3> edgeLabels =
-                    triSurfaceTools::sortedFaceEdges
-                    (
-                        *this,
-                        faceI
-                    );
+                const labelList& fEdges = faceEdges()[faceI];
 
-                os  << edgeLabels[0] + 1 << ' '
-                    << edgeLabels[1] + 1 << ' '
-                    << edgeLabels[2] + 1 << ' '
+                os  << fEdges[0] + 1 << ' '
+                    << fEdges[1] + 1 << ' '
+                    << fEdges[2] + 1 << ' '
                     << (*this)[faceI].region() << endl;
             }
         }
@@ -116,16 +107,11 @@ void triSurface::writeGTS(const bool writeSorted, Ostream& os) const
     {
         forAll(faceEs, faceI)
         {
-            FixedList<label, 3> edgeLabels =
-                triSurfaceTools::sortedFaceEdges
-                (
-                    *this,
-                    faceI
-                );
+            const labelList& fEdges = faceEdges()[faceI];
 
-            os  << edgeLabels[0] + 1 << ' '
-                << edgeLabels[1] + 1 << ' '
-                << edgeLabels[2] + 1 << ' '
+            os  << fEdges[0] + 1 << ' '
+                << fEdges[1] + 1 << ' '
+                << fEdges[2] + 1 << ' '
                 << (*this)[faceI].region() << endl;
         }
     }

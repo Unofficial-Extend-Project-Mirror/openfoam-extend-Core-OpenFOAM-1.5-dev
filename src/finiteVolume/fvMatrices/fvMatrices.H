@@ -22,14 +22,15 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    fvMatrix
+InClass
+    Foam::fvMatrix
 
 Description
     A special matrix type and solver, designed for finite volume
     solutions of scalar equations.
-    Face addressing is used to make all matrix assembly
-    and solution loops vectorise.
+
+    Face addressing is used to make all matrix assembly and solution loops
+    vectorise.
 
 \*---------------------------------------------------------------------------*/
 

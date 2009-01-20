@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-6 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Virtual base class for coupled iterative solvers
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     coupledIterativeSolver.C
@@ -79,6 +79,10 @@ protected:
         //- Relative tolerance
         scalar relTolerance_;
 
+        //- Minimum number of iterations
+        //  (forced irrespective of convergence)
+        label minIter_;
+
         //- Maximum number of iterations
         label maxIter_;
 
@@ -88,8 +92,30 @@ protected:
         //- Return dictionary
         const dictionary& dict() const;
 
-        //- Return normalisation factor
-        scalar normFactor() const;
+
+        //- Is the stop criterion reached
+        bool stop(coupledSolverPerformance& solverPerf) const;
+
+        //- Read the control parameters from the dictionary
+        virtual void readControls();
+
+        //- Return the matrix norm used to normalise the residual for the
+        //  stopping criterion
+        scalar normFactor
+        (
+            const FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const FieldField<Field, scalar>& Ax,
+            FieldField<Field, scalar>& tmpField,
+            const direction cmpt
+        ) const;
+
+        scalar normFactor
+        (
+            const FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const direction cmpt
+        ) const;
 
 
 public:
@@ -100,13 +126,10 @@ public:
         coupledIterativeSolver
         (
             const word& fieldName,
-            FieldField<Field, scalar>& x,
             const coupledLduMatrix& matrix,
-            const FieldField<Field, scalar>& b,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
             const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt,
             Istream& solverData
         );
 
@@ -117,11 +140,29 @@ public:
         {}
 
 
-    // Member Functions
+    // Member functions
 
-        //- Solve the matrix with this solver
-        virtual coupledSolverPerformance solve() = 0;
+        // Access
 
+            scalar tolerance() const
+            {
+                return tolerance_;
+            }
+
+            scalar relTolerance() const
+            {
+                return relTolerance_;
+            }
+
+            label minIter() const
+            {
+                return minIter_;
+            }
+
+            label maxIter() const
+            {
+                return maxIter_;
+            }
 };
 
 

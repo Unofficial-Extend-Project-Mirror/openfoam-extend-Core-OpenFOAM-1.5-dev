@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    wallDist
+    Foam::wallDist
 
 Description
     Calculation of distance to nearest wall for all cells and boundary.
@@ -32,7 +32,7 @@ Description
     Distance correction:
 
     if correctWalls = true:
-    For each cell with face on wall calculate the true nearest point 
+    For each cell with face on wall calculate the true nearest point
     (by triangle decomposition) on that face and do that same for that face's
     pointNeighbours. This will find the true nearest distance in almost all
     cases. Only very skewed cells or cells close to another wall might be
@@ -41,16 +41,18 @@ Description
     For each cell with only point on wall the same is done except now it takes
     the pointFaces() of the wall point to look for the nearest point.
 
-    Note: correct() : for now does complete recalculation. (which usually is
-    ok since mesh is smoothed). However for topology change where geometry in
-    most of domain does not change you could think of starting from the old
-    cell values. Tried but not done since:
-    - meshWave would have to be called with old cellInfo. This is List<wallInfo>
-    of nCells.
-    - cannot construct from distance (y_) only since we don't know a value 
-    for origin_. (origin_ = GREAT already used to denote illegal value.)
-    - so we would have to store a List<wallInfo> which unfortunately does not
-    get resized/mapped automatically upon mesh changes.
+Note
+
+    correct() : for now does complete recalculation. (which usually is
+    ok since mesh is smoothed). However for topology change where geometry
+    in most of domain does not change you could think of starting from the
+    old cell values. Tried but not done since:
+    - meshWave would have to be called with old cellInfo.
+      This is List\<wallInfo\> of nCells.
+    - cannot construct from distance (y_) only since we don't know a value
+      for origin_. (origin_ = GREAT already used to denote illegal value.)
+    - so we would have to store a List\<wallInfo\> which unfortunately does
+      not get resized/mapped automatically upon mesh changes.
 
 SourceFiles
     wallDist.C

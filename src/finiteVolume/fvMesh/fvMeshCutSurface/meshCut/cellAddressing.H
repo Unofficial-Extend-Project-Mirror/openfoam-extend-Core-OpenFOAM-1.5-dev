@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    cellAddressing
+    Foam::cellAddressing
 
 Description
     Additional addressing for a cellModel. (cellModel themselves only
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class cellModel;
 
 /*---------------------------------------------------------------------------*\

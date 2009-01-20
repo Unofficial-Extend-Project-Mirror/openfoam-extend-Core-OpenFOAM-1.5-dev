@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pressureInletUniformVelocityFvPatchVectorField
+    Foam::pressureInletUniformVelocityFvPatchVectorField
 
 Description
+    Foam::pressureInletUniformVelocityFvPatchVectorField
 
 SourceFiles
     pressureInletUniformVelocityFvPatchVectorField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-         Class pressureInletUniformVelocityFvPatchField Declaration
+             Class pressureInletUniformVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureInletUniformVelocityFvPatchVectorField

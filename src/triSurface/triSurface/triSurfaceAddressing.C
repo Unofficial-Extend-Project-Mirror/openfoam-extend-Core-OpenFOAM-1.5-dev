@@ -31,7 +31,7 @@ Description
 #include "triSurface.H"
 #include "HashTable.H"
 #include "SortableList.H"
-#include "triSurfaceTools.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,12 +72,10 @@ void triSurface::calcSortedEdgeFaces() const
 
 
             // Get opposite vertex for 0th face
-            label vertI = triSurfaceTools::oppositeVertex
-            (
-                *this,
-                myFaceNbs[0],
-                edgeI
-            );
+            const labelledTri& f = localFaces()[myFaceNbs[0]];
+            label fp0 = findIndex(f, e[0]);
+            label fp1 = f.fcIndex(fp0);
+            label vertI = (f[fp1] != e[1] ? f[fp1] : f.fcIndex(fp1));
 
             // Get vector normal both to e2 and to edge from opposite vertex
             // to edge (will be x-axis of our coordinate system)
@@ -96,17 +94,15 @@ void triSurface::calcSortedEdgeFaces() const
             for(label nbI = 1; nbI < myFaceNbs.size(); nbI++)
             {
                 // Get opposite vertex
-                label vertI = triSurfaceTools::oppositeVertex
-                (
-                    *this,
-                    myFaceNbs[nbI],
-                    edgeI
-                );
+                const labelledTri& f = localFaces()[myFaceNbs[nbI]];
+                label fp0 = findIndex(f, e[0]);
+                label fp1 = f.fcIndex(fp0);
+                label vertI = (f[fp1] != e[1] ? f[fp1] : f.fcIndex(fp1));
 
                 vector vec = e2 ^ (localPoints()[vertI] - edgePt);
                 vec /= mag(vec) + VSMALL;
 
-                faceAngles[nbI] = triSurfaceTools::pseudoAngle
+                faceAngles[nbI] = pseudoAngle
                 (
                     e0,
                     e1,

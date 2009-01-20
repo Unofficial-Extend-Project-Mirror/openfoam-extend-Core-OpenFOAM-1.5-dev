@@ -23,15 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvPatchField
+    Foam::fvPatchField
 
 Description
-    fvPatchField<Type> abstract base class.  This class gives a fat-interface
-    to all derived classes covering all possible ways in which they might be
-    used.  The first level of derivation is to basic patchFields which cover
-    zero-gradient, fixed-gradient, fixed-value and mixed conditions.  The next
-    level of derivation covers all the specialised typed with specific
-    evaluation proceedures, particularly with respect to specific fields.
+    Abstract base class with a fat-interface to all derived classes
+    covering all possible ways in which they might be used. 
+
+    The first level of derivation is to basic patchFields which cover
+    zero-gradient, fixed-gradient, fixed-value and mixed conditions.
+
+    The next level of derivation covers all the specialised typed with
+    specific evaluation proceedures, particularly with respect to specific
+    fields.
 
 SourceFiles
     fvPatchField.C
@@ -50,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 class objectRegistry;
 class dictionary;
@@ -58,7 +61,7 @@ class fvPatchFieldMapper;
 class volMesh;
 
 
-// * * * * * * Forward declaration of template friend fuctions * * * * * * * //
+// Forward declaration of friend functions and operators
 
 template<class Type>
 class fvPatchField;
@@ -68,7 +71,7 @@ Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class fvPatchField Declaration
+                           Class patch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -88,6 +91,11 @@ class fvPatchField
         //  the construction of the matrix
         bool updated_;
 
+        //- Optional patch type, used to allow specified boundary conditions
+        //  to be applied to constraint patches by providing the constraint
+        //  patch type as 'patchType'
+        word patchType_;
+
 
 public:
 
@@ -97,8 +105,8 @@ public:
     //- Runtime type information
     TypeName("fvPatchField");
 
-    //- Debug switch to disallow the use of 
-    static int disallowDefaultFvPatchField;
+    //- Debug switch to disallow the use of genericFvPatchField
+    static int disallowGenericFvPatchField;
 
 
     // Declare run-time constructor selection tables
@@ -165,7 +173,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired = false
         );
 
         //- Construct by mapping the given fvPatchField onto a new patch
@@ -338,11 +347,17 @@ public:
             }
 
             //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const bool=false)
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            )
             {}
 
             //- Evaluate the patch field, sets Updated to false
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
 
             //- Return the matrix diagonal coefficients corresponding to the

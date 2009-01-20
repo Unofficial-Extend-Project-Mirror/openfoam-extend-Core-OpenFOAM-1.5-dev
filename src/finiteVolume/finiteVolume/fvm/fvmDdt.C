@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    
-
 \*---------------------------------------------------------------------------*/
 
 #include "volFields.H"
@@ -56,6 +53,18 @@ ddt
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + vf.name() + ')')
     )().fvmDdt(vf);
+}
+
+
+template<class Type>
+tmp<fvMatrix<Type> >
+ddt
+(
+    const oneField&,
+    GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    return ddt(vf);
 }
 
 

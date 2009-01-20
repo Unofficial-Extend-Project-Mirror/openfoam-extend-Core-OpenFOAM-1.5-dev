@@ -45,9 +45,9 @@ SourceFiles
 
 #include "volFields.H"
 #include "surfaceFieldsFwd.H"
-#include "dimensionedTypes.H"
 #include "primitiveFieldsFwd.H"
-#include "zero.H"
+#include "zeroField.H"
+#include "oneField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,9 +59,10 @@ namespace Foam
 namespace MULES
 {
 
-template<class SpType, class SuType>
+template<class RhoType, class SpType, class SuType>
 void explicitSolve
 (
+    const RhoType& rho,
     volScalarField& psi,
     const surfaceScalarField& phiBD,
     surfaceScalarField& phiPsi,
@@ -80,53 +81,41 @@ void explicitSolve
     const scalar psiMin
 );
 
-template<class SpType, class SuType>
-void explicitSolve01
+template<class RhoType, class SpType, class SuType>
+void implicitSolve
 (
-    volScalarField& psi,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiPsi,
-    const SpType& Sp,
-    const SuType& Su
-);
-
-void explicitSolve01
-(
+    const RhoType& rho,
     volScalarField& gamma,
     const surfaceScalarField& phi,
-    surfaceScalarField& phiCorr
-);
-
-template<class SpType, class SuType>
-void implicitSolve01
-(
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
-    const dimensionedScalar& Dpsi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
-    const SuType& Su
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin
 );
 
-void implicitSolve01
+void implicitSolve
 (
     volScalarField& gamma,
     const surfaceScalarField& phi,
-    const dimensionedScalar& Dpsi,
-    surfaceScalarField& phiCorr
+    surfaceScalarField& phiCorr,
+    const scalar psiMax,
+    const scalar psiMin
 );
 
-template<class SpType, class SuType>
+template<class RhoType, class SpType, class SuType>
 void limiter
 (
     scalarField& allLambda,
+    const RhoType& rho,
     const volScalarField& psi,
     const surfaceScalarField& phiBD,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
     const scalar psiMax,
-    const scalar psiMin
+    const scalar psiMin,
+    const label nLimiterIter
 );
 
 } // End namespace MULES

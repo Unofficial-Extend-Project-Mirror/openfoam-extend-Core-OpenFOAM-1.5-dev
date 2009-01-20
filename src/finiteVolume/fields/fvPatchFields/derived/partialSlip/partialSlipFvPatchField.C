@@ -106,7 +106,7 @@ void partialSlipFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    Field<Type>::autoMap(m);
+    transformFvPatchField<Type>::autoMap(m);
     valueFraction_.autoMap(m);
 }
 
@@ -141,7 +141,7 @@ tmp<Field<Type> > partialSlipFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void partialSlipFvPatchField<Type>::evaluate()
+void partialSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

@@ -103,37 +103,6 @@ public:
 
         // Access
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
-            {
-                return coupledFvPatch::forwardT();
-            }
-
-            //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
-            {
-                return coupledFvPatch::reverseT();
-            }
-
-
-            //- Return shadow patch index
-            int shadowIndex() const
-            {
-                return ggiPolyPatch_.shadowIndex();
-            }
-
-            //- Is this the master side?
-            bool master() const
-            {
-                return index() < shadowIndex();
-            }
-
-            //- Is this the slave side?
-            bool slave() const
-            {
-                return !master();
-            }
-
             //- Return shadow patch
             const ggiFvPatch& shadow() const;
 
@@ -166,12 +135,14 @@ public:
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
+                const Pstream::commsTypes commsType,
                 const unallocLabelList& internalData
             ) const;
 };

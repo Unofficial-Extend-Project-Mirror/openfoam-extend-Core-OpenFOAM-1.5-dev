@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fixedValueFvPatchField
+    Foam::fixedValueFvPatchField
 
 Description
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     fixedValueFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class fixedValueFvPatchField Declaration
+                           Class fixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

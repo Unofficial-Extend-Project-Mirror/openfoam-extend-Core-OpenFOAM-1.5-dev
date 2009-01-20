@@ -95,7 +95,7 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// return gradient at boundary
+// Return gradient at boundary
 template<class Type>
 tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
 {
@@ -110,7 +110,7 @@ tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
 
 // Evaluate the field on the patch
 template<class Type>
-void basicSymmetryFvPatchField<Type>::evaluate()
+void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {

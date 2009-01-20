@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gaussDivScheme
+    Foam::fv::gaussDivScheme
 
 Description
     Basic second-order div using face-gradients and Gauss' theorem.

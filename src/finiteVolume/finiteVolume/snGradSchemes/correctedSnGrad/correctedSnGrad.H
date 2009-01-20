@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    correctedSnGrad
+    Foam::fv::correctedSnGrad
 
 Description
     Simple central-difference snGrad scheme with non-orthogonal correction.

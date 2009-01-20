@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    midPoint
+    Foam::midPoint
 
 Description
     Mid-point interpolation (weighting factors = 0.5) scheme class.

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    outletStabilised
+    Foam::outletStabilised
 
 Description
     Outlet-stabilised interpolation scheme which applies upwind differencing
@@ -178,7 +178,7 @@ public:
         }
 
         //- Return the explicit correction to the face-interpolate
-        //  set to zero on the near-boundary faces where upwind is applied
+        //  set to zero on the near-boundary faces where upwinf is applied
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction
         (

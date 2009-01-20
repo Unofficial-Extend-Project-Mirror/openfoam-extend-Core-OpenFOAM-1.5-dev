@@ -42,9 +42,9 @@ namespace fv
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class GType>
 tmp<fvMatrix<Type> >
-gaussLaplacianScheme<Type>::fvmLaplacianUncorrected
+gaussLaplacianScheme<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
     GeometricField<Type, fvPatchField, volMesh>& vf
@@ -81,9 +81,9 @@ gaussLaplacianScheme<Type>::fvmLaplacianUncorrected
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-gaussLaplacianScheme<Type>::gammaSnGradCorr
+gaussLaplacianScheme<Type, GType>::gammaSnGradCorr
 (
     const surfaceVectorField& SfGammaCorr,
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -124,96 +124,9 @@ gaussLaplacianScheme<Type>::gammaSnGradCorr
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-tmp<fvMatrix<Type> >
-gaussLaplacianScheme<Type>::fvmLaplacian
-(
-    const surfaceScalarField& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = this->mesh();
-
-    surfaceScalarField gammaMagSf = gamma*mesh.magSf();
-
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(gammaMagSf, vf);
-    fvMatrix<Type>& fvm = tfvm();
-
-    if (this->tsnGradScheme_().corrected())
-    {
-        if (mesh.fluxRequired(vf.name()))
-        {
-            fvm.faceFluxCorrectionPtr() = new
-            GeometricField<Type, fvsPatchField, surfaceMesh>
-            (
-                gammaMagSf*this->tsnGradScheme_().correction(vf)
-            );
-
-            fvm.source() -=
-                mesh.V()*
-                fvc::div
-                (
-                    *fvm.faceFluxCorrectionPtr()
-                )().internalField();
-        }
-        else
-        {
-            fvm.source() -=
-                mesh.V()*
-                fvc::div
-                (
-                    gammaMagSf*this->tsnGradScheme_().correction(vf)
-                )().internalField();
-        }
-    }
-
-    return tfvm;
-}
-
-
-template<class Type>
-tmp<fvMatrix<Type> >
-gaussLaplacianScheme<Type>::fvmLaplacian
-(
-    const surfaceTensorField& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    const fvMesh& mesh = this->mesh();
-
-    surfaceVectorField Sn = mesh.Sf()/mesh.magSf();
-
-    surfaceVectorField SfGamma = mesh.Sf() & gamma;
-    surfaceScalarField SfGammaSn = SfGamma & Sn;
-    surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
-
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(SfGammaSn, vf);
-    fvMatrix<Type>& fvm = tfvm();
-
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
-        = gammaSnGradCorr(SfGammaCorr, vf);
-
-    if (this->tsnGradScheme_().corrected())
-    {
-        tfaceFluxCorrection() +=
-            SfGammaSn*this->tsnGradScheme_().correction(vf);
-
-    }
-
-    fvm.source() -= mesh.V()*fvc::div(tfaceFluxCorrection())().internalField();
-
-    if (mesh.fluxRequired(vf.name()))
-    {
-        fvm.faceFluxCorrectionPtr() = tfaceFluxCorrection.ptr();
-    }
-
-    return tfvm;
-}
-
-
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-gaussLaplacianScheme<Type>::fvcLaplacian
+gaussLaplacianScheme<Type, GType>::fvcLaplacian
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
@@ -231,32 +144,50 @@ gaussLaplacianScheme<Type>::fvcLaplacian
 }
 
 
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-gaussLaplacianScheme<Type>::fvcLaplacian
+template<class Type, class GType>
+tmp<fvMatrix<Type> >
+gaussLaplacianScheme<Type, GType>::fvmLaplacian
 (
-    const surfaceScalarField& gamma,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
+    GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = this->mesh();
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
-    (
-        fvc::div(gamma*this->tsnGradScheme_().snGrad(vf)*mesh.magSf())
-    );
+    surfaceVectorField Sn = mesh.Sf()/mesh.magSf();
 
-    tLaplacian().rename("laplacian(" + gamma.name() + ',' + vf.name() + ')');
+    surfaceVectorField SfGamma = mesh.Sf() & gamma;
+    GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn = SfGamma & Sn;
+    surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
 
-    return tLaplacian;
+    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(SfGammaSn, vf);
+    fvMatrix<Type>& fvm = tfvm();
+
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
+        = gammaSnGradCorr(SfGammaCorr, vf);
+
+    if (this->tsnGradScheme_().corrected())
+    {
+        tfaceFluxCorrection() +=
+            SfGammaSn*this->tsnGradScheme_().correction(vf);
+    }
+
+    fvm.source() -= mesh.V()*fvc::div(tfaceFluxCorrection())().internalField();
+
+    if (mesh.fluxRequired(vf.name()))
+    {
+        fvm.faceFluxCorrectionPtr() = tfaceFluxCorrection.ptr();
+    }
+
+    return tfvm;
 }
 
 
-template<class Type>
+template<class Type, class GType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-gaussLaplacianScheme<Type>::fvcLaplacian
+gaussLaplacianScheme<Type, GType>::fvcLaplacian
 (
-    const surfaceTensorField& gamma,
+    const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -265,7 +196,7 @@ gaussLaplacianScheme<Type>::fvcLaplacian
     surfaceVectorField Sn = mesh.Sf()/mesh.magSf();
 
     surfaceVectorField SfGamma = mesh.Sf() & gamma;
-    surfaceScalarField SfGammaSn = SfGamma & Sn;
+    GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn = SfGamma & Sn;
     surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
 
     tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian

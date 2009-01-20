@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Coupled LDU matrix smoother virtual base class.
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     coupledLduSmoother.C
@@ -77,9 +77,6 @@ protected:
         //- Interfaces
         const lduInterfaceFieldPtrsListList& interfaces_;
 
-        //- Solving direction
-        const direction cmpt_;
-
 
 public:
 
@@ -98,15 +95,13 @@ public:
                 const coupledLduMatrix& matrix,
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
-                const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt
+                const lduInterfaceFieldPtrsListList& interfaces
             ),
             (
                 matrix,
                 bouCoeffs,
                 intCoeffs,
-                interfaces,
-                cmpt
+                interfaces
             )
         );
 
@@ -119,15 +114,13 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         )
         :
             matrix_(matrix),
             bouCoeffs_(bouCoeffs),
             intCoeffs_(intCoeffs),
-            interfaces_(interfaces),
-            cmpt_(cmpt)
+            interfaces_(interfaces)
         {}
 
 
@@ -140,8 +133,7 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         );
 
 
@@ -154,12 +146,12 @@ public:
     // Member Functions
 
         //- Execute smoothing.
-        //  Buffer is used for residual calculation scratch space
-        virtual void solve
+        virtual void smooth
         (
             FieldField<Field, scalar>& x,
             const FieldField<Field, scalar>& b,
-            FieldField<Field, scalar>& xBuffer
+            const direction cmpt,
+            const label nSweeps
         ) const = 0;
 };
 

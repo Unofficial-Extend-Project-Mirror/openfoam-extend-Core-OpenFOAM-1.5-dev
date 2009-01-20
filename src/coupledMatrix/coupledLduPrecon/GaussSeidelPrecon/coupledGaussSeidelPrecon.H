@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Symmetric Gauss-Seidel preconditioning
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     coupledGaussSeidelPrecon.C
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class coupledGaussSeidelPrecon Declaration
+                   Class coupledGaussSeidelPrecon Declaration
 \*---------------------------------------------------------------------------*/
 
 class coupledGaussSeidelPrecon
@@ -89,6 +89,23 @@ class coupledGaussSeidelPrecon
         ) const;
 
 
+        //- Forward transpose sweep on a single matrix
+        void forwardSweepTranspose
+        (
+            const lduMatrix& matrix,
+            scalarField& x,
+            scalarField& bPrime
+        ) const;
+
+        //- Reverse transpose sweep on a single matrix
+        void reverseSweepTranspose
+        (
+            const lduMatrix& matrix,
+            scalarField& x,
+            scalarField& bPrime
+        ) const;
+
+
 public:
 
     //- Runtime type information
@@ -103,8 +120,7 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         );
 
         //- Construct from dictionary
@@ -114,7 +130,6 @@ public:
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
             const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt,
             const dictionary& dict
         );
 
@@ -128,10 +143,19 @@ public:
     // Member Functions
 
         //- Execute preconditioning
-        virtual void solve
+        virtual void precondition
         (
             FieldField<Field, scalar>& x,
-            const FieldField<Field, scalar>& b
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
+        ) const;
+
+        //- Execute preconditioning for the transpose matrix
+        virtual void preconditionT
+        (
+            FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
         ) const;
 };
 

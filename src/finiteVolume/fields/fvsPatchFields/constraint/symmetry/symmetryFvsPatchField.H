@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    symmetryFvsPatchField
+    Foam::symmetryFvsPatchField
 
 Description
+    Foam::symmetryFvsPatchField
 
 SourceFiles
     symmetryFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class symmetryFvsPatchField Declaration
+                         Class symmetryFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

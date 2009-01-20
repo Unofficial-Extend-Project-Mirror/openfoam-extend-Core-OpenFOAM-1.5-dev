@@ -34,6 +34,7 @@ Author
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "fvBoundaryMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,7 +89,7 @@ bool Foam::regionCoupleFvPatch::coupled() const
 const Foam::fvMesh& Foam::regionCoupleFvPatch::shadowRegion() const
 {
     return 
-        boundaryMesh().mesh().parent().objectRegistry::lookupObject<fvMesh>
+        boundaryMesh().mesh().objectRegistry::parent().lookupObject<fvMesh>
         (
             rcPolyPatch_.shadowRegionName()
         );
@@ -129,8 +130,8 @@ Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::interfaceInternalField
 
 void Foam::regionCoupleFvPatch::initTransfer
 (
-    const unallocLabelList& interfaceData,
-    const bool
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& interfaceData
 ) const
 {
     transferBuffer_ = interfaceData;
@@ -139,6 +140,7 @@ void Foam::regionCoupleFvPatch::initTransfer
 
 Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::transfer
 (
+    const Pstream::commsTypes commsType,
     const unallocLabelList& interfaceData
 ) const
 {
@@ -149,8 +151,8 @@ Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::transfer
 
 void Foam::regionCoupleFvPatch::initInternalFieldTransfer
 (
-    const unallocLabelList& iF,
-    const bool bufferedTransfer
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& iF
 ) const
 {
     transferBuffer_ = patchInternalField(iF);
@@ -159,6 +161,7 @@ void Foam::regionCoupleFvPatch::initInternalFieldTransfer
 
 Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::internalFieldTransfer
 (
+    const Pstream::commsTypes commsType,
     const unallocLabelList& iF
 ) const
 {

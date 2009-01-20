@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    boundedBackwardDdtScheme
+    Foam::fv::boundedBackwardDdtScheme
 
 Description
     Second-order bounded-backward-differencing ddt using the current and

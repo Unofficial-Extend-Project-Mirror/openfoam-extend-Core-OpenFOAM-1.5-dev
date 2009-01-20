@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fixedGradientFvPatchField
+    Foam::fixedGradientFvPatchField
 
 Description
+    Foam::fixedGradientFvPatchField
 
 SourceFiles
     fixedGradientFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class fixedGradientFvPatchField Declaration
+                           Class fixedGradientFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -165,8 +166,10 @@ public:
             }
 
             //- Evaluate the patch field
-            virtual void evaluate();
-
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights

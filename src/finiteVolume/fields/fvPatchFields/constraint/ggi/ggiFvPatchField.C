@@ -25,6 +25,9 @@ License
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
+Contributor:
+    Martin Beaudoin, Hydro-Quebec, (2008)
+
 \*---------------------------------------------------------------------------*/
 
 #include "ggiFvPatchField.H"
@@ -74,8 +77,6 @@ ggiFvPatchField<Type>::ggiFvPatchField
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
-
-    this->evaluate();
 }
 
 
@@ -131,7 +132,6 @@ template<class Type>
 tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
-
     // Get shadow face-cells and assemble shadow field
     const unallocLabelList& sfc = ggiPatch_.shadow().faceCells();
 
@@ -142,15 +142,20 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
         sField[i] = iField[sfc[i]];
     }
 
-    //HJ  Add transformation when needed.  HJ, 17/Jun/2007
-//     if (doTransform())
+    //HJ, change 1: partial coverage in cyclic GGI. HJ, 18/Jan/2009
+    //    Experimental: avoiding zeros in uncovered faces
+//     const Field<Type>& pField = *this;
+//     return pField + ggiPatch_.interpolate(sField - pField);
 
     return ggiPatch_.interpolate(sField);
 }
 
 
 template<class Type>
-void ggiFvPatchField<Type>::evaluate()
+void ggiFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     Field<Type>::operator=
     (
@@ -168,7 +173,8 @@ void ggiFvPatchField<Type>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes
 ) const
 {
     // Get shadow face-cells and assemble shadow field
@@ -182,10 +188,6 @@ void ggiFvPatchField<Type>::updateInterfaceMatrix
     }
 
     scalarField pnf = ggiPatch_.interpolate(sField);
-
-    // Transform according to the transformation tensor
-    //HJ, to be added for cyclic GGI
-//     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
     const unallocLabelList& fc = ggiPatch_.faceCells();

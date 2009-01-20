@@ -298,7 +298,7 @@ void fvMesh::updatePhi(const scalarField& sweptVols) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const DimensionedField<scalar, volMesh>& fvMesh::V() const
+const volScalarField::DimensionedInternalField& fvMesh::V() const
 {
     if (!VPtr_)
     {
@@ -322,7 +322,7 @@ const DimensionedField<scalar, volMesh>& fvMesh::V() const
 }
 
 
-const DimensionedField<scalar, volMesh>& fvMesh::V0() const
+const volScalarField::DimensionedInternalField& fvMesh::V0() const
 {
     if (!V0Ptr_)
     {
@@ -363,7 +363,7 @@ DimensionedField<scalar, volMesh>& fvMesh::setV0()
 }
 
 
-const DimensionedField<scalar, volMesh>& fvMesh::V00() const
+const volScalarField::DimensionedInternalField& fvMesh::V00() const
 {
     if (!V00Ptr_)
     {

@@ -28,9 +28,6 @@ $(interfaces)/AC3D/writeAC.C
 $(interfaces)/VTK/writeVTK.C
 $(interfaces)/NAS/readNAS.C
 
-triSurface/triSurfaceTools/triSurfaceTools.C
-triSurface/triSurfaceTools/geompack/geompack.C
-
 triSurface/geometricSurfacePatch/geometricSurfacePatch.C
 triSurface/surfacePatch/surfacePatch.C
 triSurface/surfacePatch/surfacePatchIOList.C

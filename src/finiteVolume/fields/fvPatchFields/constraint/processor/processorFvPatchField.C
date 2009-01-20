@@ -172,21 +172,30 @@ tmp<Field<Type> > processorFvPatchField<Type>::patchNeighbourField() const
 template<class Type>
 void processorFvPatchField<Type>::initEvaluate
 (
-    const bool bufferdTransfer
+    const Pstream::commsTypes commsType
 )
 {
-    procPatch_.compressedSend(this->patchInternalField()(), bufferdTransfer);
+    if (Pstream::parRun())
+    {
+        procPatch_.compressedSend(commsType, this->patchInternalField()());
+    }
 }
 
 
 template<class Type>
-void processorFvPatchField<Type>::evaluate()
+void processorFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes commsType
+)
 {
-    procPatch_.compressedReceive<Type>(*this);
-
-    if (doTransform())
+    if (Pstream::parRun())
     {
-        transform(*this, procPatch_.forwardT(), *this);
+        procPatch_.compressedReceive<Type>(commsType, *this);
+
+        if (doTransform())
+        {
+            transform(*this, procPatch_.forwardT(), *this);
+        }
     }
 }
 
@@ -206,13 +215,13 @@ void processorFvPatchField<Type>::initInterfaceMatrixUpdate
     const lduMatrix&,
     const scalarField&,
     const direction,
-    const bool bufferdTransfer
+    const Pstream::commsTypes commsType
 ) const
 {
     procPatch_.compressedSend
     (
-        this->patch().patchInternalField(psiInternal)(),
-        bufferdTransfer
+        commsType,
+        this->patch().patchInternalField(psiInternal)()
     );
 }
 
@@ -224,10 +233,14 @@ void processorFvPatchField<Type>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf(procPatch_.compressedReceive<scalar>(this->size())());
+    scalarField pnf
+    (
+        procPatch_.compressedReceive<scalar>(commsType, this->size())()
+    );
 
     // Transform according to the transformation tensor
     transformCoupleField(pnf, cmpt);

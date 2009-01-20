@@ -42,7 +42,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
     if (debug)
     {
         Info<< "fvsPatchField<Type>::New(const word&, const fvPatch&, "
-               "const Field<Type>&) : "
+               "const DimensionedField<Type, surfaceMesh>&) : "
                "constructing fvsPatchField<Type>"
             << endl;
     }
@@ -52,15 +52,18 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
 
     if (cstrIter == patchConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "fvsPatchField<Type>::New(const word&, const fvPatch&, "
-            "const DimensionedField<Type, surfaceMesh>)"
-        )   << "Unknown patchTypefield type " << patchFieldType
-            << endl << endl
-            << "Valid patchField types are :" << endl
-            << patchConstructorTablePtr_->toc()
-            << exit(FatalError);
+        if (cstrIter == patchConstructorTablePtr_->end())
+        {
+            FatalErrorIn
+            (
+                "fvsPatchField<Type>::New(const word&, const fvPatch&, "
+                "const DimensionedField<Type, surfaceMesh>)"
+            )   << "Unknown patch field type " << patchFieldType
+                << endl << endl
+                << "Valid patchField types are :" << endl
+                << patchConstructorTablePtr_->toc()
+                << exit(FatalError);
+        }
     }
 
     typename patchConstructorTable::iterator patchTypeCstrIter =
@@ -103,7 +106,10 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
     {
         if (!disallowDefaultFvsPatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("default");
+            cstrIter = dictionaryConstructorTablePtr_->find
+            (
+                fvsPatchField<Type>::calculatedType()
+            );
         }
 
         if (cstrIter == dictionaryConstructorTablePtr_->end())
@@ -122,25 +128,32 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
         }
     }
 
-    typename dictionaryConstructorTable::iterator patchTypeCstrIter
-        = dictionaryConstructorTablePtr_->find(p.type());
-
-    if
+    if 
     (
-        patchTypeCstrIter != dictionaryConstructorTablePtr_->end()
-     && patchTypeCstrIter() != cstrIter()
+        !dict.found("patchType")
+     || word(dict.lookup("patchType")) != p.type()
     )
     {
-        FatalIOErrorIn
+        typename dictionaryConstructorTable::iterator patchTypeCstrIter
+            = dictionaryConstructorTablePtr_->find(p.type());
+
+        if
         (
-            "fvsPatchField<Type>const fvPatch&, "
-            "const DimensionedField<Type, surfaceMesh>&, "
-            "const dictionary&)",
-            dict
-        ) << "inconsistent patch and patchField types for \n"
-             "    patch type " << p.type()
-            << " and patchField type " << patchFieldType
-            << exit(FatalIOError);
+            patchTypeCstrIter != dictionaryConstructorTablePtr_->end()
+         && patchTypeCstrIter() != cstrIter()
+        )
+        {
+            FatalIOErrorIn
+            (
+                "fvsPatchField<Type>const fvPatch&, "
+                "const DimensionedField<Type, surfaceMesh>&, "
+                "const dictionary&)",
+                dict
+            )   << "inconsistent patch and patchField types for \n"
+                   "    patch type " << p.type()
+                << " and patchField type " << patchFieldType
+                << exit(FatalIOError);
+        }
     }
 
     return cstrIter()(p, iF, dict);
@@ -177,7 +190,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
             "fvsPatchField<Type>::New(const fvsPatchField<Type>&, "
             "const fvPatch&, const Field<Type>&, "
             "const fvPatchFieldMapper&)"
-        )   << "unknown patchTypefield type " << ptf.type() << endl << endl
+        )   << "unknown patch field type " << ptf.type() << endl << endl
             << "Valid patchField types are :" << endl
             << patchMapperConstructorTablePtr_->toc()
             << exit(FatalError);

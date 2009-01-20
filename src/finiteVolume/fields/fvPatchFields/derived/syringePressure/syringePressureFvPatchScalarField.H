@@ -23,33 +23,36 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    syringePressureFvPatchScalarField
+    Foam::syringePressureFvPatchScalarField
 
 Description
     Pressure boundary condition obtained from a 0-D model of the cylinder
-    of a syringe.  The syringe cylinder is defined by it's initial volume,
-    piston area and velocity profile specified by regions of constant
-    acceleration, speed and deceleration.  The gas in the cylinder is
-    described by it's initial pressure and compressibility which is
-    assumed constant, i.e. isothermal expansion/compression.
+    of a syringe.
+
+    The syringe cylinder is defined by its initial volume, piston area and
+    velocity profile specified by regions of constant acceleration, speed
+    and deceleration.  The gas in the cylinder is described by its initial
+    pressure and compressibility which is assumed constant, i.e. isothermal
+    expansion/compression.
 
     Example of the BC specification:
-
-    outlet
-    {
-        type            syringePressure;
-        Ap              1.388e-6; // syringe piston area
-        Sp              0.01;     // syringe piston speed
-        VsI             1.388e-8; // Initial syringe volume
-        tas             0.001;    // Start of piston acceleration
-        tae             0.002;    // End of piston acceleration
-        tds             0.005;    // Start of piston deceleration
-        tde             0.006;    // end of piston deceleration
-        psI             1e5;      // Initial syringe pressure
-        psi             1e-5;     // Gas compressibility
-        ams             0;        // Added (or removed) gas mass 
-                                  // Initially 0 but used for restarting.
-    }
+    @verbatim
+        outlet
+        {
+            type            syringePressure;
+            Ap              1.388e-6; // syringe piston area
+            Sp              0.01;     // syringe piston speed
+            VsI             1.388e-8; // Initial syringe volume
+            tas             0.001;    // Start of piston acceleration
+            tae             0.002;    // End of piston acceleration
+            tds             0.005;    // Start of piston deceleration
+            tde             0.006;    // end of piston deceleration
+            psI             1e5;      // Initial syringe pressure
+            psi             1e-5;     // Gas compressibility
+            ams             0;        // Added (or removed) gas mass
+                                      // Initially 0 but used for restarting.
+        }
+    @endverbatim
 
 SourceFiles
     syringePressureFvPatchScalarField.C
@@ -67,7 +70,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class syringePressureFvPatchField Declaration
+                           Class syringePressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class syringePressureFvPatchScalarField

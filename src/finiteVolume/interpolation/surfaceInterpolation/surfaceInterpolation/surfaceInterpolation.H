@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    surfaceInterpolation
+    Foam::surfaceInterpolation
 
 Description
     Cell to surface interpolation scheme. Included in fvMesh.
@@ -102,7 +102,7 @@ protected:
 
 public:
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     ClassName("surfaceInterpolation");
 
 

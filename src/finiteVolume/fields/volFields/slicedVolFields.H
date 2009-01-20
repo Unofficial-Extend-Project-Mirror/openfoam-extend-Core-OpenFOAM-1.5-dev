@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    slicedVolFields
+InClass
+    Foam::slicedVolFields
 
 \*---------------------------------------------------------------------------*/
 
@@ -31,29 +31,9 @@ Class
 #define slicedVolFields_H
 
 #include "SlicedGeometricField.H"
-#include "fieldTypes.H"
 #include "slicedFvPatchField.H"
 #include "volMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef SlicedGeometricField<scalar, fvPatchField, slicedFvPatchField, volMesh>
-slicedVolScalarField;
-
-typedef SlicedGeometricField<vector, fvPatchField, slicedFvPatchField, volMesh>
-slicedVolVectorField;
-
-typedef SlicedGeometricField<tensor, fvPatchField, slicedFvPatchField, volMesh>
-slicedVolTensorField;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+#include "slicedVolFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

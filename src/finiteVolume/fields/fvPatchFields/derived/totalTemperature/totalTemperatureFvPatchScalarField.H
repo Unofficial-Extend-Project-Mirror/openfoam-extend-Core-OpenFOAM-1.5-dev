@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    totalTemperatureFvPatchScalarField
+    Foam::totalTemperatureFvPatchScalarField
 
 Description
+    Foam::totalTemperatureFvPatchScalarField
 
 SourceFiles
     totalTemperatureFvPatchScalarField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class totalTemperatureFvPatchField Declaration
+                           Class totalTemperatureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class totalTemperatureFvPatchScalarField

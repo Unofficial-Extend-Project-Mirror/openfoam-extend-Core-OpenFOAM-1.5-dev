@@ -63,7 +63,7 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
                 << "face " << facei << " and " << facei + sizeby2
                 <<  " areas do not match by "
                 << 100*mag(magFa[facei] - magFa[facei + sizeby2])/avFa
-                    << "% -- possible face ordering problem." << nl
+                << "% -- possible face ordering problem." << nl
                 << "Cyclic area match tolerance = "
                 << cyclicPolyPatch::areaMatchTol << " patch: " << name()
                 << abort(FatalError);
@@ -143,6 +143,7 @@ tmp<labelField> cyclicFvPatch::interfaceInternalField
 
 tmp<labelField> cyclicFvPatch::transfer
 (
+    const Pstream::commsTypes,
     const unallocLabelList& interfaceData
 ) const
 {
@@ -163,6 +164,7 @@ tmp<labelField> cyclicFvPatch::transfer
 
 tmp<labelField> cyclicFvPatch::internalFieldTransfer
 (
+    const Pstream::commsTypes commsType,
     const unallocLabelList& iF
 ) const
 {

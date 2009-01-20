@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    basicSymmetryFvPatchField
+    Foam::basicSymmetryFvPatchField
 
 Description
+    A symmetry patch
 
 SourceFiles
     basicSymmetryFvPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class symmetryFvPatchField Declaration
+                 Class basicSymmetryFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -128,7 +129,10 @@ public:
             virtual tmp<Field<Type> > snGrad() const;
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Return face-gradient transform diagonal
             virtual tmp<Field<Type> > snGradTransformDiag() const;
@@ -141,7 +145,10 @@ template<>
 tmp<scalarField > basicSymmetryFvPatchField<scalar>::snGrad() const;
 
 template<>
-void basicSymmetryFvPatchField<scalar>::evaluate();
+void basicSymmetryFvPatchField<scalar>::evaluate
+(
+    const Pstream::commsTypes commsType
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

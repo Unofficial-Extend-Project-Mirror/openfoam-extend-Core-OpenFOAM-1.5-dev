@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    mixedFvPatchField
+    Foam::mixedFvPatchField
 
 Description
+    Foam::mixedFvPatchField
 
 SourceFiles
     mixedFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class mixedFvPatchField Declaration
+                           Class mixedFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -198,7 +199,10 @@ public:
             virtual tmp<Field<Type> > snGrad() const;
 
             //- Evaluate the patch field
-            virtual void evaluate();
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights

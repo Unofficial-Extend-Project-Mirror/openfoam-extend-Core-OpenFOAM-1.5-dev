@@ -108,7 +108,7 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
             << exit(FatalIOError);
     }
 
-    this->evaluate();
+    this->evaluate(Pstream::blocking);
 }
 
 
@@ -184,7 +184,8 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes
 ) const
 {
     scalarField pnf(this->size());

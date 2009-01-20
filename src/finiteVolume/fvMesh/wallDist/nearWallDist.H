@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    nearWallDist
+    Foam::nearWallDist
 
 Description
-    Distance calculation for cells with face on a wall. Searches pointNeighbours
-    to find closest.
+    Distance calculation for cells with face on a wall.
+    Searches pointNeighbours to find closest.
 
 SourceFiles
     nearWallDist.C

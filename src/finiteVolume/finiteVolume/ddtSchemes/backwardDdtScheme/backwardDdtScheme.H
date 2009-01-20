@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    backwardDdtScheme
+    Foam::fv::backwardDdtScheme
 
 Description
     Second-order backward-differencing ddt using the current and

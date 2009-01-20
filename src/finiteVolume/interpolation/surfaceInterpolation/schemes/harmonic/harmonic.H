@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    harmonic
+    Foam::harmonic
 
 Description
     Harmonic-mean differencing scheme class.  This scheme interpolates 1/field
@@ -124,21 +124,7 @@ public:
             const GeometricField<scalar, fvPatchField, volMesh>& vf
         ) const
         {
-            return
-                1.0/
-                stabilise
-                (
-                    reverseLinear<scalar>(vf.mesh()).interpolate
-                    (
-                        1.0/
-                        stabilise
-                        (
-                            vf,
-                            dimensionedScalar("small", vf.dimensions(), SMALL)
-                        )
-                    ),
-                    dimensionedScalar("small", dimless/vf.dimensions(), SMALL)
-                );
+            return 1.0/(reverseLinear<scalar>(vf.mesh()).interpolate(1.0/vf));
         }
 };
 

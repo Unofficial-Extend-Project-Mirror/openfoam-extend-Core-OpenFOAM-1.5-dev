@@ -44,8 +44,7 @@ pressureInletOutletVelocityFvPatchVectorField
 )
 :
     directionMixedFvPatchVectorField(p, iF),
-    phiName_("phi"),
-    tangentialVelocity_(p.size(), vector::zero)
+    phiName_("phi")
 {
     refValue() = vector::zero;
     refGrad() = vector::zero;
@@ -63,9 +62,13 @@ pressureInletOutletVelocityFvPatchVectorField
 )
 :
     directionMixedFvPatchVectorField(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_),
-    tangentialVelocity_(ptf.tangentialVelocity_, mapper)
-{}
+    phiName_(ptf.phiName_)
+{
+    if (ptf.tangentialVelocity_.size())
+    {
+        tangentialVelocity_ = mapper(ptf.tangentialVelocity_);
+    }
+}
 
 
 pressureInletOutletVelocityFvPatchVectorField::
@@ -77,8 +80,7 @@ pressureInletOutletVelocityFvPatchVectorField
 )
 :
     directionMixedFvPatchVectorField(p, iF),
-    phiName_("phi"),
-    tangentialVelocity_(p.size(), vector::zero)
+    phiName_("phi")
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 
@@ -145,8 +147,11 @@ void pressureInletOutletVelocityFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    vectorField::autoMap(m);
-    tangentialVelocity_.autoMap(m);
+    directionMixedFvPatchVectorField::autoMap(m);
+    if (tangentialVelocity_.size())
+    {
+        tangentialVelocity_.autoMap(m);
+    }
 }
 
 
@@ -158,10 +163,13 @@ void pressureInletOutletVelocityFvPatchVectorField::rmap
 {
     directionMixedFvPatchVectorField::rmap(ptf, addr);
 
-    const pressureInletOutletVelocityFvPatchVectorField& tiptf =
-        refCast<const pressureInletOutletVelocityFvPatchVectorField>(ptf);
+    if (tangentialVelocity_.size())
+    {
+        const pressureInletOutletVelocityFvPatchVectorField& tiptf =
+            refCast<const pressureInletOutletVelocityFvPatchVectorField>(ptf);
 
-    tangentialVelocity_.rmap(tiptf.tangentialVelocity_, addr);
+        tangentialVelocity_.rmap(tiptf.tangentialVelocity_, addr);
+    }
 }
 
 
@@ -186,7 +194,10 @@ void pressureInletOutletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    tangentialVelocity_.writeEntry("tangentialVelocity", os);
+    if (tangentialVelocity_.size())
+    {
+        tangentialVelocity_.writeEntry("tangentialVelocity", os);
+    }
     writeEntry("value", os);
 }
 

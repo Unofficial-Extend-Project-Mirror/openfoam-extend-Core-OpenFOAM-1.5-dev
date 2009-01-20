@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Limited01Limiter
+    Foam::Limited01Limiter
 
 Description
+    A LimitedLimiter with the range 0-1
 
 \*---------------------------------------------------------------------------*/
 

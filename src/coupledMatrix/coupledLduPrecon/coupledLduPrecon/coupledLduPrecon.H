@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class coupledLduPrecon Declaration
+                      Class coupledLduPrecon Declaration
 \*---------------------------------------------------------------------------*/
 
 class coupledLduPrecon
@@ -77,9 +77,6 @@ protected:
         //- Interfaces
         const lduInterfaceFieldPtrsListList& interfaces_;
 
-        //- Solving direction
-        const direction cmpt_;
-
 
 public:
 
@@ -99,7 +96,6 @@ public:
                 const PtrList<FieldField<Field, scalar> >& bouCoeffs,
                 const PtrList<FieldField<Field, scalar> >& intCoeffs,
                 const lduInterfaceFieldPtrsListList& interfaces,
-                const direction cmpt,
                 const dictionary& dict
             ),
             (
@@ -107,7 +103,6 @@ public:
                 bouCoeffs,
                 intCoeffs,
                 interfaces,
-                cmpt,
                 dict
             )
         );
@@ -121,15 +116,13 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         )
         :
             matrix_(matrix),
             bouCoeffs_(bouCoeffs),
             intCoeffs_(intCoeffs),
-            interfaces_(interfaces),
-            cmpt_(cmpt)
+            interfaces_(interfaces)
         {}
 
 
@@ -142,7 +135,6 @@ public:
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
             const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt,
             const dictionary& dict
         );
 
@@ -156,11 +148,29 @@ public:
     // Member Functions
 
         //- Execute preconditioning
-        virtual void solve
+        virtual void precondition
         (
             FieldField<Field, scalar>& x,
-            const FieldField<Field, scalar>& b
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
         ) const = 0;
+
+        //- Execute preconditioning for the transpose matrix
+        virtual void preconditionT
+        (
+            FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
+        ) const
+        {
+            notImplemented
+            (
+                type() +"::preconditionT"
+                "(FieldField<Field, scalar>& x, "
+                "const FieldField<Field, scalar>& b,"
+                "const direction cmpt) const"
+            );
+        }
 };
 
 

@@ -138,7 +138,7 @@ void totalPressureFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    fixedValueFvPatchScalarField::autoMap(m);
     p0_.autoMap(m);
 }
 

@@ -146,7 +146,7 @@ void inletOutletTotalTemperatureFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    mixedFvPatchScalarField::autoMap(m);
     T0_.autoMap(m);
 }
 

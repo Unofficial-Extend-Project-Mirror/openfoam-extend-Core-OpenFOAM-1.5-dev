@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    calculatedFvsPatchField
+    Foam::calculatedFvsPatchField
 
 Description
+    Foam::calculatedFvsPatchField
 
 SourceFiles
     calculatedFvsPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class calculatedFvsPatchField Declaration
+                      Class calculatedFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

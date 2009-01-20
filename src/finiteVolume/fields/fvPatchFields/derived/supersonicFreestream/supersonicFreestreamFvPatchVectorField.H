@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    supersonicFreestreamFvPatchVectorField
+    Foam::supersonicFreestreamFvPatchVectorField
 
 Description
     Supersonic free stream condition.
@@ -55,7 +55,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class supersonicFreestreamFvPatchField Declaration
+                           Class supersonicFreestreamFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class supersonicFreestreamFvPatchVectorField

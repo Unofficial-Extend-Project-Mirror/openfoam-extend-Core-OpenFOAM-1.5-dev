@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    emptyFvPatchField
+    Foam::emptyFvPatchField
 
 Description
+    Foam::emptyFvPatchField
 
 SourceFiles
     emptyFvPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class emptyFvPatchField Declaration
+                         Class emptyFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

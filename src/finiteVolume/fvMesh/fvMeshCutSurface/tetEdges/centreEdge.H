@@ -23,14 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    centreEdge
+    Foam::centreEdge
 
 Description
     Implicit description of faceCentre to cellCentre edge
     (from tet decomposition).
+
     Stores
-        - face label
-        - whether in owner or neighbour of face
+      - face label
+      - whether in owner or neighbour of face
 
 SourceFiles
 
@@ -47,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class centreEdge Declaration
@@ -67,7 +68,7 @@ public:
 
     // Public classes
 
-        // Hash function
+        //- Hash function
         class centreEdgeHash
         {
 

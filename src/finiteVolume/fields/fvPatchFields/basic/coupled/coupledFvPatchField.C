@@ -120,7 +120,7 @@ tmp<Field<Type> > coupledFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void coupledFvPatchField<Type>::initEvaluate(const bool)
+void coupledFvPatchField<Type>::initEvaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -130,13 +130,20 @@ void coupledFvPatchField<Type>::initEvaluate(const bool)
 
 
 template<class Type>
-void coupledFvPatchField<Type>::evaluate()
+void coupledFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
+    if (!this->updated())
+    {
+        this->updateCoeffs();
+    }
+
     Field<Type>::operator=
     (
         this->patch().weights()*this->patchInternalField()
       + (1.0 - this->patch().weights())*this->patchNeighbourField()
     );
+
+    fvPatchField<Type>::evaluate();
 }
 
 

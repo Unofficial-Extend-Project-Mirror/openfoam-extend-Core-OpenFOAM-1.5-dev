@@ -32,7 +32,9 @@ License
 
 void Foam::bound(volScalarField& vsf, const dimensionedScalar& vsf0)
 {
-    if (min(vsf).value() < vsf0.value())
+    scalar minVsf = min(vsf).value();
+
+    if (minVsf < vsf0.value())
     {
         Info<< "bounding " << vsf.name()
             << ", min: " << gMin(vsf.internalField())
@@ -46,13 +48,69 @@ void Foam::bound(volScalarField& vsf, const dimensionedScalar& vsf0)
             (
                 vsf.internalField(),
                 fvc::average(max(vsf, vsf0))().internalField()
-                *pos(-vsf.internalField())
+                // Bug fix: was assuming bound on zero.  HJ, 25/Nov/2008
+                *pos(vsf0.value() - vsf.internalField())
             ),
             vsf0.value()
         );
 
         vsf.correctBoundaryConditions();
         vsf.boundaryField() = max(vsf.boundaryField(), vsf0.value());
+    }
+}
+
+
+void Foam::boundMinMax
+(
+    volScalarField& vsf,
+    const dimensionedScalar& vsf0,
+    const dimensionedScalar& vsf1
+)
+{
+    scalar minVsf = min(vsf).value();
+    scalar maxVsf = max(vsf).value();
+
+    if (minVsf < vsf0.value() || maxVsf > vsf1.value())
+    {
+        Info<< "bounding " << vsf.name()
+            << ", min: " << gMin(vsf.internalField())
+            << " max: " << gMax(vsf.internalField())
+            << " average: " << gAverage(vsf.internalField())
+            << endl;
+    }
+
+    if (minVsf < vsf0.value())
+    {
+        vsf.internalField() = max
+        (
+            max
+            (
+                vsf.internalField(),
+                fvc::average(max(vsf, vsf0))().internalField()
+                *pos(vsf0.value() - vsf.internalField())
+            ),
+            vsf0.value()
+        );
+
+        vsf.correctBoundaryConditions();
+        vsf.boundaryField() = max(vsf.boundaryField(), vsf0.value());
+    }
+
+    if (maxVsf > vsf1.value())
+    {
+        vsf.internalField() = min
+        (
+            min
+            (
+                vsf.internalField(),
+                fvc::average(min(vsf, vsf1))().internalField()
+                *neg(vsf1.value() - vsf.internalField())
+            ),
+            vsf1.value()
+        );
+
+        vsf.correctBoundaryConditions();
+        vsf.boundaryField() = min(vsf.boundaryField(), vsf1.value());
     }
 }
 

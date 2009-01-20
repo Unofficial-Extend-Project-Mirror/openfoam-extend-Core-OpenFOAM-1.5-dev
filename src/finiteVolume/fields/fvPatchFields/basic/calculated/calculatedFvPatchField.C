@@ -69,10 +69,11 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    fvPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    fvPatchField<Type>(p, iF, dict, valueRequired)
 {}
 
 
@@ -176,7 +177,6 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::valueBoundaryCoeffs
     return *this;
 }
 
-
 template<class Type>
 tmp<Field<Type> > calculatedFvPatchField<Type>::gradientInternalCoeffs() const
 {
@@ -196,7 +196,6 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::gradientInternalCoeffs() const
 
     return *this;
 }
-
 
 template<class Type>
 tmp<Field<Type> > calculatedFvPatchField<Type>::gradientBoundaryCoeffs() const

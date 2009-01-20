@@ -23,9 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    turbulentInletFvPatchField
+    Foam::turbulentInletFvPatchField
 
 Description
+    Generate a fluctuating inlet condition by adding a random component
+    to a reference (mean) field.
+    Input:
+        referenceField
+            Mean field.
+        fluctuationScale
+            RMS fluctuation, provided as the fraction of the mean field.
+        alpha
+            temporal correlation factor;
+            the fraction of the new random component added to the previous
+            time-step (defaults to 0.1).
 
 SourceFiles
     turbulentInletFvPatchField.C
@@ -44,7 +55,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class turbulentInletFvPatchField Declaration
+                     Class turbulentInletFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -58,6 +69,7 @@ class turbulentInletFvPatchField
         Random ranGen_;
         Type fluctuationScale_;
         Field<Type> referenceField_;
+        scalar alpha_;
         label curTimeIndex_;
 
 

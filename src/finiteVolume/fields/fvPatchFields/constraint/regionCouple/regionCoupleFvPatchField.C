@@ -163,7 +163,10 @@ tmp<Field<Type> > regionCoupleFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
-void regionCoupleFvPatchField<Type>::evaluate()
+void regionCoupleFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     // Implement weights-based stabilised harmonic interpolation using magnitude
     // Algorithm:
@@ -212,7 +215,7 @@ void regionCoupleFvPatchField<Type>::initInterfaceMatrixUpdate
     const lduMatrix&,
     const scalarField&,
     const direction,
-    const bool
+    const Pstream::commsTypes
 ) const
 {
     matrixUpdateBuffer_ = this->patch().patchInternalField(psiInternal);
@@ -227,7 +230,8 @@ void regionCoupleFvPatchField<Type>::updateInterfaceMatrix
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
-    const direction cmpt
+    const direction cmpt,
+    const Pstream::commsTypes
 ) const
 {
     scalarField pnf =

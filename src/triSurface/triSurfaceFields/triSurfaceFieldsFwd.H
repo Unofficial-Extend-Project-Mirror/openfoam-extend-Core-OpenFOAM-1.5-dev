@@ -22,14 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    triSurfaceFields
-
-Description
-
-SourceFiles
-    triSurfaceFields.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef triSurfaceFieldsFwd_H
@@ -50,14 +42,18 @@ class DimensionedField;
 
 class triSurfaceGeoMesh;
 
+typedef Foam::DimensionedField<label, triSurfaceGeoMesh>
+    triSurfaceLabelField;
 typedef Foam::DimensionedField<scalar, triSurfaceGeoMesh>
     triSurfaceScalarField;
 typedef Foam::DimensionedField<vector, triSurfaceGeoMesh>
     triSurfaceVectorField;
-typedef Foam::DimensionedField<tensor, triSurfaceGeoMesh>
-    triSurfaceTensorField;
 typedef Foam::DimensionedField<sphericalTensor, triSurfaceGeoMesh>
     triSurfaceSphericalTensorField;
+typedef Foam::DimensionedField<symmTensor, triSurfaceGeoMesh>
+    triSurfaceSymmTensorField;
+typedef Foam::DimensionedField<tensor, triSurfaceGeoMesh>
+    triSurfaceTensorField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

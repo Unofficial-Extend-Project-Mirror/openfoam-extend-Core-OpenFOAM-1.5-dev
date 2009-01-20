@@ -471,8 +471,8 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
         {
             interfaceFields[intI].interface().initInternalFieldTransfer
             (
-                child_,
-                true
+                Pstream::blocking,
+                child_
             );
         }
     }
@@ -491,7 +491,11 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
                 (
                     fineInterface,
                     fineInterface.interfaceInternalField(child_),
-                    fineInterface.internalFieldTransfer(child_)
+                    fineInterface.internalFieldTransfer
+                    (
+                        Pstream::blocking,
+                        child_
+                    )
                 ).ptr()
             );
 

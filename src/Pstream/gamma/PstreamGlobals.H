@@ -22,10 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    PstreamGlobals
+Namespace
+    Foam::PstreamGlobals
 
 Description
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
 
 SourceFiles
     PstreamGlobals.C
@@ -51,10 +53,10 @@ namespace Foam
 namespace PstreamGlobals
 {
 
-// Block wait for message on port procNo
+//- Block wait for message on port procNo
 void gammaWait(const label procNo);
 
-// Helper routine to copy out newly received data
+//- Helper routine to copy out newly received data
 label copyReceive
 (
     const label procNo,
@@ -63,31 +65,31 @@ label copyReceive
 );
 
 
-// Receive buffers
+//- Receive buffers
 extern FixedList<List<List<char> >, 4> recvBuf;
 
-// Length of receive buffers
+//- Length of receive buffers
 extern FixedList<labelList, 4> recvBufLen;
 
-// Currently active buffer in receiving
+//- Currently active buffer in receiving
 extern labelList recvIndex;
-// Receive buffer that has to be consumed
+//- Receive buffer that has to be consumed
 extern labelList consumeIndex;
 
 
-// Special message to signal resizing
+//- Special message to signal resizing
 const int resizeMessageLen = 6;
 extern uint64_t resizeMessage[];
-// Initial buffer length. Should be able to contain the message comfortably.
+//- Initial buffer length. Should be able to contain the message comfortably.
 const int initialBufferLen = 2*resizeMessageLen*sizeof(uint64_t);
 
-// Helper routine to check if a message is a resize message. Returns -1 if
-// not or the new size.
+//- Helper routine to check if a message is a resize message.
+//  Returns -1 if not or the new size.
 label getSizeFromHeader(const char* buf, const label len);
-// Change the resize message to contain the new length
+//- Change the resize message to contain the new length
 void setResizeMessage(const label len);
 
-// Get max size of all receive buffers to procNo
+//- Get max size of all receive buffers to procNo
 label getMaxBufSize(const int procNo);
 
 };

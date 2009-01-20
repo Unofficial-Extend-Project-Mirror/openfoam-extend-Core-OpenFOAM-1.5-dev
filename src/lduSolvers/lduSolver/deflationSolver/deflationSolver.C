@@ -224,7 +224,7 @@ Foam::lduSolverPerformance Foam::deflationSolver::solve
                 nDirs < maxDirs_
              && (
                     res > divTol_*oldRes
-                 || nSteps >= nBasisSteps_ && res > basisTol_*oldRes
+                 || (nSteps >= nBasisSteps_ && res > basisTol_*oldRes)
                 )
             )
             {

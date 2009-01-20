@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    CoEulerDdtScheme
+    Foam::fv::CoEulerDdtScheme
 
 Description
     Courant number limited first-order Euler implicit/explicit ddt.
+
     The time-step is adjusted locally so that the local Courant number
     does not exceed the specified value.
 

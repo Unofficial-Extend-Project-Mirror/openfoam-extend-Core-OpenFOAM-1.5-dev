@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fvMesh
+    Foam::fvMesh
 
 Description
     Mesh data needed to do the Finite Volume discretisation.
@@ -57,10 +57,8 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "pointFieldsFwd.H"
-#include "SlicedGeometricField.H"
 #include "slicedVolFieldsFwd.H"
 #include "slicedSurfaceFieldsFwd.H"
-#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,18 +122,6 @@ class fvMesh
 
     // Private Member Functions
 
-        // Storage management
-
-            //- Clear geometry but not the old-time cell volumes
-            void clearGeomNotOldVol();
-
-            //- Clear geometry
-            void clearGeom();
-
-            //- Clear addressing
-            void clearAddressing();
-
-
        // Make geometric data
 
             void makeSf() const;
@@ -163,6 +149,20 @@ class fvMesh
         void operator=(const fvMesh&);
 
 
+    // Protected Member Functions
+
+        // Storage management
+
+            //- Clear geometry but not the old-time cell volumes
+            void clearGeomNotOldVol();
+
+            //- Clear geometry
+            void clearGeom();
+
+            //- Clear addressing
+            void clearAddressing();
+
+
 public:
 
     // Public typedefs
@@ -171,7 +171,7 @@ public:
         typedef fvBoundaryMesh BoundaryMesh;
 
 
-    // Declare name of the class and it's debug switch
+    // Declare name of the class and its debug switch
     TypeName("fvMesh");
 
 
@@ -312,6 +312,9 @@ public:
 
             //- Map all fields in time using given map.
             virtual void mapFields(const mapPolyMesh& mpm);
+
+            //- Map cell volumes in time using given map.
+            virtual void mapOldVolumes(const mapPolyMesh& mpm);
 
             //- Remove boundary patches. Warning: fvPatchFields hold ref to
             //  these fvPatches.

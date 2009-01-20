@@ -133,7 +133,7 @@ void totalTemperatureFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    fixedValueFvPatchScalarField::autoMap(m);
     T0_.autoMap(m);
 }
 

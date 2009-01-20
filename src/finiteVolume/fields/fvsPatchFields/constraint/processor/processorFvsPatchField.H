@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    processorFvsPatchField
+    Foam::processorFvsPatchField
 
 Description
+    Foam::processorFvsPatchField
 
 SourceFiles
     processorFvsPatchField.C
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class processorFvsPatchField Declaration
+                      Class processorFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

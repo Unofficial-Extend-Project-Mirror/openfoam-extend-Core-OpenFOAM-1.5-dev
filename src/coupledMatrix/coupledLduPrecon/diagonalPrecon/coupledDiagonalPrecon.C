@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Diagonal preconditioning
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 \*----------------------------------------------------------------------------*/
 
@@ -53,10 +53,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::coupledDiagonalPrecon::solve
+void Foam::coupledDiagonalPrecon::precondition
 (
     FieldField<Field, scalar>& x,
-    const FieldField<Field, scalar>& b
+    const FieldField<Field, scalar>& b,
+    const direction cmpt
 ) const
 {
     // Diagonally precondition all matrices

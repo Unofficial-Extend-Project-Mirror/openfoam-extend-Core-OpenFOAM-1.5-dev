@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Diagonal preconditioning
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     coupledDiagonalPrecon.C
@@ -77,8 +77,7 @@ public:
             const coupledLduMatrix& matrix,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
-            const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt
+            const lduInterfaceFieldPtrsListList& interfaces
         )
         :
             coupledLduPrecon
@@ -86,8 +85,7 @@ public:
                 matrix,
                 bouCoeffs,
                 intCoeffs,
-                interfaces,
-                cmpt
+                interfaces
             )
         {}
 
@@ -98,7 +96,6 @@ public:
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
             const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt,
             const dictionary& dict
         )
         :
@@ -107,8 +104,7 @@ public:
                 matrix,
                 bouCoeffs,
                 intCoeffs,
-                interfaces,
-                cmpt
+                interfaces
             )
         {}
 
@@ -122,11 +118,23 @@ public:
     // Member Functions
 
         //- Execute preconditioning
-        virtual void solve
+        virtual void precondition
         (
             FieldField<Field, scalar>& x,
-            const FieldField<Field, scalar>& b
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
         ) const;
+
+        //- Execute preconditioning for the transpose matrix
+        virtual void preconditionT
+        (
+            FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
+        ) const
+        {
+            precondition(x, b, cmpt);
+        }
 };
 
 

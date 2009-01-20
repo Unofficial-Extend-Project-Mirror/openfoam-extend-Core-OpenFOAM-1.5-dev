@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-7 H. Jasak All rights reserved
+    \\  /    A nd           | Copyright held by original author
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,11 @@ Class
     coupledCgSolver
 
 Description
-    Preconditioned Conjugate Gradient solver
+    Preconditioned Conjugate Gradient solver for coupled matrices with
+    run-time selectable preconditioning.
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     coupledCgSolver.C
@@ -54,7 +58,7 @@ class coupledCgSolver
 {
     // Private Data
 
-        // Gauss-Seidel preconditioner
+        // Preconditioner
         autoPtr<coupledLduPrecon> preconPtr_;
 
 
@@ -79,13 +83,10 @@ public:
         coupledCgSolver
         (
             const word& fieldName,
-            FieldField<Field, scalar>& x,
             const coupledLduMatrix& matrix,
-            const FieldField<Field, scalar>& b,
             const PtrList<FieldField<Field, scalar> >& bouCoeffs,
             const PtrList<FieldField<Field, scalar> >& intCoeffs,
             const lduInterfaceFieldPtrsListList& interfaces,
-            const direction cmpt,
             Istream& solverData
         );
 
@@ -99,7 +100,12 @@ public:
     // Member Functions
 
         //- Solve the matrix with this solver
-        virtual coupledSolverPerformance solve();
+        virtual coupledSolverPerformance solve
+        (
+            FieldField<Field, scalar>& x,
+            const FieldField<Field, scalar>& b,
+            const direction cmpt = 0
+        ) const;
 };
 
 

@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    slicedSurfaceFields
+InClass
+    Foam::slicedSurfaceFields
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,15 +58,23 @@ class SlicedGeometricField;
 
 typedef
 SlicedGeometricField<scalar, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceScalarField;
+    slicedSurfaceScalarField;
 
 typedef
 SlicedGeometricField<vector, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceVectorField;
+    slicedSurfaceVectorField;
+
+typedef
+SlicedGeometricField<sphericalTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
+    slicedSurfaceSphericalTensorField;
+
+typedef
+SlicedGeometricField<symmTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
+    slicedSurfaceSymmTensorField;
 
 typedef
 SlicedGeometricField<tensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceTensorField;
+    slicedSurfaceTensorField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

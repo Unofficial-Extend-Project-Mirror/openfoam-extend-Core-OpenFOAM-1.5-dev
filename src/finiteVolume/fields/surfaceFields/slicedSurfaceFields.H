@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    slicedSurfaceFields
+InClass
+    Foam::slicedSurfaceFields
 
 \*---------------------------------------------------------------------------*/
 
@@ -31,9 +31,9 @@ Class
 #define slicedSurfaceFields_H
 
 #include "SlicedGeometricField.H"
-#include "fieldTypes.H"
 #include "slicedFvsPatchField.H"
 #include "surfaceMesh.H"
+#include "slicedSurfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,17 +42,36 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef
-SlicedGeometricField<scalar, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceScalarField;
+template<>
+inline void
+SlicedGeometricField<scalar, fvsPatchField, slicedFvsPatchField, surfaceMesh>::
+correctBoundaryConditions()
+{}
 
-typedef
-SlicedGeometricField<vector, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceVectorField;
+template<>
+inline void
+SlicedGeometricField<vector, fvsPatchField, slicedFvsPatchField, surfaceMesh>::
+correctBoundaryConditions()
+{}
 
-typedef
-SlicedGeometricField<tensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
-slicedSurfaceTensorField;
+template<>
+inline void
+SlicedGeometricField<sphericalTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>::
+correctBoundaryConditions()
+{}
+
+template<>
+inline void
+SlicedGeometricField<symmTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>::
+correctBoundaryConditions()
+{}
+
+template<>
+inline void
+SlicedGeometricField<tensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>::
+correctBoundaryConditions()
+{}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

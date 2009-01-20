@@ -23,15 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pyramidEdge
+    Foam::pyramidEdge
 
 Description
     Implicit description of pyramid edge (from tet decomposition).
     Pyramid edge is edge between mesh vertex and cell centre.
+
     Stores
         - vertex label
         - cell label
-
 
 SourceFiles
 
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class pyramidEdge Declaration
@@ -68,7 +68,7 @@ public:
 
     // Public classes
 
-        // Hash function
+        //- Hash function
         class pyramidEdgeHash
         {
 

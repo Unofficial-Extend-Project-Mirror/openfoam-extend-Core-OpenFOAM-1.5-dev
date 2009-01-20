@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    faceDecompIsoSurfaceCuts
+    Foam::faceDecompIsoSurfaceCuts
 
 Description
     List of triangles based on isoSurface reconstruction on faceDecomp mesh.
@@ -45,11 +45,11 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward declaration of classes
 class volPointInterpolation;
 
 /*---------------------------------------------------------------------------*\
-                    Class faceDecompIsoSurfaceCuts Declaration
+                           Class faceDecompIsoSurfaceCuts Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceDecompIsoSurfaceCuts

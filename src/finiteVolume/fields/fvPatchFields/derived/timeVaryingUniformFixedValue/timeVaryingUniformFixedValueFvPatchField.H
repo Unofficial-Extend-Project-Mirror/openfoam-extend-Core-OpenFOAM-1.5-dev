@@ -23,9 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    timeVaryingUniformFixedValueFvPatchField
+    Foam::timeVaryingUniformFixedValueFvPatchField
 
 Description
+    A time-varying form of a uniform fixed value boundary condition.
+
+    Example of the boundary condition specification:
+    @verbatim
+    inlet
+    {
+        type            timeVaryingUniformFixedValue;
+        fileName        "time-series";
+        boundAction      clamp;           // (error|warn|clamp|repeat)
+    }
+    @endverbatim
+
+Note
+    This class is derived directly from a fixedValue patch rather than from
+    a uniformFixedValue patch.
+
+See Also
+    Foam::interpolationTable and Foam::fixedValueFvPatchField
 
 SourceFiles
     timeVaryingUniformFixedValueFvPatchField.C
@@ -35,17 +53,16 @@ SourceFiles
 #ifndef timeVaryingUniformFixedValueFvPatchField_H
 #define timeVaryingUniformFixedValueFvPatchField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "fixedValueFvPatchField.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class graph;
-
 /*---------------------------------------------------------------------------*\
-         Class timeVaryingUniformFixedValueFvPatchField Declaration
+           Class timeVaryingUniformFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -55,10 +72,8 @@ class timeVaryingUniformFixedValueFvPatchField
 {
     // Private data
 
-        fileName timeDataFileName_;
-        autoPtr<graph> timeDataPtr_;
-
-        void checkTable();
+        //- The time series being used, including the bounding treatment
+        interpolationTable<Type> timeSeries_;
 
 
 public:
@@ -84,8 +99,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given timeVaryingUniformFixedValueFvPatchField
-        //  onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         timeVaryingUniformFixedValueFvPatchField
         (
             const timeVaryingUniformFixedValueFvPatchField<Type>&,
@@ -133,16 +147,10 @@ public:
 
         // Access
 
-            //- Return the fluctuation scale
-            const graph& timeData() const
+            //- Return the time series used
+            const interpolationTable<Type>& timeSeries() const
             {
-                return timeDataPtr_;
-            }
-
-            //- Return reference to the fluctuation scale to allow adjustment
-            graph& timeData()
-            {
-                return timeDataPtr_;
+                return timeSeries_;
             }
 
 
@@ -155,21 +163,6 @@ public:
         //- Write
         virtual void write(Ostream&) const;
 };
-
-template<>
-void timeVaryingUniformFixedValueFvPatchField<scalar>::updateCoeffs();
-
-template<>
-void timeVaryingUniformFixedValueFvPatchField<vector>::updateCoeffs();
-
-template<>
-void timeVaryingUniformFixedValueFvPatchField<sphericalTensor>::updateCoeffs();
-
-template<>
-void timeVaryingUniformFixedValueFvPatchField<symmTensor>::updateCoeffs();
-
-template<>
-void timeVaryingUniformFixedValueFvPatchField<tensor>::updateCoeffs();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

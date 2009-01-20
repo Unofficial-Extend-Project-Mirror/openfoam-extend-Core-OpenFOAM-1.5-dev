@@ -65,7 +65,7 @@ IPstream::IPstream
         // Probe read buffer until message arrives.
         while (!(bufid = pvm_probe(procID(fromProcNo_), msgType())));
 
-        // When the message arrives find it's size
+        // When the message arrives find its size
         pvm_bufinfo(bufid, &messageSize_, &tag, &tid);
 
         // Resize buffer to message size

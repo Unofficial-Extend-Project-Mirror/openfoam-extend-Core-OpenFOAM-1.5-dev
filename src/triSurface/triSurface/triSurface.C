@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,6 @@ License
 #include "OFstream.H"
 #include "Time.H"
 #include "boundBox.H"
-#include "triSurfaceTools.H"
 #include "SortableList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -351,144 +350,69 @@ void triSurface::checkEdges(const bool verbose)
 // Check normals and orientation
 boolList triSurface::checkOrientation(const bool verbose)
 {
-    const edgeList& es = edges();
-    const labelListList& faceEs = faceEdges();
-
-    // Check edge normals, face normals, point normals.
-    forAll(faceEs, facei)
-    {
-        const labelList& edgeLabels = faceEs[facei];
-
-        if (edgeLabels.size() != 3)
-        {
-            FatalErrorIn("triSurface::checkOrientation(bool)")
-                << "triangle " << (*this)[facei]
-                << " does not have 3 edges. Edges:" << edgeLabels
-                << exit(FatalError);
-        }
-
-        bool valid = true;
-        forAll(edgeLabels, i)
-        {
-            if (edgeLabels[i] < 0 || edgeLabels[i] >= nEdges())
-            {
-                WarningIn
-                (
-                    "triSurface::checkOrientation(bool)"
-                )   << "edge number " << edgeLabels[i] << " on face " << facei
-                    << " out of range"
-                    << "\nThis usually means that the input surface has "
-                    << "edges with more than 2 triangles connected.\n"
-                    << endl;
-                valid = false;
-            }
-        }
-        if (! valid)
-        {
-            continue;
-        }
-
-
-        //
-        //- Compute normal from triangle points.
-        //
-
-        const labelledTri& tri = (*this)[facei];
-        const point pa(points()[tri[0]]);
-        const point pb(points()[tri[1]]);
-        const point pc(points()[tri[2]]);
-
-        const vector pointNormal((pc - pb) ^ (pa - pb));
-        if ((pointNormal & faceNormals()[facei]) < 0)
-        {
-            FatalErrorIn("triSurface::checkOrientation(bool)")
-                << "Normal calculated from points not consistent with"
-                " faceNormal" << endl
-                << "triangle:" << tri << endl
-                << "points:" << pa << ' ' << pb << ' ' << pc << endl
-                << "pointNormal:" << pointNormal << endl
-                << "faceNormal:" << faceNormals()[facei]
-                << exit(FatalError);
-        }
-    }
-
-
     const labelListList& eFaces = edgeFaces();
     
     // Storage for holding status of edge. True if normal flips across this
     // edge
     boolList borderEdge(nEdges(), false);
 
-    forAll(es, edgei)
+    forAll(eFaces, edgeI)
     {
-        const labelList& neighbours = eFaces[edgei];
+        const labelList& neighbours = eFaces[edgeI];
 
         if (neighbours.size() == 2)
         {
             // Two triangles, A and B. Check if edge orientation is
             // anticlockwise on both.
-            FixedList<label, 3> edgeLabelsA =
-                triSurfaceTools::sortedFaceEdges(*this, neighbours[0]);
 
-            // Get next edge after edgei
-            label nextEdgeA = -1;
-            forAll(edgeLabelsA, ei)
+            const labelledTri& triA = operator[](neighbours[0]);
+            const labelledTri& triB = operator[](neighbours[1]);
+
+            // Get first shared point
+            label sharedA = -1;
+            label sharedB = -1;
+            forAll(triA, i)
             {
-                if (edgeLabelsA[ei] == edgei)
+                sharedB = findIndex(triB, triA[i]);
+                if (sharedB != -1)
                 {
-                    nextEdgeA = edgeLabelsA[(ei + 1) % 3];
+                    sharedA = i;
                     break;
                 }
             }
 
-            FixedList<label, 3> edgeLabelsB =
-                triSurfaceTools::sortedFaceEdges(*this, neighbours[1]);
-
-            label nextEdgeB = -1;
-            forAll(edgeLabelsB, ei)
-            {
-                if (edgeLabelsB[ei] == edgei)
-                {
-                    nextEdgeB = edgeLabelsB[(ei + 1) % 3];
-                    break;
-                }
-            }
-
-            // Now check if nextEdgeA and nextEdgeB have any common points
             if
             (
-                (es[nextEdgeA].start() == es[nextEdgeB].start())
-             || (es[nextEdgeA].start() == es[nextEdgeB].end())
-             || (es[nextEdgeA].end() == es[nextEdgeB].start())
-             || (es[nextEdgeA].end() == es[nextEdgeB].end())
+                sharedA == -1
+             || sharedB == -1
+             || triA[sharedA] != triB[sharedB]
             )
             {
-                borderEdge[edgei] = true;
+                FatalErrorIn("triSurface::checkOrientation(bool)")
+                    << "Problem triA:" << triA << " triB:" << triB
+                    << abort(FatalError);
+            }
+
+            // Check if next point along A equals previous point along B
+            // or vise versa.
+            label nextA = triA[triA.fcIndex(sharedA)];
+            label prevA = triA[triA.rcIndex(sharedA)];
+
+            label nextB = triB[triB.fcIndex(sharedB)];
+            label prevB = triB[triB.rcIndex(sharedB)];
+
+            if (nextA != prevB && prevA != nextB)
+            {
+                borderEdge[edgeI] = true;
                 if (verbose)
                 {
                     WarningIn("triSurface::checkOrientation(bool)")
                         << "Triangle orientation incorrect." << endl
                         << "edge neighbours:" << neighbours << endl
-                        << "triangle " << neighbours[0] << " has edges "
-                        << edgeLabelsA << endl
-                        << "    with points " << endl
-                        << "    " << es[edgeLabelsA[0]].start() << ' '
-                        << es[edgeLabelsA[0]].end() << endl
-                        << "    " << es[edgeLabelsA[1]].start() << ' '
-                        << es[edgeLabelsA[1]].end() << endl
-                        << "    " << es[edgeLabelsA[2]].start() << ' '
-                        << es[edgeLabelsA[2]].end() << endl
-
-                        << "triangle " << neighbours[1] << " has edges "
-                        << edgeLabelsB << endl
-                        << "    with points " << endl
-                        << "    " << es[edgeLabelsB[0]].start() << ' '
-                        << es[edgeLabelsB[0]].end() << endl
-                        << "    " << es[edgeLabelsB[1]].start() << ' '
-                        << es[edgeLabelsB[1]].end() << endl
-                        << "    " << es[edgeLabelsB[2]].start() << ' '
-                        << es[edgeLabelsB[2]].end() << endl
-                        << endl;
+                        << "triangle " << neighbours[0]
+                        << " points " << triA << endl
+                        << "triangle " << neighbours[1]
+                        << " points " << triB << endl;
                 }
             }
         }
@@ -496,7 +420,7 @@ boolList triSurface::checkOrientation(const bool verbose)
         {
             if (verbose)
             {
-                const edge& e = es[edgei];
+                const edge& e = edges()[edgeI];
                 WarningIn("triSurface::checkOrientation(bool)")
                     << "Wrong number of edge neighbours." << endl
                     << "Edge:" << e
@@ -504,7 +428,7 @@ boolList triSurface::checkOrientation(const bool verbose)
                     << ' ' << localPoints()[e.end()]
                     << " has neighbours:" << neighbours << endl;
             }
-            borderEdge[edgei] = true;
+            borderEdge[edgeI] = true;
         }
     }
 
@@ -523,13 +447,22 @@ bool triSurface::read(Istream& is)
 
 
 // Read from file in given format
-bool triSurface::read(const fileName& name, const word& ext)
+bool triSurface::read(const fileName& name, const word& ext, const bool check)
 {
+    if (check && !exists(name))
+    {
+        FatalErrorIn
+        (
+            "triSurface::read(const fileName&, const word&, const bool)"
+        )   << "Cannnot read " << name << exit(FatalError);
+    }
+
     if (ext == "gz")
     {
         fileName unzipName = name.lessExt();
 
-        return read(unzipName, unzipName.ext());
+        // Do not check for existence. Let IFstream do the unzipping.
+        return read(unzipName, unzipName.ext(), false);
     }
     else if (ext == "ftr")
     {
@@ -661,7 +594,7 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
     {
         sortedRegion[faceI] = operator[](faceI).region();
     }
-    sortedRegion.sort();
+    sortedRegion.stableSort();
 
     faceMap = sortedRegion.indices();
 
@@ -1222,10 +1155,31 @@ void triSurface::write(const Time& d) const
 
 void triSurface::writeStats(Ostream& os) const
 {
+    // Calculate bounding box without any additional addressing
+    // Copy of treeBoundBox code. Cannot use meshTools from triSurface...
+    boundBox bb
+    (
+        point(VGREAT, VGREAT, VGREAT),
+        point(-VGREAT, -VGREAT, -VGREAT)
+    );
+    forAll(*this, triI)
+    {
+        const labelledTri& f = operator[](triI);
+
+        forAll(f, fp)
+        {
+            const point& pt = points()[f[fp]];
+            bb.min() = ::Foam::min(bb.min(), pt);
+            bb.max() = ::Foam::max(bb.max(), pt);
+        }
+    }
+
+    // Unfortunately nPoints constructs meshPoints() ...
+
     os  << "Triangles    : " << size() << endl
-        << "Edges        : " << nEdges() << endl
+        //<< "Edges        : " << nEdges() << endl
         << "Vertices     : " << nPoints() << endl
-        << "Bounding Box : " << boundBox(localPoints()) << endl;
+        << "Bounding Box : " << bb << endl;
 }
 
 

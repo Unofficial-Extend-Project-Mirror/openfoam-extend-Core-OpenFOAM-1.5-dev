@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    freestreamFvPatchField
+    Foam::freestreamFvPatchField
 
 Description
+    Foam::freestreamFvPatchField
 
 SourceFiles
     freestreamFvPatchField.C
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class freestreamFvPatchField Declaration
+                     Class freestreamFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
