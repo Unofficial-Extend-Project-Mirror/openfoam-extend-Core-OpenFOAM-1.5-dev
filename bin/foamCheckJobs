@@ -27,7 +27,7 @@
 #     foamCheckJobs
 #
 # Description
-#     Uses runningJobs/, finisedJobs/ and foamProcessInfo to create stateFile.
+#     Uses runningJobs/, finishedJobs/ and foamProcessInfo to create stateFile.
 #     stateFile contains per pid information on state of process. Format:
 #       pid state command
 #
@@ -35,10 +35,10 @@
 #     (first three are from foamProcessInfo, others from jobInfo files)
 #     (PEND is special state from when user has submitted but no jobInfo
 #     file yet. Not supported by this script yet)
-#     
+#
 #------------------------------------------------------------------------------
 
-PROGNAME=`basename $0`
+PROGNAME=${0##*/}
 
 #-------------------------------------------------------------------------------
 #- User settings
@@ -50,8 +50,8 @@ NDAYSLIMIT=7
 #- work file
 TMPFILE=/tmp/${PROGNAME}$$.tmp
 #- work dir. Needs to be accessible for all machines
-MACHDIR=$HOME/$FOAM_DOT_DIR/${PROGNAME}
-DEFSTATEFILE=$HOME/$FOAM_DOT_DIR/foamCheckJobs.out
+MACHDIR=$HOME/.OpenFOAM/${PROGNAME}
+DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 
 
 if [ `uname -s` = 'Linux' ]; then
@@ -76,7 +76,7 @@ getRawEntry() {
 # getEntry dictionary entry
 # Like getRawEntry but strips " and ending ';'
 getEntry() {
-    getRawEntry $1 $2 | sed -e 's/^"//'  -e 's/;$//' -e 's/"$//' 
+    getRawEntry $1 $2 | sed -e 's/^"//'  -e 's/;$//' -e 's/"$//'
 }
 
 # notEmpty directory
@@ -110,7 +110,7 @@ dayDiff() {
         expr $tmp1 + $tmp2
     fi
 }
-#dayDiff  "`date '+%b %d %Y'`" "Dec 28 2001" 
+#dayDiff  "`date '+%b %d %Y'`" "Dec 28 2001"
 
 
 # getAllJobs jobInfoDirectory
@@ -156,8 +156,7 @@ information on the machine the process ran on and release the lock
 if the program is no longer running.
 
 Requirements: the environment variable FOAM_JOB_DIR needs to point to the
-license directory and all machines have to be reachable using rsh/ssh.
-(as set in \$FOAMX_CONFIG/FoamX.cfg)
+license directory and all machines have to be reachable using ssh.
 
 The output from checking all running jobs is collected in an optional
 file.
@@ -183,19 +182,13 @@ if [ ! "$FOAM_JOB_DIR" ]; then
     exit 1
 fi
 
-if [ ! "$FOAM_DOT_DIR" ]; then
-    $ECHO "$PROGNAME : FOAM_DOT_DIR environment variable not set."
-    $ECHO "Do you have Foam installed correctly?"
-    exit 1
-fi
-
 if [ ! -d "$FOAM_JOB_DIR" ]; then
     $ECHO "$PROGNAME : The license directory accoring to FOAM_JOB_DIR is not valid."
     $ECHO "FOAM_JOB_DIR: $FOAM_JOB_DIR"
     exit 1
 fi
 if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]; then
-    $ECHO "$PROGNAME : The license directory accoring to FOAM_JOB_DIR is not valid."
+    $ECHO "$PROGNAME : The license directory according to FOAM_JOB_DIR is not valid."
     $ECHO "FOAM_JOB_DIR: $FOAM_JOB_DIR"
     exit 1
 fi
@@ -211,15 +204,8 @@ else
 fi
 
 #- obtain rsh method
-RSH='rsh'
-if [ -f $FOAMX_CONFIG/FoamX.cfg ]; then
-    if grep 'remoteShell' $FOAMX_CONFIG/FoamX.cfg >/dev/null; then
-        RSH=`getEntry $FOAMX_CONFIG/FoamX.cfg remoteShell`
-    fi
-fi
+RSH='ssh'
 echo "Using remote shell type : $RSH"
-
-
 
 echo ""
 echo "Collecting information on jobs in"
@@ -227,10 +213,8 @@ echo "  $FOAM_JOB_DIR"
 echo ""
 
 
-
-
 #- Collect machine names into $TMPFILE
-# Also handles 'slaves' entry in jobInfo: 
+# Also handles 'slaves' entry in jobInfo:
 
 rm -f $TMPFILE; touch $TMPFILE
 RUNJOBS=`getAllJobs $FOAM_JOB_DIR/runningJobs`

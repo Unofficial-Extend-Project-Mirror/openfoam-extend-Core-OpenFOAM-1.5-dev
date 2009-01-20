@@ -5,7 +5,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright held by original author
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,48 +24,57 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPack
+#     foamPack [outputDir]
 #
 # Description
-#     Packs and compresses the foam directory for release
+#     Packs and compresses the OpenFOAM directory for release
 #
 #------------------------------------------------------------------------------
+tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
 
-foam=$WM_PROJECT-$WM_PROJECT_VERSION
-timeStamp=`date +%d_%m_%y`
-foamPackFile=$foam'_'${timeStamp}.tgz
+timeStamp=$(date +%Y-%m-%d)
+packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+packFile=${packDir}_${timeStamp}.tgz
 
-echo Packing foam version $foam into $foamPackFile
-echo
-
-if [ ! -d $foam ]
+if [ ! -d $packDir ]
 then
-    echo directory $foam does not exist, exiting !
-    exit 1
+   echo "Error: directory $packDir does not exist"
+   exit 1
 fi
 
-if [ -f $foamPackFile ]
-then
-    echo $foamPackFile already exists,  exiting !
-    exit 1
+# add optional output directory
+if [ -d "$1" ]; then
+   packFile="$1/$packFile"
 fi
 
+if [ -f $packFile ]
+then
+   echo "Error: $packFile already exists"
+   exit 1
+fi
 
 # Create time stamp file
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-echo $timeStamp > $foam/.timeStamp
+echo $timeStamp 2>/dev/null > $packDir/.timeStamp
+
+# Clean up on termination and on Ctrl-C
+trap 'rm -f $tmpFile 2>/dev/null; exit 0' EXIT TERM INT
 
 
-# Pack and compress the foamPackFile using GNU tar
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Pack and compress the packFile using GNU tar
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-echo finding and packing
+echo
+echo "Packing foam version $packDir into $packFile"
+echo
+echo "finding and packing"
 
-find $foam                     \
+find -H $packDir               \
     ! -type d -type f          \
     ! -name "*~"               \
  -a ! -name ".*~"              \
+ -a ! -name "*.orig"           \
  -a ! -name "*.dep"            \
  -a ! -name "*.o"              \
  -a ! -name "*.so"             \
@@ -76,26 +85,26 @@ find $foam                     \
  -a ! -name "log[0-9]*"        \
  -a ! -name "so_locations"     \
 | sed                          \
- -e "/$foam\/lib\//d"          \
- -e "/$foam\/src\/mico-[0-9.]*\/platforms/d" \
- -e "/$foam\/src\/mpich-[0-9.]*\/platforms/d" \
- -e "/$foam\/src\/mpich-[0-9.]*\/lib/d" \
- -e "/$foam\/src\/lam-[0-9.]*\/platforms/d" \
- -e '/applications\/bin\//d'   \
- -e '/Make\/[^of]/d'           \
- -e '/Make.[A-Za-z]*\/[^of]/d' \
- -e '/doc\/doxygen\/html/d'    \
- -e '/doc\/doxygen\/latex/d'   \
- -e '/doc\/doxygen\/man/d'     \
- -e '/\/lnInclude/d'           \
- -e '/\/ii_files/d'            \
- > foamFiles.$$
+ -e "\@$packDir/.git/@d"       \
+ -e "\@$packDir/lib/@d"        \
+ -e '\@applications/bin/@d'       \
+ -e '\@/t/@d'                     \
+ -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
+ -e '\@doc/[Dd]oxygen/html@d'     \
+ -e '\@doc/[Dd]oxygen/latex@d'    \
+ -e '\@doc/[Dd]oxygen/man@d'      \
+ -e '\@/lnInclude@d'              \
+ -e '\@/ii_files@d'               \
+ | tee $tmpFile
 
-tar czpf $foamPackFile --files-from foamFiles.$$
+tar czpf $packFile --files-from $tmpFile
 
-rm foamFiles.$$
-
-echo Finished packing and compressing  $foam into file $foamPackFile
-
+if [ $? = 0 ]
+then
+   echo "Finished packing and compressing $packDir into file $packFile"
+else
+   echo "Error: failure packing $packDir into file $packFile"
+   rm -f $packFile 2>/dev/null
+fi
 
 #------------------------------------------------------------------------------

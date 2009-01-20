@@ -1,9 +1,9 @@
-#!/bin/csh -f
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright held by original author
+#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,15 +27,38 @@
 #     doxyFilt
 #
 # Description
-#     
+#     pass-through filter for doxygen
+#
+#     Special treatment for applications/{solvers,utilities}/*.C
+#     - only keep the first comment block of the C source file
+#       use @cond / @endcond to suppress documenting all classes/variables
+#
+#     Special treatment for applications/{solvers,utilities}/*.H
+#     - use @cond / @endcond to suppress documenting all classes/variables
 #------------------------------------------------------------------------------
 
-set relPath = `echo $1 | sed s%$WM_PROJECT_DIR%../../..%`
+if [ "$#" -gt 0 ]
+then
+   filePath=$(echo $1 | sed -e s@^$WM_PROJECT_DIR@../../..@ )
+   # dirName=$(echo "$filePath" | sed -e 's@/[^/]*$@@' )
+   dirName=${filePath%/[^/]*}
+   fileName=${filePath##*/}
 
-awk -f $WM_PROJECT_DIR/bin/doxyAwk $1 | \
-sed -f $WM_PROJECT_DIR/bin/doxyScr \
-    -e s%HfilePath%$relPath%g \
-    -e s%HfileName%$relPath:t%g \
-    -e s%foamPath%$relPath:h%g
+   awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt.awk
 
+   case "$1" in
+   */applications/solvers/*.C | */applications/utilities/*.C )
+      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-top.awk
+      ;;
+#   */applications/solvers/*.H | */applications/utilities/*.H )
+#      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-ignore.awk
+#      ;;
+   esac
+
+   awk -f $awkScript $1 | \
+   sed -f $WM_PROJECT_DIR/bin/tools/doxyFilt.sed \
+       -e s@%filePath%@$filePath@g \
+       -e s@%fileName%@$fileName@g \
+       -e s@%dirName%@$dirName@g
+fi
 #------------------------------------------------------------------------------

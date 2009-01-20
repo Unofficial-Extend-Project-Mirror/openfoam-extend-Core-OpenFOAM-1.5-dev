@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "Matrix.H"
@@ -36,7 +34,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    
     Matrix<scalar> hmm(3, 3);
 
     hmm[0][0] = -3.0;
@@ -62,6 +59,17 @@ int main(int argc, char *argv[])
     Matrix<scalar> hmm3(Sin);
 
     Info<< hmm3 << endl;
+
+    Matrix<scalar> hmm4;
+
+    hmm4 = hmm2;
+
+    Info<< hmm4 << endl;
+
+    Matrix<scalar> hmm5;
+
+    hmm4 = hmm5;
+    Info<< hmm5 << endl;
 
     Info << "End\n" << endl;
 

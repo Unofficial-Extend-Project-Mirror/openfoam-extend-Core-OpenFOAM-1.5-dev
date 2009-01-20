@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    word patchName(args.args()[3]);
+    word patchName(args.additionalArgs()[0]);
 
     label patchI = mesh.boundaryMesh().findPatchID(patchName);
 

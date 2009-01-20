@@ -5,7 +5,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright held by original author
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,46 +24,47 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPackGeneral
+#     foamPackGeneral [outputDir]
 #
 # Description
-#     Packs and compresses the foam directory for release
+#     Packs and compresses the OpenFOAM directory for release
 #
 #------------------------------------------------------------------------------
 
-foam=$WM_PROJECT-$WM_PROJECT_VERSION
-timeStamp=`date +%d_%m_%y`
-foamPackFile=${foam}.General'_'${timeStamp}.tgz
+timeStamp=$(date +%Y-%m-%d)
+packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+packFile=${packDir}.General_${timeStamp}.tgz
 
-echo Packing foam version $foam into $foamPackFile
-echo
-
-if [ ! -d $foam ]
+if [ ! -d $packDir ]
 then
-    echo directory $foam does not exist, exiting !
-    exit 1
+   echo "Error: directory $packDir does not exist"
+   exit 1
 fi
 
-if [ -f $foamPackFile ]
+# add optional output directory
+if [ -d "$1" ]
 then
-    echo $foamPackFile already exists,  exiting !
-    exit 1
+   packFile="$1/$packFile"
 fi
 
+if [ -f $packFile ]
+then
+   echo "Error: $packFile already exists"
+   exit 1
+fi
 
 # Create time stamp file
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-echo $timeStamp > $foam/.timeStamp
+echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 
+# Pack and compress the packFile
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Pack and compress the foamPackFile
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+echo
+echo "Packing $packDir into $packFile"
+echo
 
-echo finding and packing
-
-foamPackSource $foam $foamPackFile
-
-echo Finished packing and compressing  $foam into file $foamPackFile
+foamPackSource $packDir $packFile
 
 #------------------------------------------------------------------------------

@@ -34,7 +34,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 int main(int argc, char *argv[])
 {
 
@@ -44,8 +43,13 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 
     volScalarField fx = pow(mesh.C().component(vector::X), 2);
+    fx.write();
     volScalarField gradx4 = fvc::grad(fx)().component(vector::X);
     gradx4.write();
+
+    //volVectorField curlC = fvc::curl(1.0*mesh.C());
+
+    //curlC.write();
 
     /*
     surfaceScalarField xf = mesh.Cf().component(vector::X);

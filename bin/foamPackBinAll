@@ -1,11 +1,11 @@
-#!/bin/csh -f
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright held by original author
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,22 +24,23 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPackBinAll
+#     foamPackBinAll [outputDir]
 #
 # Description
 #     Packs and compresses all binary version of foam for release
 #
 #------------------------------------------------------------------------------
+packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 
-set foam = $WM_PROJECT-$WM_PROJECT_VERSION
+if [ ! -d $packDir ]
+then
+   echo "Error: directory $packDir does not exist"
+   exit 1
+fi
 
-if ( ! -d $foam ) then
-    echo directory $foam does not exist, exiting !
-    exit 1
-endif
-
-foreach bin ($foam/lib/*)
-    foamPackBin $bin:t
-end
+for bin in $packDir/lib/*
+do
+   foamPackBin ${bin##*/} $@
+done
 
 #------------------------------------------------------------------------------

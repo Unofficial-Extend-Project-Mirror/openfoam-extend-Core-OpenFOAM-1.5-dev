@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    point sample(IStringStream(args.args()[3])());
+    point sample(IStringStream(args.additionalArgs()[0])());
 
     treeBoundBox meshBb(mesh.points());
 

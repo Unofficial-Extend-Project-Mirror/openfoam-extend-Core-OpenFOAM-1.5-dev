@@ -35,7 +35,7 @@ PROGNAME=`basename $0`
 TMPFILE=/tmp/${PROGNAME}$$.tmp
 TMPFILE2=/tmp/${PROGNAME}$$.tmp2
 JOBSTRING='%4s %8s %20s %10s %8s %4s %12s %12s %20s\n'
-DEFSTATEFILE=$HOME/$FOAM_DOT_DIR/foamCheckJobs.out
+DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 
 
 #-------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ getRawEntry() {
 # getEntry dictionary entry
 # Like getRawEntry but strips " and ending ';'
 getEntry() {
-    getRawEntry $1 $2 | sed -e 's/^"//'  -e 's/;$//' -e 's/"$//' 
+    getRawEntry $1 $2 | sed -e 's/^"//'  -e 's/;$//' -e 's/"$//'
 }
 
 
@@ -106,16 +106,15 @@ leftStr() {
 
 if [ ! "$FOAM_JOB_DIR" ]; then
     echo "$PROGNAME : FOAM_JOB_DIR environment variable not set."
-    echo "            This should point to your central license directory."
     exit 1
 fi
 
 if [ ! -d "$FOAM_JOB_DIR" ]; then
-    echo "$PROGNAME : The license directory accoring to FOAM_JOB_DIR is not valid."
+    echo "$PROGNAME : directory does not exist."
     echo "            FOAM_JOB_DIR: $FOAM_JOB_DIR"
 fi
 if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]; then
-    echo "$PROGNAME : The license directory accoring to FOAM_JOB_DIR is not valid."
+    echo "$PROGNAME : invalid directory."
     echo "            FOAM_JOB_DIR: $FOAM_JOB_DIR"
 fi
 
@@ -154,7 +153,7 @@ fi
 printJob 'stat' 'user' 'case' 'machine' 'pid' 'ncpu' 'start' 'end' 'code'
 printJob '----' '----' '----' '-------' '---' '----' '-----' '---' '----'
 
- 
+
 
 #-- print submitted
 

@@ -35,7 +35,7 @@ executionTime/ExecutionTime = /ExecutionTime =
 
 #- Courant no:
 CourantMax/Courant Number /max: 
-CourantMean/Courant Number /mean:
+CourantMean/Courant Number /mean: 
 
 #- K bounding
 kMin/bounding k,/min: 
@@ -48,6 +48,6 @@ epsMax/bounding epsilon,/max:
 epsAvg/bounding epsilon,/average: 
 
 #- gamma bounding
-gammaMin/Min\(gamma\) =/Min(gamma) =
-gammaMax/Max\(gamma\) =/Max(gamma) =
+gammaMin/Min\(gamma\) =/Min(gamma) = 
+gammaMax/Max\(gamma\) =/Max(gamma) = 
 

@@ -5,7 +5,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright held by original author
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,89 +24,73 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPackBin
+#     foamPackBin <arch> [outputDir]
 #
 # Description
-#     Packs and compresses binary version of foam for release
+#     Packs and compresses binary version of OpenFOAM for release
 #
 #------------------------------------------------------------------------------
 
 if [ $# = 0 ]
 then
-   echo foamPackBin : binary type expected, exiting !
+   echo "Error: architecture type expected, exiting"
+   echo
+   echo "Usage : ${0##*/} <arch> [outputDir]"
+   echo
+   exit 1
+fi
+arch=$1
+
+timeStamp=$(date +%Y-%m-%d)
+packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+packFile=${packDir}.${arch}_${timeStamp}.tgz
+
+# add optional output directory
+if [ -d "$2" ]
+then
+   packFile="$2/$packFile"
+fi
+
+if [ -f $packFile ]
+then
+   echo "Error: $packFile already exists"
    exit 1
 fi
 
-bin=$1
-foam=$WM_PROJECT-${WM_PROJECT_VERSION}
-foamPackFile=$foam.$bin'_'`date +%d_%m_%y`.tgz
-mpich=`echo $WM_OPTIONS | sed 's/.*MPICH.*/yes/'`
+# check for essential directories
+for dir in $packDir $packDir/lib/$arch $packDir/applications/bin/$arch
+do
+   if [ ! -d $dir ]
+   then
+      echo "Error: directory $dir does not exist"
+      exit 1
+   fi
+done
 
-if [ ! -d $foam ]
-then
-    echo directory $foam does not exist, exiting !
-    exit 1
-fi
+# get list of directories
+dirList=$(
+   for dir in \
+      $packDir/lib/$arch \
+      $packDir/applications/bin/$arch \
+      $packDir/wmake/rules \
+      ;
+   do
+      [ -d $dir ] && echo $dir
+   done
+)
 
-if [ ! -d $foam/lib/$bin ]
-then
-    echo directory $foam/lib/$bin does not exist, exiting !
-    exit 1
-fi
-
-if [ ! -d $foam/applications/bin/$bin ]
-then
-    echo directory $foam/applications/bin/$bin does not exist, exiting !
-    exit 1
-fi
-
-if [ -f $foamPackFile ]
-then
-    echo $foamPackFile already exists,  exiting !
-    exit 1
-fi
-
-echo Packing $bin port of foam version $foam into $foamPackFile
+echo
+echo "Packing $arch port of $packDir into $packFile"
 echo
 
-packDirs="$foam/lib/$bin $foam/applications/bin/$bin $foam/wmake/rules"
-
-if [ -r $foam/src/mico-[0-9.]*/platforms/$bin ]
-then
-    micoDir=$foam/src/mico-[0-9.]*/platforms/$bin
-else
-    micoDir=""
-fi
-
-if [ -r $foam/src/mpich-[0-9.]*/platforms/$bin ]
-then
-    mpichDir=$foam/src/mpich-[0-9.]*/platforms/$bin
-else
-    mpichDir=""
-fi
-
-if [ -r $foam/src/lam-[0-9.]*/platforms/$bin ]
-then
-    lamDir=$foam/src/lam-[0-9.]*/platforms/$bin
-else
-    lamDir=""
-fi
-
-if [ -r $foam/src/openmpi-[0-9.ab]*/platforms/$bin ]
-then
-    openmpiDir=$foam/src/openmpi-[0-9.ab]*/platforms/$bin
-else
-    openmpiDir=""
-fi
-
-tar czpf $foamPackFile $packDirs $micoDir $mpichDir $lamDir $openmpiDir
+tar czpf $packFile $dirList
 
 if [ $? = 0 ]
 then
-    echo Finished packing and compressing file $foamPackFile
+   echo "Finished packing and compressing file $packFile"
 else
-    echo Failed to pack $foamPackFile. Exiting!
-    rm -f $foamPackFile
+   echo "Error: failure packing $packFile"
+   rm -f $packFile 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

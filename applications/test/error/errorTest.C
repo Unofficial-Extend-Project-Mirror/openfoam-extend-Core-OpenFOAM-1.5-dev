@@ -37,15 +37,24 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    WarningIn("main") << "warning 1" << endl;
-    IOWarningIn("main", Serr) << "warning 2" << endl;
+    FatalError.throwExceptions();
 
-    dictionary dict;
+    try
+    {
+        WarningIn("main") << "warning 1" << endl;
+        IOWarningIn("main", Serr) << "warning 2" << endl;
 
-    IOWarningIn("main", dict) << "warning 3" << endl;
+        dictionary dict;
 
-    FatalErrorIn("main") << "error 1" << endl;
-    FatalErrorIn("main") << "error 2" << exit(FatalError);
+        IOWarningIn("main", dict) << "warning 3" << endl;
+
+        FatalErrorIn("main") << "error 1" << endl;
+        FatalErrorIn("main") << "error 2" << exit(FatalError);
+    }
+    catch (Foam::error& fErr)
+    {
+        Serr<< "Caught Foam error " << fErr << nl << endl;
+    }
 
     return 0;
 }

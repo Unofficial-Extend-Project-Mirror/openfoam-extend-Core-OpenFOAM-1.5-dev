@@ -1,7 +1,8 @@
 #!/bin/sh
+set -x
 
-chmod o+x $WM_PROJECT_DIR
-chmod o+x $WM_PROJECT_DIR/doc
-chmod o+rx Doxygen
+chmod a+rX $WM_PROJECT_DIR
+chmod a+rX $WM_PROJECT_DIR/doc
+chmod -R a+rX Doxygen
 
-(cd Doxygen ; ./Allwmake)
+( cd Doxygen && ./Allwmake )

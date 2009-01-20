@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         thermoFileName = args.options()["thermo"];
     }
 
-    fileName CHEMKINFileName(args.args()[1]);
+    fileName CHEMKINFileName(args.additionalArgs()[0]);
 
     chemkinReader ck(CHEMKINFileName, thermoFileName);
 

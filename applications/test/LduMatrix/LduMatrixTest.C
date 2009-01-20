@@ -27,13 +27,71 @@ License
 #include "argList.H"
 #include "Time.H"
 #include "fvMesh.H"
-#include "globalMeshData.H"
+#include "volFields.H"
 #include "LduMatrix.H"
+#include "diagTensorField.H"
+#include "TPCG.H"
+#include "TPBiCG.H"
+#include "NoPreconditioner.H"
 
 using namespace Foam;
 
-typedef Foam::LduMatrix<vector,scalar,scalar> lduScalarMatrix;
-defineNamedTemplateTypeNameAndDebug(lduScalarMatrix, 0);
+typedef Foam::LduMatrix<vector, diagTensor, scalar>
+    lduVectorMatrix;
+defineNamedTemplateTypeNameAndDebug(lduVectorMatrix, 0);
+
+typedef Foam::DiagonalSolver<vector, diagTensor, scalar>
+    lduVectorDiagonalSolver;
+defineNamedTemplateTypeNameAndDebug(lduVectorDiagonalSolver, 0);
+
+template<>
+const vector lduVectorMatrix::great_(1e15, 1e15, 1e15);
+
+template<>
+const vector lduVectorMatrix::small_(1e-15, 1e-15, 1e-15);
+
+namespace Foam
+{
+    typedef LduMatrix<vector, diagTensor, scalar>::preconditioner
+        lduVectorPreconditioner;
+    defineTemplateRunTimeSelectionTable(lduVectorPreconditioner, symMatrix);
+    defineTemplateRunTimeSelectionTable(lduVectorPreconditioner, asymMatrix);
+
+    typedef LduMatrix<vector, diagTensor, scalar>::smoother
+        lduVectorSmoother;
+    defineTemplateRunTimeSelectionTable(lduVectorSmoother, symMatrix);
+    defineTemplateRunTimeSelectionTable(lduVectorSmoother, asymMatrix);
+
+    typedef LduMatrix<vector, diagTensor, scalar>::solver
+        lduVectorSolver;
+    defineTemplateRunTimeSelectionTable(lduVectorSolver, symMatrix);
+    defineTemplateRunTimeSelectionTable(lduVectorSolver, asymMatrix);
+
+    typedef TPCG<vector, diagTensor, scalar> TPCGVector;
+    defineNamedTemplateTypeNameAndDebug(TPCGVector, 0);
+
+    LduMatrix<vector, diagTensor, scalar>::solver::
+        addsymMatrixConstructorToTable<TPCGVector>
+        addTPCGSymMatrixConstructorToTable_;
+
+    typedef TPBiCG<vector, diagTensor, scalar> TPBiCGVector;
+    defineNamedTemplateTypeNameAndDebug(TPBiCGVector, 0);
+
+    LduMatrix<vector, diagTensor, scalar>::solver::
+        addasymMatrixConstructorToTable<TPBiCGVector>
+        addTPBiCGSymMatrixConstructorToTable_;
+
+    typedef NoPreconditioner<vector, diagTensor, scalar> NoPreconditionerVector;
+    defineNamedTemplateTypeNameAndDebug(NoPreconditionerVector, 0);
+
+    LduMatrix<vector, diagTensor, scalar>::preconditioner::
+        addsymMatrixConstructorToTable<NoPreconditionerVector>
+        addNoPreconditionerSymMatrixConstructorToTable_;
+
+    LduMatrix<vector, diagTensor, scalar>::preconditioner::
+        addasymMatrixConstructorToTable<NoPreconditionerVector>
+        addNoPreconditionerAsymMatrixConstructorToTable_;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,13 +105,55 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    LduMatrix<vector, scalar, scalar> hmm
+    volVectorField psi
     (
-        mesh.ldu(),
-        mesh.globalData().patchSchedule()
+        IOobject
+        (
+            "U",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     );
 
-    Info<< hmm << endl;
+    lduVectorMatrix testMatrix(mesh);
+    testMatrix.diag() = 2*pTraits<diagTensor>::one;
+    testMatrix.source() = pTraits<vector>::one;
+    testMatrix.upper() = 0.1;
+    testMatrix.lower() = -0.1;
+
+    Info<< testMatrix << endl;
+
+    FieldField<Field, scalar> boundaryCoeffs(0);
+    FieldField<Field, scalar> internalCoeffs(0);
+
+    autoPtr<lduVectorMatrix::solver> testMatrixSolver =
+    lduVectorMatrix::solver::New
+    (
+        psi.name(),
+        testMatrix,
+        boundaryCoeffs,
+        internalCoeffs,
+        psi.boundaryField().interfaces(),
+        IStringStream
+        (
+            "PBiCG"
+            "{"
+            "    preconditioner   none;"
+            "    tolerance        (1e-05 1e-05 1e-05);"
+            "    relTol           (0 0 0);"
+            "}"
+        )()
+    );
+
+    lduVectorMatrix::solverPerformance solverPerf =
+        testMatrixSolver->solve(psi);
+
+    solverPerf.print();
+
+    Info<< psi << endl;
 
     Info << "End\n" << endl;
 

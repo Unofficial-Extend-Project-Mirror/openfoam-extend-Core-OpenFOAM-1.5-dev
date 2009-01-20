@@ -38,6 +38,12 @@ int main()
         << (eigenVector(t6, e[2]) & t6) << e[2]*eigenVector(t6, e[2])
         << endl;
 
+    Info<< "Check eigenvalues for symmTensor "
+        << eigenValues(symm(t6)) - eigenValues(tensor(symm(t6))) << endl;
+
+    Info<< "Check eigenvectors for symmTensor "
+        << eigenVectors(symm(t6)) - eigenVectors(tensor(symm(t6))) << endl;
+
     tensor t7(1, 2, 3, 2, 4, 5, 3, 5, 6);
 
     Info<< "Check transformation "
@@ -49,12 +55,15 @@ int main()
         << transform(t1, st1) << endl;
 
     vector v1(1, 2, 3);
-    
+
     Info<< sqr(v1) << endl;
     Info<< symm(t7) << endl;
     Info<< twoSymm(t7) << endl;
     Info<< magSqr(st1) << endl;
     Info<< mag(st1) << endl;
+
+    Info<< (symm(t7) && t7) - (0.5*(t7 + t7.T()) && t7) << endl;
+    Info<< (t7 && symm(t7)) - (t7 && 0.5*(t7 + t7.T())) << endl;
 
     return(0);
 }

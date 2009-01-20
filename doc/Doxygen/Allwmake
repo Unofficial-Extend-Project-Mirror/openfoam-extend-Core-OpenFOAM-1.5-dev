@@ -2,11 +2,8 @@
 set -x
 
 umask 22
-
 rm -rf html latex man
-
 doxygen
-cd html
 
-find . -type d -exec chmod o+x {} \;
-find . -type f -exec chmod o+r {} \;
+# fix permissions (NB: '-X' and not '-x'!)
+chmod -R a+rX ./

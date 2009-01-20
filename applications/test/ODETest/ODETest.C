@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("ODESolver");
     argList args(argc, argv);
 
-    word ODESolverName(args.args()[1]);
+    word ODESolverName(args.additionalArgs()[0]);
 
     testODE ode;
     autoPtr<ODESolver> odeSolver = ODESolver::New(ODESolverName, ode);

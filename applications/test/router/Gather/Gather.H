@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Gather
+    Foam::Gather
 
 Description
     Gather data from all processors onto all processors. 

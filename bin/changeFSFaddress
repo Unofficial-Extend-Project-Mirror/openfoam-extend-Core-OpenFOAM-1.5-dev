@@ -1,9 +1,0 @@
-#!/bin/sh
-
-mv $1 temp.$$
-sed \
--e s/"59 Temple Place"/"51 Franklin St"/g \
--e s/"Suite 330"/"Fifth Floor"/g \
--e s/02111-1307/02110-1301/g \
-temp.$$ > $1
-rm temp.$$

@@ -50,6 +50,8 @@ int main(void)
     Info<< setw(20) << setprecision(3) << 1.234234 << endl;
 
     Info<< hex << 255 << endl;
+
+    Info.operator Foam::OSstream&() << "stop" << endl;
 }
 
 // ************************************************************************* //

@@ -49,7 +49,7 @@ PROGNAME=`basename $0`
 # getNumberedLine dictionary entry
 # Prints dictionary entry line + lineno
 getNumberedLine() {
-    grep -n "^[ \t]*$2[ \t]" $1 | grep -v '^//' | head -n 1
+    grep -n "^[ \t]*$2[ \t]" $1 | grep -v '^//' | head -1
 }
 
 # getLine dictionary entry
@@ -135,7 +135,7 @@ getBoolEntry()
 
 # newerFile file1 file2
 newerFile() {
-    latest=`ls -1 -t $1 $2 2> /dev/null | head -n 1`
+    latest=`ls -1 -t $1 $2 2> /dev/null | head -1`
     if [ "$latest" = $1 ]; then
         return 0
     else

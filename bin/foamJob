@@ -27,67 +27,67 @@
 #     foamJob
 #
 # Description
-#     
+#
 #------------------------------------------------------------------------------
+Script=${0##*/}
 
-EXENAME=`basename $0`
+usage() {
+   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+   cat<<USAGE
 
-printUsage () {
-cat <<EOF
-Usage: $0 [options] <application> <root> <case>
-    Runs a FOAM job in background.
-    Redirects the output to <root>/<case>/log
+usage: $Script [OPTION] <application> ...
 
-Options:
-   [-s] also sends output to screen
-   [-p] performs a parallel run of processors
-EOF
+options:
+  -case dir     specify case directory
+  -s            also sends output to screen
+  -p            parallel run of processors
+  -v ver        specify OpenFOAM version
+  -help         this usage
+
+* run an OpenFOAM job in background.
+  Redirects the output to 'log' in the case directory
+
+USAGE
+   exit 1
 }
 
+unset version
+
+# replacement for possibly buggy 'which'
 findExec() {
-    if [ "`echo $2 | grep /`" ] ; then
-        if [ -x "$2" ] ; then
-            return 0
-        fi
-    fi
-    oldIFS=$IFS
-    IFS=':'
-    for d in $1
-    do
-        #echo "testing: $d/$2" 1>&2
-        if [ -x "$d/$2" -a ! -d "$d/$2" ]; then
-            #echo "Found exec: $d/$2" 1>&2
-            IFS=$oldIFS
-            echo "$d/$2"
-            return 0
-        fi
-    done
-    IFS=$oldIFS
-    echo ""
-    return 1
+   case "$1" in
+   */*)
+      if [ -x "$1" ] ; then
+         echo "$1"
+         return 0
+      fi
+      ;;
+   esac
+
+   oldIFS=$IFS
+   IFS=':'
+   for d in $PATH
+   do
+      # echo "testing: $d/$1" 1>&2
+      if [ -x "$d/$1" -a ! -d "$d/$1" ] ; then
+         # echo "Found exec: $d/$1" 1>&2
+         IFS=$oldIFS
+         echo "$d/$1"
+         return 0
+      fi
+   done
+   IFS=$oldIFS
+   echo ""
+   return 1
 }
 
-fullPath () {
-if [ `dirname $1 | cut -c1` = "/" ] ; then
-    echo "$1"
-else
-    echo "`pwd`/$1"
-fi
-}
-
+# grep for $1
 getPID() {
-    ps -u $LOGNAME -o 'pid,args' | fgrep "$1 " | fgrep -v grep | head -1 | awk '{ print $1 }'
+   ps -u $LOGNAME -o 'pid,args' | fgrep "$1 " | fgrep -v grep | head -1 | awk '{ print $1 }'
 }
 
-expenv () {
-    eval "echo $1"
-}
 
-nwords () {
-    echo $#
-}
-
-consultGuide () {
+consultGuide() {
 cat<<EOF
 
 Please consult the User Guide for details of parallel running
@@ -96,148 +96,161 @@ EOF
 
 # MAIN SCRIPT
 #~~~~~~~~~~~~
-SCREEN="no"
-PARALLEL="no"
+SCREEN=no
+PARALLEL=no
 
-OPTS=`getopt sph $*`
-if [ $? -ne 0 ] ; then
-    echo "Aborting due to invalid option"
-    printUsage
-    exit 1
-fi
-eval set -- "$OPTS"
-while [ $1 != -- ]; do
-    case $1 in
-        -s) SCREEN="yes";;
-        -p) PARALLEL="yes";;
-        -h) printUsage; exit 1;;
-    esac
-    shift
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+   case "$1" in
+   -h | -help)
+      usage
+      ;;
+   -case)
+      shift
+      caseDir=$1
+      [ "$#" -ge 1 ] || usage "'-case' option requires an argument"
+      cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
+      ;;
+   -s)
+      SCREEN=yes
+      shift
+      ;;
+   -p)
+      PARALLEL=yes
+      shift
+      ;;
+   -v)
+      shift
+      version=$1
+      shift
+      ;;
+   --)
+      shift
+      break
+      ;;
+   -*)
+      usage "invalid option '$1'"
+      ;;
+   *)
+      break
+      ;;
+   esac
 done
-shift
 
-if [ $1 ] ; then
-    APPLICATION=`findExec "$PATH" $1`
-    if [ $? -ne 0 ] ; then
-        echo "Application '$1' executable not found.  Exiting..."
-        echo ''
-        printUsage
-        exit 1
-    else
-        echo "Application : $1"
-    fi
-else
-    echo 'No application specified.  Exiting...'
-    echo ''
-    printUsage
-    exit 1
-fi    
-shift
-
-if [ $1 ] ; then
-    if [ -d $1 ] ; then
-        echo "Root        : $1"
-        ROOT=`fullPath $1`
-    else
-        echo "Directory '$1' does not exist.  Exiting..."
-        echo ''
-        printUsage
-    exit 1
-    fi
-else
-    echo 'No root directory specified.  Exiting...'
-    echo ''
-    printUsage
-    exit 1    
+if [ "$#" -lt 1 ]; then
+   usage "No application specified"
 fi
-shift
 
-if [ $1 ] ; then
-    if [ -d ${ROOT}/$1 ] ; then
-        echo "Case        : $1"
-        CASE=$1
-    else
-        echo "Case directory '$1' does not exist.  Exiting..."
-        echo ''
-        printUsage
-        exit 1
-    fi
+# use foamExec for a specified version and for remote (parallel) runs
+if [ -n "$version" -o "$PARALLEL" = yes ]; then
+   APPLICATION=`findExec foamExec`
+   if [ $? -ne 0 ]; then
+      usage "'foamExec' not found"
+   fi
+   if [ -n "$version" ]; then
+      APPLICATION="$APPLICATION -v $version"
+   fi
 else
-    echo 'No case directory specified.  Exiting...'
-    echo ''
-    printUsage
-    exit 1    
+   APPLICATION=`findExec $1`
+   if [ $? -ne 0 ]; then
+      usage "Application '$1' executable not found"
+   fi
+   echo "Application : $1"
+   shift
 fi
-shift
 
-echo ""
-
-if [ "$PARALLEL" = "no" ] ; then
+if [ "$PARALLEL" = no ]; then
 #
 #   RUN ON SINGLE PROCESSOR
 #
-    if [ "$SCREEN" = "no" ] ; then
-        echo "Executing: $APPLICATION $ROOT $CASE > ${ROOT}/${CASE}/log &"
-        $APPLICATION $ROOT $CASE > ${ROOT}/${CASE}/log &
+    if [ "$SCREEN" = no ]; then
+       echo "Executing: $APPLICATION $@ > log 2>&1 &"
+       $APPLICATION $@ > log 2>&1 &
     else
-        echo "Executing: $APPLICATION $ROOT $CASE | tee ${ROOT}/${CASE}/log"
-        $APPLICATION $ROOT $CASE | tee ${ROOT}/${CASE}/log &
-        wait $!
+       echo "Executing: $APPLICATION $@ | tee log &"
+       $APPLICATION $@ | tee log &
+       wait $!
     fi
 else
+
 #
-#   IS THE CASE DECOMPOSED?   
+#   IS THE CASE DECOMPOSED?
 #
-    if [ -r "${ROOT}/${CASE}/processor0" ] ; then
-        PROCS="`ls -d ${ROOT}/${CASE}/processor*`"
-        NPROCS=`nwords $PROCS`
-        echo "Case is decomposed into $NPROCS processors"
-    else
-        echo "Case is not currently decomposed"
-        if [ -r ${ROOT}/${CASE}/system/decomposeParDict ] ; then
-            echo "${CASE}/system/decomposeParDict exists"
-            echo "Try decomposing with \"foamJob decomposePar ${ROOT} ${CASE}\""
-            exit 1
-        else
-            echo "Cannot find ${CASE}/system/decomposeParDict file required to decompose the case for parallel running."
-            consultGuide
-            exit 1
-        fi       
-    fi
+   if [ -r "processor0" ] ; then
+      NPROCS="`/bin/ls -1d processor* | wc -l`"
+   else
+      echo "Case is not currently decomposed"
+      if [ -r system/decomposeParDict ] ; then
+         echo "system/decomposeParDict exists"
+         echo "Try decomposing with \"foamJob decomposePar\""
+         exit 1
+      else
+         echo "Cannot find system/decomposeParDict file required to decompose the case for parallel running."
+         consultGuide
+         exit 1
+      fi
+   fi
+#
+#   LOCATE MPIRUN
+#
+   mpirun=`findExec mpirun`
+   if [ $? -ne 0 ]; then
+      usage "'mpirun' not found"
+   fi
+   mpiopts="-np $NPROCS"
+
 #
 #   IS THE MACHINE READY TO RUN PARALLEL?
 #
-    echo "Parallel processing uses $WM_MPLIB"
-    if [ "$WM_MPLIB" = "LAM" ] ; then
-        LAM_PID=`getPID lamd`
-        if [ ! "$LAM_PID" ] ; then
-            echo "No LAM daemon running."
-            if [ -r ${ROOT}/${CASE}/system/machines ] ; then
-                echo "${CASE}/system/machines file exists"
-                echo "Try starting the LAM multicomputer with \"lamboot -v ${ROOT}/${CASE}/system/machines\""
-                exit 1
-            else
-                echo "Cannot find a 'machines' file for LAM in ${CASE}/system"
-                echo "required to start a LAM multicomputer"
-                consultGuide
-                exit 1
-            fi
-        else
-            echo "LAM daemon running (PID $LAM_PID).  Proceeding with MPI run."
-        fi
-    fi
+   echo "Parallel processing using $WM_MPLIB with $NPROCS processors"
+   case "$WM_MPLIB" in
+   LAM)
+      lamPid=`getPID lamd`
+      if [ ! "$lamPid" ] ; then
+         echo "No LAM daemon running."
+         if [ -r system/machines ] ; then
+            echo "system/machines file exists"
+            echo "Try starting the LAM multicomputer with \"lamboot -v system/machines\""
+            exit 1
+         else
+            echo "Cannot find a 'machines' file for LAM in system/"
+            echo "required to start a LAM multicomputer"
+            consultGuide
+            exit 1
+         fi
+      else
+         echo "LAM daemon running (PID $lamPid).  Proceeding with MPI run."
+      fi
+      ;;
+   OPENMPI)
+      # add hostfile info
+      for hostfile in \
+         hostfile \
+         machines \
+         system/hostfile \
+         system/machines \
+      ;
+      do
+         if [ -r $hostfile ]; then
+            mpiopts="$mpiopts -hostfile $hostfile"
+            break
+         fi
+      done
+      ;;
+   esac
+
 #
 #   RUN IN PARALLEL
 #
-    if [ "$SCREEN" = "no" ] ; then
-        echo "Executing: mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel > ${ROOT}/${CASE}/log 2>&1"
-        mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel \
-            > ${ROOT}/${CASE}/log 2>&1 &
-    else
-        echo "Executing: mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel | tee ${ROOT}/${CASE}/log"
-        mpirun -np $NPROCS $APPLICATION $ROOT $CASE -parallel \
-            | tee ${ROOT}/${CASE}/log
-    fi
+   if [ "$SCREEN" = no ] ; then
+      echo "Executing: mpirun $mpiopts $APPLICATION $@ -parallel > log 2>&1"
+      $mpirun $mpiopts $APPLICATION $@ -parallel > log 2>&1 &
+   else
+      echo "Executing: mpirun $mpiopts $APPLICATION $@ -parallel | tee log"
+      $mpirun $mpiopts $APPLICATION $@ -parallel  | tee log
+   fi
 fi
 
 #------------------------------------------------------------------------------
