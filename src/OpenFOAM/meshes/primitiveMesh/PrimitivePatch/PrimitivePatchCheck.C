@@ -342,8 +342,8 @@ template
 void PrimitivePatch<Face, FaceList, PointField, PointType>::writeVTK
 (
     const fileName& name,
-    const PointFieldType& points,
-    const FaceListType& faces
+    const FaceListType& faces,
+    const Field<PointType>& points
 )
 {
     // Write patch and points into VTK
@@ -424,8 +424,8 @@ template
 void PrimitivePatch<Face, FaceList, PointField, PointType>::writeVTKNormals
 (
     const fileName& name,
-    const PointFieldType& points,
-    const FaceListType& faces
+    const FaceListType& faces,
+    const Field<PointType>& points
 )
 {
     // Write patch and points into VTK

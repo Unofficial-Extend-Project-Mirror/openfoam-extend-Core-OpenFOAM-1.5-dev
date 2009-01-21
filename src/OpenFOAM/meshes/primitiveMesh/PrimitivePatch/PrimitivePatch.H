@@ -421,16 +421,16 @@ public:
             static void writeVTK
             (
                 const fileName& name,
-                const PointFieldType& points,
-                const FaceListType& faces
+                const FaceListType& faces,
+                const Field<PointType>& points
             );
 
             //- Write VTK patch normals, HJ, 14/Jan/2009
             static void writeVTKNormals
             (
                 const fileName& name,
-                const PointFieldType& points,
-                const FaceListType& faces
+                const FaceListType& faces,
+                const Field<PointType>& points
             );
 
 
