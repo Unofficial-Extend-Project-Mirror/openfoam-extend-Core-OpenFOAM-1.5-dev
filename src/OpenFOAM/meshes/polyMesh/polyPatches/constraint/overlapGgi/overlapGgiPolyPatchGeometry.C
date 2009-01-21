@@ -121,8 +121,8 @@ void Foam::overlapGgiPolyPatch::calcExpandedSlave() const
             standAlonePatch::writeVTK
             (
                 fvPath/fileName("expandedSlave" + name() + shadow().name()),
-                expandedPoints,
-                expandedFaces
+                expandedFaces,
+                expandedPoints
             );
         }
     }
