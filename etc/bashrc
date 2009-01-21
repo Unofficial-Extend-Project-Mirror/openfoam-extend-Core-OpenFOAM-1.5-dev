@@ -155,6 +155,25 @@ Linux)
     esac
     ;;
 
+Darwin)
+    case `uname -p` in
+    powerpc)
+	export WM_ARCH=darwinPpc
+	;;
+    i386)
+	export WM_ARCH=darwinIntel
+	;;
+    *)
+        echo "This seems to be an Intel-Mac please tell me the output of 'uname -p'. Bernhard."
+	export WM_ARCH=darwinIntel
+	;;
+    esac
+
+    export WM_COMPILER=
+    export WM_MPLIB=OPENMPI
+
+    MACOSX_DEPLOYMENT_TARGET="10.4"
+    ;;
 *)    	# an unsupported operating system
     cat <<USAGE
 

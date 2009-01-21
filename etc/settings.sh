@@ -44,11 +44,16 @@ _foamAddPath()
 # prefix to LD_LIBRARY_PATH
 _foamAddLib()
 {
-   while [ $# -ge 1 ]
-   do
-      export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-      shift
-   done
+    while [ $# -ge 1 ]
+    do
+        [ -d $1 ] || mkdir -p $1
+        export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
+	if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]	    
+	then
+	    export DYLD_LIBRARY_PATH=$1:$DYLD_LIBRARY_PATH
+	fi
+        shift
+    done
 }
 
 
@@ -110,9 +115,9 @@ unset compilerBin compilerLib
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | System
-compilerInstall=OpenFOAM
-#compilerInstall=System
+# WM_COMPILER_INST = OpenFOAM | System
+WM_COMPILER_INST=OpenFOAM
+# WM_COMPILER_INST=System
 
 case "$compilerInstall" in
 OpenFOAM)

@@ -40,8 +40,9 @@ else
 fi
 
 export ParaView_VERSION="3.3-cvs"
+# export ParaView_VERSION="3.4.0"
 
-export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/ParaView$ParaView_VERSION
+export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
 
 if [ "$PYTHONPATH" ]; then
@@ -49,13 +50,27 @@ if [ "$PYTHONPATH" ]; then
 else
     export PYTHONPATH=$ParaView_DIR/Utilities/VTKPythonWrapping
 fi
-
-export PYTHONPATH=$ParaView_DIR/lib/paraview-3.3/:$PYTHONPATH
+if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]	    
+then
+    export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/bin
+fi
 
 if [ -r $ParaView_DIR ]; then
     export PATH=$ParaView_DIR/bin:$PATH
     export LD_LIBRARY_PATH=$ParaView_DIR/bin:$LD_LIBRARY_PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN
+    if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]	    
+    then
+	export DYLD_LIBRARY_PATH=$ParaView_DIR/bin:$DYLD_LIBRARY_PATH
+	export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview
+	if [ ! -e $PV_PLUGIN_PATH ]
+	then
+	    echo "Creating $PV_PLUGIN_PATH"
+	    mkdir $PV_PLUGIN_PATH
+	fi
+	ln -sf $FOAM_LIBBIN/libPV* $PV_PLUGIN_PATH
+    else
+	export PV_PLUGIN_PATH=$FOAM_LIBBIN
+    fi
 fi
 
 # -----------------------------------------------------------------------------

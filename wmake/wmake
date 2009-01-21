@@ -163,8 +163,25 @@ then
         exit $?
     elif [ ! -d $MakeDir ]
     then
-        $make -k -f $WM_DIR/MakefileApps \
-            FOAM_APPS="`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name "Optional" -a ! -name "Make" \)  -printf "%f "`"
+	if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]
+	then
+	    # MacOS X find doesn't have a -printf
+	    liste=""
+	    for name in *
+	    do
+		if [ -d $name ]
+		then
+		    if [ $name != "Make" ]
+		    then
+			liste="$liste $name"
+		    fi
+		fi
+	    done
+	    $make -k -f $WM_DIR/MakefileApps FOAM_APPS="$liste"
+	else
+	    $make -k -f $WM_DIR/MakefileApps \
+		FOAM_APPS="`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name "Optional" -a ! -name "Make" \)  -printf "%f "`"
+	fi
         exit $?
     fi
 

@@ -62,7 +62,7 @@ void Foam::ensightPart::writeFieldList
 {
     forAll(idList, i)
     {
-        if (idList[i] >= field.size() || isnan(field[idList[i]]))
+        if (idList[i] >= field.size() || std::isnan(field[idList[i]]))
         {
             os.writeUndef();
         }

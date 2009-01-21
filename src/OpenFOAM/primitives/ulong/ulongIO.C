@@ -66,7 +66,7 @@ Istream& operator>>(Istream& is, unsigned long& i)
 
     if (t.isLabel())
     {
-        i = ulong(t.labelToken());
+        i = (unsigned long)(t.labelToken());
     }
     else
     {

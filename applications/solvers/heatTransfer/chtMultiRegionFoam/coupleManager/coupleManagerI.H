@@ -71,7 +71,7 @@ template<class Type>
 inline const Foam::fvPatchField<Type>&
 Foam::coupleManager::neighbourPatchField() const
 {
-    return neighbourPatch().lookupPatchField
+    return neighbourPatch().fvPatch::lookupPatchField
         <GeometricField<Type, fvPatchField, volMesh>, Type>
             (neighbourFieldName_);
 }
