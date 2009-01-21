@@ -61,6 +61,13 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
         scalarField nfc = n & (ggiPolyPatch_.reconFaceCellCentres() - Cf());
 
         w = nfc/((n & (Cf() - Cn())) + nfc);
+
+        if (bridgeOverlap())
+        {
+            // Set overlap weights to 0.5 and use mirrored neighbour field
+            // for interpolation.  HJ, 21/Jan/2009
+            bridge(scalarField(size(), 0.5), w);
+        }
     }
     else
     {
@@ -68,10 +75,16 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
         scalarField masterWeights(shadow().size());
         shadow().makeWeights(masterWeights);
 
-        //HJ, change 1: partial coverage in cyclic GGI. HJ, 18/Jan/2009
-        //    Experimental: avoiding zeros in uncovered faces
-//         w = interpolate(1 - masterWeights);
-        w = 1 - interpolate(masterWeights);
+        // Note: for partial coverage in cyclic GGI, bridging requires
+        // weights to be zero. HJ, 18/Jan/2009
+        w = interpolate(1 - masterWeights);
+
+        if (bridgeOverlap())
+        {
+            // Set overlap weights to 0.5 and use mirrored neighbour field
+            // for interpolation.  HJ, 21/Jan/2009
+            bridge(scalarField(size(), 0.5), w);
+        }
     }
 }
 
@@ -82,12 +95,26 @@ void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
     if (ggiPolyPatch_.master())
     {
         dc = 1.0/max(nf() & fvPatch::delta(), 0.05*mag(fvPatch::delta()));
+
+        if (bridgeOverlap())
+        {
+            scalarField bridgeDeltas = nf() & fvPatch::delta();
+
+            bridge(bridgeDeltas, dc);
+        }
     }
     else
     {
         scalarField masterDeltas(shadow().size());
         shadow().makeDeltaCoeffs(masterDeltas);
         dc = interpolate(masterDeltas);
+
+        if (bridgeOverlap())
+        {
+            scalarField bridgeDeltas = nf() & fvPatch::delta();
+
+            bridge(bridgeDeltas, dc);
+        }
     }
 }
 
@@ -122,14 +149,32 @@ Foam::tmp<Foam::vectorField> Foam::ggiFvPatch::delta() const
 {
     if (ggiPolyPatch_.master())
     {
-        return ggiPolyPatch_.reconFaceCellCentres() - Cn();
+        tmp<vectorField> tDelta = ggiPolyPatch_.reconFaceCellCentres() - Cn();
+
+        if (bridgeOverlap())
+        {
+            vectorField bridgeDeltas = Cf() - Cn();
+
+            bridge(bridgeDeltas, tDelta());
+        }
+
+        return tDelta;
     }
     else
     {
-        return interpolate
+        tmp<vectorField> tDelta = interpolate
         (
             shadow().Cn() - ggiPolyPatch_.shadow().reconFaceCellCentres()
         );
+
+        if (bridgeOverlap())
+        {
+            vectorField bridgeDeltas = Cf() - Cn();
+
+            bridge(bridgeDeltas, tDelta());
+        }
+
+        return tDelta;
     }
 }
 

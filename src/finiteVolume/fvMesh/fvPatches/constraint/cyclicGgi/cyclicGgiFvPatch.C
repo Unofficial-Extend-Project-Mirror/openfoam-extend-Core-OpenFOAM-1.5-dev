@@ -56,7 +56,15 @@ void Foam::cyclicGgiFvPatch::makeWeights(scalarField& w) const
         vectorField n = nf();
         scalarField nfc =
             n & (cyclicGgiPolyPatch_.reconFaceCellCentres() - Cf());
+
         w = nfc/((n & (Cf() - Cn())) + nfc);
+
+        if (bridgeOverlap())
+        {
+            // Set overlap weights to 0.5 and use mirrored neighbour field
+            // for interpolation.  HJ, 21/Jan/2009
+            bridge(scalarField(size(), 0.5), w);
+        }
     }
     else
     {
@@ -65,6 +73,13 @@ void Foam::cyclicGgiFvPatch::makeWeights(scalarField& w) const
         shadow().makeWeights(masterWeights);
 
         w = interpolate(1 - masterWeights);
+
+        if (bridgeOverlap())
+        {
+            // Set overlap weights to 0.5 and use mirrored neighbour field
+            // for interpolation.  HJ, 21/Jan/2009
+            bridge(scalarField(size(), 0.5), w);
+        }
     }
 }
 
@@ -75,12 +90,26 @@ void Foam::cyclicGgiFvPatch::makeDeltaCoeffs(scalarField& dc) const
     if (cyclicGgiPolyPatch_.master())
     {
         dc = 1.0/max(nf() & delta(), 0.05*mag(delta()));
+
+        if (bridgeOverlap())
+        {
+            scalarField bridgeDeltas = nf() & fvPatch::delta();
+
+            bridge(bridgeDeltas, dc);
+        }
     }
     else
     {
         scalarField masterDeltas(shadow().size());
         shadow().makeDeltaCoeffs(masterDeltas);
         dc = interpolate(masterDeltas);
+
+        if (bridgeOverlap())
+        {
+            scalarField bridgeDeltas = nf() & fvPatch::delta();
+
+            bridge(bridgeDeltas, dc);
+        }
     }
 }
 
@@ -114,14 +143,33 @@ Foam::tmp<Foam::vectorField> Foam::cyclicGgiFvPatch::delta() const
 {
     if (cyclicGgiPolyPatch_.master())
     {
-        return cyclicGgiPolyPatch_.reconFaceCellCentres() - Cn();
+        tmp<vectorField> tDelta =
+            cyclicGgiPolyPatch_.reconFaceCellCentres() - Cn();
+
+        if (bridgeOverlap())
+        {
+            vectorField bridgeDeltas = Cf() - Cn();
+
+            bridge(bridgeDeltas, tDelta());
+        }
+
+        return tDelta;
     }
     else
     {
-        return interpolate
+        tmp<vectorField> tDelta = interpolate
         (
             transform(forwardT(), -shadow().delta())
         );
+
+        if (bridgeOverlap())
+        {
+            vectorField bridgeDeltas = Cf() - Cn();
+
+            bridge(bridgeDeltas, tDelta());
+        }
+
+        return tDelta;
     }
 }
 

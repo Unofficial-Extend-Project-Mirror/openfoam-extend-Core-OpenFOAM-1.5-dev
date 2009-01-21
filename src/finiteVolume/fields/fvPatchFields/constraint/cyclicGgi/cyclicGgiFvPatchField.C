@@ -31,6 +31,7 @@ Contributor:
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicGgiFvPatchField.H"
+#include "symmTransformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,7 +147,24 @@ tmp<Field<Type> > cyclicGgiFvPatchField<Type>::patchNeighbourField() const
     }
 
     // Transformation is handled in interpolation.  HJ, 7/Jan/2009
-    return cyclicGgiPatch_.interpolate(sField);
+    tmp<Field<Type> > tpnf(cyclicGgiPatch_.interpolate(sField));
+
+    if (cyclicGgiPatch_.bridgeOverlap())
+    {
+        // Symmetry treatment used for overlap
+        vectorField nHat = this->patch().nf();
+
+        // Use mirrored neighbour field for interpolation
+        // HJ, 21/Jan/2009
+        Field<Type> bridgeField =
+            transform(I - 2.0*sqr(nHat), this->patchInternalField());
+//             this->patchInternalField();
+
+        cyclicGgiPatch_.bridge(bridgeField, tpnf());
+    }
+
+    return tpnf;
+
 }
 
 
@@ -156,11 +174,24 @@ void cyclicGgiFvPatchField<Type>::evaluate
     const Pstream::commsTypes
 )
 {
-    Field<Type>::operator=
+    Field<Type> pf = 
     (
         this->patch().weights()*this->patchInternalField()
       + (1.0 - this->patch().weights())*this->patchNeighbourField()
     );
+
+    if (cyclicGgiPatch_.bridgeOverlap())
+    {
+        // Symmetry treatment used for overlap
+        vectorField nHat = this->patch().nf();
+
+        Field<Type> bridgeField =
+            transform(I - sqr(nHat), this->patchInternalField());
+
+        cyclicGgiPatch_.bridge(bridgeField, pf);
+    }
+
+    Field<Type>::operator=(pf);
 }
 
 
@@ -194,6 +225,9 @@ void cyclicGgiFvPatchField<Type>::updateInterfaceMatrix
     // Note: scalar interpolate does not get a transform, so this is safe
     // HJ, 12/Jan/2009
     scalarField pnf = cyclicGgiPatch_.interpolate(sField);
+
+    // Consider patching pnf to eliminate the flux
+    // HJ, 21/Jan/2009
 
     // Multiply the field by coefficients and add into the result
     const unallocLabelList& fc = cyclicGgiPatch_.faceCells();

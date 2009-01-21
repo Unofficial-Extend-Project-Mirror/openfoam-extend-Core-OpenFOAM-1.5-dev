@@ -106,6 +106,18 @@ public:
             //- Return shadow patch
             const ggiFvPatch& shadow() const;
 
+            //- Use bridging to fix overlap error in interpolation
+            bool bridgeOverlap() const
+            {
+                return ggiPolyPatch_.bridgeOverlap();
+            }
+
+            //- Return delta (P to N) vectors across coupled patch
+            virtual tmp<vectorField> delta() const;
+
+
+        // Interpolation
+
             //- Interpolate face field
             template<class Type>
             tmp<Field<Type> > interpolate(const Field<Type>& pf) const
@@ -119,8 +131,16 @@ public:
                 return ggiPolyPatch_.interpolate(tpf);
             }
 
-            //- Return delta (P to N) vectors across coupled patch
-            virtual tmp<vectorField> delta() const;
+            //- Bridge interpolated face field for uncovered faces
+            template<class Type>
+            void bridge
+            (
+                const Field<Type>& bridgeField,
+                Field<Type>& ff
+            ) const
+            {
+                return ggiPolyPatch_.bridge(bridgeField, ff);
+            }
 
 
         // Interface transfer functions

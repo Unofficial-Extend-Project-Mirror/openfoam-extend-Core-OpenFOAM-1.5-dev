@@ -31,6 +31,7 @@ Contributor:
 \*---------------------------------------------------------------------------*/
 
 #include "ggiFvPatchField.H"
+#include "symmTransformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,6 +133,7 @@ template<class Type>
 tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
+
     // Get shadow face-cells and assemble shadow field
     const unallocLabelList& sfc = ggiPatch_.shadow().faceCells();
 
@@ -142,12 +144,23 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
         sField[i] = iField[sfc[i]];
     }
 
-    //HJ, change 1: partial coverage in cyclic GGI. HJ, 18/Jan/2009
-    //    Experimental: avoiding zeros in uncovered faces
-//     const Field<Type>& pField = *this;
-//     return pField + ggiPatch_.interpolate(sField - pField);
+    tmp<Field<Type> > tpnf(ggiPatch_.interpolate(sField));
 
-    return ggiPatch_.interpolate(sField);
+    if (ggiPatch_.bridgeOverlap())
+    {
+        // Symmetry treatment used for overlap
+        vectorField nHat = this->patch().nf();
+
+        // Use mirrored neighbour field for interpolation
+        // HJ, 21/Jan/2009
+        Field<Type> bridgeField =
+            transform(I - 2.0*sqr(nHat), this->patchInternalField());
+//             this->patchInternalField();
+
+        ggiPatch_.bridge(bridgeField, tpnf());
+    }
+
+    return tpnf;
 }
 
 
@@ -157,11 +170,23 @@ void ggiFvPatchField<Type>::evaluate
     const Pstream::commsTypes
 )
 {
-    Field<Type>::operator=
-    (
+    Field<Type> pf = 
         this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*this->patchNeighbourField()
-    );
+      + (1.0 - this->patch().weights())*this->patchNeighbourField();
+
+
+    if (ggiPatch_.bridgeOverlap())
+    {
+        // Symmetry treatment used for overlap
+        vectorField nHat = this->patch().nf();
+
+        Field<Type> bridgeField =
+            transform(I - sqr(nHat), this->patchInternalField());
+
+        ggiPatch_.bridge(bridgeField, pf);
+    }
+
+    Field<Type>::operator=(pf);
 }
 
 
@@ -188,6 +213,9 @@ void ggiFvPatchField<Type>::updateInterfaceMatrix
     }
 
     scalarField pnf = ggiPatch_.interpolate(sField);
+
+    // Consider patching pnf to eliminate the flux
+    // HJ, 21/Jan/2009
 
     // Multiply the field by coefficients and add into the result
     const unallocLabelList& fc = ggiPatch_.faceCells();
