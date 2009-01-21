@@ -498,8 +498,8 @@ bool Foam::slidingInterface::projectPoints() const
         standAlonePatch::writeVTK
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "RawProjectedSlave"),
-            projectedSlavePoints,
-            slavePatch.localFaces()
+            slavePatch.localFaces(),
+            projectedSlavePoints
         );
     }
 

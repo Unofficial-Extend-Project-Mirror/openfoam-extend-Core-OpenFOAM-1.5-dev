@@ -804,36 +804,36 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         standAlonePatch::writeVTK
         (
             fvPath/fileName(masterFaceZoneID_.name() + "Master"),
-            masterLocalPoints,
-            masterPatch.localFaces()
+            masterPatch.localFaces(),
+            masterLocalPoints
         );
 
         standAlonePatch::writeVTKNormals
         (
             fvPath/fileName(masterFaceZoneID_.name() + "MasterNormals"),
-            masterLocalPoints,
-            masterPatch.localFaces()
+            masterPatch.localFaces(),
+            masterLocalPoints
         );
 
         standAlonePatch::writeVTK
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "Slave"),
-            slaveLocalPoints,
-            slavePatch.localFaces()
+            slavePatch.localFaces(),
+            slaveLocalPoints
         );
 
         standAlonePatch::writeVTKNormals
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "SlaveNormals"),
-            slaveLocalPoints,
-            slavePatch.localFaces()
+            slavePatch.localFaces(),
+            slaveLocalPoints
         );
 
         standAlonePatch::writeVTK
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "ProjectedAdjustedSlave"),
-            projectedSlavePoints,
-            slavePatch.localFaces()
+            slavePatch.localFaces(),
+            projectedSlavePoints
         );
     }
 
@@ -862,8 +862,8 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         standAlonePatch::writeVTK
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "EnrichedPatch"),
-            cutPatch.localPoints(),
-            cutPatch.localFaces()
+            cutPatch.localFaces(),
+            cutPatch.localPoints()
         );
     }
 
@@ -882,8 +882,8 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         standAlonePatch::writeVTK
         (
             fvPath/fileName(slaveFaceZoneID_.name() + "CutFacesPatch"),
-            cutPatch.localPoints(),
-            cutPatch.localCutFaces()
+            cutPatch.localCutFaces(),
+            cutPatch.localPoints()
         );
     }
 
