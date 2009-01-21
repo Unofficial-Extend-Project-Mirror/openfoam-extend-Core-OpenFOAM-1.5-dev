@@ -107,8 +107,8 @@ void Foam::cyclicGgiPolyPatch::checkDefinition() const
             standAlonePatch::writeVTK
             (
                 fvPath/fileName("cyclicGgi" + name() + cyclicShadow().name()),
-                transformedPoints,
-                cyclicShadow().localFaces()
+                cyclicShadow().localFaces(),
+                transformedPoints
             );
         }
 
@@ -141,7 +141,8 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const word& shadowName
+    const word& shadowName,
+    const bool bridgeOverlap
 )
 :
     ggiPolyPatch
@@ -151,7 +152,8 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
         start,
         index,
         bm,
-        shadowName
+        shadowName,
+        bridgeOverlap
     ),
     separationOffset_(vector::zero),
     rotationAxis_(vector(0.0, 0.0, 1.0)),
