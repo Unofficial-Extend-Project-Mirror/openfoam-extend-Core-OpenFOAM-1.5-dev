@@ -88,6 +88,7 @@ public:
             N_SQUARED
         };
 
+
     // Static data
 
         ClassName("GGIInterpolation");
@@ -169,11 +170,11 @@ class GGIInterpolation
             //- Slave to master weights
             mutable scalarListList* slaveWeightsPtr_;
 
-            //- List of Non-overlap faces for master
-            mutable labelList* masterFaceNonOverlapAddrPtr_;
+            //- List of uncovered master faces
+            mutable labelList* uncoveredMasterAddrPtr_;
 
-            //- List of Non-overlap faces for slave
-            mutable labelList* slaveFaceNonOverlapAddrPtr_;
+            //- List of uncovered slave faces
+            mutable labelList* uncoveredSlaveAddrPtr_;
 
 
     // Private static data
@@ -318,6 +319,15 @@ class GGIInterpolation
             const scalarListList& weights
         );
 
+        //- Bridge uncovered faces given addressing
+        template<class Type>
+        static void bridge
+        (
+            const Field<Type>& bridgeField,
+            Field<Type>& ff,
+            const labelList& addr
+        );
+
         //- Is a transform required?
         inline bool doTransform() const
         {
@@ -365,10 +375,10 @@ public:
         const scalarListList& slaveWeights() const;
 
         //- Return reference to the master list of non-overlap faces
-        const labelList& masterNonOverlapFaces() const;
+        const labelList& uncoveredMasterFaces() const;
 
         //- Return reference to the slave list of non-overlap faces
-        const labelList& slaveNonOverlapFaces() const;
+        const labelList& uncoveredSlaveFaces() const;
 
 
     // Interpolation functions
@@ -391,6 +401,23 @@ public:
         tmp<Field<Type> > slaveToMaster
         (
             const tmp<Field<Type> >& tpf
+        ) const;
+
+
+        //- Bridge uncovered master patch field
+        template<class Type>
+        void bridgeMaster
+        (
+            const Field<Type>& bridgeField,
+            Field<Type>& ff
+        ) const;
+
+        //- Bridge uncovered slave patch field
+        template<class Type>
+        void bridgeSlave
+        (
+            const Field<Type>& bridgeField,
+            Field<Type>& ff
         ) const;
 
 

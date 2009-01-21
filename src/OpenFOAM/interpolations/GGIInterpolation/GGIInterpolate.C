@@ -36,6 +36,7 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 template<class MasterPatch, class SlavePatch>
 template<class Type>
 void GGIInterpolation<MasterPatch, SlavePatch>::interpolate
@@ -60,6 +61,21 @@ void GGIInterpolation<MasterPatch, SlavePatch>::interpolate
     }
 }
 
+
+template<class MasterPatch, class SlavePatch>
+template<class Type>
+void GGIInterpolation<MasterPatch, SlavePatch>::bridge
+(
+    const Field<Type>& bridgeField,
+    Field<Type>& ff,
+    const labelList& addr
+)
+{
+    forAll (addr, faceI)
+    {
+        ff[addr[faceI]] = bridgeField[addr[faceI]];
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -206,6 +222,68 @@ GGIInterpolation<MasterPatch, SlavePatch>::slaveToMaster
     tmp<Field<Type> > tint = slaveToMaster(tff());
     tff.clear();
     return tint;
+}
+
+
+template<class MasterPatch, class SlavePatch>
+template<class Type>
+void GGIInterpolation<MasterPatch, SlavePatch>::bridgeMaster
+(
+    const Field<Type>& bridgeField,
+    Field<Type>& ff
+) const
+{
+    if
+    (
+        bridgeField.size() != masterPatch_.size()
+     || ff.size() != masterPatch_.size())
+    {
+        FatalErrorIn
+        (
+            "void GGIInterpolation<MasterPatch, SlavePatch>::bridgeMaster\n"
+            "(\n"
+            "    const Field<Type>& bridgeField,\n"
+            "    Field<Type>& ff\n"
+            ") const"
+        )   << "given field does not correspond to patch. Patch size: "
+            << masterPatch_.size()
+            << " bridge field size: " << bridgeField.size()
+            << " field size: " << ff.size()
+            << abort(FatalError);
+    }
+
+    bridge(bridgeField, ff, uncoveredMasterFaces());
+}
+
+
+template<class MasterPatch, class SlavePatch>
+template<class Type>
+void GGIInterpolation<MasterPatch, SlavePatch>::bridgeSlave
+(
+    const Field<Type>& bridgeField,
+    Field<Type>& ff
+) const
+{
+    if
+    (
+        bridgeField.size() != slavePatch_.size()
+     || ff.size() != slavePatch_.size())
+    {
+        FatalErrorIn
+        (
+            "void GGIInterpolation<MasterPatch, SlavePatch>::bridgeSlave\n"
+            "(\n"
+            "    const Field<Type>& bridgeField,\n"
+            "    Field<Type>& ff\n"
+            ") const"
+        )   << "given field does not correspond to patch. Patch size: "
+            << slavePatch_.size()
+            << " bridge field size: " << bridgeField.size()
+            << " field size: " << ff.size()
+            << abort(FatalError);
+    }
+
+    bridge(bridgeField, ff, uncoveredSlaveFaces());
 }
 
 

@@ -146,6 +146,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(name, size, start, index, bm),
     shadowName_(word::null),
+    bridgeOverlap_(false),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -160,11 +161,13 @@ Foam::ggiPolyPatch::ggiPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const word& shadowName
+    const word& shadowName,
+    const bool bridgeOverlap
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
     shadowName_(shadowName),
+    bridgeOverlap_(bridgeOverlap),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -182,6 +185,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(name, dict, index, bm),
     shadowName_(dict.lookup("shadowPatch")),
+    bridgeOverlap_(dict.lookup("bridgeOverlap")),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -197,6 +201,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(pp, bm),
     shadowName_(pp.shadowName_),
+    bridgeOverlap_(pp.bridgeOverlap_),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -215,6 +220,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     shadowName_(pp.shadowName_),
+    bridgeOverlap_(pp.bridgeOverlap_),
     shadowIndex_(-1),
     patchToPatchPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
@@ -259,11 +265,31 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
                 << abort(FatalError);
         }
 
+        // Check for GGI onto self
         if (index() == shadowIndex_)
         {
             FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
                 << "ggi patch " << name() << " created as its own shadow"
                 << abort(FatalError);
+        }
+
+        // Check for bridge overlap
+        if (!bridgeOverlap())
+        {
+            if
+            (
+                patchToPatch().uncoveredMasterFaces().size() > 0
+             || patchToPatch().uncoveredSlaveFaces().size() > 0
+            )
+            {
+                FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
+                    << "ggi patch " << name() << " has "
+                    << patchToPatch().uncoveredMasterFaces().size()
+                    << " uncovered master faces and "
+                    << patchToPatch().uncoveredSlaveFaces().size()
+                    << " uncovered slave faces.  Bridging is switched off. "
+                    << abort(FatalError);
+            }
         }
     }
 
@@ -372,6 +398,8 @@ void Foam::ggiPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
     os.writeKeyword("shadowPatch") << shadowName_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("bridgeOverlap") << bridgeOverlap_
         << token::END_STATEMENT << nl;
 }
 

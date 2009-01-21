@@ -73,8 +73,8 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
      || masterWeightsPtr_
      || slaveAddrPtr_
      || slaveWeightsPtr_
-     || masterFaceNonOverlapAddrPtr_
-     || slaveFaceNonOverlapAddrPtr_
+     || uncoveredMasterAddrPtr_
+     || uncoveredSlaveAddrPtr_
     )
     {
         FatalErrorIn
@@ -135,16 +135,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
             candidateMasterNeighbors[j] = nSquaredList;
         }
     }
-    else
-    {
 
-    }
-
-//     Info<< "candidateMasterNeighbors: "  << endl;
-//     forAll (candidateMasterNeighbors, i)
-//     {
-//         Info<< "i: " << i << "nbr: " << candidateMasterNeighbors[i] << endl;
-//     }
     // Next, we move to the 2D world.  We project each slave and
     // master face onto a local plane defined by the master face
     // normal.  We filter out a few false neighbors using the
@@ -257,7 +248,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
             InfoIn
             (
                 "void GGIInterpolation<MasterPatch, SlavePatch>::"
-                "::calcAddressing()"
+                "calcAddressing()"
             )   << "The master projected polygon was CW instead of CCW.  "
                 << "This is strange..."  << endl;
         }
@@ -432,13 +423,13 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
 
     // Now that the neighbourhood is known, let's go hunting for
     // non-overlapping faces
-    masterFaceNonOverlapAddrPtr_ =
+    uncoveredMasterAddrPtr_ =
         new labelList
         (
             findNonOverlappingFaces(maW, masterNonOverlapFaceTol_)
         );
 
-    slaveFaceNonOverlapAddrPtr_ =
+    uncoveredSlaveAddrPtr_ =
         new labelList
         (
             findNonOverlappingFaces(saW, slaveNonOverlapFaceTol_)
@@ -499,30 +490,24 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
     // Rescaling the slave weights
     if
     (
-        masterNonOverlapFaces().size() > 0
-     || slaveNonOverlapFaces().size() > 0
+        uncoveredMasterFaces().size() > 0
+     || uncoveredSlaveFaces().size() > 0
     )
     {
-        WarningIn
+        InfoIn
         (
             "void GGIInterpolation<MasterPatch, SlavePatch>::"
             "rescaleWeightingFactors() const"
-        )   << "Non-overlapped faces found.  On master:"
-            << masterNonOverlapFaces().size()
-            << " On slave: " << slaveNonOverlapFaces().size() << endl;
+        )   << "Uncovered faces found:  on master:"
+            << uncoveredMasterFaces().size()
+            << " on slave: " << uncoveredSlaveFaces().size() << endl;
     }
 
     forAll(saW, saWi)
     {
         scalar slaveWeightSum = Foam::sum(saW[saWi]);
 
-        if (saW[saWi].size() == 0 || slaveWeightSum < 0.1)
-        {
-            Info<< "Uncovered slave " << saWi << " has "
-                << saW[saWi].size() << " nbrs.  Area sum: "
-                << slaveWeightSum << endl;
-        }
-        else
+        if (saW[saWi].size() > 0)
         {
             saW[saWi] = saW[saWi]/slaveWeightSum;
 
@@ -539,13 +524,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
     {
         scalar masterWeightSum = Foam::sum(maW[maWi]);
 
-        if (maW[maWi].size() == 0 || masterWeightSum < 0.1)
-        {
-            Info<< "Uncovered master " << maWi << " has "
-                << maW[maWi].size() << " nbrs.  Area sum: "
-                << masterWeightSum << endl;
-        }
-        else
+        if (maW[maWi].size() > 0)
         {
             maW[maWi] = maW[maWi]/masterWeightSum;
 

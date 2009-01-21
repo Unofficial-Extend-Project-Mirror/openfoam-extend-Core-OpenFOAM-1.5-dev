@@ -45,7 +45,8 @@ SourceFiles
 #include "coupledPolyPatch.H"
 #include "ggiInterpolation.H"
 #include "transform.H"
-#include "string.H"
+#include "word.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,6 +65,9 @@ class ggiPolyPatch
 
         //- Shadow patch name
         const word shadowName_;
+
+        //- Use bridging to fix overlap error in interpolation
+        Switch bridgeOverlap_;
 
         //- Shadow patch index.  Delayed evaluation for construction
         mutable label shadowIndex_;
@@ -142,7 +146,8 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& shadowName
+            const word& shadowName,
+            const bool bridgeOverlap
         );
 
         //- Construct from dictionary
@@ -233,6 +238,11 @@ public:
             return !master();
         }
 
+        //- Use bridging to fix overlap error in interpolation
+        bool bridgeOverlap() const
+        {
+            return bridgeOverlap_;
+        }
 
         //- Interpolate face field: given field on a the shadow side,
         //  create an interpolated field on this side
@@ -259,6 +269,36 @@ public:
             else
             {
                 return patchToPatch().masterToSlave(tpf);
+            }
+        }
+
+        //- Bridge interpolated face field for uncovered faces
+        template<class Type>
+        void bridge
+        (
+            const Field<Type>& bridgeField,
+            Field<Type>& ff
+        ) const
+        {
+            if (bridgeOverlap())
+            {
+                if (master())
+                {
+                    patchToPatch().bridgeMaster(bridgeField, ff);
+                }
+                else
+                {
+                    patchToPatch().bridgeSlave(bridgeField, ff);
+                }
+            }
+            else
+            {
+                // HJ, temporary
+                InfoIn
+                (
+                    "void bridge(const Field<Type>& bridgeField, "
+                    "Field<Type>& ff) const"
+                )   << "Bridging is switched off " << endl;
             }
         }
 

@@ -52,8 +52,8 @@ void GGIInterpolation<MasterPatch, SlavePatch>::clearOut()
     deleteDemandDrivenData(slaveAddrPtr_);
     deleteDemandDrivenData(slaveWeightsPtr_);
 
-    deleteDemandDrivenData(masterFaceNonOverlapAddrPtr_);
-    deleteDemandDrivenData(slaveFaceNonOverlapAddrPtr_);
+    deleteDemandDrivenData(uncoveredMasterAddrPtr_);
+    deleteDemandDrivenData(uncoveredSlaveAddrPtr_);
 }
 
 
@@ -85,8 +85,8 @@ GGIInterpolation<MasterPatch, SlavePatch>::GGIInterpolation
     masterWeightsPtr_(NULL),
     slaveAddrPtr_(NULL),
     slaveWeightsPtr_(NULL),
-    masterFaceNonOverlapAddrPtr_(NULL),
-    slaveFaceNonOverlapAddrPtr_(NULL)
+    uncoveredMasterAddrPtr_(NULL),
+    uncoveredSlaveAddrPtr_(NULL)
 {
     // Check size of transform.  They should be equal to slave patch size
     if (forwardT_.size() != 0 || reverseT_.size() != 0)
@@ -175,27 +175,27 @@ GGIInterpolation<MasterPatch, SlavePatch>::slaveWeights() const
 
 template<class MasterPatch, class SlavePatch>
 const labelList&
-GGIInterpolation<MasterPatch, SlavePatch>::masterNonOverlapFaces() const
+GGIInterpolation<MasterPatch, SlavePatch>::uncoveredMasterFaces() const
 {
-    if (!masterFaceNonOverlapAddrPtr_)
+    if (!uncoveredMasterAddrPtr_)
     {
         calcAddressing();
     }
 
-    return *masterFaceNonOverlapAddrPtr_;
+    return *uncoveredMasterAddrPtr_;
 }
 
 
 template<class MasterPatch, class SlavePatch>
 const labelList&
-GGIInterpolation<MasterPatch, SlavePatch>::slaveNonOverlapFaces() const
+GGIInterpolation<MasterPatch, SlavePatch>::uncoveredSlaveFaces() const
 {
-    if (!slaveFaceNonOverlapAddrPtr_)
+    if (!uncoveredSlaveAddrPtr_)
     {
         calcAddressing();
     }
 
-    return *slaveFaceNonOverlapAddrPtr_;
+    return *uncoveredSlaveAddrPtr_;
 }
 
 

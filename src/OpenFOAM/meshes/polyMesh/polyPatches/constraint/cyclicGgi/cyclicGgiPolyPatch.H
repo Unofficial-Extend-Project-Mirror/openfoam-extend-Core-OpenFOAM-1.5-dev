@@ -107,7 +107,8 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& shadowName
+            const word& shadowName,
+            const bool bridgeOverlap
         );
 
         //- Construct from dictionary
