@@ -187,7 +187,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<T>& M)
                 // Write end of contents delimiter
                 os << token::END_BLOCK;
             }
-            else if (nm < 10 && contiguous<T>())
+            // Fix: matrices smaller than 20x20 will be written square.
+            // HJ, 22/Jan/2009
+            else if (nm < 400 && contiguous<T>())
             {
                 // Write size of list and start contents delimiter
                 os  << token::BEGIN_LIST;
@@ -197,7 +199,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<T>& M)
                 // loop over rows
                 for (register label i=0; i< M.n(); i++)
                 {
-                    os  << token::BEGIN_LIST;
+                    os  << nl << token::BEGIN_LIST;
 
                     // Write row
                     for (register label j=0; j< M.m(); j++)
