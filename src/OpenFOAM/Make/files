@@ -515,6 +515,12 @@ interpolations = interpolations
 interpolation = $(interpolations)/interpolation
 $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 $(interpolations)/GGIInterpolation/GGIInterpolationName.C
+$(interpolations)/RBFInterpolation/RBFInterpolation.C
+$(interpolations)/RBFInterpolation/RBFFunctions/RBFFunction/RBFFunction.C
+$(interpolations)/RBFInterpolation/RBFFunctions/RBFFunction/newRBFFunction.C
+$(interpolations)/RBFInterpolation/RBFFunctions/W2/W2.C
+$(interpolations)/RBFInterpolation/RBFFunctions/Gauss/Gauss.C
+$(interpolations)/RBFInterpolation/RBFFunctions/TPS/TPS.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
