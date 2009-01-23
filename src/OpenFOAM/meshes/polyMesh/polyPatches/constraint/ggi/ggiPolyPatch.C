@@ -272,25 +272,6 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
                 << "ggi patch " << name() << " created as its own shadow"
                 << abort(FatalError);
         }
-
-        // Check for bridge overlap
-        if (!bridgeOverlap())
-        {
-            if
-            (
-                patchToPatch().uncoveredMasterFaces().size() > 0
-             || patchToPatch().uncoveredSlaveFaces().size() > 0
-            )
-            {
-                FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
-                    << "ggi patch " << name() << " has "
-                    << patchToPatch().uncoveredMasterFaces().size()
-                    << " uncovered master faces and "
-                    << patchToPatch().uncoveredSlaveFaces().size()
-                    << " uncovered slave faces.  Bridging is switched off. "
-                    << abort(FatalError);
-            }
-        }
     }
 
     return shadowIndex_;
@@ -372,6 +353,32 @@ void Foam::ggiPolyPatch::calcTransforms()
     forwardT_.setSize(0);
     reverseT_.setSize(0);
     separation_.setSize(0);
+
+    if (debug > 1 && master())
+    {
+        Info<< "Writing transformed slave patch as VTK." << nl
+            << "Master: " << name()
+            << " Slave: " << shadowName() << endl;
+
+        // Check for bridge overlap
+        if (!bridgeOverlap())
+        {
+            if
+            (
+                patchToPatch().uncoveredMasterFaces().size() > 0
+             || patchToPatch().uncoveredSlaveFaces().size() > 0
+            )
+            {
+                FatalErrorIn("label ggiPolyPatch::shadowIndex() const")
+                    << "ggi patch " << name() << " has "
+                    << patchToPatch().uncoveredMasterFaces().size()
+                    << " uncovered master faces and "
+                    << patchToPatch().uncoveredSlaveFaces().size()
+                    << " uncovered slave faces.  Bridging is switched off. "
+                    << abort(FatalError);
+            }
+        }
+    }
 }
 
 
