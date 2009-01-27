@@ -32,6 +32,7 @@ Description
 
 scalar CoNum = 0.0;
 scalar meanCoNum = 0.0;
+scalar velMag = 0.0;
 
 if (mesh.nInternalFaces())
 {
@@ -43,9 +44,12 @@ if (mesh.nInternalFaces())
 
     meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
         .value()*runTime.deltaT().value();
+
+    velMag = max(mag(phi)/mesh.magSf()).value();
 }
 
 Info<< "Courant Number mean: " << meanCoNum
-    << " max: " << CoNum << endl;
+    << " max: " << CoNum 
+    << " velocity magnitude: " << velMag << endl;
 
 // ************************************************************************* //
