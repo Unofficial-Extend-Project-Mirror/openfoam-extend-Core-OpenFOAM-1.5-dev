@@ -154,11 +154,13 @@ tmp<Field<Type> > cyclicGgiFvPatchField<Type>::patchNeighbourField() const
         // Symmetry treatment used for overlap
         vectorField nHat = this->patch().nf();
 
-        // Use mirrored neighbour field for interpolation
-        // HJ, 21/Jan/2009
+        // Use mirrored internal field for neighbour
+        // HJ, 27/Jan/2009
         Field<Type> bridgeField =
             transform(I - 2.0*sqr(nHat), this->patchInternalField());
-//             this->patchInternalField();
+
+        // Option 2: zero gradient.  HJ, 27/Jan/2009
+//         Field<Type> bridgeField = this->patchInternalField();
 
         cyclicGgiPatch_.bridge(bridgeField, tpnf());
     }
@@ -186,7 +188,13 @@ void cyclicGgiFvPatchField<Type>::evaluate
         vectorField nHat = this->patch().nf();
 
         Field<Type> bridgeField =
-            transform(I - sqr(nHat), this->patchInternalField());
+        (
+            this->patchInternalField()
+          + transform(I - 2.0*sqr(nHat), this->patchInternalField())
+        )/2.0;
+
+        // Option 2: zero gradient.  HJ, 27/Jan/2009
+//         Field<Type> bridgeField = this->patchInternalField();
 
         cyclicGgiPatch_.bridge(bridgeField, pf);
     }
