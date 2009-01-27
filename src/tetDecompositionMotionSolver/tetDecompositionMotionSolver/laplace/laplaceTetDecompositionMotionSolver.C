@@ -56,7 +56,7 @@ namespace Foam
 Foam::laplaceTetDecompositionMotionSolver::laplaceTetDecompositionMotionSolver
 (
     const polyMesh& mesh,
-    Istream& msData
+    Istream&
 )
 :
     tetDecompositionMotionSolver(mesh),
