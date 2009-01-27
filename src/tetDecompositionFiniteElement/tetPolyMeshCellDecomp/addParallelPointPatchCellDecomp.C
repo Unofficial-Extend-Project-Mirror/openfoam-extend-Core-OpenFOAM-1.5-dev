@@ -96,7 +96,7 @@ void Foam::tetPolyMeshCellDecomp::addParallelPointPatch()
     // The processor point patch will be added if processor boundaries
     // exist in the case.  If the mesh with processor boundaries is
     // not created during a parallel run (e.g. decomposePar), the
-    // addressing will be dummy.  
+    // addressing will be dummy.  HJ, 19/Mar/2002
 
     if (mesh_.globalData().parallel())
     {
@@ -106,7 +106,7 @@ void Foam::tetPolyMeshCellDecomp::addParallelPointPatch()
         // mapping files will still be used.  I can do the globally
         // shared points because they carry their own global labels,
         // but not for cut edges shared by several processors.
-        // 
+        // HJ, 21/Apr/2003
 
         if (debug)
         {
