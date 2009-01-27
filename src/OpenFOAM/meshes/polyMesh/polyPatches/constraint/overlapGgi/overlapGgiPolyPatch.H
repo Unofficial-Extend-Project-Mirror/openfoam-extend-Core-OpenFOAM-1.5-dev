@@ -118,12 +118,12 @@ class overlapGgiPolyPatch
         //- Check definition: angles and offsets
         void checkDefinition() const;
 
-        //- Clear out
-        void clearOut();
-
         //- Expand slave face field to full coverage
         template<class Type>
         tmp<Field<Type> > expandSlaveData(const Field<Type>& spf) const;
+
+        //- Clear out
+        void clearOut();
 
 
 protected:
