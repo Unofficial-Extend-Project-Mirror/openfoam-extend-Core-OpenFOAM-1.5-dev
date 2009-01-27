@@ -323,14 +323,7 @@ void Foam::ggiPolyPatch::initMovePoints(const pointField& p)
 void Foam::ggiPolyPatch::movePoints(const pointField& p)
 {
     polyPatch::movePoints(p);
-
-    // Clear reconstructed face centres
-    deleteDemandDrivenData(reconFaceCellCentresPtr_);
-
-    if (patchToPatchPtr_)
-    {
-        patchToPatchPtr_->movePoints();
-    }
+    clearOut();
 }
 
 
