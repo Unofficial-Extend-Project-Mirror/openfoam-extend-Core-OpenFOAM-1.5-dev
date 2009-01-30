@@ -200,7 +200,8 @@ bool Foam::primitiveMesh::checkMeshMotion
                 )   << "Severe non-orthogonality in mesh motion for face "
                     << faceI
                     << " between cells " << own[faceI] << " and " << nei[faceI]
-                    << ": Angle = " << ::acos(dDotS)/mathematicalConstant::pi*180.0
+                    << ": Angle = "
+                    << Foam::acos(dDotS)/mathematicalConstant::pi*180.0
                     << " deg." << endl;
 
                 nDotProductErrors++;
