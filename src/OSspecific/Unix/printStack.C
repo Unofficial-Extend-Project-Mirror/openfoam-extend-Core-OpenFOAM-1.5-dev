@@ -67,7 +67,7 @@ string pOpen(const string &cmd, label line=0)
             {
                 string str(buffer);
                 return str.substr(0, str.size()-1);
-            }            
+            }
         }
         pclose(cmdPipe);
     }
@@ -99,12 +99,12 @@ void printSourceFileAndLine
 
         void *addr;
         sscanf(myAddress.c_str(), "%p",&addr);
-        
+
         Dl_info info;
-        
+
         dladdr(addr, &info);
 
-        unsigned long offset = reinterpret_cast<unsigned long>(info.dli_fbase);
+        unsigned long offset = ulong(info.dli_fbase);
 
         IStringStream addressStr(address.substr(2));
         label addressValue = readHexLabel(addressStr);
@@ -159,7 +159,7 @@ void getSymbolForRaw
     const word& address
 )
 {
-    if (filename[0] == '/')
+    if (filename.size() > 0 && filename[0] == '/')
     {
         string fcnt = pOpen
         (
@@ -330,10 +330,11 @@ void error::printStack(Ostream& os)
         {
             string::size_type lPos = msg.find('[');
             string::size_type rPos = msg.find(']');
-            
+
             if (lPos != string::npos && rPos != string::npos && lPos<rPos)
             {
                 address = msg.substr(lPos+1, rPos-lPos-1);
+                msg = msg.substr(0, lPos);
             }
 
             string::size_type bracketPos = msg.find('(');
@@ -388,7 +389,7 @@ void error::printStack(Ostream& os)
             else
             {
                 string::size_type endBracketPos = msg.find(')', start);
-                
+
                 if (endBracketPos != string::size_type(string::npos))
                 {
                     string fullName(msg.substr(start, endBracketPos-start));

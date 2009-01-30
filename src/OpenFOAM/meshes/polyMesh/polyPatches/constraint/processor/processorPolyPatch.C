@@ -143,7 +143,7 @@ void Foam::processorPolyPatch::initGeometry()
         (
             Pstream::blocking,
             neighbProcNo(),
-          + 3*(sizeof(label) + size()*sizeof(vector))
+            3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
         );
 
         toNeighbProc
@@ -163,7 +163,7 @@ void Foam::processorPolyPatch::calcGeometry()
             (
                 Pstream::blocking,
                 neighbProcNo(),
-                3*(sizeof(label) + size()*sizeof(vector))
+                3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
             );
             fromNeighbProc
                 >> neighbFaceCentres_
@@ -579,13 +579,12 @@ bool Foam::processorPolyPatch::order
 
             if (v.size() == 1)
             {
-                transformedCtrs = masterCtrs - v[0];
+                transformedCtrs = masterCtrs-v[0];
             }
             else
             {                    
-                transformedCtrs = masterCtrs - v;
+                transformedCtrs = masterCtrs-v;
             }
-
             matchedAll = matchPoints
             (
                 ctrs,
