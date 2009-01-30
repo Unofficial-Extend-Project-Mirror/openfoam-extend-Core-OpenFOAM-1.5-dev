@@ -67,6 +67,7 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
                 boundaryMesh()[shadowIndex()],
                 forwardT(),
                 reverseT(),
+                separation(),
                 0,             // Non-overlapping face tolerances
                 0              // HJ, 24/Oct/2008
             );

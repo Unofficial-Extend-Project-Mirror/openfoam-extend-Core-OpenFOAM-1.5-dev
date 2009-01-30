@@ -292,6 +292,13 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                 );
             }
 
+            // Apply the translation offset in order to keep the 
+            // neighbErrorProjectionAlongW values to a minimum
+            if(doSeparation())
+            {
+                curSlaveFacePoints += forwardSep_[curCMN[neighbI]];
+            }
+
             neighbPointsInUV =
                 projectPoints3Dto2D
                 (

@@ -280,24 +280,23 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
                 RodriguesRotation(rotationAxis_, -rotationAngle_)
             );
         }
-
-        separation_ = vectorField(cyclicShadow().size(), vector::zero);
     }
     else
     {
         forwardT_.setSize(0);
         reverseT_.setSize(0);
+    }
 
-        vector separation = separationOffset_;
+    // Handling the separation offset separatly
+    vector separation = separationOffset_;
 
-        if (mag(separation) > SMALL)
-        {
-            separation_ = vectorField(cyclicShadow().size(), separation);
-        }
-        else
-        {
-            separation_.setSize(0);
-        }
+    if (mag(separation) > SMALL)
+    {
+        separation_ = vectorField(cyclicShadow().size(), separation);
+    }
+    else
+    {
+        separation_.setSize(0);
     }
 }
 

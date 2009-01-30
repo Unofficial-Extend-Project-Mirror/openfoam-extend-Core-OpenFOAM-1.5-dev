@@ -168,6 +168,7 @@ void Foam::overlapGgiPolyPatch::calcPatchToPatch() const
                 expandedSlave(),
                 forwardT(),
                 reverseT(),
+                separation(),
                 0,             // master overlap tolerance
                 0              // slave overlap tolerance
             );

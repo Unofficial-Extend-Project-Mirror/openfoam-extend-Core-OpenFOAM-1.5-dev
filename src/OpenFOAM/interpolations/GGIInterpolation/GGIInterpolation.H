@@ -139,6 +139,11 @@ class GGIInterpolation
         //  indicates no transform.  HJ, 6/Jan/2009
         const tensorField reverseT_;
 
+        //- Slave-to-master separation vector. Translation of slave data to
+        //  master plane.  Size equals number of slave faces; zero length
+        //  indicates no translation.  MB, 28/Jan/2009
+        const vectorField forwardSep_;
+
         //- Master non-overlap face tolerance factor
         const scalar masterNonOverlapFaceTol_;
 
@@ -334,6 +339,12 @@ class GGIInterpolation
             return forwardT_.size() > 0;
         }
 
+        //- Is a separation required?
+        inline bool doSeparation() const
+        {
+            return forwardSep_.size() > 0;
+        }
+
 
 public:
 
@@ -346,6 +357,7 @@ public:
             const SlavePatch&  slavePatch,
             const tensorField& forwardT,
             const tensorField& reverseT,
+            const vectorField& forwardSep,
             const scalar masterFaceNonOverlapFaceTol = 0.0,
             const scalar slaveFaceNonOverlapFaceTol = 0.0,
             const bool rescaleGGIWeightingFactors = true,

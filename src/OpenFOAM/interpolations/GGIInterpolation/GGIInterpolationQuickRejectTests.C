@@ -270,7 +270,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::findNeighboursAABB
     }
 
     // Iterate over slave patch faces, compute its bounding box,
-    // using a possible transformation for cyclic patches
+    // using a possible transformation and separation for cyclic patches
     forAll (slavePatch_, faceSi)
     {
         pointField curFacePoints =
@@ -281,6 +281,11 @@ void GGIInterpolation<MasterPatch, SlavePatch>::findNeighboursAABB
             transform(curFacePoints, forwardT_[faceSi], curFacePoints);
         }
 
+        if(doSeparation())
+        {
+            curFacePoints += forwardSep_[faceSi];
+        }
+            
         slavePatchBB[faceSi] = boundBox(curFacePoints, false);
 
         // We compute the extent of the slave face BB.
