@@ -45,6 +45,7 @@ void Foam::vtkPV3Foam::convertVolFields
 (
     const fvMesh& mesh,
     const volPointInterpolation& pInterp,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
     const IOobjectList& objects,
     vtkDataArraySelection *fieldSelection,
     vtkMultiBlockDataSet* output
@@ -153,7 +154,6 @@ void Foam::vtkPV3Foam::convertVolFields
                 tf.boundaryField()[patchId]
             );
 
-
             if
             (
                 isType<emptyFvPatchField<Type> >(ptf)
@@ -164,17 +164,25 @@ void Foam::vtkPV3Foam::convertVolFields
                 )
             )
             {
-                fvPatch p
+                fvPatch p(ptf.patch().patch(), tf.mesh().boundary());
+                tmp<Field<Type> > tpptf
                 (
-                    ptf.patch().patch(),
-                    tf.mesh().boundary()
+                    fvPatchField<Type>(p, tf).patchInternalField()
                 );
 
                 convertPatchFaceField
                 (
                     tf.name(),
-                    fvPatchField<Type>(p, tf)
-                       .patchInternalField()(),
+                    tpptf(),
+                    output,
+                    selectInfoPatches_,
+                    selectedRegionDatasetIds_[regionId]
+                );
+
+                convertPatchPointField
+                (
+                    tf.name(),
+                    ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
                     output,
                     selectInfoPatches_,
                     selectedRegionDatasetIds_[regionId]
@@ -190,17 +198,15 @@ void Foam::vtkPV3Foam::convertVolFields
                     selectInfoPatches_,
                     selectedRegionDatasetIds_[regionId]
                 );
+                convertPatchPointField
+                (
+                    tf.name(),
+                    ppInterpList[patchId].faceToPointInterpolate(ptf)(),
+                    output,
+                    selectInfoPatches_,
+                    selectedRegionDatasetIds_[regionId]
+                );
             }
-
-            convertPatchPointField
-            (
-                tf.name(),
-                tptf().boundaryField()[patchId]
-                    .patchInternalField()(),
-                output,
-                selectInfoPatches_,
-                selectedRegionDatasetIds_[regionId]
-            );
         }
 
         // Convert cell zones
@@ -237,7 +243,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output, selectInfoCellZones_, datasetId,
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
         }
 
@@ -274,7 +280,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output, selectInfoCellSets_, datasetId,
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
         }
 

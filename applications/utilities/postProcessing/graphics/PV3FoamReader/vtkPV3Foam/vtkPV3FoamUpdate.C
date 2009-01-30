@@ -47,14 +47,11 @@ void Foam::vtkPV3Foam::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
     }
 
-    if
-    (
-        !reader_->GetCacheMesh()
-     || reader_->GetTimeSelection()->GetArraySetting(0)
-    )
+    if (!reader_->GetCacheMesh())
     {
         delete meshPtr_;
         meshPtr_ = NULL;
@@ -76,6 +73,8 @@ void Foam::vtkPV3Foam::updateFoamMesh()
                 dbPtr_()
             )
         );
+
+        meshChanged_ = true;
     }
     else
     {
@@ -83,6 +82,12 @@ void Foam::vtkPV3Foam::updateFoamMesh()
         {
             Info<< "Using existing Foam mesh" << endl;
         }
+    }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
     }
 }
 
@@ -94,7 +99,8 @@ void Foam::vtkPV3Foam::updateVolFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateVolFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateVolFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -114,6 +120,21 @@ void Foam::vtkPV3Foam::updateVolFields
     }
 
     volPointInterpolation pInterp(mesh, pMesh);
+
+    PtrList<PrimitivePatchInterpolation<primitivePatch> >
+        ppInterpList(mesh.boundaryMesh().size());
+
+    forAll(ppInterpList, i)
+    {
+        ppInterpList.set
+        (
+            i,
+            new PrimitivePatchInterpolation<primitivePatch>
+            (
+                mesh.boundaryMesh()[i]
+            )
+        );
+    }
 /*
     convertVolFields<Foam::label>
     (
@@ -122,24 +143,30 @@ void Foam::vtkPV3Foam::updateVolFields
 */
     convertVolFields<Foam::scalar>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::vector>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::sphericalTensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::symmTensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::tensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateVolFields" << endl;
+        printMemory();
+    }
 }
 
 
@@ -150,7 +177,8 @@ void Foam::vtkPV3Foam::updatePointFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updatePointFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updatePointFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -160,11 +188,6 @@ void Foam::vtkPV3Foam::updatePointFields
 
     vtkDataArraySelection* arraySelection = reader_->GetPointFieldSelection();
 
-    // Convert point fields
-    if (debug)
-    {
-        Info<< "converting Foam point fields" << endl;
-    }
 /*
     convertPointFields<Foam::label>
     (
@@ -191,6 +214,12 @@ void Foam::vtkPV3Foam::updatePointFields
     (
         mesh, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updatePointFields" << endl;
+        printMemory();
+    }
 }
 
 
@@ -201,7 +230,8 @@ void Foam::vtkPV3Foam::updateLagrangianFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -249,6 +279,12 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     (
         mesh, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        printMemory();
+    }
 }
 
 

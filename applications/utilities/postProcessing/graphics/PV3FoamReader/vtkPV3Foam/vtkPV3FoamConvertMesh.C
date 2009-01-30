@@ -50,7 +50,8 @@ void Foam::vtkPV3Foam::convertMeshVolume
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshVolume" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshVolume" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoVolume_;
@@ -76,7 +77,7 @@ void Foam::vtkPV3Foam::convertMeshVolume
 
         if (debug)
         {
-            Info<< "Creating VTK internal mesh" << endl;
+            Info<< "Creating VTK internalMesh" << endl;
         }
 
         const label datasetId = 0;
@@ -88,6 +89,12 @@ void Foam::vtkPV3Foam::convertMeshVolume
         selectedRegionDatasetIds_[regionId] = datasetId;
         vtkmesh->Delete();
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshVolume" << endl;
+        printMemory();
+    }
 }
 
 
@@ -98,7 +105,8 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshLagrangian" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshLagrangian" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoLagrangian_;
@@ -131,6 +139,11 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
         selectedRegionDatasetIds_[regionId] = datasetId;
         vtkmesh->Delete();
     }
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshLagrangian" << endl;
+        printMemory();
+    }
 }
 
 
@@ -141,7 +154,8 @@ void Foam::vtkPV3Foam::convertMeshPatches
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshPatches" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshPatches" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoPatches_;
@@ -196,6 +210,12 @@ void Foam::vtkPV3Foam::convertMeshPatches
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshPatches" << endl;
+        printMemory();
+    }
 }
 
 
@@ -206,7 +226,8 @@ void Foam::vtkPV3Foam::convertMeshCellZones
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshCellZones" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshCellZones" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoCellZones_;
@@ -256,14 +277,14 @@ void Foam::vtkPV3Foam::convertMeshCellZones
             (
                 subsetter.subMesh(),
                 vtkmesh,
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
 
             // renumber - superCells must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
 
             AddToBlock
@@ -275,17 +296,24 @@ void Foam::vtkPV3Foam::convertMeshCellZones
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshCellZones" << endl;
+        printMemory();
+    }
 }
 
 
-void Foam::vtkPV3Foam::convertMeshCellSet
+void Foam::vtkPV3Foam::convertMeshCellSets
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshCellSet" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshCellSets" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoCellSets_;
@@ -341,14 +369,14 @@ void Foam::vtkPV3Foam::convertMeshCellSet
             (
                 subsetter.subMesh(),
                 vtkmesh,
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
 
             // renumber - superCells must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
 
             AddToBlock
@@ -360,7 +388,14 @@ void Foam::vtkPV3Foam::convertMeshCellSet
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshCellSets" << endl;
+        printMemory();
+    }
 }
+
 
 void Foam::vtkPV3Foam::convertMeshFaceZones
 (
@@ -369,7 +404,8 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshFaceZones" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshFaceZones" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoFaceZones_;
@@ -416,17 +452,24 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshFaceZones" << endl;
+        printMemory();
+    }
 }
 
 
-void Foam::vtkPV3Foam::convertMeshFaceSet
+void Foam::vtkPV3Foam::convertMeshFaceSets
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshFaceSet" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshFaceSets" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoFaceSets_;
@@ -481,6 +524,12 @@ void Foam::vtkPV3Foam::convertMeshFaceSet
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshFaceSets" << endl;
+        printMemory();
+    }
 }
 
 
@@ -491,7 +540,8 @@ void Foam::vtkPV3Foam::convertMeshPointZones
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshPointZones" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshPointZones" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoPointZones_;
@@ -521,7 +571,7 @@ void Foam::vtkPV3Foam::convertMeshPointZones
             const label datasetId = GetNumberOfDataSets(output, selector);
 
             vtkPolyData* vtkmesh = vtkPolyData::New();
-            
+
             addPointZoneMesh
             (
                 mesh,
@@ -538,18 +588,25 @@ void Foam::vtkPV3Foam::convertMeshPointZones
             vtkmesh->Delete();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshPointZones" << endl;
+        printMemory();
+    }
 }
 
 
 
-void Foam::vtkPV3Foam::convertMeshPointSet
+void Foam::vtkPV3Foam::convertMeshPointSets
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::convertMeshPointSet" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertMeshPointSets" << endl;
+        printMemory();
     }
 
     const selectionInfo& selector = selectInfoPointSets_;
@@ -604,7 +661,12 @@ void Foam::vtkPV3Foam::convertMeshPointSet
             vtkmesh->Delete();
         }
     }
-}
 
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertMeshPointSets" << endl;
+        printMemory();
+    }
+}
 
 // ************************************************************************* //
