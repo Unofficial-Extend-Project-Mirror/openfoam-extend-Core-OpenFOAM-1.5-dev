@@ -243,8 +243,6 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
 
         const PtrList<featureEdgeMesh> dummyFeatures;
 
-        PtrList<featureEdgeMesh> dummy(0);
-
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
@@ -388,8 +386,6 @@ Foam::label Foam::autoRefineDriver::shellRefine
 
         const PtrList<featureEdgeMesh> dummyFeatures;
 
-        PtrList<featureEdgeMesh> dummy(0);
-
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
@@ -520,7 +516,9 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
     // be like boundary face from now on so not coupled anymore.
     meshRefiner_.baffleAndSplitMesh
     (
-        handleSnapProblems,
+        handleSnapProblems,             // detect&remove potential snap problem
+        false,                          // perpendicular edge connected cells
+        scalarField(0),                 // per region perpendicular angle
         !handleSnapProblems,            // merge free standing baffles?
         const_cast<Time&>(mesh.time()),
         globalToPatch_,
@@ -592,10 +590,14 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         const_cast<Time&>(mesh.time())++;
     }
 
+    const scalarField& perpAngle = meshRefiner_.surfaces().perpendicularAngle();
+
     meshRefiner_.baffleAndSplitMesh
     (
         handleSnapProblems,
-        false,                  // merge free standing baffles?
+        handleSnapProblems,                 // remove perp edge connected cells
+        perpAngle,                          // perp angle
+        false,                              // merge free standing baffles?
         const_cast<Time&>(mesh.time()),
         globalToPatch_,
         refineParams.keepPoints()[0]
