@@ -70,7 +70,7 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<Type>(p, iF),
+    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
     refValue_(ptf.refValue_, mapper),
     amplitude_(ptf.amplitude_),
     frequency_(ptf.frequency_),
