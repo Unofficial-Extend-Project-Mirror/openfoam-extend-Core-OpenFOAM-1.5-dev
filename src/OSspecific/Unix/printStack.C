@@ -104,7 +104,7 @@ void printSourceFileAndLine
 
         dladdr(addr, &info);
 
-        unsigned long offset = ulong(info.dli_fbase);
+        unsigned long offset = reinterpret_cast<unsigned long>(info.dli_fbase);
 
         IStringStream addressStr(address.substr(2));
         label addressValue = readHexLabel(addressStr);
