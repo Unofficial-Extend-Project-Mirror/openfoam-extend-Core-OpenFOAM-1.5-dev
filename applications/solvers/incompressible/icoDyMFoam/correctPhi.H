@@ -3,7 +3,7 @@
 
     for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if(p.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -38,6 +38,9 @@
         {
             phi -= pcorrEqn.flux();
         }
+
+        // Make the fluxes relative to the mesh motion
+        fvc::makeRelative(phi, U);
     }
 }
 
