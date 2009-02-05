@@ -35,8 +35,8 @@ Documentation
 
 DebugSwitches
 {
-    overlapGgi          0;
-    cyclicGgi           0;
+    overlapGgi          2;
+    cyclicGgi           2;
     coupledLduMatrix    1;
 
     APIdiffCoefFunc     0;
@@ -851,7 +851,7 @@ Tolerances
 //     slidingEdgeEndCutoffTol         0.0001;
 //     slidingEdgeCoPlanarTol          0.8;
 
-    slidingPointMergeTol            0.05;
+    slidingPointMergeTol            0.2;
     slidingEdgeMergeTol             0.01;
     slidingIntegralAdjTol           0.05;
     slidingEdgeMasterCatchFraction  0.4;
