@@ -51,7 +51,7 @@ done
 # find . -name '*~' -exec rm {} \;
 find . -name '*.dep' -exec rm {} \;
 
-find `find . -depth \( -name "Make[.A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make[.A-Za-z]*" ! -name "*Make" \) -exec rm -r {} \;
+find `find . -depth \( -name "Make[.A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make[.A-Za-z]*" ! -name "*Make" \( ! -path '*.svn*' \) \) -exec rm -r {} \;
 
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
