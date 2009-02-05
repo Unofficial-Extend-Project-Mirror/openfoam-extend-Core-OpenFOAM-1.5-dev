@@ -61,7 +61,7 @@ class graph
 :
     public HashPtrTable<curve>
 {
-    // private data
+    // Private Data
 
         string title_;
         string xName_;
@@ -103,7 +103,7 @@ class graph
         };
 
 
-    // private member functions
+    // Private Member Functions
 
         void readCurves(Istream&);
 
