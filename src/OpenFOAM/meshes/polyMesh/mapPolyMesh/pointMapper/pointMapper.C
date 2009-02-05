@@ -26,10 +26,8 @@ License
 
 #include "pointMapper.H"
 #include "demandDrivenData.H"
+#include "polyMesh.H"
 #include "mapPolyMesh.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -57,9 +55,9 @@ void Foam::pointMapper::calcAddressing() const
 
         // Not necessary to resize the list as there are no retired points
         // Not true.  HJ, 16/Oct/2008
-        directAddr.setSize(mesh_.size());
+        directAddr.setSize(mesh_.nPoints());
 
-        insertedPointLabelsPtr_ = new labelList(mesh_.size());
+        insertedPointLabelsPtr_ = new labelList(mesh_.nPoints());
         labelList& insertedPoints = *insertedPointLabelsPtr_;
 
         label nInsertedPoints = 0;
@@ -81,10 +79,12 @@ void Foam::pointMapper::calcAddressing() const
     {
         // Interpolative addressing
 
-        interpolationAddrPtr_ = new labelListList(mesh_.size());
+        // Bug fix: wrong sizes.  HJ, 5/Feb/2009
+        interpolationAddrPtr_ = new labelListList(mesh_.nPoints());
         labelListList& addr = *interpolationAddrPtr_;
 
-        weightsPtr_ = new scalarListList(mesh_.size());
+        // Bug fix: wrong sizes.  HJ, 5/Feb/2009
+        weightsPtr_ = new scalarListList(mesh_.nPoints());
         scalarListList& w = *weightsPtr_;
 
         // Points created from other points (i.e. points merged into it).
@@ -128,7 +128,8 @@ void Foam::pointMapper::calcAddressing() const
 
         // Grab inserted points (for them the size of addressing is still zero)
 
-        insertedPointLabelsPtr_ = new labelList(mesh_.size());
+        // Bug fix: wrong sizes.  HJ, 5/Feb/2009
+        insertedPointLabelsPtr_ = new labelList(mesh_.nPoints());
         labelList& insertedPoints = *insertedPointLabelsPtr_;
 
         label nInsertedPoints = 0;
@@ -191,11 +192,11 @@ Foam::pointMapper::pointMapper(const mapPolyMesh& mpm)
     }
     else
     {
-        //Check if there are inserted points with no owner
+        // Check if there are inserted points with no owner
 
         // Make a copy of the point map, add the entries for points from points
         // and check for left-overs
-        labelList cm(mesh_.size(), -1);
+        labelList cm(mesh_.nPoints(), -1);
 
         const List<objectMap>& cfc = mpm_.pointsFromPointsMap();
 
@@ -224,7 +225,8 @@ Foam::pointMapper::~pointMapper()
 
 Foam::label Foam::pointMapper::size() const
 {
-    return mpm_.pointMap().size();
+    // Bug fix: wrong size.  HJ, 5/Feb/2009
+    return mesh_.nPoints();
 }
 
 
@@ -245,20 +247,12 @@ const Foam::unallocLabelList& Foam::pointMapper::directAddressing() const
             << abort(FatalError);
     }
 
-    if (!insertedObjects())
+    if (!directAddrPtr_)
     {
-        // No inserted points.  Re-use pointMap
-        return mpm_.pointMap();
+        calcAddressing();
     }
-    else
-    {
-        if (!directAddrPtr_)
-        {
-            calcAddressing();
-        }
 
-        return *directAddrPtr_;
-    }
+    return *directAddrPtr_;
 }
 
 
