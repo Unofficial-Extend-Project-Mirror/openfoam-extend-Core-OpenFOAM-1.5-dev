@@ -58,8 +58,7 @@ autoPtr<faceTetPolyPatchCellDecomp> faceTetPolyPatchCellDecomp::New
             "const tetPolyBoundaryMeshCellDecomp&) : "
         )   << "Unknown faceTetPolyPatchCellDecomp type "
             << patch.type()
-            << endl << endl
-            << "Valid faceTetPolyPatchCellDecomp types are :" << endl
+            << ".  Valid faceTetPolyPatchCellDecomp types are :" << endl
             << polyPatchConstructorTablePtr_->toc()
             << exit(FatalError);
     }
