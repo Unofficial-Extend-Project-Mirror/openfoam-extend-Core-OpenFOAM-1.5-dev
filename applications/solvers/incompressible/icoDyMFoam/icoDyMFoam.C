@@ -72,11 +72,15 @@ int main(int argc, char *argv[])
 #           include "checkTotalVolume.H"
 #           include "volContinuity.H"
 #           include "correctPhi.H"
-#           include "CourantNo.H"
         }
 
         // Make the fluxes relative to the mesh motion
         fvc::makeRelative(phi, U);
+
+        if (meshChanged)
+        {
+#           include "CourantNo.H"
+        }
 
 #       include "UEqn.H"
 

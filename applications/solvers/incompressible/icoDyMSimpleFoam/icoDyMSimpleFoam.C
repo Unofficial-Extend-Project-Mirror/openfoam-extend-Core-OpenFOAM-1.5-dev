@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
         if (correctPhi && meshChanged)
         {
 #           include "volContinuity.H"
+            // Fluxes will be corrected to absolute velocity
+            // HJ, 6/Feb/2009
 #           include "correctPhi.H"
         }
 

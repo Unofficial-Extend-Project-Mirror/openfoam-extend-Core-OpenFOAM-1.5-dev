@@ -45,8 +45,8 @@
             phi -= pcorrEqn.flux();
         }
 
-        // Make the fluxes relative to the mesh motion
-        fvc::makeRelative(phi, U);
+        // Fluxes are corrected to absolute velocity and further corrected
+        // later.  HJ, 6/Feb/2009
     }
 }
 
