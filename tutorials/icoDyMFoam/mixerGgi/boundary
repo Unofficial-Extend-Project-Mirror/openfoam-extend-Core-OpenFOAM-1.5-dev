@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.3                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/hjasak/OpenFOAM/hjasak-1.3/run/ggiCoupling";
+    case "mixerGgi";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+impellerWall
+{
+    type wall;
+    nFaces 68;
+    startFace 1040;
+}
+
+baffleWall
+{
+    type wall;
+    nFaces 84;
+    startFace 1108;
+}
+
+insideSlider
+{
+    type ggi;
+    nFaces 36;
+    startFace 1192;
+    shadowPatch outsideSlider;
+    bridgeOverlap false;
+}
+
+outsideSlider
+{
+    type ggi;
+    nFaces 36;
+    startFace 1228;
+    shadowPatch insideSlider;
+    bridgeOverlap false;
+}
+
+defaultFaces
+{
+    type empty;
+    nFaces 1152;
+    startFace 1264;
+}
+)
+
+// ************************************************************************* //
