@@ -215,7 +215,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     if (allGeometry)
     {
         faceSet faces(mesh, "concaveFaces", mesh.nFaces()/100 + 1);
-        if (mesh.checkFaceAngles(true, 10, &faces))
+        if (mesh.checkFaceAngles(true, &faces))
         {
             //noFailedChecks++;
 
@@ -232,7 +232,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     if (allGeometry)
     {
         faceSet faces(mesh, "warpedFaces", mesh.nFaces()/100 + 1);
-        if (mesh.checkFaceFlatness(true, 0.8, &faces))
+        if (mesh.checkFaceFlatness(true, &faces))
         {
             //noFailedChecks++;
 

@@ -268,24 +268,6 @@ class primitiveMesh
             ) const;
 
 
-    // Static data members
-
-        //- Static data to control mesh checking
-
-            //- Cell closedness warning threshold
-            //  set as the fraction of un-closed area to closed area
-            static scalar closedThreshold_;
-
-            //- Aspect ratio warning threshold
-            static scalar aspectThreshold_;
-
-            //- Non-orthogonality warning threshold in deg
-            static scalar nonOrthThreshold_;
-
-            //- Skewness warning threshold
-            static scalar skewThreshold_;
-
-
 protected:
 
         //- Construct null
@@ -294,9 +276,12 @@ protected:
 
 public:
 
-        // Static data
+    // Static data
 
-            ClassName("primitiveMesh");
+        ClassName("primitiveMesh");
+
+
+    // Static mesh analysis data
 
             //- Estimated number of cells per edge
             static const unsigned cellsPerEdge_ = 4;
@@ -327,6 +312,27 @@ public:
 
             //- Estimated number of points per face
             static const unsigned pointsPerFace_ = 4;
+
+        //- Static data to control mesh checking
+
+            //- Cell closedness warning threshold
+            //  set as the fraction of un-closed area to closed area
+            static scalar closedThreshold_;
+
+            //- Aspect ratio warning threshold
+            static scalar aspectThreshold_;
+
+            //- Non-orthogonality warning threshold in deg
+            static scalar nonOrthThreshold_;
+
+            //- Skewness warning threshold
+            static scalar skewThreshold_;
+
+            //- Face angle threshold
+            static scalar faceAngleThreshold_;
+
+            //- Face flatness threshold
+            static scalar faceFlatnessThreshold_;
 
 
     // Constructors
@@ -572,7 +578,6 @@ public:
                 bool checkFaceAngles
                 (
                     const bool report = false,
-                    const scalar maxSin = 10,    // In degrees
                     labelHashSet* setPtr = NULL
                 ) const;
 
@@ -582,7 +587,6 @@ public:
                 bool checkFaceFlatness
                 (
                     const bool report,
-                    const scalar warnFlatness,  // When to include in set.
                     labelHashSet* setPtr
                 ) const;
 

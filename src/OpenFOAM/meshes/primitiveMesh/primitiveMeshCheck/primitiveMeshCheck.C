@@ -57,6 +57,16 @@ scalar primitiveMesh::skewThreshold_
     debug::tolerances("primitiveMeshSkewThreshold", 4)
 );
 
+scalar primitiveMesh::faceAngleThreshold_
+(
+    debug::tolerances("primitiveMeshFaceAngleThreshold", 10)
+);
+
+scalar primitiveMesh::faceFlatnessThreshold_
+(
+    debug::tolerances("primitiveMeshFaceFlatnessThreshold", 0.8)
+);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -843,28 +853,28 @@ bool primitiveMesh::checkPoints
 bool primitiveMesh::checkFaceAngles
 (
     const bool report,
-    const scalar maxDeg,
     labelHashSet* setPtr
 ) const
 {
     if (debug)
     {
         Info<< "bool primitiveMesh::checkFaceAngles"
-            << "(const bool, const scalar, labelHashSet*) const: "
+            << "(const bool, labelHashSet*) const: "
             << "checking face angles" << endl;
     }
 
-    if (maxDeg < -SMALL || maxDeg > 180+SMALL)
+    if (faceAngleThreshold_ < -SMALL || faceAngleThreshold_ > 180 + SMALL)
     {
         FatalErrorIn
         (
-            "primitiveMesh::checkFaceAngles"
-            "(const bool, const scalar, labelHashSet*)"
-        )   << "maxDeg should be [0..180] but is now " << maxDeg
+            "primitiveMesh::checkFaceAngles(const bool, labelHashSet*)"
+        )   << "faceAngleThreshold_ should be [0..180] but is now "
+            << faceAngleThreshold_
             << exit(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*mathematicalConstant::pi);
+    const scalar maxSin =
+        Foam::sin(faceAngleThreshold_/180.0*mathematicalConstant::pi);
 
     const pointField& p = points();
     const faceList& fcs = faces();
@@ -971,24 +981,24 @@ bool primitiveMesh::checkFaceAngles
 bool primitiveMesh::checkFaceFlatness
 (
     const bool report,
-    const scalar warnFlatness,
     labelHashSet* setPtr
 ) const
 {
     if (debug)
     {
         Info<< "bool primitiveMesh::checkFaceFlatness"
-            << "(const bool, const scalar, labelHashSet*) const: "
+            << "(const bool, labelHashSet*) const: "
             << "checking face flatness" << endl;
     }
 
-    if (warnFlatness < 0 || warnFlatness > 1)
+    if (faceFlatnessThreshold_ < 0 || faceFlatnessThreshold_ > 1)
     {
         FatalErrorIn
         (
             "primitiveMesh::checkFaceFlatness"
-            "(const bool, const scalar, labelHashSet*)"
-        )   << "warnFlatness should be [0..1] but is now " << warnFlatness
+            "(const bool, labelHashSet*)"
+        )   << "faceFlatnessThreshold_ should be [0..1] but is now "
+            << faceFlatnessThreshold_
             << exit(FatalError);
     }
 
@@ -1037,7 +1047,7 @@ bool primitiveMesh::checkFaceFlatness
 
             minFlatness = min(minFlatness, flatness);
 
-            if (flatness < warnFlatness)
+            if (flatness < faceFlatnessThreshold_)
             {
                 nWarped++;
 
@@ -1066,13 +1076,13 @@ bool primitiveMesh::checkFaceFlatness
     }
 
 
-    if (nWarped> 0)
+    if (nWarped > 0)
     {
         if (debug || report)
         {
             Info<< "   *There are " << nWarped
                 << " faces with ratio between projected and actual area < "
-                << warnFlatness << endl;
+                << faceFlatnessThreshold_ << endl;
 
             Info<< "    Minimum ratio (minimum flatness, maximum warpage) = "
                 << minFlatness << endl;

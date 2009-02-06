@@ -118,14 +118,13 @@ void checkSnapMesh
             << " faces with illegal face pyramids" << endl;
     }
 
-    if (maxConcave < 180.0-SMALL)
+    if (maxConcave < 180.0 - SMALL)
     {
         Pout<< "Checking face angles" << endl;
 
         label nOldSize = wrongFaces.size();
-        mesh.checkFaceAngles(false, maxConcave, &wrongFaces);
-        Pout<< "Detected additional " << wrongFaces.size() - nOldSize
-            << " faces with concavity > " << maxConcave << " degrees"
+        mesh.checkFaceAngles(false, &wrongFaces);
+        Pout<< "Detected additional concave " << wrongFaces.size() - nOldSize
             << endl;
     }
 
