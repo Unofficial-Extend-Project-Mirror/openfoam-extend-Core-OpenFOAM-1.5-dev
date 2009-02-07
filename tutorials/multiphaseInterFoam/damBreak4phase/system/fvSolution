@@ -57,8 +57,9 @@ solvers
 
     pdFinal PCG
     {
-        preconditioner GAMG
+        preconditioner
         {
+            type             GAMG;
             tolerance        1e-7;
             relTol           0;
 
