@@ -521,6 +521,7 @@ $(interpolations)/RBFInterpolation/RBFFunctions/RBFFunction/newRBFFunction.C
 $(interpolations)/RBFInterpolation/RBFFunctions/W2/W2.C
 $(interpolations)/RBFInterpolation/RBFFunctions/Gauss/Gauss.C
 $(interpolations)/RBFInterpolation/RBFFunctions/TPS/TPS.C
+$(interpolations)/RBFInterpolation/RBFFunctions/IMQB/IMQB.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
