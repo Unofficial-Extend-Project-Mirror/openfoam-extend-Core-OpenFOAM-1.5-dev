@@ -67,10 +67,10 @@ int main(int argc, char *argv[])
 
         bool meshChanged = mesh.update();
 
-        if (meshChanged)
+#       include "volContinuity.H"
+
+        if (correctPhi && meshChanged)
         {
-#           include "checkTotalVolume.H"
-#           include "volContinuity.H"
 #           include "correctPhi.H"
         }
 
