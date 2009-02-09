@@ -28,13 +28,38 @@ Class
 Description
     Radial basis function interpolation class
 
+Description
+    Interpolation class which uses Radial Basis Functions to interpolate the
+    fluid displacements for given boundary displacements. 
+
+	The coefficient vectors, alpha and beta are determined by solving
+    the system:
+	
+	| db | = | Mbb Pb | | alpha |
+	| 0  |   | Pb  0  | |  beta |
+	
+	where db are the given boundary displacements, 
+	Mbb the boundary RBF correlation matrix (NbxNb), containing RBF evaluations
+    at the boundary nodes, and Pb some linear polynomial matrix (Nbx4).
+	
+	Those coefficients are calculated every timestep, with the current
+    boundary displacements db, with the inverse of Mbb. Using those
+    coefficients, the RBF is evaluated at all fluid points every
+    timestep.
+
+	The efficiency of this method is increased by:
+		1) 	using control points which is a subset of the moving
+            boundary points. Those control points are selected by
+			a coarsening function.
+		2)	The outer boundary points are neglected since a cutoff function
+            is used toward the outer boundaries. 
+		
 Author
     Frank Bos, TU Delft.  All rights reserved.
 
 SourceFiles
-    RBFInterpolationI.H
     RBFInterpolation.C
-    RBFInterpolationIO.C
+    RBFInterpolationTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -85,6 +110,8 @@ class RBFInterpolation
         //- Outer cut-off radius
         scalar outerRadius_;
 
+        //- Add polynomials to RBF matrix
+        bool polyNomials_;
 
     // Private Member Functions
 

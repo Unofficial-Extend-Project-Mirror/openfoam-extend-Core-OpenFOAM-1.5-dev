@@ -37,6 +37,10 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
     const Field<Type>& ctrlField
 ) const
 {
+    // HJ and FB (05 Jan 2009)
+    // Collect the values from ALL control points to all CPUs
+    // Then, each CPU will do interpolation only on local allPoints_
+
     if (ctrlField.size() != controlPoints_.size())
     {
         FatalErrorIn
@@ -78,19 +82,23 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
         }
     }
 
-    for
-    (
-        label row = nControlPoints;
-        row < nControlPoints + 4;
-        row++
-    )
+    
+    if(polyNomials_)
     {
-        for (label col = 0; col < nControlPoints; col++)
+        for
+        (
+            label row = nControlPoints;
+            row < nControlPoints + 4;
+            row++
+        )
         {
-            beta[row - nControlPoints] += B_[row][col]*ctrlField[col];
+            for (label col = 0; col < nControlPoints; col++)
+            {
+                beta[row - nControlPoints] += B_[row][col]*ctrlField[col];
+            }
         }
     }
-
+    
     // Evaluation
     scalar t;
 
@@ -104,25 +112,34 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
             result[flPoint] += weights[i]*alpha[i];
         }
 
+    if(polyNomials_)
+    {
         result[flPoint] +=
             beta[0]
           + beta[1]*allPoints_[flPoint].x()
           + beta[2]*allPoints_[flPoint].y()
           + beta[3]*allPoints_[flPoint].z();
+    }
 
         // Cut-off function to justify neglecting outer boundary points
         t = (Foam::mag(allPoints_[flPoint]) - innerRadius_)/
             (outerRadius_ - innerRadius_);
 
-        // Apply bounds
-        if (t > 0 && t < 1)
+        scalar w;
+
+        if (t <= 0)
         {
-            result[flPoint] *= 1 - sqr(t)*(3 - 2*t);
+            w = 1.0;
         }
-        else if (t >= 1)
+        else if(t >= 1)
         {
-            result[flPoint] *= 0;
+            w = 0.0;
         }
+        else
+        {
+            w = 1 - sqr(t)*(3-2*t);
+        }
+        result[flPoint] = w*result[flPoint];
     }
 
     return tresult;

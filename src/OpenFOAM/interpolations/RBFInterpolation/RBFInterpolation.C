@@ -42,100 +42,178 @@ const Foam::scalarMatrix& Foam::RBFInterpolation::B() const
 
 void Foam::RBFInterpolation::calcB() const
 {
-	// Determine inverse of boundary connectivity matrix
-   
-	// Fill Nb x Nb matrix
-	scalarMatrix A(controlPoints_.size() + 4);
-	const label nControlPoints = controlPoints_.size();
-
-	for (label i = 0; i < nControlPoints; i++)
+    // Determine inverse of boundary connectivity matrix
+    label polySize(4); 
+    if(!polyNomials_)
     {
-		scalarField weights = RBF_->weights(controlPoints_, controlPoints_[i]);
+        polySize = 0;
+    }
+
+    // Fill Nb x Nb matrix  
+    simpleMatrix<scalar> A(controlPoints_.size()+polySize);
+
+    //global size of controlPoints
+
+    // ==================================
+    // FM BOS [22 Jan 2009]
+    // PARALLEL PIECE OF CODE
+//    globalPoints parallelPoints(mesh_);
+  
+//     IOobject addrHeader
+//     (
+//         "pointProcAddressing",
+//         mesh_.facesInstance()/mesh_.meshSubDir,
+//         mesh_,
+//         IOobject::MUST_READ
+//     );
+//         if (addrHeader.headerOk())
+//         {
+//             // There is a pointProcAddressing file so use it to get labels
+//             // on the original mesh
+//             Pout<< "globalMeshData::sharedPointGlobalLabels : "
+//                 << "Reading pointProcAddressing" << endl;
+// 
+//             labelIOList pointProcAddressing(addrHeader);
+// //             forAll(sharedPointLabels_, i)
+// //             {
+// //                 // Get my mesh point
+// //                 label pointI = sharedPointLabels_[i];
+// // 
+// //                 // Map to mesh point of original mesh
+// //                 sharedPointGlobalLabels[i] = pointProcAddressing[pointI];
+// //             }
+//         }
+// 
+// 
+//     Info << "control points: " << controlPoints_ << endl;
+// 
+//     if (Pstream::master())
+//     {
+//         Info << "Master node" << endl;
+//         Info << Pstream::parRun() << endl;
+//         for
+//         (
+//             int slave=Pstream::firstSlave();
+//             slave<=Pstream::lastSlave();
+//             slave++
+//         )
+//         {
+//             Info << "CPU number: " << slave << endl;
+//             forAll(controlPoints_, i)
+//             {
+//                 Info<<controlPoints_[i]<<endl;
+//                 OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+//                 toMaster<<controlPoints_;
+//             }
+//         }
+//     }
+//     else
+//     {
+//         Info << "Slave node" << endl;
+//     }
+// 
+//     Info << "Pstream::firstSlave(): " << Pstream::firstSlave() << endl;
+//     Info << "Pstream::lastSlave(): " << Pstream::lastSlave() << endl;
+    // FM BOS [22 Jan 2009]
+    // END PARALLEL PIECE OF CODE
+    // ==================================
+
+    const label nControlPoints = controlPoints_.size();
+    for (label i = 0; i < nControlPoints; i++)
+    {
+        scalarField weights = RBF_->weights(controlPoints_, controlPoints_[i]);
 
         for (label col = 0; col < nControlPoints; col++)
-		{
+        {
             A[i][col] = weights[col];
-		}	
-    }	
+        }    
+    }    
 
-    for 
-    (
-        label row = nControlPoints;
-        row < nControlPoints + 1;
-        row++
-    )
+    if(polyNomials_)
     {
-        for (label col = 0; col < nControlPoints; col++)
-		{
-            A[col][row] = 1.0;
-            A[row][col] = 1.0;
-		}
+        for 
+        (
+            label row = nControlPoints;
+            row < nControlPoints + 1;
+            row++
+        )
+        {
+            for (label col = 0; col < nControlPoints; col++)
+            {
+                A[col][row] = 1.0;
+                A[row][col] = 1.0;
+            }
+        }
+    
+        // Fill in X components of polynomial part of matrix
+        for 
+        (
+            label row = nControlPoints + 1;
+            row < nControlPoints + 2;
+            row++
+        )
+        {
+            for (label col = 0; col < nControlPoints; col++)
+            {
+                A[col][row] = controlPoints_[col].x();
+                A[row][col] = controlPoints_[col].x();
+            }
+        }
+    
+        // Fill in Y components of polynomial part of matrix
+        for 
+        (
+            label row = nControlPoints + 2;
+            row < nControlPoints + 3;
+            row++
+        )
+        {
+            for (label col = 0; col < nControlPoints; col++)
+            {
+                A[col][row] = controlPoints_[col].y();
+                A[row][col] = controlPoints_[col].y();
+            }
+        }
+        // Fill in Z components of polynomial part of matrix
+        for 
+        (
+            label row = nControlPoints + 3;
+            row < nControlPoints + 4;
+            row++
+        )
+        {
+            for (label col = 0; col < nControlPoints; col++)
+            {
+                A[col][row] = controlPoints_[col].z();
+                A[row][col] = controlPoints_[col].z();
+            }
+        }
+    
+        // Fill 4x4 zero part of matrix    
+        for 
+        (
+            label row = nControlPoints;
+            row < nControlPoints + 4; 
+            row++
+        )
+        {
+            for 
+            (
+                label col = nControlPoints;
+                col < nControlPoints + 4; 
+                col++
+            )
+            {
+                A[row][col] = 0.0;
+            }
+        }
     }
 
-	// Fill in X components of polynomial part of matrix
-    for 
-    (
-        label row = nControlPoints + 1;
-        row < nControlPoints + 2;
-        row++
-    )
-    {
-        for (label col = 0; col < nControlPoints; col++)
-		{
-            A[col][row] = controlPoints_[col].x();
-            A[row][col] = controlPoints_[col].x();
-		}
-    }
+    // HJ and FB (05 Jan 2009)
+    // Collect ALL control points from ALL CPUs
+    // Create an identical inverse for all CPUs
 
-	// Fill in Y components of polynomial part of matrix
-    for 
-    (
-        label row = nControlPoints + 2;
-        row < nControlPoints + 3;
-        row++
-    )
-    {
-        for (label col = 0; col < nControlPoints; col++)
-		{
-            A[col][row] = controlPoints_[col].y();
-            A[row][col] = controlPoints_[col].y();
-		}
-    }
-	// Fill in Z components of polynomial part of matrix
-    for 
-    (
-        label row = nControlPoints + 3;
-        row < nControlPoints + 4;
-        row++
-    )
-    {
-        for (label col = 0; col < nControlPoints; col++)
-		{
-            A[col][row] = controlPoints_[col].z();
-            A[row][col] = controlPoints_[col].z();
-		}
-    }
-
-	// Fill 4x4 zero part of matrix	
-    for 
-    (
-        label row = nControlPoints;
-        row < nControlPoints + 4; 
-        row++
-    )
-    {
-		for 
-		(
-			label col = nControlPoints;
-			col < nControlPoints + 4; 
-			col++
-		)
-			{
-				A[row][col] = 0.0;
-			}
-    }
-
-	BPtr_ = new scalarMatrix(A.LUinvert());
+    BPtr_ = new scalarMatrix(A.LUinvert());
 }
 
 
@@ -161,8 +239,9 @@ Foam::RBFInterpolation::RBFInterpolation
     allPoints_(allPoints),
     RBF_(RBFFunction::New(word(dict.lookup("RBF")), dict)),
     BPtr_(NULL),
-    innerRadius_(dict.lookupOrDefault<scalar>("innerRadius", 1.0)),
-    outerRadius_(dict.lookupOrDefault<scalar>("outerRadius", 2.5))
+    innerRadius_(readScalar(dict.lookup("innerRadius"))),
+    outerRadius_(readScalar(dict.lookup("outerRadius"))),
+    polyNomials_(readBool(dict.lookup("polyNomials")))
 {}
 
 
