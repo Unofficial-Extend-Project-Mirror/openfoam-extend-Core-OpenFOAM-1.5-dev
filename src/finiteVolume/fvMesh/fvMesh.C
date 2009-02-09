@@ -406,17 +406,17 @@ void fvMesh::mapFields(const mapPolyMesh& meshMap)
 
 void fvMesh::mapOldVolumes(const mapPolyMesh& meshMap)
 {
-    if (debug)
-    {
-        InfoIn("void fvMesh::(const mapPolyMesh& meshMap)")
-            << "Mapping cell volumes." << endl;
-    }
-
     const labelList& cellMap = meshMap.cellMap();
 
     // Map the old volume. Just map to new cell labels.
     if (V0Ptr_)
     {
+        if (debug)
+        {
+            InfoIn("void fvMesh::mapOldVolumes(const mapPolyMesh& meshMap)")
+                << "Mapping old cell volumes." << endl;
+        }
+
         scalarField& V0 = *V0Ptr_;
 
         scalarField savedV0(V0);
@@ -438,6 +438,12 @@ void fvMesh::mapOldVolumes(const mapPolyMesh& meshMap)
     // Map the old-old volume. Just map to new cell labels.
     if (V00Ptr_)
     {
+        if (debug)
+        {
+            InfoIn("void fvMesh::mapOldVolumes(const mapPolyMesh& meshMap)")
+                << "Mapping old-old cell volumes." << endl;
+        }
+
         scalarField& V00 = *V00Ptr_;
 
         scalarField savedV00(V00);
@@ -489,15 +495,33 @@ tmp<scalarField> fvMesh::movePoints(const pointField& p)
     {
         if (V00Ptr_ && V0Ptr_)
         {
+            if (debug)
+            {
+                InfoIn("void fvMesh::movePoints(const mapPolyMesh& meshMap)")
+                    << "Grabbing old-old cell volumes." << endl;
+            }
+
             *V00Ptr_ = *V0Ptr_;
         }
 
         if (V0Ptr_)
         {
+            if (debug)
+            {
+                InfoIn("void fvMesh::movePoints(const mapPolyMesh& meshMap)")
+                    << "Grabbing old cell volumes." << endl;
+            }
+
             *V0Ptr_ = V();
         }
         else
         {
+            if (debug)
+            {
+                InfoIn("void fvMesh::movePoints(const mapPolyMesh& meshMap)")
+                    << "Creating old cell volumes." << endl;
+            }
+
             V0Ptr_ = new DimensionedField<scalar, volMesh>
             (
                 IOobject
@@ -526,7 +550,7 @@ tmp<scalarField> fvMesh::movePoints(const pointField& p)
         if (debug)
         {
             InfoIn("tmp<scalarField> fvMesh::movePoints(const pointField& p)")
-                << "Creating null mesh motion fluxes" << endl;
+                << "Creating new mesh motion fluxes" << endl;
         }
 
         phiPtr_ = new surfaceScalarField

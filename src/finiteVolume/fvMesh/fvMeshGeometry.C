@@ -250,7 +250,7 @@ void fvMesh::makePhi() const
         if (debug)
         {
             InfoIn("void fvMesh::makePhi()")
-                << "Calculating mesh fluxes" << endl;
+                << "Creating null mesh motion fluxes" << endl;
         }
 
         phiPtr_ = new surfaceScalarField
@@ -302,6 +302,15 @@ const volScalarField::DimensionedInternalField& fvMesh::V() const
 {
     if (!VPtr_)
     {
+        if (debug)
+        {
+            InfoIn
+            (
+                "const volScalarField::DimensionedInternalField& "
+                "fvMesh::V() const"
+            )   << "Calculating cell volumes." << endl;
+        }
+
         VPtr_ = new DimensionedField<scalar, volMesh>
         (
             IOobject
@@ -345,6 +354,12 @@ DimensionedField<scalar, volMesh>& fvMesh::setV0()
     }
     
     deleteDemandDrivenData(V0Ptr_);
+
+    if (debug)
+    {
+        InfoIn("DimensionedField<scalar, volMesh>& fvMesh::setV0()")
+            << "Setting old cell volumes" << endl;
+    }
 
     V0Ptr_ = new DimensionedField<scalar, volMesh>
     (
@@ -444,6 +459,13 @@ const surfaceScalarField& fvMesh::phi() const
     if (phiPtr_->timeIndex() != time().timeIndex())
     {
         phiPtr_->oldTime();
+
+        if (debug)
+        {
+            InfoIn("const surfaceScalarField& fvMesh::phi() const")
+                << "Resetting mesh motion fluxes to zero" << endl;
+        }
+
         (*phiPtr_) = dimensionedScalar("0", dimVolume/dimTime, 0.0);
     }
 
