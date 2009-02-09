@@ -311,9 +311,7 @@ Foam::tmp<Foam::pointField> Foam::RBFMotionSolver::curPoints() const
 
 
 void Foam::RBFMotionSolver::solve()
-{
-    Info << "In solve: do nothing" << endl;
-}
+{}
 
 
 void Foam::RBFMotionSolver::updateMesh(const mapPolyMesh&)
