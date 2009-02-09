@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-#       include "readPISOControls.H"
-#       include "readTimeControls.H"
+#       include "readControls.H"
 #       include "checkTotalVolume.H"
 #       include "CourantNo.H"
 
