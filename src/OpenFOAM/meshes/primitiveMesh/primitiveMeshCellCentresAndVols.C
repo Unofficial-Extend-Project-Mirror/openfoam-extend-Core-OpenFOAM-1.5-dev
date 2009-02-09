@@ -116,8 +116,13 @@ void primitiveMesh::makeCellCentresAndVols
     forAll (own, facei)
     {
         // Calculate 3*face-pyramid volume
+
+        // Bug fix: incorrect volume calculation for mildly concave cells
+        // Critical in mesh motion sliding cases for volume conservation
+        // HJ, 9/Feb/2009
         scalar pyr3Vol =
-            max(fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]), VSMALL);
+//             max(fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]), VSMALL);
+            fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]);
 
         // Calculate face-pyramid centre
         vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[own[facei]];
@@ -132,8 +137,13 @@ void primitiveMesh::makeCellCentresAndVols
     forAll (nei, facei)
     {
         // Calculate 3*face-pyramid volume
+
+        // Bug fix: incorrect volume calculation for mildly concave cells
+        // Critical in mesh motion sliding cases for volume conservation
+        // HJ, 9/Feb/2009
         scalar pyr3Vol =
-            max(fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]), VSMALL);
+//             max(fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]), VSMALL);
+            fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]);
 
         // Calculate face-pyramid centre
         vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[nei[facei]];
