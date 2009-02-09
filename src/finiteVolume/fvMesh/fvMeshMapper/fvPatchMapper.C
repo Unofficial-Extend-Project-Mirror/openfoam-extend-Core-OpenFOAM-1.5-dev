@@ -89,7 +89,7 @@ void Foam::fvPatchMapper::calcAddressing() const
 
         if (fvMesh::debug)
         {
-            if (min(addr) < 0)
+            if (addr.size() > 0 && min(addr) < 0)
             {
                 FatalErrorIn
                 (
@@ -179,15 +179,16 @@ void Foam::fvPatchMapper::calcAddressing() const
 
         if (fvMesh::debug)
         {
-            forAll (addr, i)
+            forAll (addr, faceI)
             {
-                if (min(addr[i]) < 0)
+                if (min(addr[faceI]) < 0)
                 {
                     FatalErrorIn
                     (
                         "void fvPatchMapper::calcAddressing() const"
                     )   << "Error in patch mapping for patch "
                         << patch_.index() << " named " << patch_.name()
+                        << " face " << faceI
                         << abort(FatalError);
                 }
             }
