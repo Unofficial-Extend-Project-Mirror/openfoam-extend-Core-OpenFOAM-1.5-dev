@@ -16,6 +16,7 @@ if (mesh.moving())
 
     Info<< "volume continuity errors : "
         << "volume = " << sum(mesh.V()).value()
+        << ", max error = " << max(conserve.internalField())
         << ", sum local = " << sumLocalContErr
         << ", global = " << globalContErr << endl;
 }
