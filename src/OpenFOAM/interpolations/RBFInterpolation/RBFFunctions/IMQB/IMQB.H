@@ -23,9 +23,21 @@ License
     Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 Class
-    RBFFunction
+    IMQB
+
+Description
+    IMQB radial basis function
+
+Author
+    Frank Bos, TU Delft.  All rights reserved.
+
+SourceFiles
+    IMQB.C
 
 \*---------------------------------------------------------------------------*/
+
+#ifndef IMQB_H
+#define IMQB_H
 
 #include "RBFFunction.H"
 
@@ -34,39 +46,62 @@ Class
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                              Class IMQB Declaration
+\*---------------------------------------------------------------------------*/
 
-autoPtr<RBFFunction> RBFFunction::New
-(
-    const word& type,
-    const dictionary& dict
-)
+class IMQB
+:
+    public RBFFunction
 {
-    Info<< "Mesh motion with Radial Basis Functions: "
-        << "Selecting RBF function: " << type << endl;
+    // Private data
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(type);
+        //- Radius
+        scalar radius_;
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalIOErrorIn
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        IMQB(const IMQB&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const IMQB&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("IMQB");
+
+    // Constructors
+
+        //- Construct from dictionary
+        IMQB(const dictionary& dict);
+
+
+    // Destructor
+
+        virtual ~IMQB();
+
+
+    // Member Functions
+
+        //- Return weights given points
+        virtual tmp<scalarField> weights
         (
-            "RBFFunction::New(const word& type, const dictionary& dict)",
-            dict
-        )   << "Unknown RBFFunction type "
-            << type << endl << endl
-            << "Valid  RBFFunctions are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalIOError);
-    }
-
-    return autoPtr<RBFFunction>(cstrIter()(dict.subDict(type + "Coeffs")));
-}
+            const vectorField& points,
+            const vector& controlPoint
+        ) const;
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

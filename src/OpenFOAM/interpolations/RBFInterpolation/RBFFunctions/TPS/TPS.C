@@ -61,8 +61,21 @@ Foam::tmp<Foam::scalarField> Foam::TPS::weights
 ) const
 {
     scalarField dist = mag(points - controlPoint);
-	
-	return sqr(dist)*log(dist);
+    scalarField RBF(dist.size());
+
+    forAll(RBF, i)
+    {
+        if(dist[i] != 0.0)
+        {
+            RBF[i] = sqr(dist[i])*log(dist[i]);
+        }
+        else
+        {
+            RBF[i] = 0.0;
+        }
+    }
+
+    return RBF;
 }
 
 

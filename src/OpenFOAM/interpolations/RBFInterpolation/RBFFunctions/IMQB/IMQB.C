@@ -24,22 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "W2.H"
+#include "IMQB.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(W2, 0);
-    addToRunTimeSelectionTable(RBFFunction, W2, dictionary);
+    defineTypeNameAndDebug(IMQB, 0);
+    addToRunTimeSelectionTable(RBFFunction, IMQB, dictionary);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-Foam::W2::W2(const dictionary& dict)
+Foam::IMQB::IMQB(const dictionary& dict)
 :
     RBFFunction(),
     radius_(readScalar(dict.lookup("radius")))
@@ -48,13 +48,13 @@ Foam::W2::W2(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::W2::~W2()
+Foam::IMQB::~IMQB()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::scalarField> Foam::W2::weights
+Foam::tmp<Foam::scalarField> Foam::IMQB::weights
 (
     const vectorField& points,
     const vector& controlPoint
@@ -62,12 +62,8 @@ Foam::tmp<Foam::scalarField> Foam::W2::weights
 {
     scalarField dist = mag(points - controlPoint);
 
-    scalarField RBF(dist.size());
-
-    RBF = neg(dist - radius_)*
-        Foam::max(pow4(1 - (dist/radius_)), 0.0)*(1 + 4*(dist/radius_));
-
-    return RBF;
+    return 1/sqrt(sqr(dist) + sqr(radius_));
 }
+
 
 // ************************************************************************* //

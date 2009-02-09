@@ -62,7 +62,7 @@ Foam::tmp<Foam::scalarField> Foam::Gauss::weights
 {
     scalarField dist = mag(points - controlPoint);
 
-	return Foam::exp(-pow(radius_*dist, 2));
+    return Foam::exp(-pow(radius_*dist, 2));
 }
 
 
