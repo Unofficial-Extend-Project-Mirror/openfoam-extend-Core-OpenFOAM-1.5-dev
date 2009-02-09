@@ -30,8 +30,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "argList.H"
-#include "Time.H"
+#include "fvCFD.H"
 #include "dynamicFvMesh.H"
 
 using namespace Foam;
@@ -57,8 +56,9 @@ int main(int argc, char *argv[])
         }
 
         mesh.update();
-#       include "meshInfo.H"
-        mesh.checkMesh(true);
+#       include "checkVolContinuity.H"
+// #       include "meshInfo.H"
+//         mesh.checkMesh(true);
 
         runTime.write();
 
