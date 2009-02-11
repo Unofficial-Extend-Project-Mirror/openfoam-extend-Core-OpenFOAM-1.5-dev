@@ -121,6 +121,12 @@ void gradientEnthalpyFvPatchScalarField::updateCoeffs()
 }
 
 
+void gradientEnthalpyFvPatchScalarField::write(Ostream& os) const
+{
+    fixedGradientFvPatchScalarField::write(os);
+    writeEntry("value", os);
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makePatchTypeField(fvPatchScalarField, gradientEnthalpyFvPatchScalarField);
