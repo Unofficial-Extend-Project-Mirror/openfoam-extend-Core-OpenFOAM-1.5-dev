@@ -1,0 +1,93 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          motionProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh dynamicMotionSolverFvMesh;
+
+solver RBFMotionSolver;
+
+movingPatches ( block );
+
+staticPatches ( left right top bottom );
+
+coarseningRatio 5;
+
+interpolation
+{
+    RBF  IMQB;
+	innerRadius 2.5;//5.0
+	outerRadius 12.5;
+	polyNomials true;
+
+    W2Coeffs
+    {
+        radius     1.0;
+    }
+    TPSCoeffs
+    {
+        radius     5.0;
+    }
+	GaussCoeffs
+	{
+		radius		0.1;
+	}
+	IMQBCoeffs
+	{
+		radius		0.001;
+	}
+}
+
+/*motionVariables
+{
+	bodyPatchName				wall;
+	
+	flapping
+	{
+		flapping				no;
+		piecewiseKinematics		no;
+		flappingRotationOffset 	(0 0 0);
+		flappingFrequency		0.25;
+	}
+
+	flexing
+	{
+		flexing					no;
+		flexLength				5.0;
+		flexAmplitude			0.5;
+		flexFrequency			0.25;
+		flexDirection			(0 1 0);
+		flexCoordinate			(1 0 0);
+	}
+
+	translation
+	{
+		translationAmplitude	(0 5 0);
+		translationFrequency	(0.25 0.25 0);
+	}
+
+	rotation
+	{
+		initialRotationOrigin   (0 0 0);
+		rotationAmplitude		(0 0 0);
+		rotationFrequency		(0.25 0.25 0.25);
+		rotationDuration        0.2;
+		strokePlaneAngle		0;
+	}*/
+}
+
+
+// ************************************************************************* //
