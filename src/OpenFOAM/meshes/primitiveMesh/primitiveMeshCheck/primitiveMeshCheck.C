@@ -235,7 +235,8 @@ bool primitiveMesh::checkClosedCells
         (
             cmptMax(sumMagClosed[cellI])
            /(cmptMin(sumMagClosed[cellI]) + VSMALL),
-            1.0/6.0*cmptSum(sumMagClosed[cellI])/pow(vols[cellI], 2.0/3.0)
+            1.0/6.0*cmptSum(sumMagClosed[cellI])/
+            Foam::pow(Foam::max(vols[cellI], SMALL), 2.0/3.0)
         );
 
         maxAspectRatio = max(maxAspectRatio, aspectRatio);
