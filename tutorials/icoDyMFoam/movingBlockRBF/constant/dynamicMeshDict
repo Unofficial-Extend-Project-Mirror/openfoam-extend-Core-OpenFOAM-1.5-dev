@@ -51,43 +51,5 @@ interpolation
 	}
 }
 
-/*motionVariables
-{
-	bodyPatchName				wall;
-	
-	flapping
-	{
-		flapping				no;
-		piecewiseKinematics		no;
-		flappingRotationOffset 	(0 0 0);
-		flappingFrequency		0.25;
-	}
-
-	flexing
-	{
-		flexing					no;
-		flexLength				5.0;
-		flexAmplitude			0.5;
-		flexFrequency			0.25;
-		flexDirection			(0 1 0);
-		flexCoordinate			(1 0 0);
-	}
-
-	translation
-	{
-		translationAmplitude	(0 5 0);
-		translationFrequency	(0.25 0.25 0);
-	}
-
-	rotation
-	{
-		initialRotationOrigin   (0 0 0);
-		rotationAmplitude		(0 0 0);
-		rotationFrequency		(0.25 0.25 0.25);
-		rotationDuration        0.2;
-		strokePlaneAngle		0;
-	}*/
-}
-
 
 // ************************************************************************* //

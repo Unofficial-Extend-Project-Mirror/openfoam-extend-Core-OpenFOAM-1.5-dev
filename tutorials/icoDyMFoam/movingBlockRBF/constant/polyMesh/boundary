@@ -47,7 +47,7 @@ FoamFile
         nFaces          25;
         startFace       1271;
     }
-    defaultFaces
+    frontAndBack
     {
         type            empty;
         nFaces          1240;
