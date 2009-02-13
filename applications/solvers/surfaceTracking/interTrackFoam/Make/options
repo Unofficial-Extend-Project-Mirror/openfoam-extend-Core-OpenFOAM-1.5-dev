@@ -15,4 +15,5 @@ EXE_LIBS = \
     -lmeshTools \
     -ldynamicMesh \
     -lmeshTools \
-    $(WM_DECOMP_LIBS)
+    $(WM_DECOMP_LIBS) \
+    -llduSolvers
