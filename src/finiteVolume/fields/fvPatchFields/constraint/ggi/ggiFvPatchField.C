@@ -181,7 +181,10 @@ void ggiFvPatchField<Type>::evaluate
         vectorField nHat = this->patch().nf();
 
         Field<Type> bridgeField =
-            transform(I - sqr(nHat), this->patchInternalField());
+        (
+            this->patchInternalField()
+          + transform(I - 2.0*sqr(nHat), this->patchInternalField())
+        )/2.0;
 
         ggiPatch_.bridge(bridgeField, pf);
     }
