@@ -1,36 +1,47 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-	p ICCG  1e-8 0;
-	U BICCG 1e-6 0;
+    p CG
+    {
+        preconditioner
+        {
+            type         Cholesky;
+        }
+
+        tolerance        1e-06;
+        relTol           0;
+    };
+
+    U BiCGStab
+    {
+        preconditioner
+        {
+            type         Cholesky;
+        }
+
+        tolerance        1e-05;
+        relTol           0;
+    };
 }
 
 SIMPLE
 {
-    nTimeCorrectors             5;
+    nTimeCorrectors             2;
     nNonOrthogonalCorrectors    1;
 
     pRefCell        100;
@@ -42,7 +53,7 @@ SIMPLE
 relaxationFactors
 {
     p               0.2;
-    U               0.7;
+    U               0.5;
 }
 
 
