@@ -23,7 +23,7 @@ solvers
             type         Cholesky;
         }
 
-        tolerance        1e-06;
+        tolerance        1e-08;
         relTol           0;
     };
 
@@ -34,15 +34,15 @@ solvers
             type         Cholesky;
         }
 
-        tolerance        1e-05;
+        tolerance        1e-09;
         relTol           0;
     };
 }
 
 SIMPLE
 {
-    nTimeCorrectors             2;
-    nNonOrthogonalCorrectors    1;
+    nTimeCorrectors             30;
+    nNonOrthogonalCorrectors    0;
 
     pRefCell        100;
     pRefValue       0;
@@ -52,8 +52,8 @@ SIMPLE
 
 relaxationFactors
 {
-    p               0.2;
-    U               0.5;
+    p               0.7;
+    U               0.7;
 }
 
 
