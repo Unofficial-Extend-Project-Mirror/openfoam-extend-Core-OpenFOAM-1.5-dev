@@ -48,9 +48,18 @@ Foam::vector Foam::finiteRotation::rotVector(const tensor& rotT)
 Foam::scalar Foam::finiteRotation::rotAngle(const tensor& rotT)
 {
     // Limit trace to [-1, 1].  HJ, 4/Aug/2008
-    const scalar limitTrace = Foam::max(-1, Foam::min(1, 0.5*(tr(rotT) - 1)));
+//     const scalar limitTrace = Foam::max(-1, Foam::min(1, 0.5*(tr(rotT) - 1)));
+//     return Foam::acos(limitTrace);
 
-    return Foam::acos(limitTrace);
+    // Alternative formulation: Daniel Schmode, 15/Feb/2009
+    scalar x = rotT.zy() - rotT.yz();
+    scalar y = rotT.xz() - rotT.zx();
+    scalar z = rotT.yx() - rotT.xy();
+
+    scalar r = hypot(x, hypot(y, z));
+    scalar t = tr(rotT);
+
+    return atan2(r, t - 1);
 }
 
 
