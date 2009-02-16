@@ -67,8 +67,9 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
         vector s = areas[faceI];
         scalar magS = mag(s);
 
+        // Forum bug fix.  HJ, 16/Feb/2009
         scalar cosDDotS =
-            Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+            Foam::acos(Foam::min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
             *180.0/mathematicalConstant::pi;
 
         result[own[faceI]] = max(cosDDotS, result[own[faceI]]);
