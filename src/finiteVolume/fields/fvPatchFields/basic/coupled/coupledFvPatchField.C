@@ -61,6 +61,20 @@ coupledFvPatchField<Type>::coupledFvPatchField
 template<class Type>
 coupledFvPatchField<Type>::coupledFvPatchField
 (
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict,
+    const bool valueRequired
+)
+:
+    lduInterfaceField(refCast<const lduInterface>(p)),
+    fvPatchField<Type>(p, iF, dict, valueRequired)
+{}
+
+
+template<class Type>
+coupledFvPatchField<Type>::coupledFvPatchField
+(
     const coupledFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -69,19 +83,6 @@ coupledFvPatchField<Type>::coupledFvPatchField
 :
     lduInterfaceField(refCast<const lduInterface>(p)),
     fvPatchField<Type>(ptf, p, iF, mapper)
-{}
-
-
-template<class Type>
-coupledFvPatchField<Type>::coupledFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    lduInterfaceField(refCast<const lduInterface>(p)),
-    fvPatchField<Type>(p, iF, dict)
 {}
 
 

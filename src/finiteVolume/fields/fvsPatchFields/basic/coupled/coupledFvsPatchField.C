@@ -74,10 +74,11 @@ coupledFvsPatchField<Type>::coupledFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    fvsPatchField<Type>(p, iF, dict)
+    fvsPatchField<Type>(p, iF, dict, valueRequired)
 {}
 
 

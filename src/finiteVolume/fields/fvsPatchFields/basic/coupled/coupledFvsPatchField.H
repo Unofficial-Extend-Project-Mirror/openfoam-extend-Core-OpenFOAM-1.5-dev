@@ -82,7 +82,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired = false
         );
 
         //- Construct by mapping the given coupledFvsPatchField onto a new patch

@@ -83,7 +83,8 @@ fvsPatchField<Type>::fvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
     Field<Type>(p.size()),
@@ -97,9 +98,24 @@ fvsPatchField<Type>::fvsPatchField
             Field<Type>("value", dict, p.size())
         );
     }
-    else
+    else if (!valueRequired)
     {
         fvsPatchField<Type>::operator=(pTraits<Type>::zero);
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "fvsPatchField<Type>::fvsPatchField"
+            "("
+            "const fvPatch& p,"
+            "const DimensionedField<Type, surfaceMesh>& iF,"
+            "const dictionary& dict,"
+            "const bool valueRequired"
+            ")",
+            dict
+        )   << "Essential entry 'value' missing"
+            << exit(FatalIOError);
     }
 }
 

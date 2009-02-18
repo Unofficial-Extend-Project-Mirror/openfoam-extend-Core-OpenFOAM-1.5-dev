@@ -61,7 +61,7 @@ cyclicGgiFvPatchField<Type>::cyclicGgiFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict),
+    coupledFvPatchField<Type>(p, iF, dict, true),
     cyclicGgiPatch_(refCast<const cyclicGgiFvPatch>(p))
 {
     if (!isType<cyclicGgiFvPatch>(p))
