@@ -56,7 +56,7 @@ overlapGgiFvsPatchField<Type>::overlapGgiFvsPatchField
     const dictionary& dict
 )
 :
-    coupledFvsPatchField<Type>(p, iF, dict),
+    coupledFvsPatchField<Type>(p, iF, dict, true),
     overlapGgiPatch_(refCast<const overlapGgiFvPatch>(p))
 {
     if (!isType<overlapGgiFvPatch>(p))

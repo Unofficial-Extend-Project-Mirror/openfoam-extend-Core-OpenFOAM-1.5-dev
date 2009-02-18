@@ -56,7 +56,7 @@ ggiFvsPatchField<Type>::ggiFvsPatchField
     const dictionary& dict
 )
 :
-    coupledFvsPatchField<Type>(p, iF, dict),
+    coupledFvsPatchField<Type>(p, iF, dict, true),
     ggiPatch_(refCast<const ggiFvPatch>(p))
 {
     if (!isType<ggiFvPatch>(p))
