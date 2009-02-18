@@ -338,7 +338,7 @@ public:
                 const labelList& localPointOrder() const;
 
                 //- Given a global point index, return the local point
-                //index.  If the point is not found, return -1
+                //  index.  If the point is not found, return -1
                 label whichPoint(const label gp) const;
 
                 //- Given an edge in local point labels, return its
@@ -409,8 +409,8 @@ public:
             //  This denotes a surface that is pinched at a single point
             //  (test for pinched at single edge is already in PrimitivePatch)
             //  Returns true if this situation found and puts conflicting
-            // (mesh)point in set. Based on all the checking routines in
-            // primitiveMesh.
+            //  (mesh)point in set. Based on all the checking routines in
+            //  primitiveMesh.
             bool checkPointManifold
             (
                 const bool report = false,

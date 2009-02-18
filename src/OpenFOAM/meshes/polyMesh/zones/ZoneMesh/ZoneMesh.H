@@ -125,7 +125,7 @@ public:
         const Map<label>& zoneMap() const;
 
         //- Given a global object index, return the zone it is in.  If
-        //object does not belong to any zones, return -1
+        //  object does not belong to any zones, return -1
         label whichZone(const label objectIndex) const;
 
         //- Return a list of zone types
