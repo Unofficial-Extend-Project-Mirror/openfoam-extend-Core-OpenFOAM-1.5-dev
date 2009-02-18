@@ -94,8 +94,9 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
             vector s = faceAreas[faceI];
             scalar magS = mag(s);
 
+            // Forum bug fix.  HJ, 16/Feb/2009
             scalar cosDDotS =
-                Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+                Foam::acos(Foam::min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
                *180.0/mathematicalConstant::pi;
 
             result[faceCells[faceI]] = max(cosDDotS, result[faceCells[faceI]]);
@@ -209,8 +210,9 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
         vector s = areas[faceI];
         scalar magS = mag(s);
 
+        // Forum bug fix.  HJ, 16/Feb/2009
         scalar cosDDotS =
-            Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+            Foam::acos(Foam::min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
             *180.0/mathematicalConstant::pi;
 
         result[faceI] = cosDDotS;
@@ -235,8 +237,9 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
             vector s = faceAreas[faceI];
             scalar magS = mag(s);
 
+            // Forum bug fix.  HJ, 16/Feb/2009
             scalar cosDDotS =
-                Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+                Foam::acos(Foam::min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
                *180.0/mathematicalConstant::pi;
 
             result[globalFaceI++] = cosDDotS;
