@@ -29,6 +29,7 @@ License
 #include "surfaceFields.H"
 #include "processorFvPatchFields.H"
 #include "inletOutletFvPatchFields.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -46,6 +47,13 @@ bool Foam::adjustPhi
         scalar massIn = 0.0;
         scalar fixedMassOut = 0.0;
         scalar adjustableMassOut = 0.0;
+
+        // If the mesh is moving, adjustment needs to be calculated on
+        // relative fluxes.  HJ, 13/Feb/2009
+        if (phi.mesh().moving())
+        {
+            fvc::makeRelative(phi, U);
+        }
 
         forAll (phi.boundaryField(), patchi)
         {
@@ -128,6 +136,15 @@ bool Foam::adjustPhi
                 << exit(FatalError);
         }
 
+        if (fvMesh::debug)
+        {
+            Info<< "bool Foam::adjustPhi(...) massIn: " << massIn
+                << " fixedMassOut: " << fixedMassOut
+                << " adjustableMassOut: " << adjustableMassOut 
+                << " mass corr: " << massCorr
+                << endl;
+        }
+
         forAll (phi.boundaryField(), patchi)
         {
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
@@ -150,6 +167,13 @@ bool Foam::adjustPhi
                     }
                 }
             }
+        }
+
+        // If the mesh is moving, adjustment needs to be calculated on
+        // relative fluxes.  Now reverting to absolute fluxes.  HJ, 13/Feb/2009
+        if (phi.mesh().moving())
+        {
+            fvc::makeAbsolute(phi, U);
         }
 
         return mag(massIn) < SMALL
