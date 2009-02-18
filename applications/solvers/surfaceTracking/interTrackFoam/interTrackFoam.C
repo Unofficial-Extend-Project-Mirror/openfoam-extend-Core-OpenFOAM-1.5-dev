@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-#       include "writeData.H"
-
         Info << "ExecutionTime = "
             << scalar(runTime.elapsedCpuTime())
             << " s\n" << endl << endl;
