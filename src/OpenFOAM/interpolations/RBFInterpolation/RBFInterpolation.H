@@ -56,6 +56,7 @@ Description
 		
 Author
     Frank Bos, TU Delft.  All rights reserved.
+    Dubravko Matijasevic, FSB Zagreb.
 
 SourceFiles
     RBFInterpolation.C

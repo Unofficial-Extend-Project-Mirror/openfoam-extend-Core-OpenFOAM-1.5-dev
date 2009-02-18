@@ -25,6 +25,10 @@ License
 Description
     RBF interpolation templates
 
+Author
+    Frank Bos, TU Delft.  All rights reserved.
+    Dubravko Matijasevic, FSB Zagreb.
+
 \*---------------------------------------------------------------------------*/
 
 #include "RBFInterpolation.H"
@@ -82,8 +86,7 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
         }
     }
 
-    
-    if(polyNomials_)
+    if (polyNomials_)
     {
         for
         (
@@ -102,9 +105,9 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
     // Evaluation
     scalar t;
 
-    forAll(allPoints_, flPoint)
+    forAll (allPoints_, flPoint)
     {
-        forAll(controlPoints_, i)
+        forAll (controlPoints_, i)
         {
             scalarField weights =
                 RBF_->weights(controlPoints_, allPoints_[flPoint]);
@@ -112,14 +115,14 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
             result[flPoint] += weights[i]*alpha[i];
         }
 
-    if(polyNomials_)
-    {
-        result[flPoint] +=
-            beta[0]
-          + beta[1]*allPoints_[flPoint].x()
-          + beta[2]*allPoints_[flPoint].y()
-          + beta[3]*allPoints_[flPoint].z();
-    }
+        if (polyNomials_)
+        {
+            result[flPoint] +=
+                beta[0]
+              + beta[1]*allPoints_[flPoint].x()
+              + beta[2]*allPoints_[flPoint].y()
+              + beta[3]*allPoints_[flPoint].z();
+        }
 
         // Cut-off function to justify neglecting outer boundary points
         t = (Foam::mag(allPoints_[flPoint]) - innerRadius_)/
