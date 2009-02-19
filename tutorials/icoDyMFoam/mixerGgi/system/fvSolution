@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.3                                   |
@@ -10,12 +10,6 @@ FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          fvSolution;
 }
@@ -24,44 +18,57 @@ FoamFile
 
 solvers
 {
-//     p                  BiCGStab
-//                        {
-//                            preconditioner
-//                            {
-//                                type          Cholesky;
-//                            }
+    pcorr BiCGStab
+    {
+        preconditioner
+        {
+            type         DILU;
+        }
 
-//                            minIter           0;
-//                            maxIter           1000;
-//                            tolerance         1e-8;
-//                            relTol            0.01;
-//                        };
+        minIter          0;
+        maxIter          1000;
+        tolerance        1e-02;
+        relTol           0;
+    };
 
-//     pFinal             BiCGStab
-//                        {
-//                            preconditioner
-//                            {
-//                                type          Cholesky;
-//                            }
+    p BiCGStab
+    {
+        preconditioner
+        {
+            type         DILU;
+        }
 
-//                            minIter           0;
-//                            maxIter           1000;
-//                            tolerance         1e-8;
-//                            relTol            0.0;
-//                        };
-     p               ICCG 1e-06 0;
-     pFinal          ICCG 1e-06 0;
-//     pcorr           ICCG 1e-08 0;
-    U                  smoothSolver
-                       {
-                           smoother          GaussSeidel;
+        minIter          0;
+        maxIter          1000;
+        tolerance        1e-07;
+        relTol           0.0;
+    };
 
-                           nSweeps           5;
-                           minIter           0;
-                           maxIter           500;
-                           tolerance         1e-8;
-                           relTol            0.0;
-                       };
+    pFinal BiCGStab
+    {
+        preconditioner
+        {
+            type         DILU;
+        }
+
+        minIter          0;
+        maxIter          1000;
+        tolerance        1e-07;
+        relTol           0;
+    };
+
+    U BiCGStab
+    {
+        preconditioner   
+        {
+            type         DILU;
+        }
+
+        minIter          0;
+        maxIter          1000;
+        tolerance        1e-07;
+        relTol           0;
+    };
 }
 
 PISO
