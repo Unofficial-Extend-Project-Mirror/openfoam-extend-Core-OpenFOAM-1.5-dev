@@ -18,8 +18,9 @@ solvers
 {
     pcorr PCG
     {
-        preconditioner   GAMG
+        preconditioner
         {
+            type             GAMG;
             tolerance        1e-5;
             relTol           0;
 
@@ -60,8 +61,9 @@ solvers
 
     pdFinal PCG
     {
-        preconditioner GAMG
+        preconditioner
         {
+            type             GAMG;
             tolerance        1e-7;
             relTol           0;
 
