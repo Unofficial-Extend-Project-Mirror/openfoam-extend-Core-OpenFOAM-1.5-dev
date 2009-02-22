@@ -102,18 +102,38 @@ void GGIInterpolation<MasterPatch, SlavePatch>::findNeighbours3D
         if (doTransform())
         {
             // Transform points and normal to master plane
-            transform
-            (
-                curFacePoints,
-                forwardT_[faceSi],
-                curFacePoints
-            );
 
-            slaveFaceCentre[faceSi] = transform
-            (
-                forwardT_[faceSi],
-                slaveFaceCentre[faceSi]
-            );
+            if (forwardT_.size() == 1)
+            {
+                // Constant transform
+                transform
+                (
+                    curFacePoints,
+                    forwardT_[0],
+                    curFacePoints
+                );
+
+                slaveFaceCentre[faceSi] = transform
+                (
+                    forwardT_[0],
+                    slaveFaceCentre[faceSi]
+                );
+            }
+            else
+            {
+                transform
+                (
+                    curFacePoints,
+                    forwardT_[faceSi],
+                    curFacePoints
+                );
+
+                slaveFaceCentre[faceSi] = transform
+                (
+                    forwardT_[faceSi],
+                    slaveFaceCentre[faceSi]
+                );
+            }
         }
 
         boundBox bbSlave(curFacePoints, false);
@@ -247,7 +267,14 @@ void GGIInterpolation<MasterPatch, SlavePatch>::findNeighboursAABB
     // Transform slave normals to master plane if needed
     if (doTransform())
     {
-        transform(slaveNormals, forwardT_, slaveNormals);
+        if (forwardT_.size() == 1)
+        {
+            transform(slaveNormals, forwardT_[0], slaveNormals);
+        }
+        else
+        {
+            transform(slaveNormals, forwardT_, slaveNormals);
+        }
     }
 
     forAll (slaveFaceBBminThickness, sI)
@@ -278,12 +305,26 @@ void GGIInterpolation<MasterPatch, SlavePatch>::findNeighboursAABB
 
         if (doTransform())
         {
-            transform(curFacePoints, forwardT_[faceSi], curFacePoints);
+            if (forwardT_.size() == 1)
+            {
+                transform(curFacePoints, forwardT_[0], curFacePoints);
+            }
+            else
+            {
+                transform(curFacePoints, forwardT_[faceSi], curFacePoints);
+            }
         }
 
-        if(doSeparation())
+        if (doSeparation())
         {
-            curFacePoints += forwardSep_[faceSi];
+            if (forwardSep_.size() == 1)
+            {
+                curFacePoints += forwardSep_[0];
+            }
+            else
+            {        
+                curFacePoints += forwardSep_[faceSi];
+            }
         }
             
         slavePatchBB[faceSi] = boundBox(curFacePoints, false);

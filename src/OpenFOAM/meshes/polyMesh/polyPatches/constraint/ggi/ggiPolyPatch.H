@@ -84,9 +84,6 @@ class ggiPolyPatch
         //- Calculate interpolation
        virtual void calcPatchToPatch() const;
 
-        //- Return reference to patch-to-patch interpolation
-        const ggiInterpolation& patchToPatch() const;
-
         //- Calculate reconstructed cell centres
         void calcReconFaceCellCentres() const;
 
@@ -221,7 +218,7 @@ public:
         }
 
         //- Return shadow patch index
-        int shadowIndex() const;
+        label shadowIndex() const;
 
         //- Return shadow patch
         const ggiPolyPatch& shadow() const;
@@ -243,6 +240,10 @@ public:
         {
             return bridgeOverlap_;
         }
+
+        //- Return reference to patch-to-patch interpolation
+        //  Used only for addressing
+        const ggiInterpolation& patchToPatch() const;
 
         //- Interpolate face field: given field on a the shadow side,
         //  create an interpolated field on this side

@@ -81,6 +81,7 @@ public:
         //  local and neighbour restrict addressing
         cyclicGAMGInterface
         (
+            const lduPrimitiveMesh& lduMesh,
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing

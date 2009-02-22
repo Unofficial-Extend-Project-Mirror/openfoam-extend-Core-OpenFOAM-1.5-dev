@@ -26,7 +26,21 @@ Class
     Foam::GAMGInterface
 
 Description
-     Abstract base class for GAMG agglomerated interfaces.
+    Abstract base class for GAMG agglomerated interfaces.
+
+    For complex (interpolative) agglomeration, a single fine-level coefficient
+    may be agglomerated into several coarse level coefficients.
+    The basic functionality has been rewritten to account for this, using
+    three addressing arrays and weights:
+    faceCells_: contains coarse interface-to-matrix addressing
+
+    The following three arrays are all of the same size
+    fineAddressing_: contains addressing into the fine coefficient array
+    restrictAddressing_: contains addressing into the coarse coefficient array
+    restrictWeights_: contains restriction factor weights
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     GAMGInterface.C
@@ -39,6 +53,7 @@ SourceFiles
 
 #include "lduInterface.H"
 #include "autoPtr.H"
+#include "lduPrimitiveMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,16 +68,27 @@ class GAMGInterface
 :
     public lduInterface
 {
+    // Private data
+
+        //- Reference to ldu addressing
+        const lduPrimitiveMesh& lduMesh_;
+
 
 protected:
 
     // Protected data
 
-        //- Face-cell addressing
+        //- Face-cell addressing.  Contains coarse level addressing
         labelField faceCells_;
 
-        //- Face restrict addressing
-        labelField faceRestrictAddressing_;
+        //- Fine addressing
+        labelField fineAddressing_;
+
+        //- Restrict addressing
+        labelField restrictAddressing_;
+
+        //- Fine level agglomeration weights
+        scalarField restrictWeights_;
 
 
 private:
@@ -90,11 +116,13 @@ public:
             GAMGInterface,
             lduInterface,
             (
+                const lduPrimitiveMesh& lduMesh,
                 const lduInterface& fineInterface,
                 const labelField& localRestrictAddressing,
                 const labelField& neighbourRestrictAddressing
             ),
             (
+                lduMesh,
                 fineInterface,
                 localRestrictAddressing,
                 neighbourRestrictAddressing
@@ -108,6 +136,7 @@ public:
         //  the fine interface
         static autoPtr<GAMGInterface> New
         (
+            const lduPrimitiveMesh& lduMesh,
             const lduInterface& fineInterface,
             const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing
@@ -120,16 +149,25 @@ public:
         //  local and neighbour restrict addressing
         GAMGInterface
         (
+            const lduPrimitiveMesh& lduMesh,
             const lduInterface&,
             const labelField&,
             const labelField&
         )
+        :
+            lduMesh_(lduMesh)
         {}
 
 
     // Member Functions
 
         // Access
+
+            //- Return reference to addressing
+            const lduMesh& ldu() const
+            {
+                return lduMesh_;
+            }
 
             //- Return size
             virtual label size() const
@@ -141,18 +179,6 @@ public:
             virtual const unallocLabelList& faceCells() const
             {
                 return faceCells_;
-            }
-
-            //- Return face restrict addressing
-            virtual const labelList& faceRestrictAddressing() const
-            {
-                return faceRestrictAddressing_;
-            }
-
-            //- Return non-const access to face restrict addressing
-            virtual labelList& faceRestrictAddressing()
-            {
-                return faceRestrictAddressing_;
             }
 
             //- Return the interface internal field of the given field

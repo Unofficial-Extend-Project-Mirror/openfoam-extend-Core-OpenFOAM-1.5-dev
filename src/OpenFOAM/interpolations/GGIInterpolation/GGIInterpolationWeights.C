@@ -284,19 +284,38 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
             if (doTransform())
             {
                 // Transform points to master plane
-                transform
-                (
-                    curSlaveFacePoints,
-                    forwardT_[curCMN[neighbI]],
-                    curSlaveFacePoints
-                );
+                if (forwardT_.size() == 1)
+                {
+                    transform
+                    (
+                        curSlaveFacePoints,
+                        forwardT_[0],
+                        curSlaveFacePoints
+                    );
+                }
+                else
+                {
+                    transform
+                    (
+                        curSlaveFacePoints,
+                        forwardT_[curCMN[neighbI]],
+                        curSlaveFacePoints
+                    );
+                }
             }
 
             // Apply the translation offset in order to keep the 
             // neighbErrorProjectionAlongW values to a minimum
-            if(doSeparation())
+            if (doSeparation())
             {
-                curSlaveFacePoints += forwardSep_[curCMN[neighbI]];
+                if (forwardSep_.size() == 1)
+                {
+                    curSlaveFacePoints += forwardSep_[curCMN[neighbI]];
+                }
+                else
+                {
+                    curSlaveFacePoints += forwardSep_[0];
+                }
             }
 
             neighbPointsInUV =
@@ -543,12 +562,14 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
         }
     }
 
-    if(saW.size() > 0 && maW.size() > 0)
+    if (saW.size() > 0 && maW.size() > 0)
+    {
         Info<< "  Rescaling of weighting factor:" << nl
             << "    Largest slave weighting factor correction : " << largestSWC
             << " average: " << sumSWC/saW.size() << nl
             << "    Largest master weighting factor correction: " << largestMWC
             << " average: " << sumMWC/maW.size() << endl;
+    }
 }
 
 // Find non-overlapping faces from both master and slave patches

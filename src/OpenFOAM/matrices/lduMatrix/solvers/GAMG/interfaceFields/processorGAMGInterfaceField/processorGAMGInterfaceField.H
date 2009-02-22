@@ -87,7 +87,7 @@ public:
         processorGAMGInterfaceField
         (
             const GAMGInterface& GAMGCp,
-            const lduInterfaceField& fineInterface
+            const lduInterfaceField& fineInterfaceField
         );
 
 

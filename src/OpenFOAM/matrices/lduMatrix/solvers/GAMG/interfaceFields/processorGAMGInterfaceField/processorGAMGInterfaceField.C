@@ -47,16 +47,16 @@ namespace Foam
 Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
 (
     const GAMGInterface& GAMGCp,
-    const lduInterfaceField& fineInterface
+    const lduInterfaceField& fineInterfaceField
 )
 :
-    GAMGInterfaceField(GAMGCp, fineInterface),
+    GAMGInterfaceField(GAMGCp, fineInterfaceField),
     procInterface_(refCast<const processorGAMGInterface>(GAMGCp)),
     doTransform_(false),
     rank_(0)
 {
     const processorLduInterfaceField& p =
-        refCast<const processorLduInterfaceField>(fineInterface);
+        refCast<const processorLduInterfaceField>(fineInterfaceField);
 
     doTransform_ = p.doTransform();
     rank_ = p.rank();

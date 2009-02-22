@@ -128,11 +128,11 @@ public:
             lduMesh,
             (
                 const lduMesh& mesh,
-                const dictionary& controlDict
+                const dictionary& dict
             ),
             (
                 mesh,
-                controlDict
+                dict
             )
         );
 
@@ -145,11 +145,11 @@ public:
             lduMatrix,
             (
                 const lduMatrix& matrix,
-                const dictionary& controlDict
+                const dictionary& dict
             ),
             (
                 matrix,
-                controlDict
+                dict
             )
         );
 
@@ -160,7 +160,7 @@ public:
         GAMGAgglomeration
         (
             const lduMesh& mesh,
-            const dictionary& controlDict
+            const dictionary& dict
         );
 
 
@@ -170,14 +170,14 @@ public:
         static const GAMGAgglomeration& New
         (
             const lduMesh& mesh,
-            const dictionary& controlDict
+            const dictionary& dict
         );
 
         //- Return the selected matrix agglomerator
         static const GAMGAgglomeration& New
         (
             const lduMatrix& matrix,
-            const dictionary& controlDict
+            const dictionary& dict
         );
 
 

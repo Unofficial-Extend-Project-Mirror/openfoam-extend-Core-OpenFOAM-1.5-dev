@@ -211,18 +211,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     const lduInterfacePtrsList& fineInterfaces =
         interfaceLevels_[fineLevelIndex];
 
-    // Create coarse-level interfaces
-    interfaceLevels_.set
-    (
-        fineLevelIndex + 1,
-        new lduInterfacePtrsList(fineInterfaces.size())
-    );
-
-    lduInterfacePtrsList& coarseInterfaces =
-        interfaceLevels_[fineLevelIndex + 1];
-
-    labelListList coarseInterfaceAddr(fineInterfaces.size());
-
     // Initialise transfer of restrict addressing on the interface
     forAll (fineInterfaces, inti)
     {
@@ -237,6 +225,31 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     }
 
     // Add the coarse level
+    // Set the coarse ldu addressing onto the list
+    meshLevels_.set
+    (
+        fineLevelIndex,
+        new lduPrimitiveMesh
+        (
+            nCoarseCells,
+            coarseOwner,
+            coarseNeighbour,
+            true
+        )
+    );
+
+    // Create coarse-level interfaces
+    interfaceLevels_.set
+    (
+        fineLevelIndex + 1,
+        new lduInterfacePtrsList(fineInterfaces.size())
+    );
+
+    lduInterfacePtrsList& coarseInterfaces =
+        interfaceLevels_[fineLevelIndex + 1];
+
+    labelListList coarseInterfaceAddr(fineInterfaces.size());
+
     forAll (fineInterfaces, inti)
     {
         if (fineInterfaces.set(inti))
@@ -246,6 +259,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 inti,
                 GAMGInterface::New
                 (
+                    meshLevels_[fineLevelIndex],
                     fineInterfaces[inti],
                     fineInterfaces[inti].interfaceInternalField(restrictMap),
                     fineInterfaces[inti].internalFieldTransfer
@@ -260,21 +274,11 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         }
     }
 
-
-    // Set the coarse ldu addressing onto the list
-    meshLevels_.set
+    meshLevels_[fineLevelIndex].addInterfaces
     (
-        fineLevelIndex,
-        new lduPrimitiveMesh
-        (
-            nCoarseCells,
-            coarseOwner,
-            coarseNeighbour,
-            coarseInterfaceAddr,
-            coarseInterfaces,
-            fineMeshAddr.patchSchedule(),
-            true
-        )
+        coarseInterfaces,
+        coarseInterfaceAddr,
+        fineMeshAddr.patchSchedule()
     );
 }
 

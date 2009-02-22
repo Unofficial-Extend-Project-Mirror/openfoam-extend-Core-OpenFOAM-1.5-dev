@@ -101,7 +101,7 @@ Foam::GAMGSolver::GAMGSolver
     ),
 
     // Default values for all controls
-    // which may be overridden by those in controlDict
+    // which may be overridden by those in dict
     cacheAgglomeration_(false),
     nPreSweeps_(0),
     nPostSweeps_(2),
@@ -141,7 +141,7 @@ Foam::GAMGSolver::GAMGSolver
     ),
 
     // Default values for all controls
-    // which may be overridden by those in controlDict
+    // which may be overridden by those in dict
     cacheAgglomeration_(false),
     nPreSweeps_(0),
     nPostSweeps_(2),

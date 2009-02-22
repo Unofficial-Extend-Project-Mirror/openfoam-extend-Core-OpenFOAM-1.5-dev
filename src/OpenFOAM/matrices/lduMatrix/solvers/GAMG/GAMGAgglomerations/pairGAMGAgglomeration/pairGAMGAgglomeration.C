@@ -39,11 +39,11 @@ namespace Foam
 Foam::pairGAMGAgglomeration::pairGAMGAgglomeration
 (
     const lduMesh& mesh,
-    const dictionary& controlDict
+    const dictionary& dict
 )
 :
-    GAMGAgglomeration(mesh, controlDict),
-    mergeLevels_(readLabel(controlDict.lookup("mergeLevels")))
+    GAMGAgglomeration(mesh, dict),
+    mergeLevels_(readLabel(dict.lookup("mergeLevels")))
 {}
 
 

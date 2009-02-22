@@ -67,7 +67,27 @@ public:
 
 
     // Member Functions
-    // Not currently needed.  HJ, 14/Jan/2009
+
+        //- Is this the master side?
+        virtual bool master() const = 0;
+
+        //- Is this the fine level?
+        virtual bool fineLevel() const = 0;
+
+        //- Return shadow patch index
+        virtual label shadowIndex() const = 0;
+
+        //- Return fine level addressing
+        virtual const labelListList& addressing() const = 0;
+
+        //- Return weights
+        virtual const scalarListList& weights() const = 0;
+
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const = 0;
+
+        //- Return face reverse transformation tensor
+        virtual const tensorField& reverseT() const = 0;
 };
 
 

@@ -45,6 +45,7 @@ namespace Foam
 
 Foam::cyclicGAMGInterface::cyclicGAMGInterface
 (
+    const lduPrimitiveMesh& lduMesh,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
@@ -52,6 +53,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 :
     GAMGInterface
     (
+        lduMesh,
         fineInterface,
         localRestrictAddressing,
         neighbourRestrictAddressing
@@ -137,7 +139,11 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
 
     faceCells_.setSize(2*nCoarseFaces, -1);
-    faceRestrictAddressing_.setSize(localRestrictAddressing.size(), -1);
+    fineAddressing_.setSize(localRestrictAddressing.size(), -1);
+    restrictAddressing_.setSize(localRestrictAddressing.size(), -1);
+
+    // All weights are equal to 1: integral matching
+    restrictWeights_.setSize(localRestrictAddressing.size(), 1.0);
 
     labelList contents = neighboursTable.toc();
 
@@ -171,7 +177,8 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
                 ++facesIter
             )
             {
-                faceRestrictAddressing_[facesIter()] = nCoarseFaces;
+                fineAddressing_[facesIter()] = facesIter();
+                restrictAddressing_[facesIter()] = nCoarseFaces;
             }
 
             nCoarseFaces++;
@@ -205,7 +212,8 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
                 ++facesIter
             )
             {
-                faceRestrictAddressing_[facesIter() + sizeBy2] = nCoarseFaces;
+                fineAddressing_[facesIter() + sizeBy2] = facesIter() + sizeBy2;
+                restrictAddressing_[facesIter() + sizeBy2] = nCoarseFaces;
             }
 
             nCoarseFaces++;

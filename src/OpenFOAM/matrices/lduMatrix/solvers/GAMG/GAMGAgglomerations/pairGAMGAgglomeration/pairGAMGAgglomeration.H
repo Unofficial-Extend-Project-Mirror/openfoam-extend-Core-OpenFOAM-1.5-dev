@@ -99,7 +99,7 @@ public:
         pairGAMGAgglomeration
         (
             const lduMesh& mesh,
-            const dictionary& controlDict
+            const dictionary& dict
         );
 };
 

@@ -131,12 +131,14 @@ class GGIInterpolation
 
         //- Slave-to-master transformation tensor.  Transforms slave data to
         //  master plane.  Size equals number of slave faces; zero length
-        //  indicates no transform.  HJ, 6/Jan/2009
+        //  indicates no transform.  Size 1 indicates constant transform
+        //  HJ, 6/Jan/2009
         const tensorField forwardT_;
 
         //- Master-to-slave transformation tensor.  Transforms slave data to
         //  master plane.  Size equals number of master faces; zero length
-        //  indicates no transform.  HJ, 6/Jan/2009
+        //  indicates no transform.  Size 1 indicates constant transform
+        //  HJ, 6/Jan/2009
         const tensorField reverseT_;
 
         //- Slave-to-master separation vector. Translation of slave data to

@@ -48,10 +48,10 @@ namespace Foam
 Foam::algebraicPairGAMGAgglomeration::algebraicPairGAMGAgglomeration
 (
     const lduMatrix& matrix,
-    const dictionary& controlDict
+    const dictionary& dict
 )
 :
-    pairGAMGAgglomeration(matrix.mesh(), controlDict)
+    pairGAMGAgglomeration(matrix.mesh(), dict)
 {
     agglomerate(matrix.mesh(), mag(matrix.upper()));
 }

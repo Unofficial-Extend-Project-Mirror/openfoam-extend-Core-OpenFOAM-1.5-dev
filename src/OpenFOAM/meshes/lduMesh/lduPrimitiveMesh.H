@@ -66,8 +66,8 @@ class lduPrimitiveMesh
         lduInterfacePtrsList interfaces_;
 
         //- Patch field evaluation schedule.
-        //  Note this does not need to be held as a copy because it is invariant
-        const lduSchedule& patchSchedule_;
+        //  Note this does must be held as a copy.  HJ, 20/Feb/2009
+        lduSchedule patchSchedule_;
 
 
     // Private Member Functions
@@ -84,43 +84,32 @@ public:
     // Constructors
 
         //- Construct from components as copies
+        //  Interfaces are added upon construction.  HJ, 20/Feb/2009
         lduPrimitiveMesh
         (
             const label nCells,
             const unallocLabelList& l,
-            const unallocLabelList& u,
-            const labelListList& pa,
-            lduInterfacePtrsList interfaces,
-            const lduSchedule& ps
+            const unallocLabelList& u
         )
         :
             lduAddressing(nCells),
             lowerAddr_(l),
-            upperAddr_(u),
-            patchAddr_(pa),
-            interfaces_(interfaces),
-            patchSchedule_(ps)
+            upperAddr_(u)
         {}
 
 
-        //- Construct from components and  re-use storage as specified.
+        //- Construct from components and re-use storage as specified.
         lduPrimitiveMesh
         (
             const label nCells,
             labelList& l,
             labelList& u,
-            labelListList& pa,
-            lduInterfacePtrsList interfaces,
-            const lduSchedule& ps,
             bool reUse
         )
         :
             lduAddressing(nCells),
             lowerAddr_(l, reUse),
-            upperAddr_(u, reUse),
-            patchAddr_(pa, reUse),
-            interfaces_(interfaces, reUse),
-            patchSchedule_(ps)
+            upperAddr_(u, reUse)
         {}
 
 
@@ -131,6 +120,19 @@ public:
 
 
     // Member Functions
+
+        //- Add interfaces.  Constructor helper
+        void addInterfaces
+        (
+            const lduInterfacePtrsList& interfaces,
+            const labelListList& pa,
+            const lduSchedule& ps
+        )
+        {
+            interfaces_ = interfaces;
+            patchAddr_ = pa;
+            patchSchedule_ = ps;
+        }
 
         //- Return number of interfaces
         virtual label nPatches() const

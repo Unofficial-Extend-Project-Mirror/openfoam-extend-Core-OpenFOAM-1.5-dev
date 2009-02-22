@@ -91,7 +91,8 @@ GGIInterpolation<MasterPatch, SlavePatch>::GGIInterpolation
     uncoveredSlaveAddrPtr_(NULL)
 {
     // Check size of transform.  They should be equal to slave patch size
-    if (forwardT_.size() != 0 || reverseT_.size() != 0)
+    // if the transform is not constant
+    if (forwardT_.size() > 1 || reverseT_.size() > 1)
     {
         if
         (

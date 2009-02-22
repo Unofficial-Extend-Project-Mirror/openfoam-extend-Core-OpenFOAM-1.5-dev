@@ -113,7 +113,18 @@ GGIInterpolation<MasterPatch, SlavePatch>::masterToSlave
     if (this->doTransform() && pTraits<Type>::rank > 0)
     {
         // Transform master data to slave
-        Field<Type> transformFF = transform(reverseT_, ff);
+        Field<Type> transformFF;
+
+        if (reverseT_.size() == 1)
+        {
+            // Constant transform
+            transformFF = transform(reverseT_[0], ff);
+        }
+        else
+        {
+            // Full patch transform
+            transformFF = transform(reverseT_, ff);
+        }
 
         GGIInterpolation<MasterPatch, SlavePatch>::interpolate
         (
@@ -186,7 +197,17 @@ GGIInterpolation<MasterPatch, SlavePatch>::slaveToMaster
     if (this->doTransform() && pTraits<Type>::rank > 0)
     {
         // Transform slave data to master
-        Field<Type> transformFF = transform(forwardT_, ff);
+        Field<Type> transformFF;
+        if (forwardT_.size() == 1)
+        {
+            // Constant transform
+            transformFF = transform(forwardT_[0], ff);
+        }
+        else
+        {
+            // Full patch transform
+            transformFF = transform(forwardT_, ff);
+        }
 
         GGIInterpolation<MasterPatch, SlavePatch>::interpolate
         (

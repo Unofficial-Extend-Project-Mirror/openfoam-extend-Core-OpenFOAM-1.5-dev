@@ -32,6 +32,7 @@ License
 
 Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 (
+    const lduPrimitiveMesh& lduMesh,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
@@ -47,7 +48,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
         FatalErrorIn
         (
             "GAMGInterface::New"
-            "(const lduInterface& fineInterface, "
+            "(const lduPrimitiveMesh& lduMesh,"
+            "const lduInterface& fineInterface, "
             "const labelField& localRestrictAddressing, "
             "const labelField& neighbourRestrictAddressing)"
         )   << "Unknown GAMGInterface type " << coupleType << ".\n"
@@ -60,6 +62,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     (
         cstrIter()
         (
+            lduMesh,
             fineInterface,
             localRestrictAddressing,
             neighbourRestrictAddressing

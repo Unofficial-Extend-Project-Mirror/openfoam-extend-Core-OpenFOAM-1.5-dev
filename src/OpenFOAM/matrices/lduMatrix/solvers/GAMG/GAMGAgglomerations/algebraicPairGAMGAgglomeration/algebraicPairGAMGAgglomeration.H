@@ -64,7 +64,7 @@ public:
         algebraicPairGAMGAgglomeration
         (
             const lduMatrix& matrix,
-            const dictionary& controlDict
+            const dictionary& dict
         );
 };
 

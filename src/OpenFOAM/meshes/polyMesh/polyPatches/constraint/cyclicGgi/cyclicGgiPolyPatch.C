@@ -249,6 +249,8 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
     // rotationAngle_ We compute the separation vector from
     // separationOffset_
 
+    // All transforms are constant: size = 1.  HJ, 18/Feb/2009
+
     if (mag(rotationAngle_) > 0)
     {
         //- Rotation tensor computed from rotationAxis_ and rotationAngle_
@@ -256,13 +258,13 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
         {
             forwardT_ = tensorField
             (
-                cyclicShadow().size(),
+                1,
                 RodriguesRotation(rotationAxis_,  -rotationAngle_)
             );
 
             reverseT_ = tensorField
             (
-                this->size(),
+                1,
                 RodriguesRotation(rotationAxis_, rotationAngle_)
             );
         }
@@ -270,13 +272,13 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
         {
             forwardT_ = tensorField
             (
-                cyclicShadow().size(),
+                1,
                 RodriguesRotation(rotationAxis_,  rotationAngle_)
             );
 
             reverseT_ = tensorField
             (
-                this->size(),
+                1,
                 RodriguesRotation(rotationAxis_, -rotationAngle_)
             );
         }
@@ -288,11 +290,9 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
     }
 
     // Handling the separation offset separatly
-    vector separation = separationOffset_;
-
-    if (mag(separation) > SMALL)
+    if (mag(separationOffset_) > SMALL)
     {
-        separation_ = vectorField(cyclicShadow().size(), separation);
+        separation_ = vectorField(1, separationOffset_);
     }
     else
     {

@@ -81,24 +81,6 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
 }
 
 
-const Foam::ggiInterpolation& Foam::ggiPolyPatch::patchToPatch() const
-{
-    if (master())
-    {
-        if (!patchToPatchPtr_)
-        {
-            calcPatchToPatch();
-        }
-
-        return *patchToPatchPtr_;
-    }
-    else
-    {
-        return shadow().patchToPatch();
-    }
-}
-
-
 void Foam::ggiPolyPatch::calcReconFaceCellCentres() const
 {
     // Create neighbouring face centres using interpolation
@@ -282,6 +264,24 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
 const Foam::ggiPolyPatch& Foam::ggiPolyPatch::shadow() const
 {
     return refCast<const ggiPolyPatch>(boundaryMesh()[shadowIndex()]);
+}
+
+
+const Foam::ggiInterpolation& Foam::ggiPolyPatch::patchToPatch() const
+{
+    if (master())
+    {
+        if (!patchToPatchPtr_)
+        {
+            calcPatchToPatch();
+        }
+
+        return *patchToPatchPtr_;
+    }
+    else
+    {
+        return shadow().patchToPatch();
+    }
 }
 
 

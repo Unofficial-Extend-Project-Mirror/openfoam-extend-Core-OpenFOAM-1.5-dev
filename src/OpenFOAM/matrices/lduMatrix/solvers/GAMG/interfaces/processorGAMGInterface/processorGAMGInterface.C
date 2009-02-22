@@ -45,6 +45,7 @@ namespace Foam
 
 Foam::processorGAMGInterface::processorGAMGInterface
 (
+    const lduPrimitiveMesh& lduMesh,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
@@ -52,6 +53,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
 :
     GAMGInterface
     (
+        lduMesh,
         fineInterface,
         localRestrictAddressing,
         neighbourRestrictAddressing
@@ -150,9 +152,16 @@ Foam::processorGAMGInterface::processorGAMGInterface
 
 
     faceCells_.setSize(nCoarseFaces, -1);
-    faceRestrictAddressing_.setSize(localRestrictAddressing.size());
+    restrictAddressing_.setSize(localRestrictAddressing.size());
+
+    // All weights are equal to 1: integral matching
+    restrictWeights_.setSize(localRestrictAddressing.size(), 1.0);
 
     labelList contents = neighboursTable.toc();
+
+    // Sort makes sure the order is identical on both sides.
+    // HJ, 20/Feb.2009
+    sort(contents);
 
     // Reset face counter for re-use
     nCoarseFaces = 0;
@@ -188,7 +197,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
                     ++facesIter
                 )
                 {
-                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
+                    fineAddressing_[facesIter()] = facesIter();
+                    restrictAddressing_[facesIter()] = nCoarseFaces;
                 }
 
                 nCoarseFaces++;
@@ -226,7 +236,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
                     ++facesIter
                 )
                 {
-                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
+                    fineAddressing_[facesIter()] = facesIter();
+                    restrictAddressing_[facesIter()] = nCoarseFaces;
                 }
 
                 nCoarseFaces++;
@@ -277,7 +288,7 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
 Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const unallocLabelList&
 ) const
 {
     return receive<label>(commsType, this->size());

@@ -39,11 +39,11 @@ namespace Foam
 
 void Foam::GAMGInterface::combine(const GAMGInterface& coarseGi)
 {
-    const labelList& coarseFra = coarseGi.faceRestrictAddressing_;
+    const labelList& coarseFra = coarseGi.restrictAddressing_;
 
-    forAll(faceRestrictAddressing_, ffi)
+    forAll(restrictAddressing_, ffi)
     {
-        faceRestrictAddressing_[ffi] = coarseFra[faceRestrictAddressing_[ffi]];
+        restrictAddressing_[ffi] = coarseFra[restrictAddressing_[ffi]];
     }
 
     faceCells_ = coarseGi.faceCells_;
@@ -67,9 +67,11 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     tmp<scalarField> tcoarseCoeffs(new scalarField(size(), 0.0));
     scalarField& coarseCoeffs = tcoarseCoeffs();
 
-    forAll(faceRestrictAddressing_, ffi)
+    // Added weights to account for non-integral matching
+    forAll(restrictAddressing_, ffi)
     {
-        coarseCoeffs[faceRestrictAddressing_[ffi]] += fineCoeffs[ffi];
+        coarseCoeffs[restrictAddressing_[ffi]] +=
+            restrictWeights_[ffi]*fineCoeffs[fineAddressing_[ffi]];
     }
 
     return tcoarseCoeffs;

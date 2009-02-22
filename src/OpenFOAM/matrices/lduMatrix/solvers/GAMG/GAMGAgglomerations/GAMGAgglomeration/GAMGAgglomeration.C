@@ -68,7 +68,7 @@ bool Foam::GAMGAgglomeration::continueAgglomerating
 Foam::GAMGAgglomeration::GAMGAgglomeration
 (
     const lduMesh& mesh,
-    const dictionary& controlDict
+    const dictionary& dict
 )
 :
     MeshObject<lduMesh, GAMGAgglomeration>(mesh),
@@ -77,7 +77,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
 
     nCellsInCoarsestLevel_
     (
-        readLabel(controlDict.lookup("nCellsInCoarsestLevel"))
+        readLabel(dict.lookup("nCellsInCoarsestLevel"))
     ),
 
     nCells_(maxLevels_),
@@ -92,7 +92,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
 const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 (
     const lduMesh& mesh,
-    const dictionary& controlDict
+    const dictionary& dict
 )
 {
     if
@@ -103,11 +103,11 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         )
     )
     {
-        word agglomeratorType(controlDict.lookup("agglomerator"));
+        word agglomeratorType(dict.lookup("agglomerator"));
 
         dlLibraryTable::open
         (
-            controlDict,
+            dict,
             "geometricGAMGAgglomerationLibs",
             lduMeshConstructorTablePtr_
         );
@@ -120,7 +120,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             FatalErrorIn
             (
                 "GAMGAgglomeration::New"
-                "(const lduMesh& mesh, const dictionary& controlDict)"
+                "(const lduMesh& mesh, const dictionary& dict)"
             )   << "Unknown GAMGAgglomeration type "
                 << agglomeratorType << ".\n"
                 << "Valid algebraic GAMGAgglomeration types are :"
@@ -130,7 +130,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 << exit(FatalError);
         }
 
-        return store(cstrIter()(mesh, controlDict).ptr());
+        return store(cstrIter()(mesh, dict).ptr());
     }
     else
     {
@@ -145,7 +145,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 (
     const lduMatrix& matrix,
-    const dictionary& controlDict
+    const dictionary& dict
 )
 {
     const lduMesh& mesh = matrix.mesh();
@@ -158,11 +158,11 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         )
     )
     {
-        word agglomeratorType(controlDict.lookup("agglomerator"));
+        word agglomeratorType(dict.lookup("agglomerator"));
 
         dlLibraryTable::open
         (
-            controlDict,
+            dict,
             "algebraicGAMGAgglomerationLibs",
             lduMatrixConstructorTablePtr_
         );
@@ -173,14 +173,14 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
          || !lduMatrixConstructorTablePtr_->found(agglomeratorType)
         )
         {
-            return New(mesh, controlDict);
+            return New(mesh, dict);
         }
         else
         {
             lduMatrixConstructorTable::iterator cstrIter =
                 lduMatrixConstructorTablePtr_->find(agglomeratorType);
 
-            return store(cstrIter()(matrix, controlDict).ptr());
+            return store(cstrIter()(matrix, dict).ptr());
         }
     }
     else
