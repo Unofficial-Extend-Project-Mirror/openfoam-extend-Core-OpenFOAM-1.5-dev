@@ -214,10 +214,11 @@ void Foam::CholeskyPrecon::preconditionT
     const direction cmpt
 ) const
 {
-    if (matrix_.symmetric())
-    {
-        precondition(x, b, cmpt);
-    }
+    // HJ: handling of assymetric matrices
+//     if (matrix_.symmetric())
+//     {
+//         precondition(x, b, cmpt);
+//     }
 
     forAll(x, i)
     {
