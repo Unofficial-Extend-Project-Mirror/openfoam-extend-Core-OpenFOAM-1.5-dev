@@ -543,11 +543,12 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
         }
     }
 
-    Info<< "  Rescaling of weighting factor:" << nl
-        << "    Largest slave weighting factor correction : " << largestSWC
-        << " average: " << sumSWC/saW.size() << nl
-        << "    Largest master weighting factor correction: " << largestMWC
-        << " average: " << sumMWC/maW.size() << endl;
+    if(saW.size() > 0 && maW.size() > 0)
+        Info<< "  Rescaling of weighting factor:" << nl
+            << "    Largest slave weighting factor correction : " << largestSWC
+            << " average: " << sumSWC/saW.size() << nl
+            << "    Largest master weighting factor correction: " << largestMWC
+            << " average: " << sumMWC/maW.size() << endl;
 }
 
 // Find non-overlapping faces from both master and slave patches
