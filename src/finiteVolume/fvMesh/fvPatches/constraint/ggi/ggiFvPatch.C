@@ -179,6 +179,50 @@ Foam::tmp<Foam::vectorField> Foam::ggiFvPatch::delta() const
 }
 
 
+bool Foam::ggiFvPatch::master() const
+{
+    return ggiPolyPatch_.master();
+}
+
+
+bool Foam::ggiFvPatch::fineLevel() const
+{
+    return true;
+}
+
+
+Foam::label Foam::ggiFvPatch::shadowIndex() const
+{
+    return ggiPolyPatch_.shadowIndex();
+}
+
+
+const Foam::labelListList& Foam::ggiFvPatch::addressing() const
+{
+    if (ggiPolyPatch_.master())
+    {
+        return ggiPolyPatch_.patchToPatch().masterAddr();
+    }
+    else
+    {
+        return ggiPolyPatch_.patchToPatch().slaveAddr();
+    }
+}
+
+
+const Foam::scalarListList& Foam::ggiFvPatch::weights() const
+{
+    if (ggiPolyPatch_.master())
+    {
+        return ggiPolyPatch_.patchToPatch().masterWeights();
+    }
+    else
+    {
+        return ggiPolyPatch_.patchToPatch().slaveWeights();
+    }
+}
+
+
 Foam::tmp<Foam::labelField> Foam::ggiFvPatch::interfaceInternalField
 (
     const unallocLabelList& internalData
@@ -188,19 +232,33 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::interfaceInternalField
 }
 
 
+void Foam::ggiFvPatch::initTransfer
+(
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& interfaceData
+) const
+{
+    transferBuffer_ = interfaceData;
+}
+
+
 Foam::tmp<Foam::labelField> Foam::ggiFvPatch::transfer
 (
     const Pstream::commsTypes,
     const unallocLabelList& interfaceData
 ) const
 {
-    notImplemented
-    (
-        "ggiFvPatchField<Type>::"
-        "transfer(const unallocLabelList& interfaceData) const"
-    );
+    return this->shadow().transferBuffer();
+}
 
-    return labelField::null();
+
+void Foam::ggiFvPatch::initInternalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const unallocLabelList& iF
+) const
+{
+    transferBuffer_ = patchInternalField(iF);
 }
 
 
@@ -210,7 +268,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::internalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
-    return shadow().patchInternalField(iF);
+    return shadow().transferBuffer();
 }
 
 

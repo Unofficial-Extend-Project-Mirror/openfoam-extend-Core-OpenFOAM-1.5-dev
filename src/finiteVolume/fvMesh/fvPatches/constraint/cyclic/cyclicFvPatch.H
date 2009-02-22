@@ -97,13 +97,13 @@ public:
         // Access
 
             //- Return face transformation tensor
-            const tensorField& forwardT() const
+            virtual const tensorField& forwardT() const
             {
                 return coupledFvPatch::forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
+            virtual const tensorField& reverseT() const
             {
                 return coupledFvPatch::reverseT();
             }

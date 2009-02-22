@@ -62,6 +62,9 @@ class ggiFvPatch
         //- Reference to polyPatch
         const ggiPolyPatch& ggiPolyPatch_;
 
+        //- Transfer buffer
+        mutable labelField transferBuffer_;
+
 
 protected:
 
@@ -76,6 +79,12 @@ protected:
         //- Make patch face non-orthogonality correction vectors
         virtual void makeCorrVecs(vectorField&) const;
 
+        //- Return contents of transfer buffer
+        const labelField& transferBuffer() const
+        {
+            return transferBuffer_;
+        }
+
 
 public:
 
@@ -89,7 +98,8 @@ public:
         ggiFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
         :
             coupledFvPatch(patch, bm),
-            ggiPolyPatch_(refCast<const ggiPolyPatch>(patch))
+            ggiPolyPatch_(refCast<const ggiPolyPatch>(patch)),
+            transferBuffer_()
         {}
 
 
@@ -145,6 +155,35 @@ public:
 
         // Interface transfer functions
 
+            //- Is this the master side?
+            virtual bool master() const;
+
+            //- Is this the fine level?
+            virtual bool fineLevel() const;
+
+            //- Return shadow patch index
+            virtual label shadowIndex() const;
+
+            //- Return addressing.  Master side returns own addressing and
+            //  slave side returns addressing from master
+            virtual const labelListList& addressing() const;
+
+            //- Return weights.  Master side returns own weights and
+            //  slave side returns weights from master
+            virtual const scalarListList& weights() const;
+
+            //- Return face transformation tensor
+            virtual const tensorField& forwardT() const
+            {
+                return coupledFvPatch::forwardT();
+            }
+
+            //- Return neighbour-cell transformation tensor
+            virtual const tensorField& reverseT() const
+            {
+                return coupledFvPatch::reverseT();
+            }
+
             //- Return the values of the given internal data adjacent to
             //  the interface as a field
             virtual tmp<labelField> interfaceInternalField
@@ -152,11 +191,25 @@ public:
                 const unallocLabelList& internalData
             ) const;
 
+            //- Initialise interface data transfer
+            virtual void initTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& interfaceData
+            ) const;
+
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
                 const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
+            ) const;
+
+            //- Initialise transfer of internal field adjacent to the interface
+            virtual void initInternalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const unallocLabelList& iF
             ) const;
 
             //- Return neighbour field

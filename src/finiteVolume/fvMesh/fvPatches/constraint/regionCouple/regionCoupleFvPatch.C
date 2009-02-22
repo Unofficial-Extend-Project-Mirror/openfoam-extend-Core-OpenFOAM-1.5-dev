@@ -145,7 +145,7 @@ Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::transfer
 ) const
 {
     //HJ  Should this be mapped?  22/Jun/2007
-    return this->shadow().transferBuffer();
+    return shadow().transferBuffer();
 }
 
 
@@ -166,7 +166,7 @@ Foam::tmp<Foam::labelField> Foam::regionCoupleFvPatch::internalFieldTransfer
 ) const
 {
     //HJ  Should this be mapped?  22/Jun/2007
-    return this->shadow().transferBuffer();
+    return shadow().transferBuffer();
 }
 
 
