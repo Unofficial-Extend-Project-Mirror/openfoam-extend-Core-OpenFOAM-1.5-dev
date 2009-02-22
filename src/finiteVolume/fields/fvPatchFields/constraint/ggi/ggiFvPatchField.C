@@ -155,7 +155,6 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
         // HJ, 21/Jan/2009
         Field<Type> bridgeField =
             transform(I - 2.0*sqr(nHat), this->patchInternalField());
-//             this->patchInternalField();
 
         ggiPatch_.bridge(bridgeField, tpnf());
     }
