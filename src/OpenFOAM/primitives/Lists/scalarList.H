@@ -42,6 +42,7 @@ namespace Foam
 {
     typedef List<scalar> scalarList;
     typedef List<scalarList> scalarListList;
+    typedef List<scalarListList> scalarListListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
