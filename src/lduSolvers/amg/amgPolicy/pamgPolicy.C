@@ -464,6 +464,15 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
 
     // Add the coarse level
 
+    lduPrimitiveMesh* coarseAddrPtr =
+        new lduPrimitiveMesh
+        (
+            nCoarseEqns_,
+            coarseOwner,
+            coarseNeighbour,
+            true
+        );
+
     // Initialise transfer of restrict addressing on the interface
     forAll (interfaceFields, intI)
     {
@@ -489,6 +498,7 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
                 intI,
                 GAMGInterface::New
                 (
+                    *coarseAddrPtr,
                     fineInterface,
                     fineInterface.interfaceInternalField(child_),
                     fineInterface.internalFieldTransfer
@@ -528,20 +538,15 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
         }
     }
 
-    // Matrix restriction done!
+    // Add interfaces
+    coarseAddrPtr->addInterfaces
+    (
+        *coarseInterfacesPtr,
+        coarseInterfaceAddr,
+        matrix_.patchSchedule()
+    );
 
-    // Set the coarse ldu addressing onto the list
-    lduPrimitiveMesh* coarseAddrPtr =
-        new lduPrimitiveMesh
-        (
-            nCoarseEqns_,
-            coarseOwner,
-            coarseNeighbour,
-            coarseInterfaceAddr,
-            *coarseInterfacesPtr,
-            matrix_.patchSchedule(),
-            true
-        );
+    // Matrix restriction done!
 
     // Set the coarse level matrix
     lduMatrix* coarseMatrixPtr = new lduMatrix(*coarseAddrPtr);
