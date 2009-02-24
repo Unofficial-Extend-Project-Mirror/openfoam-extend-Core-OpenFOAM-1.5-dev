@@ -152,7 +152,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
 
 
     faceCells_.setSize(nCoarseFaces, -1);
-    restrictAddressing_.setSize(localRestrictAddressing.size());
+    fineAddressing_.setSize(localRestrictAddressing.size(), -1);
+    restrictAddressing_.setSize(localRestrictAddressing.size(), -1);
 
     // All weights are equal to 1: integral matching
     restrictWeights_.setSize(localRestrictAddressing.size(), 1.0);
