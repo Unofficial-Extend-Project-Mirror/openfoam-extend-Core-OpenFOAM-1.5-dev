@@ -826,11 +826,13 @@ Tolerances
     primitiveMeshAspectThreshold     1000;
     primitiveMeshNonOrthThreshold    70;
     primitiveMeshSkewThreshold       4;
+    primitiveMeshFaceAngleThreshold  10;
+    primitiveMeshFaceFlatnessThreshold 0.8;
 
     // Geometric matching tolerances
     cyclicMatchTol      1e-4;
     processorMatchTol   1e-4;
-    closedDomainTol     1e-12;
+    closedDomainTol     1e-10;
 
     // Patch-to-patch interpolation tolerances
     patchToPatchDirectHit       1e-5;
