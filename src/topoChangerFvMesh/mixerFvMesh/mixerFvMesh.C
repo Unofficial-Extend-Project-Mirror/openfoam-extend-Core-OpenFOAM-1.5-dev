@@ -369,8 +369,8 @@ Foam::mixerFvMesh::mixerFvMesh
     Info<< "Mixer mesh" << nl
         << "    origin       : " << cs().origin() << nl
         << "    axis         : " << cs().axis() << nl
-        << "    rpm          : " << rpm_
-        << "    marker       : " << rotatingRegionMarker_
+        << "    rpm          : " << rpm_ << nl
+        << "    marker       : " << rotatingRegionMarker_ << nl
         << "    attach-detach: " << attachDetach_
         << endl;
 }
@@ -397,7 +397,10 @@ bool Foam::mixerFvMesh::update()
         deleteDemandDrivenData(movingPointsMaskPtr_);
     }
 
-    // Rotational speed needs to be converted from rpm
+    // Save old points
+    pointField oldPointsNew = allPoints();
+
+    // Move points.  Rotational speed needs to be converted from rpm
     movePoints
     (
         csPtr_->globalPosition
@@ -416,6 +419,14 @@ bool Foam::mixerFvMesh::update()
         Info << "Attaching rotors" << endl;
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
+
+        // Move the sliding interface points to correct position
+        pointField mappedOldPointsNew(allPoints().size());
+        mappedOldPointsNew.map(oldPointsNew, topoChangeMap->pointMap());
+
+        movePoints(mappedOldPointsNew);
+        resetMotion();
+        setV0();
 
         // Move the sliding interface points to correct position
         movePoints(topoChangeMap->preMotionPoints());
