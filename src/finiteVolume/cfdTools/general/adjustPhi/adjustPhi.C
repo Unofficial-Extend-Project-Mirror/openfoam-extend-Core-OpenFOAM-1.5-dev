@@ -104,7 +104,7 @@ bool Foam::adjustPhi
         scalar massCorr = 1.0;
 
         static const scalar closedDomainTol =
-            debug::tolerances("closedDomainTol", 1e-12);
+            debug::tolerances("closedDomainTol", 1e-10);
 
         if (mag(adjustableMassOut) > SMALL)
         {
