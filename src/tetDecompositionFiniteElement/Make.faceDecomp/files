@@ -14,6 +14,7 @@ wedgeTetPolyPatchFaceDecomp     = $(constraintTetPolyPatchesFaceDecomp)/wedge
 processorTetPolyPatchFaceDecomp = $(constraintTetPolyPatchesFaceDecomp)/processor
 globalTetPolyPatchFaceDecomp    = $(constraintTetPolyPatchesFaceDecomp)/global
 wallTetPolyPatchFaceDecomp      = $(derivedTetPolyPatchesFaceDecomp)/wall
+ggiTetPolyPatchFaceDecomp      = $(derivedTetPolyPatchesFaceDecomp)/ggi
 
 MapTetFemFieldsFaceDecomp       = $(tetPolyMeshFaceDecomp)/MapTetFemFieldsFaceDecomp
 
@@ -33,6 +34,7 @@ wedgeTetPolyPatchCellDecomp     = $(constraintTetPolyPatchesCellDecomp)/wedge
 processorTetPolyPatchCellDecomp = $(constraintTetPolyPatchesCellDecomp)/processor
 globalTetPolyPatchCellDecomp    = $(constraintTetPolyPatchesCellDecomp)/global
 wallTetPolyPatchCellDecomp      = $(derivedTetPolyPatchesCellDecomp)/wall
+ggiTetPolyPatchCellDecomp      = $(derivedTetPolyPatchesCellDecomp)/ggi
 
 MapTetFemFieldsCellDecomp       = $(tetPolyMeshCellDecomp)/MapTetFemFieldsCellDecomp
 
@@ -55,6 +57,7 @@ $(processorTetPolyPatchFaceDecomp)/calcProcessorTetPolyPatchFaceDecompPointAddr.
 $(globalTetPolyPatchFaceDecomp)/globalTetPolyPatchFaceDecomp.C
 $(globalTetPolyPatchFaceDecomp)/calcGlobalTetPolyPatchFaceDecompAddr.C
 $(wallTetPolyPatchFaceDecomp)/wallTetPolyPatchFaceDecomp.C
+$(ggiTetPolyPatchFaceDecomp)/ggiTetPolyPatchFaceDecomp.C
 $(tetPolyBoundaryMeshFaceDecomp)/tetPolyBoundaryMeshFaceDecomp.C
 $(tetPolyMeshFaceDecomp)/tetPolyMeshLduAddressingFaceDecomp.C
 $(tetPolyMeshFaceDecomp)/tetPolyMeshFaceDecomp.C
@@ -82,6 +85,7 @@ $(processorTetPolyPatchCellDecomp)/calcProcessorTetPolyPatchCellDecompPointAddr.
 $(globalTetPolyPatchCellDecomp)/globalTetPolyPatchCellDecomp.C
 $(globalTetPolyPatchCellDecomp)/calcGlobalTetPolyPatchCellDecompAddr.C
 $(wallTetPolyPatchCellDecomp)/wallTetPolyPatchCellDecomp.C
+$(ggiTetPolyPatchCellDecomp)/ggiTetPolyPatchCellDecomp.C
 $(tetPolyBoundaryMeshCellDecomp)/tetPolyBoundaryMeshCellDecomp.C
 $(tetPolyMeshCellDecomp)/tetPolyMeshLduAddressingCellDecomp.C
 $(tetPolyMeshCellDecomp)/tetPolyMeshCellDecomp.C
