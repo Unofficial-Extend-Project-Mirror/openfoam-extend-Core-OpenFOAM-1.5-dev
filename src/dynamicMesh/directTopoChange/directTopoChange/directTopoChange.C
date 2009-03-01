@@ -1497,7 +1497,6 @@ void Foam::directTopoChange::resetZones
         }
 
         // Reset the addresing on the zone
-        newMesh.pointZones().clearAddressing();
         forAll(newMesh.pointZones(), zoneI)
         {
             if (debug)
@@ -1510,6 +1509,7 @@ void Foam::directTopoChange::resetZones
 
             newMesh.pointZones()[zoneI] = addressing[zoneI];
         }
+        newMesh.pointZones().updateMesh();
     }
 
 
@@ -1587,7 +1587,6 @@ void Foam::directTopoChange::resetZones
 
 
         // Reset the addresing on the zone
-        newMesh.faceZones().clearAddressing();
         forAll(newMesh.faceZones(), zoneI)
         {
             if (debug)
@@ -1604,6 +1603,7 @@ void Foam::directTopoChange::resetZones
                 flipMode[zoneI]
             );
         }
+        newMesh.faceZones().updateMesh();
     }
 
 
@@ -1679,7 +1679,6 @@ void Foam::directTopoChange::resetZones
         }
 
         // Reset the addresing on the zone
-        newMesh.cellZones().clearAddressing();
         forAll(newMesh.cellZones(), zoneI)
         {
             if (debug)
@@ -1692,6 +1691,9 @@ void Foam::directTopoChange::resetZones
 
             newMesh.cellZones()[zoneI] = addressing[zoneI];
         }
+
+        // Clear addressing
+        newMesh.cellZones().updateMesh();
     }
 }
 

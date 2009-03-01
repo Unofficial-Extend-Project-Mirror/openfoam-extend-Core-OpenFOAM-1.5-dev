@@ -767,7 +767,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         );
 
         // Reset any addressing on face zones.
-        mesh.faceZones().clearAddressing();
+        mesh.faceZones().updateMesh();
 
         // Clear the addressing
         mesh.clearOut();
