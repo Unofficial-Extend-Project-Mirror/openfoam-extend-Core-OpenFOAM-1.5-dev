@@ -598,6 +598,7 @@ int main(int argc, char *argv[])
             mesh.nPoints(),
             sumOp<label>()
         );
+
         label nTotIntPoints = returnReduce
         (
             mesh.nInternalPoints(),
@@ -609,16 +610,19 @@ int main(int argc, char *argv[])
             mesh.nEdges(),
             sumOp<label>()
         );
+
         label nTotIntEdges = returnReduce
         (
             mesh.nInternalEdges(),
             sumOp<label>()
         );
+
         label nTotInt0Edges = returnReduce
         (
             mesh.nInternal0Edges(),
             sumOp<label>()
         );
+
         label nTotInt1Edges = returnReduce
         (
             mesh.nInternal1Edges(),
@@ -662,6 +666,7 @@ int main(int argc, char *argv[])
             ),
             map().cellMap()
         ).write();
+
         labelIOList
         (
             IOobject
@@ -676,6 +681,7 @@ int main(int argc, char *argv[])
             ),
             map().faceMap()
         ).write();
+
         labelIOList
         (
             IOobject

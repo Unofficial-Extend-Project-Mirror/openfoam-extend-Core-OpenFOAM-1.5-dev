@@ -22,6 +22,8 @@ if (mesh.moving())
 
     forAll (conserve, cellI)
     {
+        maxMotionError = Foam::max(maxMotionError, mag(conserve[cellI]));
+
         if (mag(conserve[cellI]) > 1e-8)
         {
             Info<< "Motion conservation error in cell " << cellI << ": "
@@ -31,20 +33,18 @@ if (mesh.moving())
                 << " div flux: " << divFlux[cellI] << endl;
 
             nMotionErrors++;
-
-            maxMotionError = Foam::max(maxMotionError, mag(conserve[cellI]));
         }
     }
 
     if (nMotionErrors > 0)
     {
         Info<< "Number of motion errors: " << nMotionErrors
-            << " (nCells = " << mesh.nCells() << ").  Max = "
-            << maxMotionError << endl;
+            << " (nCells = " << mesh.nCells() << endl;
     }
 
     Info<< "volume continuity errors : "
         << "volume = " << sumV
+        << ", max error = " << maxMotionError
         << ", sum local = " << sumLocalContErr
         << ", global = " << globalContErr << endl;
 }
