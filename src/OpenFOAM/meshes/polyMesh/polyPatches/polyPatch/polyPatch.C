@@ -523,6 +523,7 @@ const Foam::labelList& Foam::polyPatch::meshEdges() const
 
 void Foam::polyPatch::clearAddressing()
 {
+    primitivePatch::clearOut();
     deleteDemandDrivenData(faceCellsPtr_);
     deleteDemandDrivenData(mePtr_);
 }

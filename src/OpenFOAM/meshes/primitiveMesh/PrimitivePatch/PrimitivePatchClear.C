@@ -96,6 +96,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology()
     deleteDemandDrivenData(pointFacesPtr_);
 
     deleteDemandDrivenData(edgeLoopsPtr_);
+    deleteDemandDrivenData(localPointOrderPtr_);
 }
 
 
