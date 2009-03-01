@@ -385,7 +385,6 @@ bool domainDecomposition::writeDecomposition()
                 }
             }
 
-            procMesh.pointZones().clearAddressing();
             procMesh.pointZones().setSize(zonePoints.size());
             forAll(zonePoints, zoneI)
             {
@@ -400,6 +399,7 @@ bool domainDecomposition::writeDecomposition()
                     )
                 );
             }
+            procMesh.pointZones().updateMesh();
 
             if (pz.size())
             {
@@ -478,7 +478,6 @@ bool domainDecomposition::writeDecomposition()
                 }
             }
 
-            procMesh.faceZones().clearAddressing();
             procMesh.faceZones().setSize(zoneFaces.size());
             forAll(zoneFaces, zoneI)
             {
@@ -494,6 +493,7 @@ bool domainDecomposition::writeDecomposition()
                     )
                 );
             }
+            procMesh.faceZones().updateMesh();
 
             if (fz.size())
             {
@@ -543,7 +543,6 @@ bool domainDecomposition::writeDecomposition()
                 }
             }
 
-            procMesh.cellZones().clearAddressing();
             procMesh.cellZones().setSize(zoneCells.size());
             forAll(zoneCells, zoneI)
             {
@@ -558,6 +557,7 @@ bool domainDecomposition::writeDecomposition()
                     )
                 );
             }
+            procMesh.cellZones().updateMesh();
 
             if (cz.size())
             {
