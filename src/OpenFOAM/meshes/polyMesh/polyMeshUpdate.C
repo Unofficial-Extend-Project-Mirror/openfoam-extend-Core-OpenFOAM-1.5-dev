@@ -40,9 +40,9 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     boundary_.updateMesh();
 
     // Update zones
-    pointZones_.clearAddressing();
-    faceZones_.clearAddressing();
-    cellZones_.clearAddressing();
+    pointZones_.updateMesh();
+    faceZones_.updateMesh();
+    cellZones_.updateMesh();
 
     // Update parallel data
     if (globalMeshDataPtr_)

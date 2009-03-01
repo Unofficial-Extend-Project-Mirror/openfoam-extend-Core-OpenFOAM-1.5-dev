@@ -98,6 +98,9 @@ class pointZone
         //- Build map of local point indices
         void calcPointLookupMap() const;
 
+        //- Clear addressing
+        void clearAddressing();
+
 
 public:
 
@@ -218,15 +221,16 @@ public:
         //- Return zoneMesh reference
         const pointZoneMesh& zoneMesh() const;
 
-        //- Clear addressing
-        void clearAddressing();
-
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
 
         //- Correct patch after moving points
         virtual void movePoints(const pointField&)
         {}
+
+        //- Correct after topology update.  Note: Zone has been rebuilt
+        //  and no mapping is required.  HJ, 1/Mar/2009
+        void updateMesh();
 
         //- Write
         virtual void write(Ostream&) const;

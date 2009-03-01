@@ -95,6 +95,12 @@ void Foam::cellZone::calcCellLookupMap() const
 }
 
 
+void Foam::cellZone::clearAddressing()
+{
+    deleteDemandDrivenData(cellLookupMapPtr_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
@@ -182,12 +188,6 @@ const Foam::cellZoneMesh& Foam::cellZone::zoneMesh() const
 }
 
 
-void Foam::cellZone::clearAddressing()
-{
-    deleteDemandDrivenData(cellLookupMapPtr_);
-}
-
-
 bool Foam::cellZone::checkDefinition(const bool report) const
 {
     const labelList& addr = *this;
@@ -214,6 +214,12 @@ bool Foam::cellZone::checkDefinition(const bool report) const
         }
     }
     return boundaryError;
+}
+
+
+void Foam::cellZone::updateMesh()
+{
+    clearAddressing();
 }
 
 

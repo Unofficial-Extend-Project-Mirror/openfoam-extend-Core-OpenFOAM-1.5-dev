@@ -127,6 +127,9 @@ class faceZone
         //- Check addressing
         void checkAddressing() const;
 
+        //- Clear addressing
+        void clearAddressing();
+
 
 public:
 
@@ -272,9 +275,6 @@ public:
             const labelList& meshEdges() const;
 
 
-        //- Clear addressing
-        void clearAddressing();
-
         //- Reset addressing and flip map (clearing demand-driven data)
         void resetAddressing(const labelList&, const boolList&);
 
@@ -284,8 +284,9 @@ public:
         //- Correct patch after moving points
         virtual void movePoints(const pointField&);
 
-        //- Update for changes in topology
-        void updateMesh(const mapPolyMesh& mpm);
+        //- Update for changes in topology  Note: Zone has been rebuilt
+        //  and no mapping is required.  HJ, 1/Mar/2009
+        void updateMesh();
 
         //- Write
         virtual void write(Ostream&) const;

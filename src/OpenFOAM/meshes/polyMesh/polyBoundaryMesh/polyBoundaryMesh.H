@@ -173,7 +173,8 @@ public:
         //- Correct polyBoundaryMesh after moving points
         void movePoints(const pointField&);
 
-        //- Correct polyBoundaryMesh after topology update
+        //- Correct after topology update  Note: Boundary has been rebuilt
+        //  and no mapping is required.  HJ, 1/Mar/2009
         void updateMesh();
 
         //- Reorders patches. Ordering does not have to be done in

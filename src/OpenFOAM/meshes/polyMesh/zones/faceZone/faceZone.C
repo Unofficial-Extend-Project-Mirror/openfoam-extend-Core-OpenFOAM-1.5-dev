@@ -235,6 +235,18 @@ void Foam::faceZone::checkAddressing() const
 }
 
 
+void Foam::faceZone::clearAddressing()
+{
+    deleteDemandDrivenData(patchPtr_);
+
+    deleteDemandDrivenData(masterCellsPtr_);
+    deleteDemandDrivenData(slaveCellsPtr_);
+
+    deleteDemandDrivenData(mePtr_);
+    deleteDemandDrivenData(faceLookupMapPtr_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
@@ -409,18 +421,6 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
 }
 
 
-void Foam::faceZone::clearAddressing()
-{
-    deleteDemandDrivenData(patchPtr_);
-
-    deleteDemandDrivenData(masterCellsPtr_);
-    deleteDemandDrivenData(slaveCellsPtr_);
-
-    deleteDemandDrivenData(mePtr_);
-    deleteDemandDrivenData(faceLookupMapPtr_);
-}
-
-
 void Foam::faceZone::resetAddressing
 (
     const labelList& addr,
@@ -433,33 +433,9 @@ void Foam::faceZone::resetAddressing
 }
 
 
-void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
+void Foam::faceZone::updateMesh()
 {
     clearAddressing();
-
-    labelList newAddressing(size());
-    boolList newFlipMap(flipMap_.size());
-    label nFaces = 0;
-
-    const labelList& faceMap = mpm.reverseFaceMap();
-
-    forAll(*this, i)
-    {
-        label faceI = operator[](i);
-
-        if (faceMap[faceI] >= 0)
-        {
-            newAddressing[nFaces] = faceMap[faceI];
-            newFlipMap[nFaces] = flipMap_[i];       // Keep flip map.
-            nFaces++;
-        }
-    }
-
-    newAddressing.setSize(nFaces);
-    newFlipMap.setSize(nFaces);
-
-    transfer(newAddressing);
-    flipMap_.transfer(newFlipMap);
 }
 
 

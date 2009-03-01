@@ -93,6 +93,12 @@ void Foam::pointZone::calcPointLookupMap() const
 }
 
 
+void Foam::pointZone::clearAddressing()
+{
+    deleteDemandDrivenData(pointLookupMapPtr_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
@@ -180,9 +186,9 @@ const Foam::pointZoneMesh& Foam::pointZone::zoneMesh() const
 }
 
 
-void Foam::pointZone::clearAddressing()
+void Foam::pointZone::updateMesh()
 {
-    deleteDemandDrivenData(pointLookupMapPtr_);
+    clearAddressing();
 }
 
 
@@ -207,7 +213,7 @@ bool Foam::pointZone::checkDefinition(const bool report) const
                 )   << "Zone " << name()
                     << " contains invalid point label " << addr[i] << nl
                     << "Valid point labels are 0.."
-                    << zoneMesh_.mesh().points().size()-1 << endl;
+                    << zoneMesh_.mesh().points().size() - 1 << endl;
             }
         }
     }

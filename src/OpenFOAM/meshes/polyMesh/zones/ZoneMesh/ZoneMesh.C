@@ -259,13 +259,6 @@ template<class ZoneType, class MeshType>
 void ZoneMesh<ZoneType, MeshType>::clearAddressing()
 {
     deleteDemandDrivenData(zoneMapPtr_);
-
-    PtrList<ZoneType>& zones = *this;
-
-    forAll (zones, zoneI)
-    {
-        zones[zoneI].clearAddressing();
-    }
 }
 
 
@@ -302,6 +295,20 @@ void ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
     forAll (zones, zoneI)
     {
         zones[zoneI].movePoints(p);
+    }
+}
+
+
+template<class ZoneType, class MeshType>
+void ZoneMesh<ZoneType, MeshType>::updateMesh()
+{
+    this->clearAddressing();
+
+    PtrList<ZoneType>& zones = *this;
+
+    forAll (zones, zoneI)
+    {
+        zones[zoneI].updateMesh();
     }
 }
 

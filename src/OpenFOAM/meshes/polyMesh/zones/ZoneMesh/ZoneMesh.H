@@ -87,6 +87,9 @@ class ZoneMesh
         //- Create zone map
         void calcZoneMap() const;
 
+        //- Clear addressing
+        void clearAddressing();
+
 
 public:
 
@@ -137,9 +140,6 @@ public:
         //- Find zone index given a name
         label findZoneID(const word& zoneName) const;
 
-        //- Clear addressing
-        void clearAddressing();
-
         //- Clear the zones
         void clear();
 
@@ -148,6 +148,9 @@ public:
 
         //- Correct zone mesh after moving points
         void movePoints(const pointField&);
+
+        //- Correct after topology update
+        void updateMesh();
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;
