@@ -58,7 +58,7 @@ const scalar GGIInterpolation<MasterPatch, SlavePatch>::areaErrorTol_
 template<class MasterPatch, class SlavePatch>
 const scalar GGIInterpolation<MasterPatch, SlavePatch>::featureCosTol_
 (
-    debug::tolerances("GGIFeatureCosTol", 0.95)
+    debug::tolerances("GGIFeatureCosTol", 0.8)
 );
 
 
