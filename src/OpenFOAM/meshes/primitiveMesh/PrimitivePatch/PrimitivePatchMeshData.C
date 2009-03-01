@@ -41,7 +41,6 @@ template
     class PointField,
     class PointType
 >
-
 void PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshData() const
 {
     if (debug)
@@ -137,7 +136,6 @@ template
     class PointField,
     class PointType
 >
-
 void
 PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshPointMap() const
 {
@@ -188,7 +186,6 @@ template
     class PointField,
     class PointType
 >
-
 void
 PrimitivePatch<Face, FaceList, PointField, PointType>::calcLocalPoints() const
 {
@@ -240,7 +237,6 @@ template
     class PointField,
     class PointType
 >
-
 void
 PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointNormals() const
 {
@@ -307,7 +303,6 @@ template
     class PointField,
     class PointType
 >
-
 void
 PrimitivePatch<Face, FaceList, PointField, PointType>::calcFaceNormals() const
 {

@@ -43,8 +43,8 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcBdryPoints()
- const
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcBdryPoints() const
 {
     if (debug)
     {

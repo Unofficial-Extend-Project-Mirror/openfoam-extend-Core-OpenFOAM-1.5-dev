@@ -47,7 +47,6 @@ template
     class PointField,
     class PointType
 >
-
 template <class ToPatch>
 List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectPoints
@@ -317,7 +316,6 @@ template
     class PointField,
     class PointType
 >
-
 template <class ToPatch>
 List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectFaceCentres

@@ -42,7 +42,6 @@ template
     class PointField,
     class PointType
 >
-
 labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
 (
     const edgeList& allEdges,
@@ -120,7 +119,6 @@ template
     class PointField,
     class PointType
 >
-
 label PrimitivePatch<Face, FaceList, PointField, PointType>::whichEdge
 (
     const edge& e

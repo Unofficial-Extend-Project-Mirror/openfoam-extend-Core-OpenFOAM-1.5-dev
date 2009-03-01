@@ -44,9 +44,8 @@ template
     class PointField,
     class PointType
 >
-
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointEdges()
- const
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointEdges() const
 {
     if (debug)
     {
@@ -115,9 +114,8 @@ template
     class PointField,
     class PointType
 >
-
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointFaces()
- const
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointFaces() const
 {
     if (debug)
     {

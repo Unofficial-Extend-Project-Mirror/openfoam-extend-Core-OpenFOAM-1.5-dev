@@ -44,8 +44,8 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
- const
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops() const
 {
     if (debug)
     {

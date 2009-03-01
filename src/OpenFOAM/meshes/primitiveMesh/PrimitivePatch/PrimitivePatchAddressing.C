@@ -53,8 +53,8 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
- const
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing() const
 {
     if (debug)
     {
