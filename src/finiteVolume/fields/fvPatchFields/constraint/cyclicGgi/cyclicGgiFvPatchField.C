@@ -61,7 +61,7 @@ cyclicGgiFvPatchField<Type>::cyclicGgiFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, true),
+    coupledFvPatchField<Type>(p, iF, dict, false),
     cyclicGgiPatch_(refCast<const cyclicGgiFvPatch>(p))
 {
     if (!isType<cyclicGgiFvPatch>(p))
@@ -78,6 +78,12 @@ cyclicGgiFvPatchField<Type>::cyclicGgiFvPatchField
         )   << "patch " << this->patch().index() << " not cyclicGgi type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
+    }
+
+    if (!dict.found("value"))
+    {
+        // Grab the internal value for initialisation. (?) HJ, 27/Feb/2009
+        fvPatchField<Type>::operator=(this->patchInternalField()());
     }
 }
 

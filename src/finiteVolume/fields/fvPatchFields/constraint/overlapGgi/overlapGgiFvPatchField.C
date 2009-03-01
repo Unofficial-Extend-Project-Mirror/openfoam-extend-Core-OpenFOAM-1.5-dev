@@ -56,7 +56,7 @@ overlapGgiFvPatchField<Type>::overlapGgiFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, true),
+    coupledFvPatchField<Type>(p, iF, dict, false),
     overlapGgiPatch_(refCast<const overlapGgiFvPatch>(p))
 {
     if (!isType<overlapGgiFvPatch>(p))
@@ -73,6 +73,12 @@ overlapGgiFvPatchField<Type>::overlapGgiFvPatchField
         )   << "patch " << this->patch().index() << " not overlapGgi type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
+    }
+
+    if (!dict.found("value"))
+    {
+        // Grab the internal value for initialisation. (?) HJ, 27/Feb/2009
+        fvPatchField<Type>::operator=(this->patchInternalField()());
     }
 }
 

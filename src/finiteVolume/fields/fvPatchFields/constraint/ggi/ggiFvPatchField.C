@@ -60,7 +60,7 @@ ggiFvPatchField<Type>::ggiFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, true),
+    coupledFvPatchField<Type>(p, iF, dict, false),
     ggiPatch_(refCast<const ggiFvPatch>(p))
 {
     if (!isType<ggiFvPatch>(p))
@@ -77,6 +77,12 @@ ggiFvPatchField<Type>::ggiFvPatchField
         )   << "patch " << this->patch().index() << " not ggi type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
+    }
+
+    if (!dict.found("value"))
+    {
+        // Grab the internal value for initialisation. (?) HJ, 27/Feb/2009
+        fvPatchField<Type>::operator=(this->patchInternalField()());
     }
 }
 

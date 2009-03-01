@@ -69,7 +69,8 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
                 reverseT(),
                 separation(),
                 0,             // Non-overlapping face tolerances
-                0              // HJ, 24/Oct/2008
+                0,             // HJ, 24/Oct/2008
+                ggiInterpolation::AABB
             );
     }
     else
