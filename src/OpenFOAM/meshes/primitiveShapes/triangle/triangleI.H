@@ -437,34 +437,39 @@ inline scalar triangle<Point, PointRef>::sweptVol(const triangle& t) const
       + ((c_ - t.c_) & ((b_ - t.c_)^(t.a_ - t.c_)))
     );
 
-    scalar V3 =
-    (
-        ((t.b_ - b_) & ((c_ - b_)^(a_ - b_)))
-      + ((c_ - t.c_) & ((t.b_ - t.c_)^(t.a_ - t.c_)))
-      + ((t.a_ - a_) & ((t.b_ - a_)^(c_ - a_)))
-    );
+    // Update by Frank Bos: other volumes cancel out.
+    // HJ, 18/Feb/2009
+    return (1.0/12.0)*(V1 + V2);
 
-    scalar V4 =
-    (
-        ((t.b_ - b_) & ((c_ - b_)^(a_ - b_)))
-      + ((a_ - t.a_) & ((t.c_ - t.a_)^(t.b_ - t.a_)))
-      + ((c_ - t.c_) & ((t.b_ - t.c_)^(a_ - t.c_)))
-    );
+//     scalar V3 =
+//     (
+//         ((t.b_ - b_) & ((c_ - b_)^(a_ - b_)))
+//       + ((c_ - t.c_) & ((t.b_ - t.c_)^(t.a_ - t.c_)))
+//       + ((t.a_ - a_) & ((t.b_ - a_)^(c_ - a_)))
+//     );
 
-    scalar V5 =
-    (
-        ((t.c_ - c_) & ((a_ - c_)^(b_ - c_)))
-      + ((a_ - t.a_) & ((t.c_ - t.a_)^(t.b_ - t.a_)))
-      + ((t.b_ - b_) & ((t.c_ - b_)^(a_ - b_)))
-    );
+//     scalar V4 =
+//     (
+//         ((t.b_ - b_) & ((c_ - b_)^(a_ - b_)))
+//       + ((a_ - t.a_) & ((t.c_ - t.a_)^(t.b_ - t.a_)))
+//       + ((c_ - t.c_) & ((t.b_ - t.c_)^(a_ - t.c_)))
+//     );
 
-    scalar V6 =
-    (
-        ((t.c_ - c_) & ((a_ - c_)^(b_ - c_)))
-      + ((b_ - t.b_) & ((t.a_ - t.b_)^(t.c_ - t.b_)))
-      + ((a_ - t.a_) & ((t.c_ - a_)^(b_ - t.a_)))
-    );
-	return (1.0/6.0)*(1.0/6.0)*(V1 + V2 + V3 + V4 + V5 + V6);
+//     scalar V5 =
+//     (
+//         ((t.c_ - c_) & ((a_ - c_)^(b_ - c_)))
+//       + ((a_ - t.a_) & ((t.c_ - t.a_)^(t.b_ - t.a_)))
+//       + ((t.b_ - b_) & ((t.c_ - b_)^(a_ - b_)))
+//     );
+
+//     scalar V6 =
+//     (
+//         ((t.c_ - c_) & ((a_ - c_)^(b_ - c_)))
+//       + ((b_ - t.b_) & ((t.a_ - t.b_)^(t.c_ - t.b_)))
+//       + ((a_ - t.a_) & ((t.c_ - a_)^(b_ - t.a_)))
+//     );
+
+//     return (1.0/6.0)*(1.0/6.0)*(V1 + V2 + V3 + V4 + V5 + V6);
 }
 
 
