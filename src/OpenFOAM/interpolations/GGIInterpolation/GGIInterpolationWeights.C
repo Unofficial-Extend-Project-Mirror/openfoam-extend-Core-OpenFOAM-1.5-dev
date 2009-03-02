@@ -310,11 +310,11 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
             {
                 if (forwardSep_.size() == 1)
                 {
-                    curSlaveFacePoints += forwardSep_[curCMN[neighbI]];
+                    curSlaveFacePoints += forwardSep_[0];
                 }
                 else
                 {
-                    curSlaveFacePoints += forwardSep_[0];
+                    curSlaveFacePoints += forwardSep_[curCMN[neighbI]];
                 }
             }
 
