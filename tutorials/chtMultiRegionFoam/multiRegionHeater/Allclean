@@ -4,4 +4,10 @@
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cleanCase
-rm -r VTK
+
+if [ -d "VTK" ]
+then
+    rm -r VTK
+fi
+
+
