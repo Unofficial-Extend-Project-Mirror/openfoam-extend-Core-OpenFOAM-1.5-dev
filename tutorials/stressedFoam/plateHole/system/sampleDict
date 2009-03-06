@@ -25,13 +25,14 @@ FoamFile
 
 interpolationScheme cellPoint;
 
-writeFormat     raw;
+setFormat     raw;
 
-sampleSets      
+sets      
 (
-    uniform 
+    leftPatch
     {
-        name            leftPatch;
+        
+        type            uniform;
         axis            y;
         start           (0 0.5 0.25);
         end             (0 2 0.25);
@@ -44,5 +45,8 @@ fields
     sigmaxx
 );
 
+surfaces
+(
+);
 
 // ************************************************************************* //
