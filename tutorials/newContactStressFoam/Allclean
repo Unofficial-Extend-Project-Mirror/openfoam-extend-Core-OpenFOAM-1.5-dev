@@ -9,7 +9,7 @@ tutorialPath=`dirname $0`/..
 
 for case in $cases
 do
-    cleanCase $case
+    (cd $case; cleanCase)
     cp $case/0/materials.org $case/0/materials
     rm -rf $case/0/polyMesh
 done

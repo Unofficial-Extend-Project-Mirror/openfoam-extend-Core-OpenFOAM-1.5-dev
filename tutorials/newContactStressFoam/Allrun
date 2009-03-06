@@ -7,7 +7,7 @@ case="ballAndBrickFriction"
 tutorialPath=`dirname $0`/..
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-runApplication blockMesh $case
-runApplication setFields $case
-runApplication $application $case
-deformedGeom . $case 1.0
+(cd $case; runApplication blockMesh)
+(cd $case; runApplication setFields)
+(cd $case; runApplication $application)
+(cd $case; runApplication deformedGeom  1.0)
