@@ -7,6 +7,6 @@ case="ballAndBrick"
 tutorialPath=`dirname $0`/..
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-runApplication blockMesh $case
-runApplication $application $case
+(cd $case; runApplication blockMesh)
+(cd $case; runApplication $application)
 

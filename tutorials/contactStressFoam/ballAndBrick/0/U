@@ -45,7 +45,7 @@ boundaryField
         type            directionMixed;
         refValue        uniform (0 0 0);
         refGradient     uniform (0 0 0);
-        valueFraction   uniform 0;
+        valueFraction   uniform (0 0 0 0 0 0);
     }
 
     topBrickUp      
