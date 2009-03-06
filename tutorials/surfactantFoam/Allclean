@@ -9,13 +9,13 @@ tutorialPath=`dirname $0`/..
 
 cleanFaMesh ()
 {
-    rm -rf $1/constant/faMesh/{faceLabels*,boundary*} \
+    rm -rf ./constant/faMesh/{faceLabels*,boundary*} \
            > /dev/null 2>&1
 }
 
 for case in $cases
 do
-    cleanTimeDirectories $case
-    cleanFaMesh $case
+    (cd $case; cleanTimeDirectories)
+    (cd $case; cleanFaMesh)
 done
 

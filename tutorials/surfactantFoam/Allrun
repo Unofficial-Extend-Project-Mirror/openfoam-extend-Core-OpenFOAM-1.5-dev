@@ -9,6 +9,6 @@ tutorialPath=`dirname $0`/..
 
 for case in $cases
 do
-    runApplication makeFaMesh $case
-    runApplication $application $case
+    (cd $case; runApplication makeFaMesh)
+    (cd $case; runApplication $application)
 done
