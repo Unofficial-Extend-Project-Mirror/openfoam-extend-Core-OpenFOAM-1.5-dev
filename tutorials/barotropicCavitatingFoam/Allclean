@@ -7,6 +7,6 @@ case=nozzle
 tutorialPath=`dirname $0`/..
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-cleanCase $case
-cleanSamples $case
+(cd $case; cleanCase)
+(cd $case; cleanSamples)
 

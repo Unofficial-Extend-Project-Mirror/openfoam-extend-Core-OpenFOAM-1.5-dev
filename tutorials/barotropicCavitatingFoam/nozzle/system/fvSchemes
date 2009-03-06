@@ -45,7 +45,7 @@ laplacianSchemes
 	default none;
 
     laplacian((interpolate(rho)*((interpolate(p)*nug)+((1-interpolate(p))*nul))),U) Gauss linear corrected;
-    laplacian(1|interpolate(A(U)),p) Gauss  linear corrected;
+    laplacian((1|interpolate(A(U))),p) Gauss  linear corrected;
 }
 
 interpolationSchemes

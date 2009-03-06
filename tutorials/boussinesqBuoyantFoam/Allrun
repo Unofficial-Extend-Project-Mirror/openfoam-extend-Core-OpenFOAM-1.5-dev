@@ -9,6 +9,6 @@ tutorialPath=`dirname $0`/..
 
 for case in $cases
 do
-    runApplication blockMesh $case
-    runApplication $application $case
+    (cd $case; runApplication blockMesh)
+    (cd $case; runApplication $application) 
 done
