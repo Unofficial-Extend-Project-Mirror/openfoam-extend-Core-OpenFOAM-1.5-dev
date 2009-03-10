@@ -513,9 +513,11 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
     // basic info to the user
     scalar largestSWC = 0.0;
     scalar sumSWC = 0.0;
+    scalar curSWC = 0.0;
 
     scalar largestMWC = 0.0;
     scalar sumMWC = 0.0;
+    scalar curMWC = 0.0;
 
     // Rescaling the slave weights
     if
@@ -542,10 +544,10 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
             saW[saWi] = saW[saWi]/slaveWeightSum;
 
             // Some book-keeping
-            largestSWC =
-                Foam::max(largestSWC, 1.0 - slaveWeightSum);
+            curSWC     = mag(1.0 - slaveWeightSum);
+            largestSWC = Foam::max(largestSWC, curSWC);
 
-            sumSWC += mag(1.0 - slaveWeightSum);
+            sumSWC += curSWC;
         }
     }
 
@@ -559,10 +561,10 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
             maW[maWi] = maW[maWi]/masterWeightSum;
 
             // Some book-keeping
-            largestMWC =
-                Foam::max(largestMWC, 1.0 - masterWeightSum);
+            curMWC     = mag(1.0 - masterWeightSum);
+            largestMWC = Foam::max(largestMWC, curMWC);
 
-            sumMWC += mag(1.0 - masterWeightSum);
+            sumMWC += curMWC;
         }
     }
 
