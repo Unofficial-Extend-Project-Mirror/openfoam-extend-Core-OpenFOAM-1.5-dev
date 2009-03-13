@@ -238,6 +238,26 @@ void block::blockPoints()
                         *edgeWeights[7][j]
                 );
 
+                // Rescale importance factors
+                // Forum bug fix: Andreas Feymark.  HJ, 13/Mar/2009
+                scalar impxtot = impx1 + impx2 + impx3 + impx4;
+                impx1 /= impxtot;
+                impx2 /= impxtot;
+                impx3 /= impxtot;
+                impx4 /= impxtot;
+
+                scalar impytot = impy1 + impy2 + impy3 + impy4; 
+                impy1 /= impytot;
+                impy2 /= impytot;
+                impy3 /= impytot;
+                impy4 /= impytot;
+
+                scalar impztot = impz1 + impz2 + impz3 + impz4;
+                impz1 /= impztot;
+                impz2 /= impztot;
+                impz3 /= impztot;
+                impz4 /= impztot;
+
                 // calculate the correction vectors
                 vector corx1 = impx1*(edgePoints[0][i] - edgex1);
                 vector corx2 = impx2*(edgePoints[1][i] - edgex2);
