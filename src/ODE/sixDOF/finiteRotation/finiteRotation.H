@@ -118,7 +118,7 @@ public:
         //- Return rotation angle
         scalar rotAngle() const;
 
-        // Transformations betwean new and previous rotation
+        // Transformations between new and previous rotation
         const tensor& rotIncrementTensor() const;
 
         //- Return rotation vector increment

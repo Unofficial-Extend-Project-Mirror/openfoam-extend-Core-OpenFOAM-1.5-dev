@@ -94,14 +94,8 @@ class sixDOFqODE
             //- Velocity of mass centroid
             dimensionedVector U_;
 
-            //- Velocity of mass centroid at previous time-step
-            dimensionedVector Uold_;
-
-            //- Initial unit rotational vector to fixed coordinate system
-            vector rotVectorInitial_;
-
-            //- Initial rotation angle to fixed coordinate system
-            dimensionedScalar rotAngleInitial_;
+            //- Average velocity of mass centroid at previous time-step
+            dimensionedVector Uaverage_;
 
             //- Finite rotation
             finiteRotation rotation_;
@@ -213,7 +207,7 @@ public:
         // Variables in relative coordinate system (solved for)
 
             //- Return displacement in translated coordinate system
-            // relative to spring equilibrium
+            //  relative to spring equilibrium
             inline const dimensionedVector& Xrel() const;
 
             //- Return rotational velocity in relative coordinate system
@@ -231,8 +225,8 @@ public:
             //- Return velocity of origin
             inline const dimensionedVector& U() const;
 
-            //- Return velocity of origin for the previous time-step
-            inline const dimensionedVector& Uold() const;
+            //- Return average velocity of origin for the previous time-step
+            inline const dimensionedVector& Uaverage() const;
 
             //- Return acceleration of origin
             inline dimensionedVector A() const;
@@ -244,10 +238,17 @@ public:
             inline dimensionedScalar rotAngle() const;
 
 
-        // Average motion per time-step
+        // Non-constant access to velocities
 
-            //- Return average velocity of origin
-            inline dimensionedVector Uaverage() const;
+            //- Return access to velocity of origin
+            inline dimensionedVector& U();
+
+            //- Return access to rotational velocity in relative
+            //  coordinate system
+            inline dimensionedVector& omega();
+
+
+        // Average motion per time-step
 
             //- Return average rotational vector of body
             inline vector rotVectorAverage() const;
@@ -301,6 +302,9 @@ public:
             //- Return rotation tensor to absolute coordinate system
             inline tensor toAbsolute() const;
 
+            //- Return transformation tensor between new and previous rotation
+            inline const tensor& rotIncrementTensor() const;
+
 
         // ODE parameters
 
@@ -341,13 +345,6 @@ public:
 
             //- Update ODE after the solution, advancing by delta
             virtual void update(const scalar delta);
-
-
-        // Return velocity of boundary points given current points
-        tmp<vectorField> boundaryVelocity
-        (
-            const vectorField& boundaryPoints
-        ) const;
 
 
         //- WriteData member function required by regIOobject

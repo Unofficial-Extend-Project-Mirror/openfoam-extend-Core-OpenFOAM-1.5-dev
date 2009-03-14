@@ -136,10 +136,12 @@ Foam::sixDOFqODE::sixDOFqODE(const IOobject& io)
     linDampingCoeffs_(lookup("linearDamping")),
     Xrel_(lookup("Xrel")),
     U_(lookup("U")),
-    Uold_(lookup("Uold")),
-    rotVectorInitial_(lookup("rotationVector")),
-    rotAngleInitial_(lookup("rotationAngle")),
-    rotation_(rotVectorInitial_, rotAngleInitial_.value()),
+    Uaverage_(U_),
+    rotation_
+    (
+        vector(lookup("rotationVector")),
+        dimensionedScalar(lookup("rotationAngle")).value()
+    ),
     omega_(lookup("omega")),
     omegaAverage_(omega_),
     omegaAverageAbsolute_(omega_),
@@ -226,6 +228,8 @@ void Foam::sixDOFqODE::jacobian
 void Foam::sixDOFqODE::update(const scalar delta)
 {
     // Update position
+    vector Xold = Xrel_.value();
+
     vector& Xval = Xrel_.value();
 
     Xval.x() = coeffs_[0];
@@ -233,7 +237,7 @@ void Foam::sixDOFqODE::update(const scalar delta)
     Xval.z() = coeffs_[2];
 
     // Update velocity
-    Uold_ = U_;
+    Uaverage_.value() = (Xval - Xold)/delta;
 
     vector& Uval = U_.value();
 
@@ -261,26 +265,6 @@ void Foam::sixDOFqODE::update(const scalar delta)
 
     omegaAverage_.value() = rotation_.omegaAverage(delta);
     omegaAverageAbsolute_.value() = rotation_.omegaAverageAbsolute(delta);
-
-//     Info
-//         << "eInitial: " << rotation_.eInitial() << nl
-//         << "eCurrent: " << rotation_.eCurrent() << nl
-//         << "Rot vec: " << rotation_.rotVector() << nl
-//         << "Rot ten: " << rotation_.rotTensor() << nl
-//         << "Rot angle: " << rotation_.rotAngle() << endl
-//         << "omega: " << omega_.value() << nl
-//         << "omegaAverage: " << omegaAverage_.value() << nl
-//         << "omegaAverageAbsolute: " << omegaAverageAbsolute_.value() << endl;
-}
-
-
-Foam::tmp<Foam::vectorField> Foam::sixDOFqODE::boundaryVelocity 	 
-(
-    const vectorField& boundaryPoints
-) const
-{
-    return Uaverage().value()
-        + (omegaAverageAbsolute().value() ^ (boundaryPoints - X().value()));
 }
 
 
@@ -310,7 +294,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const sixDOFqODE& sds)
 
     os.writeKeyword("Xrel") << tab << sds.Xrel() << token::END_STATEMENT << nl;
     os.writeKeyword("U") << tab << sds.U() << token::END_STATEMENT << nl;
-    os.writeKeyword("Uold") << tab << sds.Uold() << token::END_STATEMENT << nl;
     os.writeKeyword("rotationVector") << tab << sds.rotVector() 
 				      << token::END_STATEMENT << nl;
     os.writeKeyword("rotationAngle") << tab << sds.rotAngle() 

@@ -27,13 +27,11 @@ Description
 
 Author
     Dubravko Matijasevic, FSB Zagreb.  All rights reserved.
+    Updates by Hrvoje Jasak, Wikki Ltd.
 
 \*---------------------------------------------------------------------------*/
 
 #include "finiteRotation.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -85,12 +83,6 @@ const Foam::dimensionedVector& Foam::sixDOFqODE::U() const
 }
 
 
-const Foam::dimensionedVector& Foam::sixDOFqODE::Uold() const
-{
-    return Uold_;
-}
-
-
 Foam::dimensionedVector Foam::sixDOFqODE::A() const
 {
     return A(Xrel_, U_, rotation_.eCurrent());
@@ -109,9 +101,21 @@ Foam::dimensionedScalar Foam::sixDOFqODE::rotAngle() const
 }
 
 
-Foam::dimensionedVector Foam::sixDOFqODE::Uaverage() const
+Foam::dimensionedVector& Foam::sixDOFqODE::U()
 {
-    return 0.5*(U_ + Uold_);
+    return U_;
+}
+
+
+Foam::dimensionedVector& Foam::sixDOFqODE::omega()
+{
+    return omega_;
+}
+
+
+const Foam::dimensionedVector& Foam::sixDOFqODE::Uaverage() const
+{
+    return Uaverage_;
 }
 
 
@@ -202,6 +206,12 @@ Foam::tensor Foam::sixDOFqODE::toRelative() const
 Foam::tensor Foam::sixDOFqODE::toAbsolute() const
 {
     return rotation_.eCurrent().invR();
+}
+
+
+const Foam::tensor& Foam::sixDOFqODE::rotIncrementTensor() const
+{
+    return rotation_.rotIncrementTensor();
 }
 
 
