@@ -45,6 +45,8 @@ Contributor
 namespace Foam
 {
     defineTypeNameAndDebug(cyclicGgiPolyPatch, 0);
+
+    addToRunTimeSelectionTable(polyPatch, cyclicGgiPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicGgiPolyPatch, dictionary);
 }
 
@@ -66,9 +68,18 @@ void Foam::cyclicGgiPolyPatch::checkDefinition() const
     // So, we impose that the boundary definition of both
     // patches must specify the same information If not, well,
     // we stop the simulation and ask for a fix.
+
+    if(shadowIndex() < 0)
+    {
+        // No need to check anything, the shadow is not initialized properly.
+        // This will happen with blockMesh when defining cyclicGGI patches.
+        // Return quietly
+        return;
+    }
+
     if
     (
-        (rotationAngle() + cyclicShadow().rotationAngle()) > SMALL
+        (mag(rotationAngle()) - mag(cyclicShadow().rotationAngle())) > SMALL
      || cmptSum(rotationAxis() - cyclicShadow().rotationAxis()) > SMALL
     )
     {

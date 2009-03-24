@@ -42,6 +42,8 @@ Contributor
 namespace Foam
 {
     defineTypeNameAndDebug(ggiPolyPatch, 0);
+
+    addToRunTimeSelectionTable(polyPatch, ggiPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, ggiPolyPatch, dictionary);
 }
 

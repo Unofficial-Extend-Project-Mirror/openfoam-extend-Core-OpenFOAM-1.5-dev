@@ -39,6 +39,8 @@ Author
 namespace Foam
 {
     defineTypeNameAndDebug(overlapGgiPolyPatch, 0);
+
+    addToRunTimeSelectionTable(polyPatch, overlapGgiPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, overlapGgiPolyPatch, dictionary);
 }
 
