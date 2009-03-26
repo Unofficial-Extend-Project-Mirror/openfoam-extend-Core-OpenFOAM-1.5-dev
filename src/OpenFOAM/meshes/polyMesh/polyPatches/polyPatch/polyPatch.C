@@ -523,7 +523,9 @@ const Foam::labelList& Foam::polyPatch::meshEdges() const
 
 void Foam::polyPatch::clearAddressing()
 {
+    // Missing base level clear-out  HJ, 1/Mar/2009
     primitivePatch::clearOut();
+
     deleteDemandDrivenData(faceCellsPtr_);
     deleteDemandDrivenData(mePtr_);
 }
