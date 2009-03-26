@@ -327,14 +327,14 @@ bool ZoneMesh<ZoneType, MeshType>::writeData(Ostream& os) const
 template<class ZoneType, class MeshType>
 Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones)
 {
-    os  << zones.size() << nl << token::BEGIN_LIST;
+    os  << zones.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
     forAll(zones, zoneI)
     {
         zones[zoneI].writeDict(os);
     }
 
-    os  << token::END_LIST;
+    os  << decrIndent << token::END_LIST;
 
     return os;
 }

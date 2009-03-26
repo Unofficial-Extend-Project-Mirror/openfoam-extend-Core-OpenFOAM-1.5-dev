@@ -230,12 +230,15 @@ void Foam::pointZone::write(Ostream& os) const
 
 void Foam::pointZone::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
+    os  << indent << name() << nl
+        << indent << token::BEGIN_BLOCK << nl
+        << incrIndent
+        << indent << "type " << type() << token::END_STATEMENT << nl;
 
     writeEntry("pointLabels", os);
 
-    os  << token::END_BLOCK << endl;
+    os  << decrIndent
+        << indent << token::END_BLOCK << endl;
 }
 
 

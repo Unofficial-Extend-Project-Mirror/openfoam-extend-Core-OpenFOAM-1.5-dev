@@ -486,13 +486,17 @@ void Foam::faceZone::write(Ostream& os) const
 
 void Foam::faceZone::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
+    os  << indent << name() << nl
+        << indent << token::BEGIN_BLOCK << nl
+        << incrIndent
+        << indent << "type " << type() << token::END_STATEMENT << nl;
 
     writeEntry("faceLabels", os);
+
     flipMap().writeEntry("flipMap", os);
 
-    os  << token::END_BLOCK << endl;
+    os  << decrIndent
+        << indent << token::END_BLOCK << endl;
 }
 
 
