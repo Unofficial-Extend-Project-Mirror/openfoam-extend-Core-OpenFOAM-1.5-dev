@@ -158,7 +158,12 @@ Foam::coupledSolverPerformance Foam::coupledBicgSolver::solve
 
             // Execute preconditioning
             preconPtr_->precondition(wA, rA, cmpt);
-            preconPtr_->preconditionT(wT, rT, cmpt);
+
+            // Using standard preconditioning on the transpose
+            // Not sure this is correct, but the other one does not work
+            // HJ, 13/Mar/2009
+//             preconPtr_->preconditionT(wT, rT, cmpt);
+            preconPtr_->precondition(wT, rT, cmpt);
 
             // Update search directions
             rho = gSumProd(wA, rT);
