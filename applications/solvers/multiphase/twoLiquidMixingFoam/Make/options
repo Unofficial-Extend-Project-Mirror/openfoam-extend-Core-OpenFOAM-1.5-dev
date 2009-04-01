@@ -7,4 +7,5 @@ EXE_INC = \
 EXE_LIBS = \
     -linterfaceProperties \
     -lincompressibleTransportModels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -llduSolvers
