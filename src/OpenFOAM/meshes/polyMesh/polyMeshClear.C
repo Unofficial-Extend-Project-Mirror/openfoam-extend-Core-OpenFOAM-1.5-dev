@@ -31,6 +31,9 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::polyMesh::removeBoundary()
 {
     if (debug)
@@ -48,7 +51,28 @@ void Foam::polyMesh::removeBoundary()
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+void Foam::polyMesh::removeZones()
+{
+    if (debug)
+    {
+        Info<< "void polyMesh::removeZones(): "
+            << "Removing point, face and cell zones."
+            << endl;
+    }
+
+    // Remove the zones
+    pointZones_.clear();
+    pointZones_.setSize(0);
+
+    faceZones_.clear();
+    faceZones_.setSize(0);
+
+    cellZones_.clear();
+    cellZones_.setSize(0);
+
+    clearOut();
+}
+
 
 void Foam::polyMesh::clearGeom()
 {

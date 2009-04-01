@@ -236,7 +236,7 @@ public:
         );
 
         //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //  and neighbour without boundary.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
@@ -449,6 +449,9 @@ public:
 
             //- Remove boundary patches
             void removeBoundary();
+
+            //- Remove point, face and cell zones
+            void removeZones();
 
             //- Reset mesh primitive data. Assumes all patch info correct
             //  (so does e.g. parallel communication). If not use
