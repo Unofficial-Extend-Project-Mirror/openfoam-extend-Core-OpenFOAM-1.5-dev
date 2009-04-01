@@ -1,4 +1,4 @@
-    scalar newTotalVolume = sum(mesh.cellVolumes());
+    scalar newTotalVolume = gSum(mesh.cellVolumes());
     scalar totalVolRatio = newTotalVolume/totalVolume;
 
     Info<< "Volume: new = " << newTotalVolume << " old = " << totalVolume
