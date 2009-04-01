@@ -30,7 +30,6 @@ divSchemes
 {
     default         none;
     div(phi,T)      Gauss upwind;
-    hrvsScheme      Gauss upwind;
 }
 
 laplacianSchemes
