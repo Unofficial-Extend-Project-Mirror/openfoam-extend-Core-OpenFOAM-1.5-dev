@@ -38,8 +38,10 @@ namespace Foam
 {
     //- Foam::pointZoneID
     typedef ZoneID<pointZone> pointZoneID;
+
     //- Foam::faceZoneID
     typedef ZoneID<faceZone> faceZoneID;
+
     //- Foam::cellZoneID
     typedef ZoneID<cellZone> cellZoneID;
 }
