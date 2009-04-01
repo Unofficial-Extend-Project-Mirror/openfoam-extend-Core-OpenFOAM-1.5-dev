@@ -86,6 +86,7 @@ find -H $packDir               \
  -a ! -name "so_locations"     \
 | sed                          \
  -e "\@$packDir/.git/@d"       \
+ -e "\@.svn/@d"                  \
  -e "\@$packDir/lib/@d"        \
  -e '\@applications/bin/@d'       \
  -e '\@/t/@d'                     \
