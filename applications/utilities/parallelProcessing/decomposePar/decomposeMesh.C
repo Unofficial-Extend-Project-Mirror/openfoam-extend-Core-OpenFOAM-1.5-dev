@@ -55,7 +55,9 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
     // set references to the original mesh
     const polyBoundaryMesh& patches = boundaryMesh();
-    const faceList& fcs = faces();
+
+    // Access all faces to grab the zones
+    const faceList& fcs = allFaces();
     const labelList& owner = faceOwner();
     const labelList& neighbour = faceNeighbour();
 
@@ -108,6 +110,12 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 // Face internal to processor
                 procFaceList[cellToProc_[owner[facei]]].append(facei);
             }
+        }
+
+        // Record number of internal faces on each processor
+        forAll (procFaceList, procI)
+        {
+            nInternalProcFaces_[procI] = procFaceList[procI].size();
         }
 
         // Detect inter-processor boundaries
@@ -435,7 +443,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                         // Note: I cannot add the other side of the cyclic
                         // boundary here because this would violate the order.
                         // They will be added in a separate loop below
-                        // 
+                        // HJ, 15/Jan/2001
                     }
                 }
 
@@ -464,12 +472,74 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             }
         }
 
+        // Face zone treatment.  HJ, 27/Mar/2009
+        // Face zones identified as global will be present on all CPUs
+        List<SLList<label> > procZoneFaceList(nProcs_);
+
+        if (decompositionDict_.found("globalFaceZones"))
+        {
+            wordList fzNames(decompositionDict_.lookup("globalFaceZones"));
+
+            const faceZoneMesh& fz = faceZones();
+
+            forAll (fzNames, nameI)
+            {
+                const label zoneID = fz.findZoneID(fzNames[nameI]);
+
+                if (zoneID == -1)
+                {
+                    FatalErrorIn("domainDecomposition::decomposeMesh()")
+                        << "Unknown global face zone " << fzNames[nameI]
+                        << nl << "Valid face zones are" << fz.names()
+                        << exit(FatalError);
+                }
+
+                Info<< "Preserving global face zone " << fzNames[nameI] << endl;
+
+                const faceZone& curFz = fz[zoneID];
+
+                // Go through all the faces in the zone.  If the owner of the
+                // face equals to current processor, it has already been added;
+                // otherwise, add the face to all processor face lists
+                forAll (curFz, faceI)
+                {
+                    const label curFaceID = curFz[faceI];
+
+                    if (curFaceID < owner.size())
+                    {
+                        // This is an active mesh face, and it already belongs
+                        // to one CPU.  Find out which and add it to the others
+
+                        const label curProc = cellToProc_[owner[curFaceID]];
+
+                        forAll (procZoneFaceList, procI)
+                        {
+                            if (procI != curProc)
+                            {
+                                procZoneFaceList[procI].append(curFaceID);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // This is a stand-alone face, add it to all processors
+                        forAll (procFaceList, procI)
+                        {
+                            procZoneFaceList[procI].append(curFaceID);
+                        }
+                    }
+                }
+            }
+        }
+
+
         // Convert linked lists into normal lists
         // Add inter-processor boundaries and remember start indices
+
         forAll (procFaceList, procI)
         {
             // Get internal and regular boundary processor faces
-            SLList<label>& curProcFaces = procFaceList[procI];
+            const SLList<label>& curProcFaces = procFaceList[procI];
 
             // Get reference to processor face addressing
             labelList& curProcFaceAddressing = procFaceAddressing_[procI];
@@ -488,7 +558,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
             for 
             (
-                SLList<SLList<label> >::iterator curInterProcBFacesIter =
+                SLList<SLList<label> >::const_iterator curInterProcBFacesIter =
                     interProcBFaces[procI].begin();
                 curInterProcBFacesIter != interProcBFaces[procI].end();
                 ++curInterProcBFacesIter
@@ -496,6 +566,9 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             {
                 nFacesOnProcessor += curInterProcBFacesIter().size();
             }
+
+            // Add stand-alone global zone faces
+            nFacesOnProcessor += procZoneFaceList[procI].size();
 
             curProcFaceAddressing.setSize(nFacesOnProcessor);
 
@@ -509,10 +582,11 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
             // Add internal and boundary faces
             // Remember to increment the index by one such that the
-            // turning index works properly.  
+            // turning index works properly.  HJ, 5/Dec/2001
             for
             (
-                SLList<label>::iterator curProcFacesIter = curProcFaces.begin();
+                SLList<label>::const_iterator curProcFacesIter =
+                    curProcFaces.begin();
                 curProcFacesIter != curProcFaces.end();
                 ++curProcFacesIter
             )
@@ -579,7 +653,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     // add the face
 
                     // Remember to increment the index by one such that the
-                    // turning index works properly.  
+                    // turning index works properly.  HJ, 5/Dec/2001
                     if (cellToProc_[owner[curFacesIter()]] == procI)
                     {
                         curProcFaceAddressing[nFaces] = curFacesIter() + 1;
@@ -598,8 +672,26 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
                 nProcPatches++;
             }
-        }
-    }
+
+            // Record number of live faces
+            nLiveProcFaces_[procI] = nFaces;
+
+            // Add stand-alone face zone faces
+            const SLList<label>& curProcZoneFaces = procZoneFaceList[procI];
+
+            for
+            (
+                SLList<label>::const_iterator curProcZoneFacesIter =
+                    curProcZoneFaces.begin();
+                curProcZoneFacesIter != curProcZoneFaces.end();
+                ++curProcZoneFacesIter
+            )
+            {
+                curProcFaceAddressing[nFaces] = curProcZoneFacesIter() + 1;
+                nFaces++;
+            }
+        } // End for all processors
+    } // End of memory management
 
     Info << "\nCalculating processor boundary addressing" << endl;
     // For every patch of processor boundary, find the index of the original
@@ -665,37 +757,85 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     // used for the processor. Collect the list of used points for the
     // processor.
 
+    // Record number of live points on each processor
+    labelList nLivePoints(nProcs_, 0);
+
     forAll (procPointAddressing_, procI)
     {
-        boolList pointLabels(nPoints(), false);
+        // Dimension list to all points in the mesh.  HJ, 27/Mar/2009
+        boolList pointLabels(allPoints().size(), false);
 
         // Get reference to list of used faces
         const labelList& procFaceLabels = procFaceAddressing_[procI];
-
-        forAll (procFaceLabels, facei)
-        {
-            // Because of the turning index, some labels may be negative
-            const labelList& facePoints = fcs[mag(procFaceLabels[facei]) - 1];
-
-            forAll (facePoints, pointi)
-            {
-                // Mark the point as used
-                pointLabels[facePoints[pointi]] = true;
-            }
-        }
 
         // Collect the used points
         labelList& procPointLabels = procPointAddressing_[procI];
 
         procPointLabels.setSize(pointLabels.size());
 
+        // Two-pass algorithm:
+        // First loop through live faces and record them in the points list
+        // Second, visit all inactive zone faces and record the points
+
         label nUsedPoints = 0;
 
-        forAll (pointLabels, pointi)
+        // First pass: live faces
+
+        for (label faceI = 0; faceI < nLiveProcFaces_[procI]; faceI++)
         {
-            if (pointLabels[pointi])
+            // Because of the turning index, some labels may be negative
+            const labelList& facePoints = fcs[mag(procFaceLabels[faceI]) - 1];
+
+            forAll (facePoints, pointI)
             {
-                procPointLabels[nUsedPoints] = pointi;
+                // Mark the point as used
+                pointLabels[facePoints[pointI]] = true;
+            }
+        }
+
+        forAll (pointLabels, pointI)
+        {
+            if (pointLabels[pointI])
+            {
+                procPointLabels[nUsedPoints] = pointI;
+
+                nUsedPoints++;
+            }
+        }
+
+        // Record number of live points
+        nLivePoints[procI] = nUsedPoints;
+
+        // Second pass: zone faces
+
+        // Reset point usage list
+        boolList pointLabelsSecondPass(allPoints().size(), false);
+
+        for
+        (
+            label faceI = nLiveProcFaces_[procI];
+            faceI < procFaceLabels.size();
+            faceI++
+        )
+        {
+            // Because of the turning index, some labels may be negative
+            const labelList& facePoints = fcs[mag(procFaceLabels[faceI]) - 1];
+
+            forAll (facePoints, pointI)
+            {
+                // Mark the point as used
+                if (!pointLabels[facePoints[pointI]])
+                {
+                    pointLabelsSecondPass[facePoints[pointI]] = true;
+                }
+            }
+        }
+
+        forAll (pointLabelsSecondPass, pointI)
+        {
+            if (pointLabelsSecondPass[pointI])
+            {
+                procPointLabels[nUsedPoints] = pointI;
 
                 nUsedPoints++;
             }
@@ -709,7 +849,8 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
     // Memory management
     {
-        labelList pointsUsage(nPoints(), 0);
+        // Dimension list to all points in the mesh.  HJ, 27/Mar/2009
+        labelList pointsUsage(allPoints().size(), 0);
 
         // Globally shared points are the ones used by more than 2 processors
         // Size the list approximately and gather the points
@@ -744,29 +885,29 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
                 for
                 (
-                    label facei = curStart;
-                    facei < curEnd;
-                    facei++
+                    label faceI = curStart;
+                    faceI < curEnd;
+                    faceI++
                 )
                 {
                     // Mark the original face as used
                     // Remember to decrement the index by one (turning index)
                     // 
-                    const label curF = mag(curFaceLabels[facei]) - 1;
+                    const label curF = mag(curFaceLabels[faceI]) - 1;
 
                     const face& f = fcs[curF];
 
-                    forAll (f, pointi)
+                    forAll (f, pointI)
                     {
-                        if (pointsUsage[f[pointi]] == 0)
+                        if (pointsUsage[f[pointI]] == 0)
                         {
                             // Point not previously used
-                            pointsUsage[f[pointi]] = patchi + 1;
+                            pointsUsage[f[pointI]] = patchi + 1;
                         }
-                        else if (pointsUsage[f[pointi]] != patchi + 1)
+                        else if (pointsUsage[f[pointI]] != patchi + 1)
                         {
                             // Point used by some other patch = global point!
-                            gSharedPoints.insert(f[pointi]);
+                            gSharedPoints.insert(f[pointI]);
                         }
                     }
                 }

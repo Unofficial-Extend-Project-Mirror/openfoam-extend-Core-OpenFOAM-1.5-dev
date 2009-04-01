@@ -1,10 +1,10 @@
-/*-------------------------------*- C++ -*---------------------------------*\
-|    =========                                                              |
-|    \\      /     OpenFOAM                                                 |
-|     \\    /                                                               |
-|      \\  /       The Open Source CFD Toolbox                              |
-|       \\/                                        http://www.OpenFOAM.org  |
-\*-------------------------------------------------------------------------*/
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
@@ -19,8 +19,12 @@ FoamFile
 
 numberOfSubdomains  4;
 
+// Patches or face zones which need to face both cells on the same CPU
 // preservePatches (inlet);
 // preserveFaceZones (heater solid1 solid3);
+
+// Face zones which need to be present on all CPUs in its entirety
+// globalFaceZones (ggiInside ggiOutside);
 
 method          simple;
 // method          hierarchical;

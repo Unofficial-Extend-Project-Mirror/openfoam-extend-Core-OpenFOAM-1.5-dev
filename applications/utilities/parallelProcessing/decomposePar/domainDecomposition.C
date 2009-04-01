@@ -37,30 +37,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::mark
-(
-    const labelList& zoneElems,
-    const label zoneI,
-    labelList& elementToZone
-)
-{
-    forAll(zoneElems, i)
-    {
-        label pointi = zoneElems[i];
-
-        if (elementToZone[pointi] == -1)
-        {
-            // First occurrence
-            elementToZone[pointi] = zoneI;
-        }
-        else if (elementToZone[pointi] >= 0)
-        {
-            // Multiple zones
-            elementToZone[pointi] = -2;
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -84,6 +60,8 @@ domainDecomposition::domainDecomposition(const IOobject& io)
     cellToProc_(nCells()),
     procPointAddressing_(nProcs_),
     procFaceAddressing_(nProcs_),
+    nInternalProcFaces_(nProcs_),
+    nLiveProcFaces_(nProcs_),
     procCellAddressing_(nProcs_),
     procBoundaryAddressing_(nProcs_),
     procPatchSize_(nProcs_),
@@ -96,8 +74,7 @@ domainDecomposition::domainDecomposition(const IOobject& io)
 {
     if (decompositionDict_.found("distributed"))
     {
-        Switch distributed(decompositionDict_.lookup("distributed"));
-        distributed_ = distributed;
+        distributed_ = Switch(decompositionDict_.lookup("distributed"));
     }
 }
 
@@ -123,38 +100,8 @@ bool domainDecomposition::writeDecomposition()
     }
 
 
-    // Mark point/faces/cells that are in zones.
-    // -1   : not in zone
-    // -2   : in multiple zones
-    // >= 0 : in single given zone
-    // This will give direct lookup of elements that are in a single zone
-    // and we'll only have to revert back to searching through all zones
-    // for the duplicate elements
-
-    // Point zones
-    labelList pointToZone(allPoints().size(), -1);
-
-    forAll(pointZones(), zoneI)
-    {
-        mark(pointZones()[zoneI], zoneI, pointToZone);
-    }
-
-    // Face zones
-    labelList faceToZone(allFaces().size(), -1);
-
-    forAll(faceZones(), zoneI)
-    {
-        mark(faceZones()[zoneI], zoneI, faceToZone);
-    }
-
-    // Cell zones
-    labelList cellToZone(nCells(), -1);
-
-    forAll(cellZones(), zoneI)
-    {
-        mark(cellZones()[zoneI], zoneI, cellToZone);
-    }
-
+    // Mark point/faces/cells that are in zones.  Bad coding - removed
+    // HJ, 31/Mar/2009
 
     label totProcFaces = 0;
     label maxProcPatches = 0;
@@ -167,9 +114,10 @@ bool domainDecomposition::writeDecomposition()
         // Create processor points
         const labelList& curPointLabels = procPointAddressing_[procI];
 
-        const pointField& meshPoints = points();
+        // Access list of all points in the mesh.  HJ, 27/Mar/2009
+        const pointField& meshPoints = allPoints();
 
-        labelList pointLookup(nPoints(), -1);
+        labelList pointLookup(meshPoints.size(), -1);
 
         pointField procPoints(curPointLabels.size());
 
@@ -183,9 +131,10 @@ bool domainDecomposition::writeDecomposition()
         // Create processor faces
         const labelList& curFaceLabels = procFaceAddressing_[procI];
 
-        const faceList& meshFaces = faces();
+        // Access list of all faces in the mesh.  HJ, 27/Mar/2009
+        const faceList& meshFaces = allFaces();
 
-        labelList faceLookup(nFaces(), -1);
+        labelList faceLookup(meshFaces.size(), -1);
 
         faceList procFaces(curFaceLabels.size());
 
@@ -193,7 +142,7 @@ bool domainDecomposition::writeDecomposition()
         {
             // Mark the original face as used
             // Remember to decrement the index by one (turning index)
-            // 
+            // HJ, 5/Dec/2001
             label curF = mag(curFaceLabels[facei]) - 1;
 
             faceLookup[curF] = facei;
@@ -222,26 +171,80 @@ bool domainDecomposition::writeDecomposition()
             }
         }
 
-        // Create processor cells
+        // Create cell lookup
+        labelList cellLookup(nCells(), -1);
         const labelList& curCellLabels = procCellAddressing_[procI];
 
-        const cellList& meshCells = cells();
-
-        cellList procCells(curCellLabels.size());
-
-        forAll (curCellLabels, celli)
+        forAll (curCellLabels, cellI)
         {
-            const labelList& origCellLabels = meshCells[curCellLabels[celli]];
+            cellLookup[curCellLabels[cellI]] = cellI;
+        }
 
-            cell& curCell = procCells[celli];
+        // Get complete owner-neighour addressing in the mesh
+        const labelList& own = faceOwner();
+        const labelList& nei = faceNeighbour();
 
-            curCell.setSize(origCellLabels.size());
+        // Calculate owner and neighbour list
+        // Owner list is sized to number of live faces
+        // Neighbour list is sized to number of internal faces
 
-            forAll (origCellLabels, cellFaceI)
+        labelList procOwner(nLiveProcFaces_[procI]);
+
+        // Note: loop over owner, not all faces: sizes are different
+        forAll (procOwner, faceI)
+        {
+            // Remember to decrement the index by one (turning index)
+            // HJ, 28/Mar/2009
+            label curF = mag(curFaceLabels[faceI]) - 1;
+
+            if (curFaceLabels[faceI] >= 0)
             {
-                curCell[cellFaceI] = faceLookup[origCellLabels[cellFaceI]];
+                procOwner[faceI] = cellLookup[own[curF]];
+            }
+            else
+            {
+                procOwner[faceI] = cellLookup[nei[curF]];
             }
         }
+ 
+        labelList procNeighbour(nInternalProcFaces_[procI]);
+
+        // Note: loop over neighbour, not all faces: sizes are different
+        forAll (procNeighbour, faceI)
+        {
+            // Remember to decrement the index by one (turning index)
+            // HJ, 28/Mar/2009
+            label curF = mag(curFaceLabels[faceI]) - 1;
+
+            if (curFaceLabels[faceI] >= 0)
+            {
+                procNeighbour[faceI] = cellLookup[nei[curF]];
+            }
+            else
+            {
+                procNeighbour[faceI] = cellLookup[own[curF]];
+            }
+        }
+
+        // Create processor cells.  No longer needed: using owner and neighbour
+        // HJ, 28/Mar/2009
+//         const cellList& meshCells = cells();
+
+//         cellList procCells(curCellLabels.size());
+
+//         forAll (curCellLabels, cellI)
+//         {
+//             const labelList& origCellLabels = meshCells[curCellLabels[cellI]];
+
+//             cell& curCell = procCells[cellI];
+
+//             curCell.setSize(origCellLabels.size());
+
+//             forAll (origCellLabels, cellFaceI)
+//             {
+//                 curCell[cellFaceI] = faceLookup[origCellLabels[cellFaceI]];
+//             }
+//         }
 
         // Create processor mesh without a boundary
 
@@ -263,7 +266,7 @@ bool domainDecomposition::writeDecomposition()
             "constant"
         );
 
-        // create the mesh
+        // Create the mesh
         polyMesh procMesh
         (
             IOobject
@@ -274,7 +277,12 @@ bool domainDecomposition::writeDecomposition()
             ),
             procPoints,
             procFaces,
-            procCells
+            procOwner,
+            procNeighbour,
+            false          // Do not sync par
+//             procCells   // Old-fashioned mesh creation using cells.
+                           // Deprecated: using face owner/neighbour
+                           // HJ, 30/Mar/2009
         );
 
         // Create processor boundary patches
@@ -342,228 +350,165 @@ bool domainDecomposition::writeDecomposition()
 
         // Create and add zones
 
-        // Point zones
+        // Note:
+        // This coding was all wrong, as each point/face/cell may only belong to
+        // a single zone.
+        // Additionally, ordering of points/faces/cells in the processor mesh
+        // needs to match the ordering in global mesh zones.  Full rewrite.
+        // HJ, 30/Mar/2009
+
+        // Create zones if needed
+        if
+        (
+            pointZones().size() > 0
+         || faceZones().size() > 0
+         || cellZones().size() > 0
+        )
         {
-            const pointZoneMesh& pz = pointZones();
+            // Point zones
+            List<pointZone*> procPz(pointZones().size());
 
-            // Go through all the zoned points and find out if they
-            // belong to a zone.  If so, add it to the zone as
-            // necessary
-            List<DynamicList<label> > zonePoints(pz.size());
-
-            // Estimate size
-            forAll(zonePoints, zoneI)
             {
-                zonePoints[zoneI].setSize(pz[zoneI].size() / nProcs_);
-            }
+                const pointZoneMesh& pz = pointZones();
 
-            // Use the pointToZone map to find out the single zone (if any),
-            // use slow search only for shared points.
-            forAll (curPointLabels, pointi)
-            {
-                label curPoint = curPointLabels[pointi];
-
-                label zoneI = pointToZone[curPoint];
-
-                if (zoneI >= 0)
+                // Go through all the zoned points and find out if they
+                // belong to a processor.  If so, add it to the zone as
+                // necessary
+                forAll (pz, zoneI)
                 {
-                    // Single zone.
-                    zonePoints[zoneI].append(pointi);
-                }
-                else if (zoneI == -2)
-                {
-                    // Multiple zones. Lookup.
-                    forAll(pz, zoneI)
+                    const labelList& zonePoints = pz[zoneI];
+
+                    labelList procZonePoints(zonePoints.size());
+                    label nZonePoints = 0;
+
+                    forAll (zonePoints, pointI)
                     {
-                        label index = pz[zoneI].whichPoint(curPoint);
+                        const label localIndex =
+                            pointLookup[zonePoints[pointI]];
 
-                        if (index != -1)
+                        if (localIndex >= 0)
                         {
-                            zonePoints[zoneI].append(pointi);
+                            // Point live on processor: add to zone
+                            procZonePoints[nZonePoints] = localIndex;
+                            nZonePoints++;
                         }
                     }
-                }
-            }
 
-            procMesh.pointZones().setSize(zonePoints.size());
-            forAll(zonePoints, zoneI)
-            {
-                procMesh.pointZones().set
-                (
-                    zoneI,
-                    pz[zoneI].clone
+                    // Add the zone
+                    procZonePoints.setSize(nZonePoints);
+
+                    procPz[zoneI] = new pointZone
                     (
-                        procMesh.pointZones(),
+                        pz[zoneI].name(),
+                        procZonePoints,
                         zoneI,
-                        zonePoints[zoneI].shrink()
-                    )
-                );
-            }
-            procMesh.pointZones().updateMesh();
-
-            if (pz.size())
-            {
-                // Force writing on all processors
-                procMesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
-            }
-        }
-
-        // Face zones
-        {
-            const faceZoneMesh& fz = faceZones();
-
-            // Go through all the zoned face and find out if they
-            // belong to a zone.  If so, add it to the zone as
-            // necessary
-            List<DynamicList<label> > zoneFaces(fz.size());
-            List<DynamicList<bool> > zoneFaceFlips(fz.size());
-
-            // Estimate size
-            forAll(zoneFaces, zoneI)
-            {
-                label procSize = fz[zoneI].size() / nProcs_;
-
-                zoneFaces[zoneI].setSize(procSize);
-                zoneFaceFlips[zoneI].setSize(procSize);
-            }
-
-            // Go through all the zoned faces and find out if they
-            // belong to a zone.  If so, add it to the zone as
-            // necessary
-            forAll (curFaceLabels, facei)
-            {
-                // Remember to decrement the index by one (turning index)
-                // 
-                label curF = mag(curFaceLabels[facei]) - 1;
-
-                label zoneI = faceToZone[curF];
-
-                if (zoneI >= 0)
-                {
-                    // Single zone. Add the face
-                    zoneFaces[zoneI].append(facei);
-
-                    label index = fz[zoneI].whichFace(curF);
-
-                    bool flip = fz[zoneI].flipMap()[index];
-
-                    if (curFaceLabels[facei] < 0)
-                    {
-                        flip = !flip;
-                    }
-
-                    zoneFaceFlips[zoneI].append(flip);
+                        procMesh.pointZones()
+                    );
                 }
-                else if (zoneI == -2)
+            }
+        
+
+            // Face zones
+            List<faceZone*> procFz(faceZones().size());
+
+            {
+                const faceZoneMesh& fz = faceZones();
+
+                forAll (fz, zoneI)
                 {
-                    // Multiple zones. Lookup.
-                    forAll(fz, zoneI)
+                    const labelList& zoneFaces = fz[zoneI];
+                    const boolList& flipMap = fz[zoneI].flipMap();
+
+                    // Go through all the zoned faces and find out if they
+                    // belong to a processor.  If so, add it to the zone as
+                    // necessary
+
+                    labelList procZoneFaces(zoneFaces.size());
+                    boolList procZoneFaceFlips(zoneFaces.size());
+                    label nZoneFaces = 0;
+
+                    forAll (zoneFaces, faceI)
                     {
-                        label index = fz[zoneI].whichFace(curF);
+                        const label localIndex = faceLookup[zoneFaces[faceI]];
 
-                        if (index != -1)
+                        if (localIndex >= 0)
                         {
-                            zoneFaces[zoneI].append(facei);
+                            // Face is present on the processor
 
-                            bool flip = fz[zoneI].flipMap()[index];
+                            // Add the face to the zone
+                            procZoneFaces[nZoneFaces] = localIndex;
 
-                            if (curFaceLabels[facei] < 0)
+                            // Grab the flip
+                            bool flip = flipMap[faceI];
+
+                            if (curFaceLabels[localIndex] < 0)
                             {
                                 flip = !flip;
                             }
 
-                            zoneFaceFlips[zoneI].append(flip);
+                            procZoneFaceFlips[nZoneFaces] = flip;
+                            nZoneFaces++;
                         }
                     }
-                }
-            }
 
-            procMesh.faceZones().setSize(zoneFaces.size());
-            forAll(zoneFaces, zoneI)
-            {
-                procMesh.faceZones().set
-                (
-                    zoneI,
-                    fz[zoneI].clone
+                    // Add the zone
+                    procZoneFaces.setSize(nZoneFaces);
+                    procZoneFaceFlips.setSize(nZoneFaces);
+
+                    procFz[zoneI] = new faceZone
                     (
-                        zoneFaces[zoneI].shrink(),          // addressing
-                        zoneFaceFlips[zoneI].shrink(),      // flipmap
+                        fz[zoneI].name(),
+                        procZoneFaces,
+                        procZoneFaceFlips,
                         zoneI,
                         procMesh.faceZones()
-                    )
-                );
-            }
-            procMesh.faceZones().updateMesh();
-
-            if (fz.size())
-            {
-                // Force writing on all processors
-                procMesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
-            }
-        }
-
-        // Cell zones
-        {
-            const cellZoneMesh& cz = cellZones();
-
-            // Go through all the zoned cells and find out if they
-            // belong to a zone.  If so, add it to the zone as
-            // necessary
-            List<DynamicList<label> > zoneCells(cz.size());
-
-            // Estimate size
-            forAll(zoneCells, zoneI)
-            {
-                zoneCells[zoneI].setSize(cz[zoneI].size() / nProcs_);
-            }
-
-            forAll (curCellLabels, celli)
-            {
-                label curCellI = curCellLabels[celli];
-
-                label zoneI = cellToZone[curCellI];
-
-                if (zoneI >= 0)
-                {
-                    // Single zone.
-                    zoneCells[zoneI].append(celli);
+                    );
                 }
-                else if (zoneI == -2)
-                {
-                    // Multiple zones. Lookup.
-                    forAll(cz, zoneI)
-                    {
-                        label index = cz[zoneI].whichCell(curCellI);
+            }
 
-                        if (index != -1)
+            // Cell zones
+            List<cellZone*> procCz(cellZones().size());
+
+            {
+                const cellZoneMesh& cz = cellZones();
+
+                // Go through all the zoned cells and find out if they
+                // belong to a processor.  If so, add it to the zone as
+                // necessary
+
+                forAll (cz, zoneI)
+                {
+                    const labelList& zoneCells = cz[zoneI];
+
+                    labelList procZoneCells(zoneCells.size());
+                    label nZoneCells = 0;
+
+                    forAll (zoneCells, cellI)
+                    {
+                        const label localIndex = cellLookup[zoneCells[cellI]];
+
+                        if (localIndex >= 0)
                         {
-                            zoneCells[zoneI].append(celli);
+                            procZoneCells[nZoneCells] = localIndex;
+                            nZoneCells++;
                         }
                     }
+
+                    // Add the zone
+                    procZoneCells.setSize(nZoneCells);
+
+                    procCz[zoneI] = new cellZone
+                    (
+                        cz[zoneI].name(),
+                        procZoneCells,
+                        zoneI,
+                        procMesh.cellZones()
+                    );
                 }
             }
 
-            procMesh.cellZones().setSize(zoneCells.size());
-            forAll(zoneCells, zoneI)
-            {
-                procMesh.cellZones().set
-                (
-                    zoneI,
-                    cz[zoneI].clone
-                    (
-                        zoneCells[zoneI].shrink(),
-                        zoneI,
-                        procMesh.cellZones()
-                    )
-                );
-            }
-            procMesh.cellZones().updateMesh();
-
-            if (cz.size())
-            {
-                // Force writing on all processors
-                procMesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-            }
+            // Add zones
+            procMesh.addZones(procPz, procFz, procCz);
         }
 
         // Set the precision of the points data to 10

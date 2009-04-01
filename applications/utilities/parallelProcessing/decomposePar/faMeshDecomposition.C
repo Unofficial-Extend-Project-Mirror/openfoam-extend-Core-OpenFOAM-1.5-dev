@@ -130,8 +130,7 @@ faMeshDecomposition::faMeshDecomposition(const fvMesh& mesh)
 {
     if (decompositionDict_.found("distributed"))
     {
-        Switch distributed(decompositionDict_.lookup("distributed"));
-        distributed_ = distributed;
+        distributed_ = Switch(decompositionDict_.lookup("distributed"));
     }
 }
 

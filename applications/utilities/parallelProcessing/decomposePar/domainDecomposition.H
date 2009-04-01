@@ -48,7 +48,7 @@ SourceFiles
 #endif
 
 /*---------------------------------------------------------------------------*\
-                           Class domainDecomposition Declaration
+                     Class domainDecomposition Declaration
 \*---------------------------------------------------------------------------*/
 
 class domainDecomposition
@@ -73,14 +73,20 @@ class domainDecomposition
         labelListList procPointAddressing_;
 
         //- Labels of faces for each processor
-        // Note: Face turning index is stored as the sign on addressing
-        // Only the processor boundary faces are affected: if the sign of the
-        // index is negative, the processor face is the reverse of the
-        // original face. In order to do this properly, all face
-        // indices will be incremented by 1 and the decremented as
-        // necessary t avoid the problem of face number zero having no
-        // sign.  
+        //  Note: Face turning index is stored as the sign on addressing
+        //  Only the processor boundary faces are affected: if the sign of the
+        //  index is negative, the processor face is the reverse of the
+        //  original face. In order to do this properly, all face
+        //   indices will be incremented by 1 and the decremented as
+        //  necessary t avoid the problem of face number zero having no
+        //  sign.  
         labelListList procFaceAddressing_;
+
+        //- Numver of internal faces for each processor
+        labelList nInternalProcFaces_;
+
+        //- Number of live faces for each processor
+        labelList nLiveProcFaces_;
 
         //- Labels of cells for each processor
         labelListList procCellAddressing_;
@@ -116,13 +122,6 @@ class domainDecomposition
 
         void distributeCells();
 
-        //- Mark all elements with value or -2 if occur twice
-        static void mark
-        (
-            const labelList& zoneElems,
-            const label zoneI,
-            labelList& elementToZone
-        );
 
 public:
 

@@ -62,7 +62,7 @@ void domainDecomposition::distributeCells()
             {
                 FatalErrorIn("domainDecomposition::distributeCells()")
                     << "Unknown preservePatch " << pNames[i]
-                    << endl << "Valid patches are " << patches.names()
+                    << nl << "Valid patches are " << patches.names()
                     << exit(FatalError);
             }
 
@@ -149,7 +149,7 @@ void domainDecomposition::distributeCells()
             {
                 forAll(pp, i)
                 {
-                    blockedFace[pp.start()+i] = false;
+                    blockedFace[pp.start() + i] = false;
                 }
             }
         }
