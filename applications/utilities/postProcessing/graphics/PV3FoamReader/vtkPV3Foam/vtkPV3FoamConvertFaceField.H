@@ -72,6 +72,7 @@ void Foam::vtkPV3Foam::convertFaceField
         const label faceNo = faceLabels[faceI];
         if (faceNo < nInternalFaces)
         {
+            // Internal face: cell interpolation
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
             for (direction d=0; d<nComp; d++)
@@ -79,12 +80,23 @@ void Foam::vtkPV3Foam::convertFaceField
                 vec[d] = component(t, d);
             }
         }
-        else
+        else if (faceNo < faceOwner.size())
         {
+            // Boundary face, no interpolation
+            // HJ, 28/Mar/2009
             const Type& t = tf[faceOwner[faceNo]];
             for (direction d=0; d<nComp; d++)
             {
                 vec[d] = component(t, d);
+            }
+        }
+        else
+        {
+            // Inactive zone face.  No data: padding
+            // HJ, 28/Mar/2009
+            for (direction d=0; d<nComp; d++)
+            {
+                vec[d] = 0;
             }
         }
 
@@ -133,6 +145,8 @@ void Foam::vtkPV3Foam::convertFaceField
 
         if (faceNo < nInternalFaces)
         {
+            // Internal face: cell interpolation
+            // HJ, 28/Mar/2009
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
             for (direction d=0; d<nComp; d++)
@@ -140,12 +154,23 @@ void Foam::vtkPV3Foam::convertFaceField
                 vec[d] = component(t, d);
             }
         }
-        else
+        else if (faceNo < faceOwner.size())
         {
+            // Boundary face, no interpolation
+            // HJ, 28/Mar/2009
             const Type& t = tf[faceOwner[faceNo]];
             for (direction d=0; d<nComp; d++)
             {
                 vec[d] = component(t, d);
+            }
+        }
+        else
+        {
+            // Inactive zone face.  No data: padding
+            // HJ, 28/Mar/2009
+            for (direction d=0; d<nComp; d++)
+            {
+                vec[d] = 0;
             }
         }
 

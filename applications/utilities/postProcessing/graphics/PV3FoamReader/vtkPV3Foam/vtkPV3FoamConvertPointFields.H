@@ -66,8 +66,8 @@ void Foam::vtkPV3Foam::convertPointFields
 
                 if (debug)
                 {
-                    Info<< "Foam::vtkPV3Foam::convertPointFields : " << fieldName
-                        << endl;
+                    Info<< "Foam::vtkPV3Foam::convertPointFields : "
+                        << fieldName << endl;
                 }
 
                 pointMesh pMesh(mesh);
@@ -151,7 +151,16 @@ void Foam::vtkPV3Foam::convertPointField
     );
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(ptf.size() + addPointCellLabels_.size());
+
+    // Recalculate size of data field to include inactive points (supporting
+    // inactive faces).  Data will be padded for correct size
+    // HJ, 28/Mar/2009
+    pointData->SetNumberOfTuples
+    (
+        ptf.size()
+      + addPointCellLabels_.size()
+      + tf.mesh().allPoints().size() - tf.mesh().nPoints()
+    );
     pointData->SetNumberOfComponents(nComp);
     pointData->Allocate(nComp*ptf.size());
     pointData->SetName(tf.name().c_str());
@@ -197,6 +206,23 @@ void Foam::vtkPV3Foam::convertPointField
 
             pointData->InsertTuple(i++, vec);
         }
+    }
+
+    // Pad for inactive points
+    // HJ, 28/Mar/2009
+    for (direction d = 0; d < nComp; d++)
+    {
+        vec[d] = 0;
+    }
+
+    for
+    (
+        label padI = tf.mesh().nPoints();
+        padI < tf.mesh().allPoints().size();
+        padI++
+    )
+    {
+        pointData->InsertTuple(i++, vec);
     }
 
     internalMesh->GetPointData()->AddArray(pointData);

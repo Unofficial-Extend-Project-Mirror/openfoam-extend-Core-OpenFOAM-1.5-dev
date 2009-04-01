@@ -50,7 +50,9 @@ void Foam::vtkPV3Foam::addPointSetMesh
         Info<< "entered add point set mesh" << endl;
     }
 
-    const pointField& meshPoints = mesh.points();
+    // Use all points: support for inactive points and faces.
+    // HJ, 28/Mar/2009
+    const pointField& meshPoints = mesh.allPoints();
 
     vtkPoints *vtkpoints = vtkPoints::New();
     vtkpoints->Allocate(pSet.size());

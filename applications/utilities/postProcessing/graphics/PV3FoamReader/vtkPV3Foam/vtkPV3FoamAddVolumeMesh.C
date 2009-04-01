@@ -83,6 +83,10 @@ void Foam::vtkPV3Foam::addVolumeMesh
     {
         Info<< "... scanning" << endl;
     }
+
+    // Get access to faces for volume mesh analysis
+    const faceList& faces = mesh.faces();
+
     forAll(cellShapes, cellI)
     {
         const cellModel& model = cellShapes[cellI].model();
@@ -101,7 +105,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
             forAll(cFaces, cFaceI)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = faces[cFaces[cFaceI]];
 
                 label nFacePoints = f.size();
 
@@ -141,7 +145,9 @@ void Foam::vtkPV3Foam::addVolumeMesh
     vtkPoints *vtkpoints = vtkPoints::New();
     vtkpoints->Allocate(mesh.nPoints() + nAddPoints);
 
-    const Foam::pointField& points = mesh.points();
+    // Use all points: support for inactive points and faces.
+    // HJ, 28/Mar/2009
+    const pointField& points = mesh.allPoints();
 
     forAll(points, i)
     {
@@ -278,7 +284,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
             forAll(cFaces, cFaceI)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = faces[cFaces[cFaceI]];
 
                 label nFacePoints = f.size();
 

@@ -53,14 +53,17 @@ void Foam::vtkPV3Foam::addFaceSetMesh
 
     // Construct primitivePatch of faces in fSet.
 
-    const faceList& meshFaces = mesh.faces();
+    const faceList& meshFaces = mesh.allFaces();
     faceList patchFaces(fSet.size());
     label faceI = 0;
     forAllConstIter(faceSet, fSet, iter)
     {
         patchFaces[faceI++] = meshFaces[iter.key()];
     }
-    primitiveFacePatch p(patchFaces, mesh.points());
+
+    // Use all points: support for inactive points and faces.
+    // HJ, 28/Mar/2009
+    primitiveFacePatch p(patchFaces, mesh.allPoints());
 
 
     // The balance of this routine should be identical to addPatchMesh
