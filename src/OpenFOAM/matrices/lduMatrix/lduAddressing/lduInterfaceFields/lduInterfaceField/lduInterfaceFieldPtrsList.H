@@ -41,7 +41,7 @@ Description
 namespace Foam
 {
     typedef UPtrList<const lduInterfaceField> lduInterfaceFieldPtrsList;
-    typedef List<lduInterfaceFieldPtrsList> lduInterfaceFieldPtrsListList;
+    typedef List<const lduInterfaceFieldPtrsList> lduInterfaceFieldPtrsListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

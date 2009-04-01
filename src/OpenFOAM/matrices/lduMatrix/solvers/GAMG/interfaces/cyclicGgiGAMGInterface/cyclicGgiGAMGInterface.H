@@ -69,7 +69,7 @@ public:
         (
             const lduPrimitiveMesh& lduMesh,
             const lduInterface& fineInterface,
-            const labelField& restrictAddressing,
+            const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing
         );
 

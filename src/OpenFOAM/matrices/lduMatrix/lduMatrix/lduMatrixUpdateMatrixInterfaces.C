@@ -37,12 +37,12 @@ void Foam::lduMatrix::initMatrixInterfaces
     const direction cmpt
 ) const
 {
-    if
-    (
-        Pstream::defaultCommsType == Pstream::blocking
-     || Pstream::defaultCommsType == Pstream::nonBlocking
-    )
-    {
+//     if
+//     (
+//         Pstream::defaultCommsType == Pstream::blocking
+//      || Pstream::defaultCommsType == Pstream::nonBlocking
+//     )
+//     {
         forAll (interfaces, interfaceI)
         {
             if (interfaces.set(interfaceI))
@@ -58,41 +58,41 @@ void Foam::lduMatrix::initMatrixInterfaces
                 );
             }
         }
-    }
-    else if (Pstream::defaultCommsType == Pstream::scheduled)
-    {
-        const lduSchedule& patchSchedule = this->patchSchedule();
+//     }
+//     else if (Pstream::defaultCommsType == Pstream::scheduled)
+//     {
+//         const lduSchedule& patchSchedule = this->patchSchedule();
 
-        // Loop over the "global" patches are on the list of interfaces but
-        // beyond the end of the schedule which only handles "normal" patches
-        for
-        (
-            label interfaceI=patchSchedule.size()/2;
-            interfaceI<interfaces.size();
-            interfaceI++
-        )
-        {
-            if (interfaces.set(interfaceI))
-            {
-                interfaces[interfaceI].initInterfaceMatrixUpdate
-                (
-                    psiif,
-                    result,
-                    *this,
-                    coupleCoeffs[interfaceI],
-                    cmpt,
-                    Pstream::blocking
-                );
-            }
-        }
-    }
-    else
-    {
-        FatalErrorIn("lduMatrix::initMatrixInterfaces")
-            << "Unsuported communications type "
-            << Pstream::commsTypeNames[Pstream::defaultCommsType]
-            << exit(FatalError);
-    }
+//         // Loop over the "global" patches are on the list of interfaces but
+//         // beyond the end of the schedule which only handles "normal" patches
+//         for
+//         (
+//             label interfaceI=patchSchedule.size()/2;
+//             interfaceI<interfaces.size();
+//             interfaceI++
+//         )
+//         {
+//             if (interfaces.set(interfaceI))
+//             {
+//                 interfaces[interfaceI].initInterfaceMatrixUpdate
+//                 (
+//                     psiif,
+//                     result,
+//                     *this,
+//                     coupleCoeffs[interfaceI],
+//                     cmpt,
+//                     Pstream::blocking
+//                 );
+//             }
+//         }
+//     }
+//     else
+//     {
+//         FatalErrorIn("lduMatrix::initMatrixInterfaces")
+//             << "Unsuported communications type "
+//             << Pstream::commsTypeNames[Pstream::defaultCommsType]
+//             << exit(FatalError);
+//     }
 }
 
 
@@ -105,12 +105,12 @@ void Foam::lduMatrix::updateMatrixInterfaces
     const direction cmpt
 ) const
 {
-    if
-    (
-        Pstream::defaultCommsType == Pstream::blocking
-     || Pstream::defaultCommsType == Pstream::nonBlocking
-    )
-    {
+//     if
+//     (
+//         Pstream::defaultCommsType == Pstream::blocking
+//      || Pstream::defaultCommsType == Pstream::nonBlocking
+//     )
+//     {
         // Block until all sends/receives have been finished
         if (Pstream::defaultCommsType == Pstream::nonBlocking)
         {
@@ -133,75 +133,75 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 );
             }
         }
-    }
-    else if (Pstream::defaultCommsType == Pstream::scheduled)
-    {
-        const lduSchedule& patchSchedule = this->patchSchedule();
+//     }
+//     else if (Pstream::defaultCommsType == Pstream::scheduled)
+//     {
+//         const lduSchedule& patchSchedule = this->patchSchedule();
 
-        // Loop over all the "normal" interfaces relating to standard patches
-        forAll (patchSchedule, i)
-        {
-            label interfaceI = patchSchedule[i].patch;
+//         // Loop over all the "normal" interfaces relating to standard patches
+//         forAll (patchSchedule, i)
+//         {
+//             label interfaceI = patchSchedule[i].patch;
 
-            if (interfaces.set(interfaceI))
-            {
-                if (patchSchedule[i].init)
-                {
-                    interfaces[interfaceI].initInterfaceMatrixUpdate
-                    (
-                        psiif,
-                        result,
-                        *this,
-                        coupleCoeffs[interfaceI],
-                        cmpt,
-                        Pstream::scheduled
-                    );
-                }
-                else
-                {
-                    interfaces[interfaceI].updateInterfaceMatrix
-                    (
-                        psiif,
-                        result,
-                        *this,
-                        coupleCoeffs[interfaceI],
-                        cmpt,
-                        Pstream::scheduled
-                    );
-                }
-            }
-        }
+//             if (interfaces.set(interfaceI))
+//             {
+//                 if (patchSchedule[i].init)
+//                 {
+//                     interfaces[interfaceI].initInterfaceMatrixUpdate
+//                     (
+//                         psiif,
+//                         result,
+//                         *this,
+//                         coupleCoeffs[interfaceI],
+//                         cmpt,
+//                         Pstream::scheduled
+//                     );
+//                 }
+//                 else
+//                 {
+//                     interfaces[interfaceI].updateInterfaceMatrix
+//                     (
+//                         psiif,
+//                         result,
+//                         *this,
+//                         coupleCoeffs[interfaceI],
+//                         cmpt,
+//                         Pstream::scheduled
+//                     );
+//                 }
+//             }
+//         }
 
-        // Loop over the "global" patches are on the list of interfaces but
-        // beyond the end of the schedule which only handles "normal" patches
-        for
-        (
-            label interfaceI=patchSchedule.size()/2;
-            interfaceI<interfaces.size();
-            interfaceI++
-        )
-        {
-            if (interfaces.set(interfaceI))
-            {
-                interfaces[interfaceI].updateInterfaceMatrix
-                (
-                    psiif,
-                    result,
-                    *this,
-                    coupleCoeffs[interfaceI],
-                    cmpt,
-                    Pstream::blocking
-                );
-            }
-        }
-    }
-    else
-    {
-        FatalErrorIn("lduMatrix::updateMatrixInterfaces")
-            << "Unsuported communications type "
-            << Pstream::commsTypeNames[Pstream::defaultCommsType]
-            << exit(FatalError);
-    }
+//         // Loop over the "global" patches are on the list of interfaces but
+//         // beyond the end of the schedule which only handles "normal" patches
+//         for
+//         (
+//             label interfaceI=patchSchedule.size()/2;
+//             interfaceI<interfaces.size();
+//             interfaceI++
+//         )
+//         {
+//             if (interfaces.set(interfaceI))
+//             {
+//                 interfaces[interfaceI].updateInterfaceMatrix
+//                 (
+//                     psiif,
+//                     result,
+//                     *this,
+//                     coupleCoeffs[interfaceI],
+//                     cmpt,
+//                     Pstream::blocking
+//                 );
+//             }
+//         }
+//     }
+//     else
+//     {
+//         FatalErrorIn("lduMatrix::updateMatrixInterfaces")
+//             << "Unsuported communications type "
+//             << Pstream::commsTypeNames[Pstream::defaultCommsType]
+//             << exit(FatalError);
+//     }
 }
 
 

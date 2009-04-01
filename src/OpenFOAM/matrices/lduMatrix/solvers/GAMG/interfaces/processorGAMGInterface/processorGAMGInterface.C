@@ -51,13 +51,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
     const labelField& neighbourRestrictAddressing
 )
 :
-    GAMGInterface
-    (
-        lduMesh,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
-    ),
+    GAMGInterface(lduMesh),
     fineProcInterface_(refCast<const processorLduInterface>(fineInterface))
 {
     // Make a lookup table of entries for owner/neighbour
@@ -148,7 +142,6 @@ Foam::processorGAMGInterface::processorGAMGInterface
             nCoarseFaces++;
         }
     } // end for all fine faces
-
 
 
     faceCells_.setSize(nCoarseFaces, -1);

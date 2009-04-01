@@ -26,6 +26,7 @@ License
 
 #include "GAMGAgglomeration.H"
 #include "GAMGInterface.H"
+#include "FieldFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -224,7 +225,31 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         }
     }
 
+    // Store coefficients to avoid tangled communications
+    // HJ, 1/Apr/2009
+    FieldField<Field, label> fineInterfaceAddr(fineInterfaces.size());
+
+    forAll (fineInterfaces, inti)
+    {
+        if (fineInterfaces.set(inti))
+        {
+            fineInterfaceAddr.set
+            (
+                inti,
+                new labelField
+                (
+                    fineInterfaces[inti].internalFieldTransfer
+                    (
+                        Pstream::blocking,
+                        restrictMap
+                    )
+                )
+            );
+        }
+    }
+
     // Add the coarse level
+
     // Set the coarse ldu addressing onto the list
     meshLevels_.set
     (
@@ -262,11 +287,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                     meshLevels_[fineLevelIndex],
                     fineInterfaces[inti],
                     fineInterfaces[inti].interfaceInternalField(restrictMap),
-                    fineInterfaces[inti].internalFieldTransfer
-                    (
-                        Pstream::blocking,
-                        restrictMap
-                    )
+                    fineInterfaceAddr[inti]
                 ).ptr()
             );
             

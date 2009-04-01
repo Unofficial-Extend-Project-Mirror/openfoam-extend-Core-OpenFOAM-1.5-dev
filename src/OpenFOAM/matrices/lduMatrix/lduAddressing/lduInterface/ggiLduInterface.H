@@ -53,6 +53,16 @@ namespace Foam
 
 class ggiLduInterface
 {
+protected:
+
+    // Protected data
+
+        //- Transfer buffer
+        mutable labelField labelTransferBuffer_;
+
+        //- Field transfer buffer
+        mutable scalarField fieldTransferBuffer_;
+
 
 public:
 
@@ -60,6 +70,14 @@ public:
     TypeName("ggiLduInterface");
 
     // Constructors
+
+        //- Construct null
+        ggiLduInterface()
+        :
+            labelTransferBuffer_(),
+            fieldTransferBuffer_()
+        {}
+
 
     // Destructor
 
@@ -74,8 +92,17 @@ public:
         //- Is this the fine level?
         virtual bool fineLevel() const = 0;
 
-        //- Return shadow patch index
+        //- Return shadow interface index
         virtual label shadowIndex() const = 0;
+
+        //- Return shadow interface
+        virtual const ggiLduInterface& shadowInterface() const = 0;
+
+        //- Return zone size
+        virtual label zoneSize() const = 0;
+
+        //- Return zone addressing
+        virtual const labelList& zoneAddressing() const = 0;
 
         //- Return fine level addressing
         virtual const labelListList& addressing() const = 0;
@@ -88,6 +115,21 @@ public:
 
         //- Return face reverse transformation tensor
         virtual const tensorField& reverseT() const = 0;
+
+
+        // Transfer buffer access
+
+            //- Return contents of the label transfer buffer
+            const labelField& labelTransferBuffer() const
+            {
+                return labelTransferBuffer_;
+            }
+
+            //- Return contents of the field transfer buffer
+            const scalarField& fieldTransferBuffer() const
+            {
+                return fieldTransferBuffer_;
+            }
 };
 
 

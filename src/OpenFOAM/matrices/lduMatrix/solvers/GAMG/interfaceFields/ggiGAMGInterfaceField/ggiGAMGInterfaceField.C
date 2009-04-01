@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "lduMatrix.H"
 
+#include "OSspecific.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -100,11 +102,27 @@ void Foam::ggiGAMGInterfaceField::updateInterfaceMatrix
         ggiInterface_.internalFieldTransfer(commsType, psiInternal);
     transformCoupleField(pnf, cmpt);
 
+    // Expand data to zone size
+    scalarField zonePnf(ggiInterface_.shadowInterface().zoneSize(), 0);
+
+    const labelList& shadowZa =
+        ggiInterface_.shadowInterface().zoneAddressing();
+
+    forAll (shadowZa, i)
+    {
+        zonePnf[shadowZa[i]] = pnf[i];
+    }
+
+    // Reduce zone data
+    reduce(zonePnf, sumOp<scalarField>());
+
     const unallocLabelList& faceCells = ggiInterface_.faceCells();
+
+    const labelList& za = ggiInterface_.zoneAddressing();
 
     forAll(faceCells, elemI)
     {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+        result[faceCells[elemI]] -= coeffs[elemI]*zonePnf[za[elemI]];
     }
 }
 

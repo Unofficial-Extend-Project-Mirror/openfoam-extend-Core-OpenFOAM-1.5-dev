@@ -62,11 +62,11 @@ class ggiGAMGInterface
         //  agglomerated
         const ggiLduInterface& fineGgiInterface_;
 
-        //- Transfer buffer
-        mutable labelField labelTransferBuffer_;
+        //- Zone size
+        label zoneSize_;
 
-        //- Field transfer buffer
-        mutable scalarField fieldTransferBuffer_;
+        //- Zone addressing
+        labelList zoneAddressing_;
 
 
     // Private Member Functions
@@ -78,21 +78,10 @@ class ggiGAMGInterface
         void operator=(const ggiGAMGInterface&);
 
 
-protected:
+    // Private static data
 
-    // Protected Member Functions
-
-        //- Return contents of the label transfer buffer
-        const labelField& labelTransferBuffer() const
-        {
-            return labelTransferBuffer_;
-        }
-
-        //- Return contents of the field transfer buffer
-        const scalarField& fieldTransferBuffer() const
-        {
-            return fieldTransferBuffer_;
-        }
+        //- Processor cluster offset index
+        static const label procOffset = 1000000;
 
 
 public:
@@ -109,7 +98,7 @@ public:
         (
             const lduPrimitiveMesh& lduMesh,
             const lduInterface& fineInterface,
-            const labelField& restrictAddressing,
+            const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing
         );
 
@@ -120,6 +109,15 @@ public:
 
 
     // Member Functions
+
+        // Agglomeration
+
+            //- Agglomerating the given fine-level coefficients and return
+            virtual tmp<scalarField> agglomerateCoeffs
+            (
+                const scalarField& fineCoeffs
+            ) const;
+
 
         // Interface transfer functions
 
@@ -176,7 +174,13 @@ public:
             virtual label shadowIndex() const;
 
             //- Return shadow interface
-            const ggiGAMGInterface& shadow() const;
+            virtual const ggiLduInterface& shadowInterface() const;
+
+            //- Return zone size
+            virtual label zoneSize() const;
+
+            //- Return zone addressing
+            virtual const labelList& zoneAddressing() const;
 
             //- Return addressing
             virtual const labelListList& addressing() const;

@@ -49,8 +49,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
         (
             "GAMGInterface::New"
             "(const lduPrimitiveMesh& lduMesh,"
-            "const lduInterface& fineInterface, "
-            "const labelField& localRestrictAddressing, "
+            "const lduInterface& fineInterface,"
+            "const labelField& localRestrictAddressing,"
             "const labelField& neighbourRestrictAddressing)"
         )   << "Unknown GAMGInterface type " << coupleType << ".\n"
             << "Valid GAMGInterface types are :"

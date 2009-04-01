@@ -147,13 +147,7 @@ public:
 
         //- Construct from fine-level interface,
         //  local and neighbour restrict addressing
-        GAMGInterface
-        (
-            const lduPrimitiveMesh& lduMesh,
-            const lduInterface&,
-            const labelField&,
-            const labelField&
-        )
+        GAMGInterface(const lduPrimitiveMesh& lduMesh)
         :
             lduMesh_(lduMesh)
         {}

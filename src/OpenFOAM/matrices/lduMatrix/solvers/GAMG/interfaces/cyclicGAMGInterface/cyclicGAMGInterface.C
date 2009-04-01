@@ -51,13 +51,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     const labelField& neighbourRestrictAddressing
 )
 :
-    GAMGInterface
-    (
-        lduMesh,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
-    ),
+    GAMGInterface(lduMesh),
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {
     // Make a lookup table of entries for owner/neighbour
@@ -222,7 +216,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
 {}
