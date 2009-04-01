@@ -153,6 +153,7 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
     const label index,
     const polyBoundaryMesh& bm,
     const word& shadowName,
+    const word& zoneName,
     const bool bridgeOverlap
 )
 :
@@ -164,6 +165,7 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
         index,
         bm,
         shadowName,
+        zoneName,
         bridgeOverlap
     ),
     separationOffset_(vector::zero),

@@ -108,6 +108,7 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& shadowName,
+            const word& zoneName,
             const bool bridgeOverlap
         );
 
