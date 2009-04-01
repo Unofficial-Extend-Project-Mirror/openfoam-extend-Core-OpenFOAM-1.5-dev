@@ -49,7 +49,7 @@ namespace Foam
 class volPointInterpolation;
 
 /*---------------------------------------------------------------------------*\
-                           Class faceDecompIsoSurfaceCuts Declaration
+                  Class faceDecompIsoSurfaceCuts Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceDecompIsoSurfaceCuts
