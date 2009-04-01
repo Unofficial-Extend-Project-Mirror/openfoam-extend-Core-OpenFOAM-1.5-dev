@@ -486,6 +486,32 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
         }
     }
 
+    // Store coefficients to avoid tangled communications
+    // HJ, 1/Apr/2009
+    FieldField<Field, label> fineInterfaceAddr(interfaceFields.size());
+
+    forAll (interfaceFields, intI)
+    {
+        if (interfaceFields.set(intI))
+        {
+            const lduInterface& fineInterface =
+                interfaceFields[intI].interface();
+
+            fineInterfaceAddr.set
+            (
+                intI,
+                new labelField
+                (
+                    fineInterface.internalFieldTransfer
+                    (
+                        Pstream::blocking,
+                        child_
+                    )
+                )
+            );
+        }
+    }
+
     forAll (interfaceFields, intI)
     {
         if (interfaceFields.set(intI))
@@ -501,14 +527,16 @@ Foam::autoPtr<Foam::amgMatrix> Foam::pamgPolicy::restrictMatrix
                     *coarseAddrPtr,
                     fineInterface,
                     fineInterface.interfaceInternalField(child_),
-                    fineInterface.internalFieldTransfer
-                    (
-                        Pstream::blocking,
-                        child_
-                    )
+                    fineInterfaceAddr[intI]
                 ).ptr()
             );
+        }
+    }
 
+    forAll (interfaceFields, intI)
+    {
+        if (interfaceFields.set(intI))
+        {
             const GAMGInterface& coarseInterface = 
                 refCast<const GAMGInterface>(coarseInterfaces[intI]);
 

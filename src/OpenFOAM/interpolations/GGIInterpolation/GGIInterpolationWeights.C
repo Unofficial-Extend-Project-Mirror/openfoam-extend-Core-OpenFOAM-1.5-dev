@@ -511,13 +511,13 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
 
     // Memorize the largest correction needed in order to provide some
     // basic info to the user
-    scalar largestSWC = 0.0;
-    scalar sumSWC = 0.0;
-    scalar curSWC = 0.0;
+    scalar largestSWC = 0;
+    scalar sumSWC = 0;
+    scalar curSWC = 0;
 
-    scalar largestMWC = 0.0;
-    scalar sumMWC = 0.0;
-    scalar curMWC = 0.0;
+    scalar largestMWC = 0;
+    scalar sumMWC = 0;
+    scalar curMWC = 0;
 
     // Rescaling the slave weights
     if
@@ -530,7 +530,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
         (
             "void GGIInterpolation<MasterPatch, SlavePatch>::"
             "rescaleWeightingFactors() const"
-        )   << "Uncovered faces found:  on master:"
+        )   << "Uncovered faces found.  On master: "
             << uncoveredMasterFaces().size()
             << " on slave: " << uncoveredSlaveFaces().size() << endl;
     }
@@ -544,7 +544,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
             saW[saWi] = saW[saWi]/slaveWeightSum;
 
             // Some book-keeping
-            curSWC     = mag(1.0 - slaveWeightSum);
+            curSWC = mag(1.0 - slaveWeightSum);
             largestSWC = Foam::max(largestSWC, curSWC);
 
             sumSWC += curSWC;
@@ -561,7 +561,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
             maW[maWi] = maW[maWi]/masterWeightSum;
 
             // Some book-keeping
-            curMWC     = mag(1.0 - masterWeightSum);
+            curMWC = mag(1.0 - masterWeightSum);
             largestMWC = Foam::max(largestMWC, curMWC);
 
             sumMWC += curMWC;
@@ -570,7 +570,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::rescaleWeightingFactors() const
 
     if (saW.size() > 0 && maW.size() > 0)
     {
-        Info  << "  Largest slave weighting factor correction : " << largestSWC
+        Info<< "  Largest slave weighting factor correction : " << largestSWC
             << " average: " << sumSWC/saW.size() << nl
             << "  Largest master weighting factor correction: " << largestMWC
             << " average: " << sumMWC/maW.size() << endl;

@@ -47,6 +47,12 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::ggiFvPatch::~ggiFvPatch()
+{}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // Make patch weighting factors
@@ -197,6 +203,26 @@ Foam::label Foam::ggiFvPatch::shadowIndex() const
 }
 
 
+const Foam::ggiLduInterface& Foam::ggiFvPatch::shadowInterface() const
+{
+    const fvPatch& p = this->boundaryMesh()[ggiPolyPatch_.shadowIndex()];
+
+    return refCast<const ggiLduInterface>(p);
+}
+
+
+Foam::label Foam::ggiFvPatch::zoneSize() const
+{
+    return ggiPolyPatch_.zone().size();
+}
+
+
+const Foam::labelList& Foam::ggiFvPatch::zoneAddressing() const
+{
+    return ggiPolyPatch_.zoneAddressing();
+}
+
+
 const Foam::labelListList& Foam::ggiFvPatch::addressing() const
 {
     if (ggiPolyPatch_.master())
@@ -238,7 +264,7 @@ void Foam::ggiFvPatch::initTransfer
     const unallocLabelList& interfaceData
 ) const
 {
-    transferBuffer_ = interfaceData;
+    labelTransferBuffer_ = interfaceData;
 }
 
 
@@ -248,7 +274,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::transfer
     const unallocLabelList& interfaceData
 ) const
 {
-    return this->shadow().transferBuffer();
+    return this->shadow().labelTransferBuffer();
 }
 
 
@@ -258,7 +284,7 @@ void Foam::ggiFvPatch::initInternalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
-    transferBuffer_ = patchInternalField(iF);
+    labelTransferBuffer_ = patchInternalField(iF);
 }
 
 
@@ -268,7 +294,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::internalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
-    return shadow().transferBuffer();
+    return shadow().labelTransferBuffer();
 }
 
 

@@ -62,9 +62,6 @@ class ggiFvPatch
         //- Reference to polyPatch
         const ggiPolyPatch& ggiPolyPatch_;
 
-        //- Transfer buffer
-        mutable labelField transferBuffer_;
-
 
 protected:
 
@@ -79,12 +76,6 @@ protected:
         //- Make patch face non-orthogonality correction vectors
         virtual void makeCorrVecs(vectorField&) const;
 
-        //- Return contents of transfer buffer
-        const labelField& transferBuffer() const
-        {
-            return transferBuffer_;
-        }
-
 
 public:
 
@@ -98,15 +89,13 @@ public:
         ggiFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
         :
             coupledFvPatch(patch, bm),
-            ggiPolyPatch_(refCast<const ggiPolyPatch>(patch)),
-            transferBuffer_()
+            ggiPolyPatch_(refCast<const ggiPolyPatch>(patch))
         {}
 
 
     // Destructor
 
-        virtual ~ggiFvPatch()
-        {}
+        virtual ~ggiFvPatch();
 
 
     // Member functions
@@ -163,6 +152,15 @@ public:
 
             //- Return shadow patch index
             virtual label shadowIndex() const;
+
+            //- Return shadow interface
+            virtual const ggiLduInterface& shadowInterface() const;
+
+            //- Return zone size
+            virtual label zoneSize() const;
+
+            //- Return zone addressing
+            virtual const labelList& zoneAddressing() const;
 
             //- Return addressing.  Master side returns own addressing and
             //  slave side returns addressing from master

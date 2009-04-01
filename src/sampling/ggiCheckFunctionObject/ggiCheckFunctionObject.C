@@ -98,8 +98,8 @@ bool Foam::ggiCheckFunctionObject::execute()
                 visited[patchI] = true;
 
                 // Calculate local and shadow flux
-                scalar localFlux = sum(phi.boundaryField()[patchI]);
-                scalar localFluxMag = sumMag(phi.boundaryField()[patchI]);
+                scalar localFlux = gSum(phi.boundaryField()[patchI]);
+                scalar localFluxMag = gSumMag(phi.boundaryField()[patchI]);
 
                 const ggiPolyPatch& ggiPatch =
                     refCast<const ggiPolyPatch>
@@ -111,16 +111,16 @@ bool Foam::ggiCheckFunctionObject::execute()
 
                 visited[shadowPatchI] = true;
 
-                scalar shadowFlux = sum(phi.boundaryField()[shadowPatchI]);
+                scalar shadowFlux = gSum(phi.boundaryField()[shadowPatchI]);
                 scalar shadowFluxMag =
-                    sumMag(phi.boundaryField()[shadowPatchI]);
+                    gSumMag(phi.boundaryField()[shadowPatchI]);
 
                 Info<< "GGI pair (" << ggiPatch.name() << ", "
                     << ggiPatch.shadow().name()
                     << ") : " << localFluxMag << " " << shadowFluxMag
                     << " Diff = " << localFlux + shadowFlux << " or "
-                    << mag(localFlux + shadowFlux)/mag(localFluxMag)*100 << " %"
-                    << endl;
+                    << mag(localFlux + shadowFlux)/(localFluxMag + SMALL)*100
+                    << " %" << endl;
             }
         }
     }
