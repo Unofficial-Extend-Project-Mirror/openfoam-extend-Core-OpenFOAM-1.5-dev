@@ -25,6 +25,9 @@ License
 Application
     simpleFoamResidual
 
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
+
 Description
     Calculate and write residual for a simpleFoam momentum equation
 
