@@ -29,7 +29,7 @@ Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
 Description
-    Mass-conservative face interpolation: typedef for polyPatch
+    Mass-conservative face interpolation: typedefs for polyPatch and faceZone
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +51,12 @@ namespace Foam
         PrimitivePatch<face, SubList, const pointField&>,
         PrimitivePatch<face, SubList, const pointField&>
     >   ggiInterpolation;
+
+    typedef GGIInterpolation
+    <
+        PrimitivePatch<face, List, const pointField&>,
+        PrimitivePatch<face, List, const pointField&>
+    >   ggiZoneInterpolation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

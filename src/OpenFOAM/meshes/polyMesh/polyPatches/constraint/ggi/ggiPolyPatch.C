@@ -35,6 +35,7 @@ Contributor
 #include "addToRunTimeSelectionTable.H"
 #include "demandDrivenData.H"
 #include "polyPatchID.H"
+#include "ZoneIDs.H"
 #include "SubField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -50,6 +51,37 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::ggiPolyPatch::calcZoneAddressing() const
+{
+    // Calculate patch-to-zone addressing
+    if (zoneAddressingPtr_)
+    {
+        FatalErrorIn("void ggiPolyPatch::calcZoneAddressing() const")
+            << "Patch to zone addressing already calculated"
+            << abort(FatalError);
+    }
+
+    // Calculate patch-to-zone addressing
+    zoneAddressingPtr_ = new labelList(size());
+    labelList& addr = *zoneAddressingPtr_;
+    const faceZone& myZone = zone();
+
+    for (label i = 0; i < size(); i++)
+    {
+        addr[i] = myZone.whichFace(start() + i);
+    }
+
+    // Check zone addressing
+    if (min(addr) < 0)
+    {
+        FatalErrorIn("void ggiPolyPatch::calcZoneAddressing() const")
+            << "Problem with patch-to zone addressing: some patch faces "
+            << "not found in interpolation zone"
+            << abort(FatalError);
+    }
+}
+
+
 void Foam::ggiPolyPatch::calcPatchToPatch() const
 {
     // Create patch-to-patch interpolation
@@ -62,11 +94,12 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
 
     if (master())
     {
+        // Create interpolation for zones
         patchToPatchPtr_ =
-            new ggiInterpolation
+            new ggiZoneInterpolation
             (
-                *this,
-                boundaryMesh()[shadowIndex()],
+                zone()(),
+                shadow().zone()(),
                 forwardT(),
                 reverseT(),
                 separation(),
@@ -115,7 +148,10 @@ void Foam::ggiPolyPatch::calcReconFaceCellCentres() const
 void Foam::ggiPolyPatch::clearOut()
 {
     deleteDemandDrivenData(patchToPatchPtr_);
+    deleteDemandDrivenData(zoneAddressingPtr_);
+
     deleteDemandDrivenData(reconFaceCellCentresPtr_);
+   
 }
 
 
@@ -132,14 +168,16 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(name, size, start, index, bm),
     shadowName_(word::null),
+    zoneName_(word::null),
     bridgeOverlap_(false),
     shadowIndex_(-1),
+    zoneIndex_(-1),
     patchToPatchPtr_(NULL),
+    zoneAddressingPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
-{
-}
+{}
 
-// Construct from components
+
 Foam::ggiPolyPatch::ggiPolyPatch
 (
     const word& name,
@@ -148,19 +186,22 @@ Foam::ggiPolyPatch::ggiPolyPatch
     const label index,
     const polyBoundaryMesh& bm,
     const word& shadowName,
+    const word& zoneName,
     const bool bridgeOverlap
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
     shadowName_(shadowName),
+    zoneName_(zoneName),
     bridgeOverlap_(bridgeOverlap),
     shadowIndex_(-1),
+    zoneIndex_(-1),
     patchToPatchPtr_(NULL),
+    zoneAddressingPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
 
-// Construct from dictionary
 Foam::ggiPolyPatch::ggiPolyPatch
 (
     const word& name,
@@ -171,14 +212,16 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(name, dict, index, bm),
     shadowName_(dict.lookup("shadowPatch")),
+    zoneName_(dict.lookup("zone")),
     bridgeOverlap_(dict.lookup("bridgeOverlap")),
     shadowIndex_(-1),
+    zoneIndex_(-1),
     patchToPatchPtr_(NULL),
+    zoneAddressingPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
 
-//- Construct as copy, resetting the boundary mesh
 Foam::ggiPolyPatch::ggiPolyPatch
 (
     const ggiPolyPatch& pp,
@@ -187,9 +230,12 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(pp, bm),
     shadowName_(pp.shadowName_),
+    zoneName_(pp.zoneName_),
     bridgeOverlap_(pp.bridgeOverlap_),
     shadowIndex_(-1),
+    zoneIndex_(-1),
     patchToPatchPtr_(NULL),
+    zoneAddressingPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -206,9 +252,12 @@ Foam::ggiPolyPatch::ggiPolyPatch
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     shadowName_(pp.shadowName_),
+    zoneName_(pp.zoneName_),
     bridgeOverlap_(pp.bridgeOverlap_),
     shadowIndex_(-1),
+    zoneIndex_(-1),
     patchToPatchPtr_(NULL),
+    zoneAddressingPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -264,13 +313,52 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
 }
 
 
+Foam::label Foam::ggiPolyPatch::zoneIndex() const
+{
+    if (zoneIndex_ == -1 && zoneName_ != Foam::word::null)
+    {
+        // Grab zone patch index
+        faceZoneID zone(zoneName_, boundaryMesh().mesh().faceZones());
+
+        if (!zone.active())
+        {
+            FatalErrorIn("label ggiPolyPatch::zoneIndex() const")
+                << "Face zone name " << zoneName_
+                << " not found.  Please check your GGI interface definition."
+                << abort(FatalError);
+        }
+
+        zoneIndex_ = zone.index();
+    }
+
+    return zoneIndex_;
+}
+
+
 const Foam::ggiPolyPatch& Foam::ggiPolyPatch::shadow() const
 {
     return refCast<const ggiPolyPatch>(boundaryMesh()[shadowIndex()]);
 }
 
 
-const Foam::ggiInterpolation& Foam::ggiPolyPatch::patchToPatch() const
+const Foam::faceZone& Foam::ggiPolyPatch::zone() const
+{
+    return boundaryMesh().mesh().faceZones()[zoneIndex()];
+}
+
+
+const Foam::labelList& Foam::ggiPolyPatch::zoneAddressing() const
+{
+    if (!zoneAddressingPtr_)
+    {
+        calcZoneAddressing();
+    }
+
+    return *zoneAddressingPtr_;
+}
+
+
+const Foam::ggiZoneInterpolation& Foam::ggiPolyPatch::patchToPatch() const
 {
     if (master())
     {
@@ -402,6 +490,8 @@ void Foam::ggiPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
     os.writeKeyword("shadowPatch") << shadowName_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("zone") << zoneName_
         << token::END_STATEMENT << nl;
     os.writeKeyword("bridgeOverlap") << bridgeOverlap_
         << token::END_STATEMENT << nl;

@@ -46,6 +46,7 @@ SourceFiles
 #include "ggiInterpolation.H"
 #include "transform.H"
 #include "word.H"
+#include "faceZone.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,7 +55,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ggiPolyPatch Declaration
+                         Class ggiPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class ggiPolyPatch
@@ -66,14 +67,23 @@ class ggiPolyPatch
         //- Shadow patch name
         const word shadowName_;
 
+        //- Interpolation zone name
+        const word zoneName_;
+
         //- Use bridging to fix overlap error in interpolation
         Switch bridgeOverlap_;
 
         //- Shadow patch index.  Delayed evaluation for construction
         mutable label shadowIndex_;
 
+        //- Interpolation zone index.  Delayed evaluation for construction
+        mutable label zoneIndex_;
+
         //- Patch-to-patch interpolation
-        mutable ggiInterpolation* patchToPatchPtr_;
+        mutable ggiZoneInterpolation* patchToPatchPtr_;
+
+        //- Patch-to-zone addressing
+        mutable labelList* zoneAddressingPtr_;
 
         //- Reconstructed patch neighbour cell centres
         mutable vectorField* reconFaceCellCentresPtr_;
@@ -81,8 +91,11 @@ class ggiPolyPatch
 
     // Private member functions
 
+        //- Calculate patch-to-zone addressing
+        virtual void calcZoneAddressing() const;
+
         //- Calculate interpolation
-       virtual void calcPatchToPatch() const;
+        virtual void calcPatchToPatch() const;
 
         //- Calculate reconstructed cell centres
         void calcReconFaceCellCentres() const;
@@ -144,6 +157,7 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& shadowName,
+            const word& zoneName,
             const bool bridgeOverlap
         );
 
@@ -220,8 +234,20 @@ public:
         //- Return shadow patch index
         label shadowIndex() const;
 
+        //- Return name of interpolation face zone
+        const word& zoneName() const
+        {
+            return zoneName_;
+        }
+
+        //- Return zone patch index
+        label zoneIndex() const;
+
         //- Return shadow patch
         const ggiPolyPatch& shadow() const;
+
+        //- Return interpolation face zone
+        const faceZone& zone() const;
 
         //- Is this the master side?
         bool master() const
@@ -241,37 +267,28 @@ public:
             return bridgeOverlap_;
         }
 
+        //- Return patch-to-zone addressing
+        const labelList& zoneAddressing() const;
+
         //- Return reference to patch-to-patch interpolation
         //  Used only for addressing
-        const ggiInterpolation& patchToPatch() const;
+        const ggiZoneInterpolation& patchToPatch() const;
+
+        //- Expand face field to full zone size, including reduction
+        template<class Type>
+        tmp<Field<Type> > expand(const Field<Type>& pf) const;
+
+        //- Filter zone field to patch size
+        template<class Type>
+        tmp<Field<Type> > filter(const Field<Type>& zf) const;
 
         //- Interpolate face field: given field on a the shadow side,
         //  create an interpolated field on this side
         template<class Type>
-        tmp<Field<Type> > interpolate(const Field<Type>& pf) const
-        {
-            if (master())
-            {
-                return patchToPatch().slaveToMaster(pf);
-            }
-            else
-            {
-                return patchToPatch().masterToSlave(pf);
-            }
-        }
+        tmp<Field<Type> > interpolate(const Field<Type>& pf) const;
 
         template<class Type>
-        tmp<Field<Type> > interpolate(const tmp<Field<Type> >& tpf) const
-        {
-            if (master())
-            {
-                return patchToPatch().slaveToMaster(tpf);
-            }
-            else
-            {
-                return patchToPatch().masterToSlave(tpf);
-            }
-        }
+        tmp<Field<Type> > interpolate(const tmp<Field<Type> >& tpf) const;
 
         //- Bridge interpolated face field for uncovered faces
         template<class Type>
@@ -279,29 +296,7 @@ public:
         (
             const Field<Type>& bridgeField,
             Field<Type>& ff
-        ) const
-        {
-            if (bridgeOverlap())
-            {
-                if (master())
-                {
-                    patchToPatch().bridgeMaster(bridgeField, ff);
-                }
-                else
-                {
-                    patchToPatch().bridgeSlave(bridgeField, ff);
-                }
-            }
-            else
-            {
-                // HJ, temporary
-                InfoIn
-                (
-                    "void bridge(const Field<Type>& bridgeField, "
-                    "Field<Type>& ff) const"
-                )   << "Bridging is switched off " << endl;
-            }
-        }
+        ) const;
 
         //- Return reconstructed cell centres
         const vectorField& reconFaceCellCentres() const;
@@ -331,6 +326,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "ggiPolyPatchTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
