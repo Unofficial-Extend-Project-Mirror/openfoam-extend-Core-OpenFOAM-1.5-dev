@@ -91,61 +91,61 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     List<faceZone*> fz(3);
 
-    // Inner slider
-    const word innerSliderName(dict_.subDict("slider").lookup("inside"));
-    label innerSliderIndex = boundaryMesh().findPatchID(innerSliderName);
+    // Moving slider
+    const word movingSliderName(dict_.subDict("slider").lookup("moving"));
+    label movingSliderIndex = boundaryMesh().findPatchID(movingSliderName);
 
-    if (innerSliderIndex < 0)
+    if (movingSliderIndex < 0)
     {
         FatalErrorIn("void mixerFvMesh::addZonesAndModifiers() const")
-            << "Inner slider patch not found in boundary"
+            << "Moving slider patch not found in boundary"
             << abort(FatalError);
     }
 
-    const word outerSliderName(dict_.subDict("slider").lookup("outside"));
-    label outerSliderIndex = boundaryMesh().findPatchID(outerSliderName);
+    const word staticSliderName(dict_.subDict("slider").lookup("static"));
+    label staticSliderIndex = boundaryMesh().findPatchID(staticSliderName);
 
-    if (outerSliderIndex < 0)
+    if (staticSliderIndex < 0)
     {
         FatalErrorIn("void mixerFvMesh::addZonesAndModifiers() const")
-            << "Outer slider patch not found in boundary"
+            << "Static slider patch not found in boundary"
             << abort(FatalError);
 
     }
 
-    const polyPatch& innerSlider = boundaryMesh()[innerSliderIndex];
+    const polyPatch& movingSlider = boundaryMesh()[movingSliderIndex];
 
-    labelList isf(innerSlider.size());
+    labelList isf(movingSlider.size());
 
     forAll (isf, i)
     {
-        isf[i] = innerSlider.start() + i;
+        isf[i] = movingSlider.start() + i;
     }
 
     fz[0] = new faceZone
     (
-        innerSliderName + "Zone",
+        movingSliderName + "Zone",
         isf,
-        boolList(innerSlider.size(), false),
+        boolList(movingSlider.size(), false),
         0,
         faceZones()
     );
 
-    // Outer slider
-    const polyPatch& outerSlider = boundaryMesh()[outerSliderIndex];
+    // Static slider
+    const polyPatch& staticSlider = boundaryMesh()[staticSliderIndex];
 
-    labelList osf(outerSlider.size());
+    labelList osf(staticSlider.size());
 
     forAll (osf, i)
     {
-        osf[i] = outerSlider.start() + i;
+        osf[i] = staticSlider.start() + i;
     }
 
     fz[1] = new faceZone
     (
-        outerSliderName + "Zone",
+        staticSliderName + "Zone",
         osf,
-        boolList(outerSlider.size(), false),
+        boolList(staticSlider.size(), false),
         1,
         faceZones()
     );
@@ -205,12 +205,12 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
             "mixerSlider",
             0,
             topoChanger_,
-            outerSliderName + "Zone",
-            innerSliderName + "Zone",
+            staticSliderName + "Zone",
+            movingSliderName + "Zone",
             "cutPointZone",
             "cutFaceZone",
-            outerSliderName,
-            innerSliderName,
+            staticSliderName,
+            movingSliderName,
             slidingInterface::INTEGRAL,   // Edge matching algorithm
             attachDetach_,                // Attach-detach action
             intersection::VISIBLE         // Projection algorithm
@@ -270,18 +270,18 @@ void Foam::mixerFvMesh::calcMovingMask() const
         }
     }
 
-    const word innerSliderZoneName
+    const word movingSliderZoneName
     (
-        word(dict_.subDict("slider").lookup("inside"))
+        word(dict_.subDict("slider").lookup("moving"))
       + "Zone"
     );
 
-    const labelList& innerSliderAddr =
-        faceZones()[faceZones().findZoneID(innerSliderZoneName)];
+    const labelList& movingSliderAddr =
+        faceZones()[faceZones().findZoneID(movingSliderZoneName)];
 
-    forAll (innerSliderAddr, faceI)
+    forAll (movingSliderAddr, faceI)
     {
-        const face& curFace = f[innerSliderAddr[faceI]];
+        const face& curFace = f[movingSliderAddr[faceI]];
 
         forAll (curFace, pointI)
         {
@@ -289,18 +289,18 @@ void Foam::mixerFvMesh::calcMovingMask() const
         }
     }
 
-    const word outerSliderZoneName
+    const word staticSliderZoneName
     (
-        word(dict_.subDict("slider").lookup("outside"))
+        word(dict_.subDict("slider").lookup("static"))
       + "Zone"
     );
 
-    const labelList& outerSliderAddr =
-        faceZones()[faceZones().findZoneID(outerSliderZoneName)];
+    const labelList& staticSliderAddr =
+        faceZones()[faceZones().findZoneID(staticSliderZoneName)];
 
-    forAll (outerSliderAddr, faceI)
+    forAll (staticSliderAddr, faceI)
     {
-        const face& curFace = f[outerSliderAddr[faceI]];
+        const face& curFace = f[staticSliderAddr[faceI]];
 
         forAll (curFace, pointI)
         {

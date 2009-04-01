@@ -30,6 +30,12 @@ mixerGgiFvMeshCoeffs
     }
 
     rpm             60;
+
+    slider
+    {
+        moving      insideSlider;
+        static      outsideSlider;
+    }
 }
 
 

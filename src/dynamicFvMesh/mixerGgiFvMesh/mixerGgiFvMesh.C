@@ -27,7 +27,8 @@ License
 #include "mixerGgiFvMesh.H"
 #include "Time.H"
 #include "regionSplit.H"
-#include "slidingInterface.H"
+#include "ggiPolyPatch.H"
+#include "polyPatchID.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mapPolyMesh.H"
 
@@ -63,6 +64,20 @@ void Foam::mixerGgiFvMesh::addZonesAndModifiers()
     List<faceZone*> fz(0);
     List<cellZone*> cz(1);
 
+    // Copy the face zones associated with the GGI interfaces
+    if (faceZones().size() > 0)
+    {
+        // Copy face zones
+        Info << "Copying existing face zones" << endl;
+
+        fz.setSize(faceZones().size());
+
+        forAll (faceZones(), i)
+        {
+            fz[i] = faceZones()[i].clone(faceZones()).ptr();
+        }
+    }
+
     regionSplit rs(*this);
 
     // Get the region of the cell containing the origin.
@@ -92,6 +107,7 @@ void Foam::mixerGgiFvMesh::addZonesAndModifiers()
     );
 
     Info << "Adding point, face and cell zones" << endl;
+    removeZones();
     addZones(pz, fz, cz);
 
     // Write mesh
@@ -140,6 +156,67 @@ void Foam::mixerGgiFvMesh::calcMovingMasks() const
             }
         }
     }
+
+    // Grab the ggi patch on the moving side
+    polyPatchID movingSliderID
+    (
+        word(dict_.subDict("slider").lookup("moving")),
+        boundaryMesh()
+    );
+
+    if (!movingSliderID.active())
+    {
+        FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
+            << "Moving slider named " << movingSliderID.name()
+            << " not found.  Valid patch names: "
+            << boundaryMesh().names() << abort(FatalError);
+    }
+
+    const ggiPolyPatch& movingGgiPatch =
+        refCast<const ggiPolyPatch>(boundaryMesh()[movingSliderID.index()]);
+
+    const labelList& movingSliderAddr = movingGgiPatch.zone();
+
+    forAll (movingSliderAddr, faceI)
+    {
+        const face& curFace = f[movingSliderAddr[faceI]];
+
+        forAll (curFace, pointI)
+        {
+            movingPointsMask[curFace[pointI]] = 1;
+        }
+    }
+
+    // Grab the ggi patch on the static side
+    polyPatchID staticSliderID
+    (
+        word(dict_.subDict("slider").lookup("static")),
+        boundaryMesh()
+    );
+
+    if (!staticSliderID.active())
+    {
+        FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
+            << "Static slider named " << staticSliderID.name()
+            << " not found.  Valid patch names: "
+            << boundaryMesh().names() << abort(FatalError);
+    }
+
+    const ggiPolyPatch& staticGgiPatch =
+        refCast<const ggiPolyPatch>(boundaryMesh()[staticSliderID.index()]);
+
+    const labelList& staticSliderAddr = staticGgiPatch.zone();
+
+    forAll (staticSliderAddr, faceI)
+    {
+        const face& curFace = f[staticSliderAddr[faceI]];
+
+        forAll (curFace, pointI)
+        {
+            movingPointsMask[curFace[pointI]] = 0;
+        }
+    }
+
 }
 
 

@@ -40,8 +40,8 @@ mixerFvMeshCoeffs
 
     slider
     {
-        inside      insideSlider;
-        outside     outsideSlider;
+        moving      insideSlider;
+        static      outsideSlider;
     }
 }
 
