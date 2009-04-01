@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
+|  \\    /   O peration     | Version:  1.4.1                                 |
 |   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,12 +10,6 @@ FoamFile
 {
     version  1.0;
     format   ascii;
-
-    root     "";
-    case     "";
-    instance "system";
-    local    "";
-
     class    dictionary;
     object   mirrorMeshDict;
 }
