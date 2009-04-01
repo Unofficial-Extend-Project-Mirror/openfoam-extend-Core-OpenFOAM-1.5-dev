@@ -40,7 +40,7 @@ if ( -r $CEI_HOME ) then
 
     # special treatment for 32bit FOAM and 64bit Ensight
     if ($WM_ARCH == linux) then
-        setenv CEI_ARCH linux_linux_2.6_32
+        setenv CEI_ARCH linux_2.6_64
     endif
 
     set path=($path $CEI_HOME/bin)
