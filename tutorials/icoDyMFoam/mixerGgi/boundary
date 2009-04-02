@@ -35,6 +35,7 @@ FoamFile
         nFaces          36;
         startFace       1192;
         shadowPatch     outsideSlider;
+        zone            insideZone;
         bridgeOverlap   false;
     }
     outsideSlider
@@ -43,6 +44,7 @@ FoamFile
         nFaces          36;
         startFace       1228;
         shadowPatch     insideSlider;
+        zone            outsideZone;
         bridgeOverlap   false;
     }
     defaultFaces
