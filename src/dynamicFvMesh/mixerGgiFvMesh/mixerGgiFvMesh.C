@@ -193,7 +193,7 @@ void Foam::mixerGgiFvMesh::calcMovingMasks() const
     }
 
     // Grab the ggi patches on the static side
-    wordList staticPatches(dict_.subDict("slider").lookup("moving"));
+    wordList staticPatches(dict_.subDict("slider").lookup("static"));
 
     forAll (staticPatches, patchI)
     {
