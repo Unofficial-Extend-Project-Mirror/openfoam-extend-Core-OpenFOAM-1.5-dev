@@ -157,66 +157,75 @@ void Foam::mixerGgiFvMesh::calcMovingMasks() const
         }
     }
 
-    // Grab the ggi patch on the moving side
-    polyPatchID movingSliderID
-    (
-        word(dict_.subDict("slider").lookup("moving")),
-        boundaryMesh()
-    );
+    // Grab the ggi patches on the moving side
+    wordList movingPatches(dict_.subDict("slider").lookup("moving"));
 
-    if (!movingSliderID.active())
+    forAll (movingPatches, patchI)
     {
-        FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
-            << "Moving slider named " << movingSliderID.name()
-            << " not found.  Valid patch names: "
-            << boundaryMesh().names() << abort(FatalError);
-    }
+        polyPatchID movingSliderID
+        (
+            movingPatches[patchI],
+            boundaryMesh()
+        );
 
-    const ggiPolyPatch& movingGgiPatch =
-        refCast<const ggiPolyPatch>(boundaryMesh()[movingSliderID.index()]);
-
-    const labelList& movingSliderAddr = movingGgiPatch.zone();
-
-    forAll (movingSliderAddr, faceI)
-    {
-        const face& curFace = f[movingSliderAddr[faceI]];
-
-        forAll (curFace, pointI)
+        if (!movingSliderID.active())
         {
-            movingPointsMask[curFace[pointI]] = 1;
+            FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
+                << "Moving slider named " << movingPatches[patchI]
+                << " not found.  Valid patch names: "
+                << boundaryMesh().names() << abort(FatalError);
+        }
+
+        const ggiPolyPatch& movingGgiPatch =
+            refCast<const ggiPolyPatch>(boundaryMesh()[movingSliderID.index()]);
+
+        const labelList& movingSliderAddr = movingGgiPatch.zone();
+
+        forAll (movingSliderAddr, faceI)
+        {
+            const face& curFace = f[movingSliderAddr[faceI]];
+
+            forAll (curFace, pointI)
+            {
+                movingPointsMask[curFace[pointI]] = 1;
+            }
         }
     }
 
-    // Grab the ggi patch on the static side
-    polyPatchID staticSliderID
-    (
-        word(dict_.subDict("slider").lookup("static")),
-        boundaryMesh()
-    );
+    // Grab the ggi patches on the static side
+    wordList staticPatches(dict_.subDict("slider").lookup("moving"));
 
-    if (!staticSliderID.active())
+    forAll (staticPatches, patchI)
     {
-        FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
-            << "Static slider named " << staticSliderID.name()
-            << " not found.  Valid patch names: "
-            << boundaryMesh().names() << abort(FatalError);
-    }
+        polyPatchID staticSliderID
+        (
+            staticPatches[patchI],
+            boundaryMesh()
+        );
 
-    const ggiPolyPatch& staticGgiPatch =
-        refCast<const ggiPolyPatch>(boundaryMesh()[staticSliderID.index()]);
-
-    const labelList& staticSliderAddr = staticGgiPatch.zone();
-
-    forAll (staticSliderAddr, faceI)
-    {
-        const face& curFace = f[staticSliderAddr[faceI]];
-
-        forAll (curFace, pointI)
+        if (!staticSliderID.active())
         {
-            movingPointsMask[curFace[pointI]] = 0;
+            FatalErrorIn("void mixerGgiFvMesh::calcMovingMasks() const")
+                << "Static slider named " << staticPatches[patchI]
+                << " not found.  Valid patch names: "
+                << boundaryMesh().names() << abort(FatalError);
+        }
+
+        const ggiPolyPatch& staticGgiPatch =
+            refCast<const ggiPolyPatch>(boundaryMesh()[staticSliderID.index()]);
+
+        const labelList& staticSliderAddr = staticGgiPatch.zone();
+
+        forAll (staticSliderAddr, faceI)
+        {
+            const face& curFace = f[staticSliderAddr[faceI]];
+
+            forAll (curFace, pointI)
+            {
+                movingPointsMask[curFace[pointI]] = 0;
+            }
         }
     }
-
 }
 
 
