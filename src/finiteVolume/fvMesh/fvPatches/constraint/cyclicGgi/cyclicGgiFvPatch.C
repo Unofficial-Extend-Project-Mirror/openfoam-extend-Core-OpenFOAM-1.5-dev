@@ -114,23 +114,6 @@ void Foam::cyclicGgiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 }
 
 
-void Foam::cyclicGgiFvPatch::makeCorrVecs(vectorField& cv) const
-{
-    // No non-orthogonality correction on a ggi interface
-    // HJ, 2/Aug/2007
-    cv = vector::zero;
-
-    // Full non-orthogonality treatment
-
-    // Calculate correction vectors on coupled patches
-//     const scalarField& patchDeltaCoeffs = deltaCoeffs();
-
-//     vectorField patchDeltas = delta();
-//     vectorField n = nf();
-//     cv = n - patchDeltas*patchDeltaCoeffs;
-}
-
-
 const Foam::cyclicGgiFvPatch& Foam::cyclicGgiFvPatch::shadow() const
 {
     const fvPatch& p = this->boundaryMesh()[cyclicGgiPolyPatch_.shadowIndex()];
@@ -159,7 +142,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicGgiFvPatch::delta() const
     {
         tmp<vectorField> tDelta = interpolate
         (
-            transform(forwardT(), -shadow().delta())
+            shadow().Cn() - cyclicGgiPolyPatch_.shadow().reconFaceCellCentres()
         );
 
         if (bridgeOverlap())

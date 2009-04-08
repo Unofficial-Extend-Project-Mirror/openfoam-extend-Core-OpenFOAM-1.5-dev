@@ -46,6 +46,13 @@ namespace Foam
     addToRunTimeSelectionTable(fvPatch, ggiFvPatch, polyPatch);
 }
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const bool Foam::ggiFvPatch::enableGgiNonOrthogonalCorrection_
+(
+    debug::optimisationSwitch("enableGgiNonOrthogonalCorrection", 0)
+);
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -100,7 +107,8 @@ void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     if (ggiPolyPatch_.master())
     {
-        dc = 1.0/max(nf() & fvPatch::delta(), 0.05*mag(fvPatch::delta()));
+        //dc = 1.0/max(nf() & fvPatch::delta(), 0.05*mag(fvPatch::delta()));
+        dc = 1.0/max(nf() & delta(), 0.05*mag(delta()));
 
         if (bridgeOverlap())
         {
@@ -127,18 +135,33 @@ void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 
 void Foam::ggiFvPatch::makeCorrVecs(vectorField& cv) const
 {
-    // No non-orthogonality correction on a ggi interface
-    // HJ, 2/Aug/2007
-    cv = vector::zero;
+    // Non-orthogonality correction on a ggi interface
+    // MB, 7/April/2009
+    if(enableGgiNonOrthogonalCorrection_)
+    {
+        // Full non-orthogonality treatment
 
-    // Full non-orthogonality treatment
+        // Calculate correction vectors on coupled patches
+        const scalarField& patchDeltaCoeffs = deltaCoeffs();
 
-    // Calculate correction vectors on coupled patches
-//     const scalarField& patchDeltaCoeffs = deltaCoeffs();
+        vectorField patchDeltas = delta();
+        vectorField n = nf();
+        cv = n - patchDeltas*patchDeltaCoeffs;
+    }
+    else
+    {
+        // No non-orthogonality correction on a ggi interface
+        cv = vector::zero;
+    }
 
-//     vectorField patchDeltas = delta();
-//     vectorField n = nf();
-//     cv = n - patchDeltas*patchDeltaCoeffs;
+    if(debug)
+    {
+        WarningIn("ggiFvPatch::makeCorrVecs(vectorField& cv)")
+            << (enableGgiNonOrthogonalCorrection_ ? "--  Enabling" : "--  Disabling")
+            << " GGI non-orthogonality correction for patch: "
+            << this->ggiPolyPatch_.name()
+            << endl;
+    }
 }
 
 
@@ -296,6 +319,7 @@ Foam::tmp<Foam::labelField> Foam::ggiFvPatch::internalFieldTransfer
 {
     return shadow().labelTransferBuffer();
 }
+
 
 
 // ************************************************************************* //
