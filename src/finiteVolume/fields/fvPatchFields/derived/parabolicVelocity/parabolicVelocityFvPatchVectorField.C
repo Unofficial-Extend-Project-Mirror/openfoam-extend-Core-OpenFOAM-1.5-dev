@@ -108,6 +108,11 @@ parabolicVelocityFvPatchVectorField::parabolicVelocityFvPatchVectorField
 
 void parabolicVelocityFvPatchVectorField::updateCoeffs()
 {
+    if (updated())
+    {
+        return;
+    }
+
     // Get range and orientation
     boundBox bb(patch().patch().localPoints(), true);
 
