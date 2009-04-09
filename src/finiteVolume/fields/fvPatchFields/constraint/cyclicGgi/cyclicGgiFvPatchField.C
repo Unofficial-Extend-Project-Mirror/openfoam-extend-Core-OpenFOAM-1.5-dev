@@ -172,7 +172,6 @@ tmp<Field<Type> > cyclicGgiFvPatchField<Type>::patchNeighbourField() const
     }
 
     return tpnf;
-
 }
 
 
@@ -182,7 +181,7 @@ void cyclicGgiFvPatchField<Type>::evaluate
     const Pstream::commsTypes
 )
 {
-    Field<Type> pf = 
+    Field<Type> pf
     (
         this->patch().weights()*this->patchInternalField()
       + (1.0 - this->patch().weights())*this->patchNeighbourField()

@@ -175,10 +175,11 @@ void ggiFvPatchField<Type>::evaluate
     const Pstream::commsTypes
 )
 {
-    Field<Type> pf = 
+    Field<Type> pf
+    (
         this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*this->patchNeighbourField();
-
+      + (1.0 - this->patch().weights())*this->patchNeighbourField()
+    );
 
     if (ggiPatch_.bridgeOverlap())
     {
