@@ -29,6 +29,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvcMeshPhi.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -182,7 +183,8 @@ void Foam::movingRotatingWallVelocityFvPatchVectorField::updateCoeffs()
     const scalarField& magSf = p.magSf();
     scalarField Un = phip/(magSf + VSMALL);
 
-    vectorField Urot = (axis_ ^ (patch().Cf() - centre_))*rpm_/60;
+    vectorField Urot =
+        (axis_ ^ (patch().Cf() - centre_))*rpm_*2*mathematicalConstant::pi/60;
 
     vectorField::operator=(Urot + n*(Un - (n & Urot)));
 
