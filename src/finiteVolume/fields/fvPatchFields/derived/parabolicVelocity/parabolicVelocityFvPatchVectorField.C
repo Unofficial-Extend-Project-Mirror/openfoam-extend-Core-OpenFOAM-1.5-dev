@@ -109,7 +109,7 @@ parabolicVelocityFvPatchVectorField::parabolicVelocityFvPatchVectorField
 void parabolicVelocityFvPatchVectorField::updateCoeffs()
 {
     // Get range and orientation
-    boundBox bb(patch().patch().localPoints(), false);
+    boundBox bb(patch().patch().localPoints(), true);
 
     vector ctr = 0.5*(bb.max() + bb.min());
 
