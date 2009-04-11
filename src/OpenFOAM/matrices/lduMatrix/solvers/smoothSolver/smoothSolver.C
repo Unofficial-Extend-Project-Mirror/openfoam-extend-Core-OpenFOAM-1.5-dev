@@ -135,7 +135,7 @@ Foam::lduSolverPerformance Foam::smoothSolver::solve
 
 
     // Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         autoPtr<lduMatrix::smoother> smootherPtr =
             lduMatrix::smoother::New

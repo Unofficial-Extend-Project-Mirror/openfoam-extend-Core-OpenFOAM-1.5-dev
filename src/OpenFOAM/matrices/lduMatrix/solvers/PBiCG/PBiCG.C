@@ -116,7 +116,7 @@ Foam::lduSolverPerformance Foam::PBiCG::solve
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         // Select and construct the preconditioner
         autoPtr<lduPreconditioner> preconPtr;

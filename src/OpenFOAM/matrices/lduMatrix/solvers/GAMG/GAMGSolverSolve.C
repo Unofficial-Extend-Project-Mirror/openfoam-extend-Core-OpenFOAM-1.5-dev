@@ -66,7 +66,7 @@ Foam::lduMatrix::solverPerformance Foam::GAMGSolver::solve
 
 
     // Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         // Create coarse grid correction fields
         PtrList<scalarField> coarseCorrX;

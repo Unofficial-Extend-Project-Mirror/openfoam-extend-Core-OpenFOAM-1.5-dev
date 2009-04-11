@@ -103,7 +103,7 @@ Foam::lduSolverPerformance Foam::PCG::solve
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         scalar wArA = matrix_.great_;
         scalar wArAold = wArA;
