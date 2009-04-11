@@ -118,7 +118,7 @@ Foam::lduSolverPerformance Foam::bicgStabSolver::solve
     solverPerf.initialResidual() = gSumMag(r)/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         scalar rho = matrix_.great_;
         scalar rhoOld = rho;

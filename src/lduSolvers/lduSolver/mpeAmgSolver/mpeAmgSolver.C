@@ -108,7 +108,7 @@ Foam::lduSolverPerformance Foam::mpeAmgSolver::solve
 
     // Solver loop
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         // Krylov vectors
         typedef FieldField<Field, scalar> scalarFieldField;

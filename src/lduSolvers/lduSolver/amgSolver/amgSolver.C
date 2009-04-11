@@ -98,7 +98,7 @@ Foam::lduSolverPerformance Foam::amgSolver::solve
     solverPerf.initialResidual() = gSumMag(amg_.residual(x, b, cmpt))/norm;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         do
         {

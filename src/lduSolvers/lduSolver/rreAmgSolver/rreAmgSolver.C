@@ -135,7 +135,7 @@ Foam::lduSolverPerformance Foam::rreAmgSolver::solve
 
     // Solver loop
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         scalarField psiSave(x.size());
 

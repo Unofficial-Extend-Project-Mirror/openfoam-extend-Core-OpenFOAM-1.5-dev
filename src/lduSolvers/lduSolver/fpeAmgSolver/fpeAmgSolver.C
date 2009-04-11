@@ -103,7 +103,7 @@ Foam::lduSolverPerformance Foam::fpeAmgSolver::solve
 
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         scalarField psiSave(x.size());
 

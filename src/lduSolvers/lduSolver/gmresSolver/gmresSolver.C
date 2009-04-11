@@ -151,7 +151,7 @@ Foam::lduSolverPerformance Foam::gmresSolver::solve
     solverPerf.initialResidual() = gSumMag(rA)/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         // Create the Hesenberg matrix
         Matrix<scalar> H(nDirs_, nDirs_, 0);

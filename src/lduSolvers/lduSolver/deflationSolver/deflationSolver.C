@@ -179,7 +179,7 @@ Foam::lduSolverPerformance Foam::deflationSolver::solve
     solverPerf.initialResidual() = res/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
-    if (!solverPerf.checkConvergence(tolerance(), relTolerance()))
+    if (!stop(solverPerf))
     {
         // Store residuals
         scalar oldRes = res;
