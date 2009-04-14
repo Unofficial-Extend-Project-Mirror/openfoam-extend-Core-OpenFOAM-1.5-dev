@@ -39,7 +39,14 @@ Description
 #include "processorMeshes.H"
 #include "fvFieldReconstructor.H"
 #include "pointFieldReconstructor.H"
+#include "tetPointFieldReconstructor.H"
 #include "reconstructLagrangian.H"
+
+#include "faCFD.H"
+#include "faMesh.H"
+#include "processorFaMeshes.H"
+#include "faFieldReconstructor.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -227,6 +234,52 @@ int main(int argc, char *argv[])
             Info << "No point fields" << nl << endl;
         }
 
+        // If there are any tetFem fields, reconstruct them
+        if
+        (
+            objects.lookupClass(tetPointScalarField::typeName).size()
+         || objects.lookupClass(tetPointVectorField::typeName).size()
+         || objects.lookupClass(tetPointSphericalTensorField::typeName).size()
+         || objects.lookupClass(tetPointSymmTensorField::typeName).size()
+         || objects.lookupClass(tetPointTensorField::typeName).size()
+        )
+        {
+            Info << "Reconstructing tet point fields" << nl << endl;
+
+            tetPolyMesh tetMesh(mesh);
+            PtrList<tetPolyMesh> tetMeshes(procMeshes.meshes().size());
+
+            forAll (tetMeshes, procI)
+            {
+                tetMeshes.set
+                (
+                    procI,
+                    new tetPolyMesh(procMeshes.meshes()[procI])
+                );
+            }
+
+            tetPointFieldReconstructor tetPointReconstructor
+            (
+                tetMesh,
+                tetMeshes,
+                procMeshes.pointProcAddressing(),
+                procMeshes.faceProcAddressing(),
+                procMeshes.cellProcAddressing(),
+                procMeshes.boundaryProcAddressing()
+            );
+
+            // Reconstruct tet point fields
+            tetPointReconstructor.reconstructFields<scalar>(objects);
+            tetPointReconstructor.reconstructFields<vector>(objects);
+            tetPointReconstructor.reconstructFields<sphericalTensor>(objects);
+            tetPointReconstructor.reconstructFields<symmTensor>(objects);
+            tetPointReconstructor.reconstructFields<tensor>(objects);
+        }
+        else
+        {
+            Info << "No tetFem fields" << nl << endl;
+        }
+
 
         // If there are any clouds, reconstruct them.
         // The problem is that a cloud of size zero will not get written so
@@ -343,6 +396,47 @@ int main(int argc, char *argv[])
         else
         {
             Info << "No lagrangian fields" << nl << endl;
+        }
+
+        // If there are any FA fields, reconstruct them
+
+        if
+        (
+            objects.lookupClass(areaScalarField::typeName).size()
+         || objects.lookupClass(areaVectorField::typeName).size()
+         || objects.lookupClass(areaSphericalTensorField::typeName).size()
+         || objects.lookupClass(areaSymmTensorField::typeName).size()
+         || objects.lookupClass(areaTensorField::typeName).size()
+         || objects.lookupClass(edgeScalarField::typeName).size()
+        )
+        {
+            Info << "Reconstructing FA fields" << nl << endl;
+
+            faMesh aMesh(mesh);
+
+            processorFaMeshes procFaMeshes(procMeshes.meshes());
+            
+            faFieldReconstructor faReconstructor
+            (
+                aMesh,
+                procFaMeshes.meshes(),
+                procFaMeshes.edgeProcAddressing(),
+                procFaMeshes.faceProcAddressing(),
+                procFaMeshes.boundaryProcAddressing()
+            );
+
+            faReconstructor.reconstructFaAreaFields<scalar>(objects);
+            faReconstructor.reconstructFaAreaFields<vector>(objects);
+            faReconstructor
+               .reconstructFaAreaFields<sphericalTensor>(objects);
+            faReconstructor.reconstructFaAreaFields<symmTensor>(objects);
+            faReconstructor.reconstructFaAreaFields<tensor>(objects);
+
+            faReconstructor.reconstructFaEdgeFields<scalar>(objects);
+        }
+        else
+        {
+            Info << "No FA fields" << nl << endl;
         }
 
         // If there are any "uniform" directories copy them from
