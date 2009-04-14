@@ -56,7 +56,9 @@ void tetPointFieldDecomposer::calcAddressing() const
     label nAddr = 0;
 
     // Insert point addressing
-    forAll (pointAddressing_, pointI)
+
+    // Use only live points.  HJ, 14/Apr/2009
+    for (label pointI = 0; pointI < processorMesh_().nPoints(); pointI++)
     {
         addr[nAddr] = pointAddressing_[pointI];
         nAddr++;
@@ -66,7 +68,8 @@ void tetPointFieldDecomposer::calcAddressing() const
     // Insert face addressing.  Only for face decomposition
     const label faceOffset = originalMesh_.faceOffset();
 
-    forAll (faceAddressing_, faceI)
+    // Use only live faces.  HJ, 14/Apr/2009
+    for (label faceI = 0; faceI < processorMesh_().nFaces(); faceI++)
     {
         // Remember to decrement the index by one (turning index)
         addr[nAddr] = faceOffset + mag(faceAddressing_[faceI]) - 1;

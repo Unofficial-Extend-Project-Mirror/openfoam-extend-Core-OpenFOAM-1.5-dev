@@ -48,7 +48,9 @@ labelList tetPointFieldReconstructor::procAddressing
     label nAddr = 0;
 
     // Insert point addressing
-    forAll (pointAddr, pointI)
+
+    // Use only live points.  HJ, 14/Apr/2009
+    for (label pointI = 0; pointI < procMeshes_[procNo]().nPoints(); pointI++)
     {
         addr[nAddr] = pointAddr[pointI];
         nAddr++;
@@ -60,7 +62,8 @@ labelList tetPointFieldReconstructor::procAddressing
 
     const label faceOffset = mesh_.faceOffset();
 
-    forAll (faceAddr, faceI)
+    // Use only live faces.  HJ, 14/Apr/2009
+    for (label faceI = 0; faceI < procMeshes_[procNo]().nFaces(); faceI++)
     {
         // Remember to decrement the index by one (turning index)
         addr[nAddr] = faceOffset + mag(faceAddr[faceI]) - 1;
