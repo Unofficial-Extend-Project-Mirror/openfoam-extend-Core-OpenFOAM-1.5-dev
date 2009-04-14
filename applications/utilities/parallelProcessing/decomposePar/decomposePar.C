@@ -66,17 +66,29 @@ Usage
 #include "processorFvPatchFields.H"
 #include "domainDecomposition.H"
 #include "labelIOField.H"
+
 #include "scalarIOField.H"
 #include "vectorIOField.H"
 #include "sphericalTensorIOField.H"
 #include "symmTensorIOField.H"
 #include "tensorIOField.H"
+
+#include "tetPointFields.H"
+#include "tetFemMatrices.H"
+#include "tetPointFieldDecomposer.H"
+
 #include "pointFields.H"
 
 #include "readFields.H"
+
 #include "fvFieldDecomposer.H"
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
+
+#include "faCFD.H"
+#include "emptyFaPatch.H"
+#include "faMeshDecomposition.H"
+#include "faFieldDecomposer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -305,6 +317,36 @@ int main(int argc, char *argv[])
 
     PtrList<pointTensorField> pointTensorFields;
     readFields(pMesh, objects, pointTensorFields);
+
+
+    // Construct the tetPoint fields
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    tetPolyMesh* tetMeshPtr = NULL;
+
+    PtrList<tetPointScalarField> tetPointScalarFields;
+    PtrList<tetPointVectorField> tetPointVectorFields;
+    PtrList<tetPointSphericalTensorField> tetPointSphericalTensorFields;
+    PtrList<tetPointSymmTensorField> tetPointSymmTensorFields;
+    PtrList<tetPointTensorField> tetPointTensorFields;
+
+    if
+    (
+        objects.lookupClass("tetPointScalarField").size() > 0
+     || objects.lookupClass("tetPointVectorField").size() > 0
+     || objects.lookupClass("tetPointSphericalTensorField").size() > 0
+     || objects.lookupClass("tetPointSymmTensorField").size() > 0
+     || objects.lookupClass("tetPointTensorField").size() > 0
+    )
+    {
+        tetMeshPtr = new tetPolyMesh(mesh);
+        tetPolyMesh& tetMesh = *tetMeshPtr;
+
+        readFields(tetMesh, objects, tetPointScalarFields);
+        readFields(tetMesh, objects, tetPointVectorFields);
+        readFields(tetMesh, objects, tetPointSphericalTensorFields);
+        readFields(tetMesh, objects, tetPointSymmTensorFields);
+        readFields(tetMesh, objects, tetPointTensorFields);
+    }
 
 
     // Construct the Lagrangian fields
@@ -629,6 +671,58 @@ int main(int argc, char *argv[])
         }
 
 
+        // tetPoint fields
+        if (tetMeshPtr)
+        {
+            const tetPolyMesh& tetMesh = *tetMeshPtr;
+            tetPolyMesh procTetMesh(procMesh);
+
+            // Read the point addressing information
+            labelIOList pointProcAddressing
+            (
+                IOobject
+                (
+                    "pointProcAddressing",
+                    "constant",
+                    procMesh.meshSubDir,
+                    procMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            // Read the point addressing information
+            labelIOList faceProcAddressing
+            (
+                IOobject
+                (
+                    "faceProcAddressing",
+                    "constant",
+                    procMesh.meshSubDir,
+                    procMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            tetPointFieldDecomposer fieldDecomposer
+            (
+                tetMesh,
+                procTetMesh,
+                pointProcAddressing,
+                faceProcAddressing,
+                cellProcAddressing,
+                boundaryProcAddressing
+            );
+
+            fieldDecomposer.decomposeFields(tetPointScalarFields);
+            fieldDecomposer.decomposeFields(tetPointVectorFields);
+            fieldDecomposer.decomposeFields(tetPointSphericalTensorFields);
+            fieldDecomposer.decomposeFields(tetPointSymmTensorFields);
+            fieldDecomposer.decomposeFields(tetPointTensorFields);
+        }
+
+
         // If there is lagrangian data write it out
         forAll(lagrangianPositions, cloudI)
         {
@@ -716,6 +810,162 @@ int main(int argc, char *argv[])
                     uniformDir
                 );
                 chDir(currentDir);
+            }
+        }
+    }
+
+
+    if (tetMeshPtr)
+    {
+        delete tetMeshPtr;
+        tetMeshPtr = NULL;
+    }
+
+
+    // Finite area mesh and field decomposition
+
+    IOobject faMeshBoundaryIOobj
+    (
+        "boundary",
+        mesh.time().findInstance(mesh.dbDir()/fvMesh::meshSubDir, "boundary"),
+        faMesh::meshSubDir,
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+
+    if(faMeshBoundaryIOobj.headerOk())
+    {
+        Info << "\nFinite area mesh decomposition" << endl;
+
+        faMeshDecomposition aMesh(mesh);
+
+        aMesh.decomposeMesh(filterPatches);
+
+        aMesh.writeDecomposition();
+
+
+        // Construct the area fields
+        // ~~~~~~~~~~~~~~~~~~~~~~~~
+        PtrList<areaScalarField> areaScalarFields;
+        readFields(mesh, objects, areaScalarFields);
+
+        PtrList<areaVectorField> areaVectorFields;
+        readFields(mesh, objects, areaVectorFields);
+
+        PtrList<areaSphericalTensorField> areaSphericalTensorFields;
+        readFields(mesh, objects, areaSphericalTensorFields);
+
+        PtrList<areaSymmTensorField> areaSymmTensorFields;
+        readFields(mesh, objects, areaSymmTensorFields);
+
+        PtrList<areaTensorField> areaTensorFields;
+        readFields(mesh, objects, areaTensorFields);
+
+
+        // Construct the edge fields
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        PtrList<edgeScalarField> edgeScalarFields;
+        readFields(mesh, objects, edgeScalarFields);
+
+        Info << endl;
+
+        // Split the fields over processors
+        for (label procI = 0; procI < mesh.nProcs(); procI++)
+        {
+            Info<< "Processor " << procI
+                << ": finite area field transfer" << endl;
+
+            // open the database
+            Time processorDb
+            (
+                Time::controlDictName,
+                args.rootPath(),
+                args.caseName()/fileName(word("processor") + name(procI))
+            );
+
+            processorDb.setTime(runTime);
+
+            // Read the mesh
+            fvMesh procFvMesh
+            (
+                IOobject
+                (
+                    fvMesh::defaultRegion,
+                    processorDb.timeName(),
+                    processorDb
+                )
+            );
+
+            faMesh procMesh(procFvMesh);
+
+            labelIOList faceProcAddressing
+            (
+                IOobject
+                (
+                    "faceProcAddressing",
+                    "constant",
+                    procMesh.meshSubDir,
+                    procFvMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            labelIOList boundaryProcAddressing
+            (
+                IOobject
+                (
+                    "boundaryProcAddressing",
+                    "constant",
+                    procMesh.meshSubDir,
+                    procFvMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            // FA fields
+            if
+            (
+                areaScalarFields.size()
+             || areaVectorFields.size()
+             || areaSphericalTensorFields.size()
+             || areaSymmTensorFields.size()
+             || areaTensorFields.size()
+             || edgeScalarFields.size()
+            )
+            {
+                labelIOList edgeProcAddressing
+                (
+                    IOobject
+                    (
+                        "edgeProcAddressing",
+                        "constant",
+                        procMesh.meshSubDir,
+                        procFvMesh,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                );
+
+                faFieldDecomposer fieldDecomposer
+                (
+                    aMesh,
+                    procMesh,
+                    edgeProcAddressing,
+                    faceProcAddressing,
+                    boundaryProcAddressing
+                );
+
+                fieldDecomposer.decomposeFields(areaScalarFields);
+                fieldDecomposer.decomposeFields(areaVectorFields);
+                fieldDecomposer.decomposeFields(areaSphericalTensorFields);
+                fieldDecomposer.decomposeFields(areaSymmTensorFields);
+                fieldDecomposer.decomposeFields(areaTensorFields);
+
+                fieldDecomposer.decomposeFields(edgeScalarFields);
             }
         }
     }
