@@ -165,7 +165,14 @@ void fvPatch::makeDeltaCoeffs(scalarField& dc) const
 
 void fvPatch::makeCorrVecs(vectorField& cv) const
 {
-    cv = vector::zero;
+    // Correction vector
+    vectorField d = delta();
+    vectorField n = nf();
+    cv = n - d/(n & d);
+
+    // Old version: no non-orthogonal correction on the wall
+    // Testing.  HJ, 9/Apr/2009
+//     cv = vector::zero;
 }
 
 
