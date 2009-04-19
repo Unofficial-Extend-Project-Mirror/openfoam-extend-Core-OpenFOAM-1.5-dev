@@ -163,7 +163,7 @@ void Foam::solidParticle::hitPatch
 {}
 
 
-void Foam::solidParticle::transformProperties (const tensor& T)
+void Foam::solidParticle::transformProperties(const tensor& T)
 {
     Particle<solidParticle>::transformProperties(T);
     U_ = transform(T, U_);

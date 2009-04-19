@@ -65,7 +65,7 @@ class solidParticle
         //- Diameter
         scalar d_;
 
-        //- Velocity of parcel
+        //- Velocity of particle
         vector U_;
 
 
