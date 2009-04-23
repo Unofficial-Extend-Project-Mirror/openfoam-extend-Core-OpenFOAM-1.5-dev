@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
         CsEqn.solve();
 
-        if (runTime.write())
+        if (runTime.outputTime())
         {
             vsm.mapToVolume(Cs, Cvf.boundaryField());
 
