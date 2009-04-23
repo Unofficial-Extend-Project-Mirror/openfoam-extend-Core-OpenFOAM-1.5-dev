@@ -20,10 +20,9 @@ $(basicFaPatchFields)/coupled/coupledFaPatchFields.C
 $(basicFaPatchFields)/zeroGradient/zeroGradientFaPatchFields.C
 $(basicFaPatchFields)/fixedValue/fixedValueFaPatchFields.C
 $(basicFaPatchFields)/fixedGradient/fixedGradientFaPatchFields.C
+$(basicFaPatchFields)/mixed/mixedFaPatchFields.C
 $(basicFaPatchFields)/transform/transformFaPatchFields.C
 $(basicFaPatchFields)/transform/transformFaPatchScalarField.C
-
-
 
 constraintFaPatchFields = $(faPatchFields)/constraint
 $(constraintFaPatchFields)/empty/emptyFaPatchFields.C
@@ -34,6 +33,7 @@ $(constraintFaPatchFields)/wedge/wedgeFaPatchScalarField.C
 
 derivedFaPatchFields = $(faPatchFields)/derived
 $(derivedFaPatchFields)/fixedValueOutflow/fixedValueOutflowFaPatchFields.C
+$(derivedFaPatchFields)/inletOutlet/inletOutletFaPatchFields.C 
 
 faePatchFields = fields/faePatchFields
 $(faePatchFields)/faePatchField/faePatchFields.C
