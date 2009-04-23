@@ -105,6 +105,9 @@ void Foam::boundMinMax
                 vsf.internalField(),
                 fvc::average(min(vsf, vsf1))().internalField()
                 *neg(vsf1.value() - vsf.internalField())
+                // This is needed when all values are above max
+                // HJ, 18/Apr/2009
+              + pos(vsf1.value() - vsf.internalField())*vsf1.value()
             ),
             vsf1.value()
         );
