@@ -2,6 +2,7 @@ probes/probes.C
 probes/probesFunctionObject.C
 
 minMaxField/minMaxField.C
+boundField/boundField.C
 ggiCheckFunctionObject/ggiCheckFunctionObject.C
 meshCheckFunctionObject/meshCheckFunctionObject.C
 
