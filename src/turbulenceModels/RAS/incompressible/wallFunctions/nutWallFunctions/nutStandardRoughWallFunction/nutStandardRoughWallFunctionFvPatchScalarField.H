@@ -57,6 +57,9 @@ class nutStandardRoughWallFunctionFvPatchScalarField
 {
     // Private data
 
+        //- Name of the velocity field
+        word UName_;
+
         scalar roughnessHeight_;
         scalar roughnessConstant_;
         scalar roughnessFudgeFactor_;
@@ -134,6 +137,13 @@ public:
     // Member functions
 
         // Access
+
+            //- Return the name of the velocity field
+            const word& UName() const
+            {
+                return UName_;
+            }
+
 
             //- Return the fluctuation scale
             const scalar& roughnessHeight() const

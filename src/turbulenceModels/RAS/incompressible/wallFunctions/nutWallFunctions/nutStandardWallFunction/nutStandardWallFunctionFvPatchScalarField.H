@@ -57,6 +57,9 @@ class nutStandardWallFunctionFvPatchScalarField
 {
     // Private data
 
+        //- Name of the velocity field
+        word UName_;
+
 
 public:
 
@@ -127,6 +130,15 @@ public:
 
 
     // Member functions
+
+        // Access
+
+            //- Return the name of the velocity field
+            const word& UName() const
+            {
+                return UName_;
+            }
+
 
         // Evaluation functions
 

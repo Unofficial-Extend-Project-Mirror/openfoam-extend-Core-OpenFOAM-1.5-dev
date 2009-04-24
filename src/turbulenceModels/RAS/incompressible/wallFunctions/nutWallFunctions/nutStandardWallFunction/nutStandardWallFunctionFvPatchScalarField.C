@@ -48,7 +48,8 @@ nutStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    UName_("undefined")
 {}
 
 
@@ -61,7 +62,8 @@ nutStandardWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_)
 {}
 
 
@@ -73,7 +75,8 @@ nutStandardWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U"))
 {}
 
 
@@ -83,7 +86,8 @@ nutStandardWallFunctionFvPatchScalarField
     const nutStandardWallFunctionFvPatchScalarField& tppsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(tppsf),
+    UName_(tppsf.UName_)
 {}
 
 
@@ -94,7 +98,8 @@ nutStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(tppsf, iF),
+    UName_(tppsf.UName_)
 {}
 
 
@@ -115,7 +120,7 @@ void nutStandardWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
