@@ -49,6 +49,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
+    UName_("undefined"),
     roughnessHeight_(pTraits<scalar>::zero),
     roughnessConstant_(pTraits<scalar>::zero),
     roughnessFudgeFactor_(pTraits<scalar>::zero)
@@ -65,6 +66,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
     roughnessHeight_(ptf.roughnessHeight_),
     roughnessConstant_(ptf.roughnessConstant_),
     roughnessFudgeFactor_(ptf.roughnessFudgeFactor_)
@@ -80,6 +82,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
     roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
     roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
     roughnessFudgeFactor_(readScalar(dict.lookup("roughnessFudgeFactor")))
@@ -93,6 +96,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(tppsf),
+    UName_(tppsf.UName_),
     roughnessHeight_(tppsf.roughnessHeight_),
     roughnessConstant_(tppsf.roughnessConstant_),
     roughnessFudgeFactor_(tppsf.roughnessFudgeFactor_)
@@ -107,6 +111,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(tppsf, iF),
+    UName_(tppsf.UName_),
     roughnessHeight_(tppsf.roughnessHeight_),
     roughnessConstant_(tppsf.roughnessConstant_),
     roughnessFudgeFactor_(tppsf.roughnessFudgeFactor_)
@@ -131,7 +136,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     const fvPatchScalarField& rho =
         patch().lookupPatchField<volScalarField, scalar>("rho");
