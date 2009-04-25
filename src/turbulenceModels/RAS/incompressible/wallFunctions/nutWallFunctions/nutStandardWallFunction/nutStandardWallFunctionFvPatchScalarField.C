@@ -161,9 +161,21 @@ void nutStandardWallFunctionFvPatchScalarField::evaluate
 }
 
 
+void nutStandardWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fixedValueFvPatchScalarField::write(os);
+    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, nutStandardWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    nutStandardWallFunctionFvPatchScalarField
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -279,6 +279,7 @@ void nutStandardRoughWallFunctionFvPatchScalarField::evaluate
 void nutStandardRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fixedValueFvPatchScalarField::write(os);
+    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")

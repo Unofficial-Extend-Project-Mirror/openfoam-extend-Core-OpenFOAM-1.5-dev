@@ -147,6 +147,10 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::blocking
             );
+
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 

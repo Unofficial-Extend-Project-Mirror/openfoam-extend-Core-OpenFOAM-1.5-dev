@@ -165,6 +165,13 @@ void nutWallFunctionFvPatchScalarField::evaluate(const Pstream::commsTypes)
 }
 
 
+void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fixedValueFvPatchScalarField::write(os);
+    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makePatchTypeField(fvPatchScalarField, nutWallFunctionFvPatchScalarField);
