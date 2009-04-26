@@ -49,7 +49,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class correctedSnGrad Declaration
+                       Class correctedSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
