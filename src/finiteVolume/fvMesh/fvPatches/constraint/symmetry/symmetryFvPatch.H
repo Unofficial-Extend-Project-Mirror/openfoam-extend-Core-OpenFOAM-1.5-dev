@@ -53,6 +53,14 @@ class symmetryFvPatch
     public fvPatch
 {
 
+protected:
+
+    // Protected Member Functions
+
+        //- Make patch face non-orthogonality correction vectors
+        virtual void makeCorrVecs(vectorField&) const;
+
+
 public:
 
     //- Runtime type information

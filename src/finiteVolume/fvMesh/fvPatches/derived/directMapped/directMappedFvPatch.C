@@ -35,4 +35,19 @@ namespace Foam
     addToRunTimeSelectionTable(fvPatch, directMappedFvPatch, polyPatch);
 }
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::directMappedFvPatch::makeCorrVecs(vectorField& cv) const
+{
+    // Correction vector
+    vectorField d = delta();
+    vectorField n = nf();
+    cv = n - d/(n & d);
+
+    // Old version: no non-orthogonal correction on the wall
+    // Testing.  HJ, 9/Apr/2009
+//     cv = vector::zero;
+}
+
+
 // ************************************************************************* //

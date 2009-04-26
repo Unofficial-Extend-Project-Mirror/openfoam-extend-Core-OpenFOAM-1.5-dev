@@ -32,15 +32,25 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cohesiveFvPatch, 0);
-addToRunTimeSelectionTable(fvPatch, cohesiveFvPatch, polyPatch);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    defineTypeNameAndDebug(cohesiveFvPatch, 0);
+    addToRunTimeSelectionTable(fvPatch, cohesiveFvPatch, polyPatch);
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::cohesiveFvPatch::makeCorrVecs(vectorField& cv) const
+{
+    // Correction vector
+    vectorField d = delta();
+    vectorField n = nf();
+    cv = n - d/(n & d);
+
+    // Old version: no non-orthogonal correction on the wall
+    // Testing.  HJ, 9/Apr/2009
+//     cv = vector::zero;
+}
+
 
 // ************************************************************************* //

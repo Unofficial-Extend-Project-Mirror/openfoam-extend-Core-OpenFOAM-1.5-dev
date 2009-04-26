@@ -71,6 +71,7 @@ protected:
         //  on a ggi interface
         static const bool enableGgiNonOrthogonalCorrection_;
 
+
     // Protected Member functions
 
         //- Make patch weighting factors

@@ -40,6 +40,21 @@ defineTypeNameAndDebug(wallFvPatch, 0);
 addToRunTimeSelectionTable(fvPatch, wallFvPatch, polyPatch);
 
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void wallFvPatch::makeCorrVecs(vectorField& cv) const
+{
+    // Correction vector
+    vectorField d = delta();
+    vectorField n = nf();
+    cv = n - d/(n & d);
+
+    // Old version: no non-orthogonal correction on the wall
+    // Testing.  HJ, 9/Apr/2009
+//     cv = vector::zero;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
