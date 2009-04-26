@@ -96,10 +96,17 @@ public:
         ) const;
 
         //- Map surface field to volume boundary field
-        template<class Type> 
+        template<class Type>
         void mapToVolume
         (
             const GeometricField<Type, faPatchField, areaMesh>& af,
+            FieldField<fvPatchField, Type>& bf
+        ) const;
+
+        template<class Type>
+        void mapToVolume
+        (
+            const tmp<GeometricField<Type, faPatchField, areaMesh> >& taf,
             FieldField<fvPatchField, Type>& bf
         ) const;
 };

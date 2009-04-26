@@ -100,4 +100,17 @@ void Foam::volSurfaceMapping::mapToVolume
 }
 
 
+template<class Type>
+void Foam::volSurfaceMapping::mapToVolume
+(
+    const tmp<GeometricField<Type, faPatchField, areaMesh> >& taf,
+    Foam::FieldField<Foam::fvPatchField, Type>& bf
+) const
+{
+    mapToVolume(taf(), bf);
+
+    taf.clear();
+}
+
+
 // ************************************************************************* //
