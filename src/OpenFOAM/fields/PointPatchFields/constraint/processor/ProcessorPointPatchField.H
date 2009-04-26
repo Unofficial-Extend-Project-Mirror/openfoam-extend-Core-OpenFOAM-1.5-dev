@@ -73,6 +73,21 @@ class ProcessorPointPatchField
         const ProcessorPointPatch& procPatch_;
 
 
+        // Non-blocking parallel communications
+        // Temporary: move to patch.  HJ, 15/Apr/2008
+
+            //- Send buffer.
+            //  Only sized and used when compressed or non-blocking comms used.
+            mutable List<char> sendBuf_;
+
+            //- Receive buffer.
+            //  Only sized and used when compressed or non-blocking comms used.
+            mutable List<char> receiveBuf_;
+
+            //- Resize the buffer if required
+            void resizeBuf(List<char>& buf, const label size) const;
+
+
     // Private member functions
 
         //- Raw field send function

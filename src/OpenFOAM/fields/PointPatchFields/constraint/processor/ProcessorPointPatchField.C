@@ -38,6 +38,29 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template
+<
+    template<class> class PatchField,
+    class Mesh,
+    class PointPatch,
+    class ProcessorPointPatch,
+    template<class> class MatrixType,
+    class Type
+>
+void ProcessorPointPatchField
+<PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>::resizeBuf
+(
+    List<char>& buf, 
+    const label size
+) const
+{
+    if (buf.size() < size)
+    {
+        buf.setSize(size);
+    }
+}
+
+
 // Raw field sending and receiving
 template
 <
@@ -57,21 +80,68 @@ sendField
     const Pstream::commsTypes commsType
 ) const
 {
-    // Not using non-blocking comms
-    if (commsType == Pstream::nonBlocking)
+    const Field<Type2>& f = tf();
+
+    //HJ: This needs complete rewrite:
+    // - move communications into a patch
+    // - allow for various types of communication
+    // HJ, 15/Apr/2009
+
+    if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
     {
-        FatalErrorIn("void ProcessorPointPatchField::sendField")
-            << "Non-blocking comms not implemented"
-            << abort(FatalError);
+        OPstream::write
+        (
+            commsType,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<const char*>(f.begin()),
+            f.byteSize()
+        );
+    }
+    else if (commsType == Pstream::nonBlocking)
+    {
+        resizeBuf(receiveBuf_, f.size()*sizeof(Type));
+
+        IPstream::read
+        (
+            commsType,
+            procPatch_.neighbProcNo(),
+            receiveBuf_.begin(),
+            receiveBuf_.size()
+        );
+
+        resizeBuf(sendBuf_, f.byteSize());
+        memcpy(sendBuf_.begin(), f.begin(), f.byteSize());
+
+        OPstream::write
+        (
+            commsType,
+            procPatch_.neighbProcNo(),
+            sendBuf_.begin(),
+            f.byteSize()
+        );
+    }
+    else
+    {
+        FatalErrorIn("ProcessorPointPatchField::send")
+            << "Unsupported communications type " << commsType
+            << exit(FatalError);
     }
 
-    OPstream::write
-    (
-        commsType,
-        procPatch_.neighbProcNo(),
-        reinterpret_cast<const char*>(tf().begin()),
-        tf().byteSize()
-    );
+    // Not using non-blocking comms
+//     if (commsType == Pstream::nonBlocking)
+//     {
+//         FatalErrorIn("void ProcessorPointPatchField::sendField")
+//             << "Non-blocking comms not implemented"
+//             << abort(FatalError);
+//     }
+
+//     OPstream::write
+//     (
+//         commsType,
+//         procPatch_.neighbProcNo(),
+//         reinterpret_cast<const char*>(f.begin()),
+//         f.byteSize()
+//     );
 
     tf.clear();
 }
@@ -220,7 +290,9 @@ ProcessorPointPatchField
         MatrixType,
         Type
     >(p, iF),
-    procPatch_(refCast<const ProcessorPointPatch>(p))
+    procPatch_(refCast<const ProcessorPointPatch>(p)),
+    sendBuf_(),
+    receiveBuf_()
 {}
 
 
@@ -251,7 +323,9 @@ ProcessorPointPatchField
         MatrixType,
         Type
     >(p, iF),
-    procPatch_(refCast<const ProcessorPointPatch>(p))
+    procPatch_(refCast<const ProcessorPointPatch>(p)),
+    sendBuf_(),
+    receiveBuf_()
 {}
 
 
@@ -269,7 +343,7 @@ ProcessorPointPatchField
 ProcessorPointPatchField
 (
     const ProcessorPointPatchField
-        <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>& ptf,
+    <PatchField, Mesh, PointPatch, ProcessorPointPatch, MatrixType, Type>& ptf,
     const PointPatch& p,
     const DimensionedField<Type, Mesh>& iF,
     const PointPatchFieldMapper&
@@ -284,7 +358,9 @@ ProcessorPointPatchField
         MatrixType,
         Type
     >(p, iF),
-    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch()))
+    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch())),
+    sendBuf_(),
+    receiveBuf_()
 {}
 
 
@@ -314,7 +390,9 @@ ProcessorPointPatchField
         MatrixType,
         Type
     >(ptf),
-    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch()))
+    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch())),
+    sendBuf_(),
+    receiveBuf_()
 {}
 
 
@@ -345,7 +423,9 @@ ProcessorPointPatchField
         MatrixType,
         Type
     >(ptf, iF),
-    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch()))
+    procPatch_(refCast<const ProcessorPointPatch>(ptf.patch())),
+    sendBuf_(),
+    receiveBuf_()
 {}
 
 
