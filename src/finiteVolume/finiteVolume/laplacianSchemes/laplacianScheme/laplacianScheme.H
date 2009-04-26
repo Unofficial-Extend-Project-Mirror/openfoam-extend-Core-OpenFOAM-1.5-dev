@@ -231,6 +231,7 @@ makeFvLaplacianTypeScheme(SS, scalar, tensor)                                  \
 makeFvLaplacianTypeScheme(SS, vector, scalar)                                  \
 makeFvLaplacianTypeScheme(SS, sphericalTensor, scalar)                         \
 makeFvLaplacianTypeScheme(SS, symmTensor, scalar)                              \
+makeFvLaplacianTypeScheme(SS, symmTensor, symmTensor)                          \
 makeFvLaplacianTypeScheme(SS, tensor, scalar)                                  \
 
 
