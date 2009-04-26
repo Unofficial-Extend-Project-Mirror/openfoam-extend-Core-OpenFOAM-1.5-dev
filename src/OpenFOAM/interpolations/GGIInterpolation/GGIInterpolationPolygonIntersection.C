@@ -208,13 +208,13 @@ GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection
 // 
 // This is based on the winding number technique, but optimized in
 // order to only evaluate quarter revolutions instead of the whole
-// arcos/sqrt basic algorithm When the GGI weighting factors will
+// arcos/sqrt basic algorithm.  When the GGI weighting factors will
 // have to be recomputed often for moving meshes, this performance
 // will be useful.  We can also go back to the classical winding
 // number algorithm if need be Notice: The list subjectVertexInside
 // will return a boolean marking if a point from the subject polygon
 // is inside or outside the clipping polygon. A point is "inside"
-// (value == true) if it is inside the clipping polygono, or on a
+// (value == true) if it is inside the clipping polygon, or on a
 // vertex or edge.  This information will be very useful for the
 // Sutherland Hodgman algo.
 template<class MasterPatch, class SlavePatch>
