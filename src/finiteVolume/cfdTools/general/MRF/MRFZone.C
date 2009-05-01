@@ -135,7 +135,7 @@ void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
         {
             phi[facei] -= (Omega ^ (Cf[facei] - origin)) & Sf[facei];
         }
-        else
+        else if (facei < mesh_.nFaces())
         {
             label patchi = mesh_.boundaryMesh().whichPatch(facei);
             label patchFacei = mesh_.boundaryMesh()[patchi].whichFace(facei);
