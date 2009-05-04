@@ -36,9 +36,9 @@ boundaryField
 
     fixedWall
     {
-//         type            fixedValue;
-//         value           uniform (0 0 0);
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (0 0 0);
     }
 
     axis

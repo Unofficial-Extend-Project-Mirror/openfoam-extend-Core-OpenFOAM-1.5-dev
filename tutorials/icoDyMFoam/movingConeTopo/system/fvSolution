@@ -41,7 +41,7 @@ solvers
         minIter          0;
         maxIter          1000;
         tolerance        1e-06;
-        relTol           0.05;
+        relTol           0.0;
     };
 
     pFinal PCG
@@ -69,24 +69,11 @@ solvers
         tolerance        1e-05;
         relTol           0;
     };
-
-    cellMotionUx PCG
-    {
-        preconditioner      
-        {
-            type         DIC;
-        }
-
-        minIter          0;
-        maxIter          1000;
-        tolerance        1e-08;
-        relTol           0;
-    };
 }
 
 PISO
 {
-    nCorrectors     2;
+    nCorrectors     4;
     nNonOrthogonalCorrectors 0;
 }
 
