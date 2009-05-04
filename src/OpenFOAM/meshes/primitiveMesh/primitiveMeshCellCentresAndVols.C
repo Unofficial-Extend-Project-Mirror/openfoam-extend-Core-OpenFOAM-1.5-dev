@@ -155,7 +155,7 @@ void primitiveMesh::makeCellCentresAndVols
         cellVols[nei[facei]] += pyr3Vol;
     }
 
-    cellCtrs /= cellVols;
+    cellCtrs /= cellVols + SMALL;
     cellVols *= (1.0/3.0);
 }
 
