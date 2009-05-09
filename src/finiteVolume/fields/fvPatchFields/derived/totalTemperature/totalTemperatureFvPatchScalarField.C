@@ -153,16 +153,12 @@ void totalTemperatureFvPatchScalarField::rmap
 }
 
 
-void totalTemperatureFvPatchScalarField::updateCoeffs()
+void totalTemperatureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 {
     if (updated())
     {
         return;
     }
-
-    const fvPatchVectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
-
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
@@ -177,6 +173,11 @@ void totalTemperatureFvPatchScalarField::updateCoeffs()
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
+}
+
+void totalTemperatureFvPatchScalarField::updateCoeffs()
+{
+    updateCoeffs(patch().lookupPatchField<volVectorField, vector>(UName_));
 }
 
 

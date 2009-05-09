@@ -141,6 +141,12 @@ public:
 
         // Access
 
+            //- Return the name of the velocity field
+            const word& UName() const
+            {
+                return UName_;
+            }
+
             //- Return the total pressure
             const scalarField& T0() const
             {
@@ -171,6 +177,10 @@ public:
 
 
         // Evaluation functions
+
+            //- Update the coefficients associated with the patch field
+            //  using the given patch velocity field
+            virtual void updateCoeffs(const vectorField& Up);
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
