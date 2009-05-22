@@ -236,8 +236,8 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         FatalErrorIn
         (
             "LaunderGibsonRSTM::LaunderGibsonRSTM"
-            "(const volVectorField& U, const surfaceScalarField& phi,"
-            "incompressibleTransportModel& lamTransportModel)"
+            "(const volScalarField&, const volVectorField&"
+            ", const surfaceScalarField&, basicThermo&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
@@ -347,7 +347,7 @@ void LaunderGibsonRSTM::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G = 0.5*tr(P);
+    volScalarField G = 0.5*mag(tr(P));
 
 #   include "wallFunctionsI.H"
 
@@ -385,7 +385,7 @@ void LaunderGibsonRSTM::correct()
             {
                 label faceCelli = curPatch.faceCells()[facei];
                 P[faceCelli] *=
-                    min(G[faceCelli]/(0.5*tr(P[faceCelli]) + SMALL), 100.0);
+                    min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 100.0);
             }
         }
     }
