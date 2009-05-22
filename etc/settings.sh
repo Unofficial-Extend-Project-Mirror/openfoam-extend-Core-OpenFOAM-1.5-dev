@@ -44,16 +44,11 @@ _foamAddPath()
 # prefix to LD_LIBRARY_PATH
 _foamAddLib()
 {
-    while [ $# -ge 1 ]
-    do
-        [ -d $1 ] || mkdir -p $1
-        export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-	if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]	    
-	then
-	    export DYLD_LIBRARY_PATH=$1:$DYLD_LIBRARY_PATH
-	fi
-        shift
-    done
+   while [ $# -ge 1 ]
+   do
+      export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
+      shift
+   done
 }
 
 
@@ -74,7 +69,7 @@ export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
 # wmake configuration
 export WM_DIR=$WM_PROJECT_DIR/wmake
 export WM_LINK_LANGUAGE=c++
-export WM_OPTIONS=$WM_ARCH${WM_COMPILER}$WM_PRECISION_OPTION$WM_COMPILE_OPTION
+export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 export PATH=$WM_DIR:$PATH
 
 #export WM_DECOMP_INC=-DCELL_DECOMP
@@ -249,6 +244,25 @@ GAMMA)
 MPI)
     export MPI_ARCH_PATH=/opt/mpi
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+    ;;
+
+FJMPI)
+    export MPI_ARCH_PATH=/opt/FJSVmpi2
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib/sparcv9
+    _foamAddLib  /opt/FSUNf90/lib/sparcv9
+    _foamAddLib  /opt/FJSVpnidt/lib
+    ;;
+
+QSMPI)
+    export MPI_ARCH_PATH=/usr/lib/mpi
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/qsmpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib $MPI_ARCH_PATH/lib
+
     ;;
 
 *)
