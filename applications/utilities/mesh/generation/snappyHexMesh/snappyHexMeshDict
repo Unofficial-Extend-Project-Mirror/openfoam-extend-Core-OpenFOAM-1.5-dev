@@ -1,23 +1,16 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "/home/penfold/mattijs/foam/mattijs2.1/run/icoFoam";
-    case            "cavity";
-    instance        "system";
-    local           "";
-
-    class           dictionary;
-    object          autoHexMeshDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      autoHexMeshDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -129,7 +122,7 @@ castellatedMeshControls
         {
             // Surface-wise min and max refinement level
             level (2 2);
-        
+
             // Optional region-wise level specification
             regions
             {
@@ -138,6 +131,12 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional angle to detect small-large cell situation perpendicular
+            // to the surface. Is the angle of face w.r.t the local surface
+            // normal. Use on flat(ish) surfaces only. Otherwise
+            // leave out or set to negative number.
+            //perpendicularAngle 10;
         }
     }
 
@@ -231,7 +230,7 @@ addLayersControls
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerRatio 0.3; 
+    finalLayerRatio 0.3;
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
@@ -254,20 +253,20 @@ addLayersControls
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
 
-    // Number of smoothing iterations of surface normals 
+    // Number of smoothing iterations of surface normals
     nSmoothSurfaceNormals 1;
 
-    // Number of smoothing iterations of interior mesh movement direction  
+    // Number of smoothing iterations of interior mesh movement direction
     nSmoothNormals 3;
 
     // Smooth layer thickness over surface patches
     nSmoothThickness 10;
 
-    // Stop layer growth on highly warped cells 
+    // Stop layer growth on highly warped cells
     maxFaceThicknessRatio 0.5;
 
-    // Reduce layer growth where ratio thickness to medial 
-    // distance is large 
+    // Reduce layer growth where ratio thickness to medial
+    // distance is large
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
@@ -313,7 +312,7 @@ meshQualityControls
     //- 1 = hex, <= 0 = folded or flattened illegal cell
     minDeterminant 0.001;
 
-    //- minFaceWeight (0 -> 0.5) 
+    //- minFaceWeight (0 -> 0.5)
     minFaceWeight 0.05;
 
     //- minVolRatio (0 -> 1)
@@ -321,6 +320,12 @@ meshQualityControls
 
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
+
+    //- if >0 : preserve single cells with all points on the surface if the
+    //  resulting volume after snapping (by approximation) is larger than
+    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
+    //  If <0 : delete always.
+    //minVolCollapseRatio 0.5;
 
 
     // Advanced
