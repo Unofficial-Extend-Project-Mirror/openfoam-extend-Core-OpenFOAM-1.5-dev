@@ -35,8 +35,8 @@ Documentation
 
 DebugSwitches
 {
-    overlapGgi          2;
-    cyclicGgi           2;
+    overlapGgi          0;
+    cyclicGgi           0;
     coupledLduMatrix    1;
 
     APIdiffCoefFunc     0;
@@ -814,6 +814,7 @@ OptimisationSwitches
 {
     fileModificationSkew 10;
     commsType       nonBlocking; //scheduled; //blocking;
+//     commsType       blocking; //scheduled; //blocking;
     floatTransfer   0;// Floating transfer not realiable
     nProcsSimpleSum 0;
 
@@ -856,8 +857,8 @@ Tolerances
 //     slidingEdgeCoPlanarTol          0.8;
 
     slidingPointMergeTol            0.2;
-    slidingEdgeMergeTol             0.01;
-    slidingIntegralAdjTol           0.05;
+    slidingEdgeMergeTol             0.05;
+    slidingIntegralAdjTol           0.15;
     slidingEdgeMasterCatchFraction  0.4;
     slidingEdgeEndCutoffTol         0.0001;
     slidingEdgeCoPlanarTol          0.8;
