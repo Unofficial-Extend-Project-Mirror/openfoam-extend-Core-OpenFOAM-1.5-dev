@@ -149,7 +149,7 @@ void Pstream::combineScatter(const List<Pstream::commsStruct>& comms, T& Value)
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
-        // Reveive from up
+        // Receive from up
         if (myComm.above() != -1)
         {
             if (contiguous<T>())
@@ -337,7 +337,7 @@ void Pstream::listCombineScatter
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
-        // Reveive from up
+        // Receive from up
         if (myComm.above() != -1)
         {
             if (contiguous<T>())
@@ -504,7 +504,7 @@ void Pstream::mapCombineScatter
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
 
-        // Reveive from up
+        // Receive from up
         if (myComm.above() != -1)
         {
             IPstream fromAbove(Pstream::scheduled, myComm.above());

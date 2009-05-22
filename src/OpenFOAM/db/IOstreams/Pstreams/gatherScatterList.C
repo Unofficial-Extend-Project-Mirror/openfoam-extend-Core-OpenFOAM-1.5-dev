@@ -215,7 +215,7 @@ void Pstream::scatterList
         // Get my communication order
         const commsStruct& myComm = comms[Pstream::myProcNo()];
 
-        // Reveive from up
+        // Receive from up
         if (myComm.above() != -1)
         {
             const labelList& notBelowLeaves = myComm.allNotBelow();
