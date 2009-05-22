@@ -87,12 +87,21 @@ bool Foam::minMaxField::execute()
     const fvMesh& mesh =
         time_.lookupObject<fvMesh>(regionName_);
 
-    const volScalarField& f = mesh.lookupObject<volScalarField>(fieldName_);
+    if (mesh.foundObject<volScalarField>(fieldName_))
+    {
+        const volScalarField& f = mesh.lookupObject<volScalarField>(fieldName_);
 
-    Info<< "Field " << fieldName_ << " min = " << Foam::min(f).value()
-        << " max = " << Foam::max(f).value() << endl;
+        Info<< "Field " << fieldName_ << " min = " << Foam::min(f).value()
+            << " max = " << Foam::max(f).value() << endl;
 
-    return true;
+        return true;
+    }
+    else
+    {
+        Info<< "Field "  << fieldName_ << " not found.  Skipping." << endl;
+
+        return false;
+    }
 }
 
 
