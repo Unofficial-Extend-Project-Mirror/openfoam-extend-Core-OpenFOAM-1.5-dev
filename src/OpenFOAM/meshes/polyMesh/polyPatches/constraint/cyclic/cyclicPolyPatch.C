@@ -66,26 +66,34 @@ const Foam::scalar Foam::cyclicPolyPatch::areaMatchTol
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::label Foam::cyclicPolyPatch::findMaxArea
+(
+    const pointField& points,
+    const faceList& faces
+)
+{
+    label maxI = -1;
+    scalar maxAreaSqr = -GREAT;
+
+    forAll(faces, faceI)
+    {
+        scalar areaSqr = magSqr(faces[faceI].normal(points));
+
+        if (areaSqr > maxAreaSqr)
+        {
+            maxAreaSqr = areaSqr;
+            maxI = faceI;
+        }
+    }
+    return maxI;
+}
+
+
 void Foam::cyclicPolyPatch::calcTransforms()
 {
     if (size() > 0)
     {
         const pointField& points = this->points();
-
-        maxI_ = -1;
-        scalar maxAreaSqr = -GREAT;
-
-        for (label faceI = 0; faceI < size()/2; faceI++)
-        {
-            const face& f = operator[](faceI);
-            scalar areaSqr = magSqr(f.normal(points));
-
-            if (areaSqr > maxAreaSqr)
-            {
-                maxAreaSqr = areaSqr;
-                maxI_ = faceI;
-            }
-        }
 
         primitivePatch half0
         (
@@ -375,6 +383,9 @@ bool Foam::cyclicPolyPatch::getGeometricHalves
 }
 
 
+// Given a split of faces into left and right half calculate the centres
+// and anchor points. Transform the left points so they align with the
+// right ones.
 void Foam::cyclicPolyPatch::getCentresAndAnchors
 (
     const primitivePatch& pp,
@@ -409,11 +420,17 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
         }
         default:
         {
-            // Assumes that cyclic is correctly ordered, so that face[maxI_]
-            // on each side is equivalent.
-            n0 = half0Faces[maxI_].normal(pp.points());
+            // Assumes that cyclic is planar. This is also the initial
+            // condition for patches without faces.
+
+            // Determine the face with max area on both halves. These
+            // two faces are used to determine the transformation tensors
+            label max0I = findMaxArea(pp.points(), half0Faces);
+            n0 = half0Faces[max0I].normal(pp.points());
             n0 /= mag(n0) + VSMALL;
-            n1 = half1Faces[maxI_].normal(pp.points());
+
+            label max1I = findMaxArea(pp.points(), half1Faces);
+            n1 = half1Faces[max1I].normal(pp.points());
             n1 /= mag(n1) + VSMALL;
         }
     }
@@ -602,13 +619,10 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(0.9),
-    maxI_(-1),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero)
-{
-    calcTransforms();
-}
+{}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -623,15 +637,12 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(0.9),
-    maxI_(-1),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero)
 {
-    if (dict.found("featureCos"))
-    {
-        dict.lookup("featureCos") >> featureCos_;
-    }
+    dict.readIfPresent("featureCos", featureCos_);
+
     if (dict.found("transform"))
     {
         transform_ = transformTypeNames.read(dict.lookup("transform"));
@@ -649,8 +660,6 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             }
         }
     }
-
-    calcTransforms();
 }
 
 
@@ -664,13 +673,10 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(pp.featureCos_),
-    maxI_(pp.maxI_),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_)
-{
-    calcTransforms();
-}
+{}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -686,13 +692,10 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(pp.featureCos_),
-    maxI_(pp.maxI_),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_)
-{
-    calcTransforms();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -716,6 +719,7 @@ void Foam::cyclicPolyPatch::initGeometry()
 void Foam::cyclicPolyPatch::calcGeometry()
 {
     polyPatch::calcGeometry();
+    calcTransforms();
 }
 
 
