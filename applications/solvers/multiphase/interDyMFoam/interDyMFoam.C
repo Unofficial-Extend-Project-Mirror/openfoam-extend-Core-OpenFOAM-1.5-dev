@@ -40,7 +40,6 @@ Description
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "incompressible/RASModel/RASModel.H"
-#include "probes.H"
 #include "EulerDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -125,7 +124,7 @@ int main(int argc, char *argv[])
             (
                 "p",
                 p.dimensions(),
-                pRefValue - pRefProbe->sample<scalar>("p")()[0]
+                pRefValue - getRefCellValue(p, pdRefCell)
             );
         }
 
