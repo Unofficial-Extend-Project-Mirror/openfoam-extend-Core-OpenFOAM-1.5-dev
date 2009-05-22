@@ -70,7 +70,7 @@ setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty
 if ( ! $?WM_OS ) setenv WM_OS Unix
 
 
-# Compiler: set to Gcc, Gcc43 or Icc (for Intel's icc)
+# Compiler: set to Gcc, Gcc42 or Icc (for Intel's icc)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?WM_COMPILER ) setenv WM_COMPILER Gcc
 
@@ -97,7 +97,7 @@ setenv WM_COMPILE_OPTION Opt
 # WM_JAVAC_OPTION = Opt | Debug
 if ( ! $?WM_JAVAC_OPTION ) setenv WM_JAVAC_OPTION Opt
 
-# WM_MPLIB = | OPENMPI | LAM | MPICH | MPICH-GM | HPMPI | GAMMA | MPI
+# WM_MPLIB = | OPENMPI | LAM | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
 if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
 
 
@@ -118,6 +118,7 @@ case Linux:
     switch (`uname -m`)
     case i686:
         breaksw
+
     case x86_64:
         switch ($WM_ARCH_OPTION)
         case 32:
@@ -129,6 +130,7 @@ case Linux:
             setenv WM_CXXFLAGS '-m32 -fPIC'
             setenv WM_LDFLAGS '-m32'
             breaksw
+
         case 64:
             setenv WM_ARCH linux64
             setenv WM_COMPILER_LIB_ARCH 64
@@ -141,16 +143,20 @@ case Linux:
             #setenv WM_CC 'icc'
             #setenv WM_CXX 'icpc'
             breaksw
+
         default:
             echo Unknown WM_ARCH_OPTION $WM_ARCH_OPTION, should be 32 or 64
             breaksw
+
         endsw
         breaksw
+
     case ia64:
         setenv WM_ARCH linuxIA64
         setenv WM_COMPILER I64
         breaksw
-    mips64)
+
+    case mips64:
         setenv WM_ARCH SiCortex64
         setenv WM_COMPILER_LIB_ARCH 64
         setenv WM_CC 'gcc'
@@ -164,10 +170,33 @@ case Linux:
         setenv WM_ARCH darwin
         setenv WM_COMPILER
         breaksw
+
+    case ppc64:
+        setenv WM_ARCH linuxPPC64
+        setenv WM_COMPILER_LIB_ARCH 64
+        setenv WM_CC 'gcc'
+        setenv WM_CXX 'g++'
+        setenv WM_CFLAGS '-m64 -fPIC'
+        setenv WM_CXXFLAGS '-m64 -fPIC'
+        setenv WM_LDFLAGS '-m64'
+        breaksw
+
     default:
         echo Unknown processor type `uname -m` for Linux
         breaksw
+
     endsw
+    breaksw
+
+case SunOS:
+    setenv WM_ARCH SunOS64
+    setenv WM_COMPILER_LIB_ARCH 64
+    setenv WM_CC 'gcc'
+    setenv WM_CXX 'g++'
+    setenv WM_CFLAGS '-mabi=64 -fPIC'
+    setenv WM_CXXFLAGS '-mabi=64 -fPIC'
+    setenv WM_LDFLAGS '-mabi=64 -G0'
+    setenv WM_MPLIB FJMPI
     breaksw
 
 default:
@@ -236,7 +265,7 @@ endif
 setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH"`
 
 #- Clean MANPATH
-setenv MANPATH `$cleanProg "$MANPATH"`
+setenv MANPATH `$cleanProg "$MANPATH"`:
 
 #- Clean LD_PRELOAD
 if ( $?LD_PRELOAD ) then
@@ -249,4 +278,5 @@ unset cleanProg
 unset wildCards
 unset colonPath
 unalias _foamSource
+
 # -----------------------------------------------------------------------------
