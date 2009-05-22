@@ -77,13 +77,14 @@ Foam::ggiGAMGInterfaceField::~ggiGAMGInterfaceField()
 void Foam::ggiGAMGInterfaceField::initInterfaceMatrixUpdate
 (
     const scalarField& psiInternal,
-    scalarField&,
+    scalarField& result,
     const lduMatrix&,
-    const scalarField&,
-    const direction,
+    const scalarField& coeffs,
+    const direction cmpt,
     const Pstream::commsTypes commsType
 ) const
 {
+    // This must have a reduce in it.  HJ, 15/May/2009
     ggiInterface_.initInternalFieldTransfer(commsType, psiInternal);
 }
 
@@ -98,23 +99,11 @@ void Foam::ggiGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf =
+    // Get expanded data to zone size.  No global reduce allowed
+    // HJ, 15/May/2009
+    scalarField zonePnf =
         ggiInterface_.internalFieldTransfer(commsType, psiInternal);
-    transformCoupleField(pnf, cmpt);
-
-    // Expand data to zone size
-    scalarField zonePnf(ggiInterface_.shadowInterface().zoneSize(), 0);
-
-    const labelList& shadowZa =
-        ggiInterface_.shadowInterface().zoneAddressing();
-
-    forAll (shadowZa, i)
-    {
-        zonePnf[shadowZa[i]] = pnf[i];
-    }
-
-    // Reduce zone data
-    reduce(zonePnf, sumOp<scalarField>());
+    transformCoupleField(zonePnf, cmpt);
 
     const unallocLabelList& faceCells = ggiInterface_.faceCells();
 
