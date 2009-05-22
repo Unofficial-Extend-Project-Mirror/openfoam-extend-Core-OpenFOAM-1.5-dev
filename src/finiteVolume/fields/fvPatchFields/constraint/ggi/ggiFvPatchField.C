@@ -25,8 +25,13 @@ License
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
-Contributor:
+Contributor
     Martin Beaudoin, Hydro-Quebec, (2008)
+
+Note on parallelisation
+    In order to handle parallelisation correctly, I need to rely on the fact
+    that all patches that require a global gather-scatter come before
+    processor patches.  In that case, the 
 
 \*---------------------------------------------------------------------------*/
 
@@ -170,6 +175,14 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
+void ggiFvPatchField<Type>::initEvaluate
+(
+    const Pstream::commsTypes commsType
+)
+{}
+
+
+template<class Type>
 void ggiFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
@@ -197,6 +210,19 @@ void ggiFvPatchField<Type>::evaluate
 
     Field<Type>::operator=(pf);
 }
+
+
+template<class Type>
+void ggiFvPatchField<Type>::initInterfaceMatrixUpdate
+(
+    const scalarField& psiInternal,
+    scalarField&,
+    const lduMatrix&,
+    const scalarField&,
+    const direction,
+    const Pstream::commsTypes commsType
+) const
+{}
 
 
 // Return matrix product for coupled boundary

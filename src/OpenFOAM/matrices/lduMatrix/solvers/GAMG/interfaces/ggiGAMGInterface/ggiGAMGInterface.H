@@ -77,6 +77,11 @@ class ggiGAMGInterface
         //- Disallow default bitwise assignment
         void operator=(const ggiGAMGInterface&);
 
+        //- Expand data to zone size
+        //  Note: contains global reduce.  HJ, 15/May/2009
+        template<class Type>
+        tmp<Field<Type> > expand(const UList<Type>&) const;
+
 
     // Private static data
 
@@ -199,6 +204,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "ggiGAMGInterfaceTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

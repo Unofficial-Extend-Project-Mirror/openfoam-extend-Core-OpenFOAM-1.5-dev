@@ -527,7 +527,6 @@ Foam::ggiGAMGInterface::ggiGAMGInterface
         // Resize arrays: not all of ggi is used locally
         faceCells_.setSize(nProcFaces);
         zoneAddressing_.setSize(nProcFaces);
-
         fineAddressing_.setSize(nAgglomPairs);
         restrictAddressing_.setSize(nAgglomPairs);
         restrictWeights_.setSize(nAgglomPairs);
@@ -657,7 +656,9 @@ void Foam::ggiGAMGInterface::initTransfer
     const unallocLabelList& interfaceData
 ) const
 {
+    // Label transfer is straight local
     labelTransferBuffer_ = interfaceData;
+//     labelTransferBuffer_ = expand(interfaceData);
 }
 
 
@@ -667,6 +668,7 @@ Foam::tmp<Foam::labelField> Foam::ggiGAMGInterface::transfer
     const unallocLabelList& interfaceData
 ) const
 {
+    // Label transfer is local without global reduction
     return this->shadowInterface().labelTransferBuffer();
 }
 
@@ -677,17 +679,11 @@ void Foam::ggiGAMGInterface::initInternalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
+    // Label transfer is local without global reduction
     labelTransferBuffer_ = interfaceInternalField(iF);
-}
 
-
-void Foam::ggiGAMGInterface::initInternalFieldTransfer
-(
-    const Pstream::commsTypes commsType,
-    const scalarField& iF
-) const
-{
-    fieldTransferBuffer_ = interfaceInternalField(iF);
+//     labelList pif = interfaceInternalField(iF);
+//     labelTransferBuffer_ = expand(pif);
 }
 
 
@@ -698,6 +694,19 @@ Foam::tmp<Foam::labelField> Foam::ggiGAMGInterface::internalFieldTransfer
 ) const
 {
     return shadowInterface().labelTransferBuffer();
+}
+
+
+void Foam::ggiGAMGInterface::initInternalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const scalarField& iF
+) const
+{
+    scalarField pif = interfaceInternalField(iF);
+
+    // Expand the field, executing a reduce operation in init
+    fieldTransferBuffer_ = expand(pif);
 }
 
 

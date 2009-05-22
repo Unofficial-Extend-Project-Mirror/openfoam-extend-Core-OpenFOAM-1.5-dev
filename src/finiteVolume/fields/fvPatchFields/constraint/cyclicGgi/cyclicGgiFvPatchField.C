@@ -176,9 +176,9 @@ tmp<Field<Type> > cyclicGgiFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
-void cyclicGgiFvPatchField<Type>::evaluate
+void cyclicGgiFvPatchField<Type>::initEvaluate
 (
-    const Pstream::commsTypes
+    const Pstream::commsTypes commsType
 )
 {
     Field<Type> pf
@@ -208,16 +208,48 @@ void cyclicGgiFvPatchField<Type>::evaluate
 }
 
 
-// Return matrix product for coupled boundary
 template<class Type>
-void cyclicGgiFvPatchField<Type>::updateInterfaceMatrix
+void cyclicGgiFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
+{
+//     Field<Type> pf
+//     (
+//         this->patch().weights()*this->patchInternalField()
+//       + (1.0 - this->patch().weights())*this->patchNeighbourField()
+//     );
+
+//     if (cyclicGgiPatch_.bridgeOverlap())
+//     {
+//         // Symmetry treatment used for overlap
+//         vectorField nHat = this->patch().nf();
+
+//         Field<Type> bridgeField =
+//         (
+//             this->patchInternalField()
+//           + transform(I - 2.0*sqr(nHat), this->patchInternalField())
+//         )/2.0;
+
+//         // Option 2: zero gradient.  HJ, 27/Jan/2009
+// //         Field<Type> bridgeField = this->patchInternalField();
+
+//         cyclicGgiPatch_.bridge(bridgeField, pf);
+//     }
+
+//     Field<Type>::operator=(pf);
+}
+
+
+template<class Type>
+void cyclicGgiFvPatchField<Type>::initInterfaceMatrixUpdate
 (
     const scalarField& psiInternal,
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
     const direction cmpt,
-    const Pstream::commsTypes
+    const Pstream::commsTypes commsType
 ) const
 {
     // Get shadow face-cells and assemble shadow field
@@ -249,6 +281,50 @@ void cyclicGgiFvPatchField<Type>::updateInterfaceMatrix
     {
         result[fc[elemI]] -= coeffs[elemI]*pnf[elemI];
     }
+}
+
+
+// Return matrix product for coupled boundary
+template<class Type>
+void cyclicGgiFvPatchField<Type>::updateInterfaceMatrix
+(
+    const scalarField& psiInternal,
+    scalarField& result,
+    const lduMatrix&,
+    const scalarField& coeffs,
+    const direction cmpt,
+    const Pstream::commsTypes
+) const
+{
+//     // Get shadow face-cells and assemble shadow field
+//     const unallocLabelList& sfc = cyclicGgiPatch_.shadow().faceCells();
+
+//     scalarField sField(sfc.size());
+
+//     forAll (sField, i)
+//     {
+//         sField[i] = psiInternal[sfc[i]];
+//     }
+
+//     // Transform according to the transformation tensor, using the slave
+//     // side transform.  Warning: forwardT() has got the side of the slave
+//     // patch.  HJ, 12/Jan/2009
+//     transformCoupleField(sField, cmpt);
+
+//     // Note: scalar interpolate does not get a transform, so this is safe
+//     // HJ, 12/Jan/2009
+//     scalarField pnf = cyclicGgiPatch_.interpolate(sField);
+
+//     // Consider patching pnf to eliminate the flux
+//     // HJ, 21/Jan/2009
+
+//     // Multiply the field by coefficients and add into the result
+//     const unallocLabelList& fc = cyclicGgiPatch_.faceCells();
+
+//     forAll(fc, elemI)
+//     {
+//         result[fc[elemI]] -= coeffs[elemI]*pnf[elemI];
+//     }
 }
 
 

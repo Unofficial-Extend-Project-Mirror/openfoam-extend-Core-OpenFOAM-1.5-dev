@@ -130,13 +130,30 @@ public:
         // Evaluation functions
 
             //- Return neighbour field given internal cell data
+            //  This is a dummy function: returning patch values 
+            //  due to scheduling issues in parallel communication.
+            //  See processofFvPatchField for details HJ, 11/May/2009
             virtual tmp<Field<Type> > patchNeighbourField() const;
+
+            //- Initialise the evaluation of the patch field
+            virtual void initEvaluate(const Pstream::commsTypes commsType);
 
             //- Evaluate the patch field
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType
             );
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix& m,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const Pstream::commsTypes commsType
+            ) const;
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix

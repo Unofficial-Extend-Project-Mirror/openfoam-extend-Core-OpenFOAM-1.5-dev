@@ -154,6 +154,14 @@ tmp<Field<Type> > overlapGgiFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
+void overlapGgiFvPatchField<Type>::initEvaluate
+(
+    const Pstream::commsTypes commsType
+)
+{}
+
+
+template<class Type>
 void overlapGgiFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
@@ -165,6 +173,19 @@ void overlapGgiFvPatchField<Type>::evaluate
       + (1.0 - this->patch().weights())*this->patchNeighbourField()
     );
 }
+
+
+template<class Type>
+void overlapGgiFvPatchField<Type>::initInterfaceMatrixUpdate
+(
+    const scalarField& psiInternal,
+    scalarField&,
+    const lduMatrix&,
+    const scalarField&,
+    const direction,
+    const Pstream::commsTypes commsType
+) const
+{}
 
 
 // Return matrix product for coupled boundary
