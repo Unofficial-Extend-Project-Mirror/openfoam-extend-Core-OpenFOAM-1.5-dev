@@ -32,8 +32,8 @@
 #------------------------------------------------------------------------------
 
 setenv CINTSYSDIR ~/pub/CINT/cint
-setenv PATH $PATH:$CINTSYSDIR
-setenv MANPATH $MANPATH:$CINTSYSDIR/doc
+set path=($CINTSYSDIR $path)
+setenv MANPATH ${MANPATH}:$CINTSYSDIR/doc
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$CINTSYSDIR
 
 # -----------------------------------------------------------------------------
