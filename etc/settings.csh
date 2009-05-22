@@ -87,8 +87,8 @@ _foamMkDir $FOAM_USER_APPBIN
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | System
-set compilerInstall=OpenFOAM
-#set compilerInstall=System
+#set compilerInstall=OpenFOAM
+set compilerInstall=System
 
 switch ("$compilerInstall")
 case OpenFOAM:

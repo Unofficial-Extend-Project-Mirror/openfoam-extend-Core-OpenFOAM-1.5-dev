@@ -111,8 +111,8 @@ unset compilerBin compilerLib
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | System
-compilerInstall=OpenFOAM
-# compilerInstall=System
+#compilerInstall=OpenFOAM
+compilerInstall=System
 
 case "$compilerInstall" in
 OpenFOAM)
