@@ -165,6 +165,8 @@ processorFvPatchField<Type>::~processorFvPatchField()
 template<class Type>
 tmp<Field<Type> > processorFvPatchField<Type>::patchNeighbourField() const
 {
+    // Warning: returning own patch field, not actual neighbour data
+    // HJ, 14/May/2009
     return *this;
 }
 
