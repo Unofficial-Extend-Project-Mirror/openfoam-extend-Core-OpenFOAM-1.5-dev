@@ -90,6 +90,7 @@ $(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureF
 $(derivedFvPatchFields)/flowRateInletVelocity/flowRateInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/movingRotatingWallVelocity/movingRotatingWallVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/oscillatingFixedValue/oscillatingFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedMeanValue/fixedMeanValueFvPatchFields.C
 $(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
@@ -155,11 +156,9 @@ $(interpolation)/interpolationCellPoint/cellPointWeight/cellPointWeight.C
 $(interpolation)/interpolationCellPoint/makeInterpolationCellPoint.C
 $(interpolation)/interpolationCellPointFace/makeInterpolationCellPointFace.C
 
-interpolation/volPointInterpolation/pointPatchInterpolation/pointPatchInterpolation.C
-interpolation/volPointInterpolation/volPointInterpolation.C
-/* interpolation/volPointInterpolation/edgeCorrectedVolPointInterpolation/edgeCorrectedVolPointInterpolation.C */
-interpolation/pointVolInterpolation/pointVolInterpolation.C
-
+volPointInterpolation = interpolation/volPointInterpolation
+$(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
+$(volPointInterpolation)/volPointInterpolation.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
 $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C

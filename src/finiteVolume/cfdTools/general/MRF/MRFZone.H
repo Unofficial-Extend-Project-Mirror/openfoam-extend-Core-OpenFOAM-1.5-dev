@@ -26,7 +26,7 @@ Class
     Foam::MRFZone
 
 Description
-    MRF zone definition based on both cell and face zones and parameters
+    MRF zone definition based on cell zone and optional face zone and parameters
     obtained from a control dictionary constructed from the given stream.
 
     The rotation of the MRF region is defined by an origin and axis of
@@ -68,22 +68,49 @@ class MRFZone
 
         const fvMesh& mesh_;
 
-        word name_;
+        const word name_;
 
-        dictionary dict_;
+        const dictionary dict_;
 
         label cellZoneID_;
+
+        //- label of face zone with faces on outside of cell zone.
         label faceZoneID_;
-        wordList patchNames_;
+
+        //- Do patches move with frame (true) or are explicitly provided (false,
+        //  old behaviour)
+        Switch allPatchesMove_;
+
+        const wordList patchNames_;
         labelList patchLabels_;
 
-        dimensionedVector origin_;
+        //- Internal faces that are part of MRF
+        labelList internalFaces_;
+
+        //- Outside faces (per patch) that move with the MRF
+        labelListList includedFaces_;
+
+        //- Excluded faces (per patch) that do not move with the MRF
+        labelListList excludedFaces_;
+
+        const dimensionedVector origin_;
         dimensionedVector axis_;
-        dimensionedScalar omega_;
+        const dimensionedScalar omega_;
         dimensionedVector Omega_;
 
 
     // Private Member Functions
+
+        //- Divide faces in frame according to patch
+        void setMRFFaces
+        (
+            labelList& faceType,
+            const labelList& excludedPatchIDs
+        );
+
+        //- Divide faces in frame according to patch
+        void setMRFFaces();
+
 
         //- Disallow default bitwise copy construct
         MRFZone(const MRFZone&);
@@ -127,6 +154,13 @@ public:
 
 
     // Member Functions
+
+        //- Update the mesh corresponding to given map
+        void updateMesh(const mapPolyMesh& mpm)
+        {
+            // Only updates face addressing
+            setMRFFaces();
+        }
 
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;

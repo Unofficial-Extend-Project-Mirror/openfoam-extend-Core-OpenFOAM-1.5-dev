@@ -52,8 +52,6 @@ namespace Foam
                            Class liquid Declaration
 \*---------------------------------------------------------------------------*/
 
-    //class eos;
-
 class liquid
 {
     // Private data

@@ -322,8 +322,9 @@ public:
             //- Set reference level for solution
             void setReference
             (
-                const label cell,
-                const Type& value
+                const label celli,
+                const Type& value,
+                const bool forceReference = false
             );
 
             //- Set reference level for a component of the solution
@@ -338,11 +339,11 @@ public:
 
             //- Relax matrix (for steady-state solution).
             //  alpha = 1 : diagonally equal
-            //  alpha < 1 :    ,,      dominant
+            //  alpha < 1 : diagonally dominant
             //  alpha = 0 : do nothing
             void relax(const scalar alpha);
 
-            //- Relax matrix (for steadty-state solution).
+            //- Relax matrix (for steady-state solution).
             //  alpha is read from controlDict
             void relax();
 

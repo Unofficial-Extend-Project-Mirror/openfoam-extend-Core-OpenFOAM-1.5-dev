@@ -290,7 +290,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
                 << " split faces " << endl;
         }
 
-        forAll (correctFluxes_, i)
+        forAll(correctFluxes_, i)
         {
             if (debug)
             {
@@ -480,7 +480,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::unrefine
         const labelList& reversePointMap = map().reversePointMap();
         const labelList& reverseFaceMap = map().reverseFaceMap();
 
-        forAll (correctFluxes_, i)
+        forAll(correctFluxes_, i)
         {
             if (debug)
             {
@@ -870,9 +870,6 @@ dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     nRefinementIterations_(0),
     protectedCell_(nCells(), 0)
 {
-    // Read dictionary
-    readDict();
-
     const labelList& cellLevel = meshCutter_.cellLevel();
     const labelList& pointLevel = meshCutter_.pointLevel();
 
@@ -1039,6 +1036,9 @@ bool dynamicRefineFvMesh::update()
             << " be >= 1." << nl
             << exit(FatalError);
     }
+
+
+
 
     // Note: cannot refine at time 0 since no V0 present since mesh not
     //       moved yet.

@@ -58,9 +58,9 @@ void Foam::tetherPotentialList::readTetherPotentialDict
             if (!tetherPotentialDict.found(tetherPotentialName))
             {
                 FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
-                        << nl << "tether potential specification subDict "
-                        << tetherPotentialName << " not found"
-                        << abort(FatalError);
+                    << "tether potential specification subDict "
+                    << tetherPotentialName << " not found" << nl
+                    << abort(FatalError);
             }
 
             this->set
@@ -121,7 +121,7 @@ void Foam::tetherPotentialList::buildPotentials
 {
     setSize(tetherIds.size());
 
-    const List<word>& idList = List<word>(idListDict.lookup("idList"));
+    List<word> idList(idListDict.lookup("idList"));
 
     readTetherPotentialDict(tetherPotentialDict, idList, tetherIds);
 }
@@ -132,7 +132,7 @@ const Foam::tetherPotential& Foam::tetherPotentialList::tetherPotentialFunction
     const label a
 ) const
 {
-    return (*this)[tetherPotentialIndex (a)];
+    return (*this)[tetherPotentialIndex(a)];
 }
 
 
@@ -142,7 +142,7 @@ Foam::scalar Foam::tetherPotentialList::force
     const scalar rITMag
 ) const
 {
-    scalar f = (*this)[tetherPotentialIndex (a)].force(rITMag);
+    scalar f = (*this)[tetherPotentialIndex(a)].force(rITMag);
 
     return f;
 }
@@ -154,11 +154,10 @@ Foam::scalar Foam::tetherPotentialList::energy
     const scalar rITMag
 ) const
 {
-    scalar e = (*this)[tetherPotentialIndex (a)].energy(rITMag);
+    scalar e = (*this)[tetherPotentialIndex(a)].energy(rITMag);
 
     return e;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
