@@ -52,11 +52,11 @@ Description
 #include "cellSet.H"
 #include "meshTools.H"
 #include "OFstream.H"
+#include "wordIOList.H"
 
 #include "readHexLabel.H"
 #include "cellShapeRecognition.H"
 #include "repatch.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -383,7 +383,7 @@ endOfSection               {space}")"{space}
         scalar x = readScalar(vertexXyzStream);
         scalar y = readScalar(vertexXyzStream);
 
-        points[pointI] = point(x, y, 0);
+        points[pointI] = convertToMeters*point(x, y, 0);
         pointI++;
     }
 
@@ -765,7 +765,6 @@ endOfSection               {space}")"{space}
     }
 
 <readZoneBlock>{lbrac} {
-        Info<< "Found unknown block in zone:" << YYText() << endl;
         yy_push_state(unknownBlock);
     }
 
@@ -785,7 +784,6 @@ endOfSection               {space}")"{space}
 
 
 {lbrac}{label} {
-        Info<< "Found unknown block:" << YYText() << endl;
         yy_push_state(unknownBlock);
     }
 
@@ -793,13 +791,11 @@ endOfSection               {space}")"{space}
     }
 
 <readComment,unknownBlock,embeddedUnknownBlock>{spaceNl}{lbrac} {
-        Info<< "Embedded blocks in comment or unknown:" << YYText() << endl;
         yy_push_state(embeddedUnknownBlock);
 
     }
 
 <readComment,unknownBlock,embeddedUnknownBlock>{spaceNl}{endOfSection} {
-        Info<< "Found end of section in unknown:" << YYText() << endl;
         yy_pop_state();
     }
 
@@ -1229,7 +1225,38 @@ int main(int argc, char *argv[])
 
     label nPatches = 0;
 
-    //colate information for all patches (internal and external)
+    // Colate information for all patches (internal and external)
+
+    // Create a file listing patch type for each zone
+
+    label maxZoneID = 0;
+
+    for
+    (
+        SLList<label>::iterator fgzIDIter = faceGroupZoneID.begin();
+        fgzIDIter != faceGroupZoneID.end();
+        ++fgzIDIter
+    )
+    {
+        maxZoneID = max(maxZoneID, fgzIDIter());
+    }
+
+    Info << "maxZoneID: " << maxZoneID << endl;
+    wordIOList zoneToPatchName
+    (
+        IOobject
+        (
+            "zoneToPatchName",
+            runTime.constant(),
+            pShapeMesh.meshSubDir,
+            pShapeMesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        wordList(maxZoneID + 1, "unknown")
+    );
+
+
     for
     (
         ;
@@ -1251,6 +1278,9 @@ int main(int argc, char *argv[])
             << " start: " << faceGroupStartIndexIter()
             << " end: " << faceGroupEndIndexIter()
             << " type: " << curPatchType << " name: " << curPatchName << endl;
+
+        // Record zone index
+        zoneToPatchName[faceGroupZoneIDIter()] = curPatchName;
 
         // make patch labels
         label faceLabel = faceGroupStartIndexIter() - 1;
@@ -1712,6 +1742,9 @@ int main(int argc, char *argv[])
 
     pShapeMesh.setInstance(pShapeMesh.instance());
     pShapeMesh.write();
+
+    // Write zone to patch name
+    zoneToPatchName.write();
     Info<< "done." << endl << endl;
 
     // Write cellSets for Fluent regions

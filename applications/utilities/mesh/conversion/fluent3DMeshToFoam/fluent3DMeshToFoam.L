@@ -47,6 +47,7 @@ Description
 #include "cyclicPolyPatch.H"
 #include "Swap.H"
 #include "IFstream.H"
+#include "wordIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -980,6 +981,20 @@ int main(int argc, char *argv[])
     List<polyPatch*> newPatches(patchIDs.size());
     HashSet<word> patchNames;
 
+    wordIOList zoneToPatchName
+    (
+        IOobject
+        (
+            "zoneToPatchName",
+            runTime.constant(),
+            mesh.meshSubDir,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        wordList(max(faceGroupZoneID) + 1, "unknown")
+    );
+
     forAll(patchIDs, patchi)
     {
         label zoneID = faceGroupZoneID[patchIDs[patchi] ];
@@ -991,6 +1006,8 @@ int main(int argc, char *argv[])
             << " name: " << name
             << " type: " << type
             << endl;
+
+        zoneToPatchName[zoneID] = name;
 
         uniquify(name, patchNames);
 
@@ -1326,6 +1343,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Writing mesh to " << mesh.objectPath() << endl;
     mesh.write();
+    zoneToPatchName.write();
 
 
     Info<< nl << "End" << endl;
