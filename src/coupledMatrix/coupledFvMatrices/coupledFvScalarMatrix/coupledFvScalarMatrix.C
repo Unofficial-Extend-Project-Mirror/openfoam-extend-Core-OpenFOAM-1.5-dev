@@ -47,12 +47,6 @@ coupledSolverPerformance coupledFvMatrix<scalar>::solve(Istream& solverControls)
             << "solving coupledFvMatrix<Type>" << endl;
     }
 
-    coupledSolverPerformance solverPerfVec
-    (
-        "coupledFvMatrix<Type>::solve",
-        this->coupledPsiName()
-    );
-
     typedef FieldField<Field, scalar> scalarFieldField;
 
     PtrList<lduMatrix>& matrices = *this;
@@ -132,7 +126,7 @@ coupledSolverPerformance coupledFvMatrix<scalar>::solve(Istream& solverControls)
         curMatrix.psi().correctBoundaryConditions();
     }
 
-    return solverPerfVec;
+    return solverPerf;
 }
 
 
