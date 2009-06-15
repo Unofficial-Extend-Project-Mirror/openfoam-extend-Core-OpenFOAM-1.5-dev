@@ -73,7 +73,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
             false
         ),
         mesh_,
-        dimless
+        dimLength
     );
     surfaceVectorField& SkewCorrVecs = *skewCorrectionVectors_;
 
