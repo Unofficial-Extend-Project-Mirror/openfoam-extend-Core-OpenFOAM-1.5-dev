@@ -96,6 +96,18 @@ bool Foam::minMaxField::execute()
 
         return true;
     }
+    else if (mesh.foundObject<volVectorField>(fieldName_))
+    {
+        const volVectorField& f = mesh.lookupObject<volVectorField>(fieldName_);
+
+        volScalarField magF = mag(f);
+
+        Info<< "Field " << fieldName_ << " magnitude min = "
+            << Foam::min(magF).value()
+            << " max = " << Foam::max(magF).value() << endl;
+
+        return true;
+    }
     else
     {
         Info<< "Field "  << fieldName_ << " not found.  Skipping." << endl;
