@@ -14,9 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 8;
+numberOfSubdomains 4;
 
-method          metis;
+method          simple;
 
 simpleCoeffs
 {
@@ -33,7 +33,13 @@ hierarchicalCoeffs
 
 metisCoeffs
 {
-    processorWeights 8{1};
+    processorWeights 
+    (
+        1
+        1
+        1
+        1
+    );
 }
 
 manualCoeffs

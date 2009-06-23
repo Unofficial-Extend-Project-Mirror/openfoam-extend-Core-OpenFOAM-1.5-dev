@@ -18,11 +18,11 @@ application interFoam;
 
 startFrom       startTime;
 
-startTime       1;
+startTime       0;
 
 stopAt          endTime;
 
-endTime         2;
+endTime         1;
 
 deltaT          0.001;
 
