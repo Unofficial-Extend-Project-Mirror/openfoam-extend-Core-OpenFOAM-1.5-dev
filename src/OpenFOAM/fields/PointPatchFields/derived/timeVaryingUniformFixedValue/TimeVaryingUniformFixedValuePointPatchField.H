@@ -71,7 +71,7 @@ class TimeVaryingUniformFixedValuePointPatchField
 public:
 
     //- Runtime type information
-    TypeName("oscillatingFixedValue");
+    TypeName("timeVaryingUniformFixedValue");
 
 
     // Constructors
