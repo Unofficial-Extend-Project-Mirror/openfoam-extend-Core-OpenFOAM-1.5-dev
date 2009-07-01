@@ -129,9 +129,11 @@ public:
             virtual tmp<Field<Type> > snGrad() const;
 
             //- Evaluate the patch field
+            //  Default argument needed to allow call in constructors
+            //  HJ, 30/Jun/2009
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType=Pstream::blocking
+                const Pstream::commsTypes commsType = Pstream::blocking
             );
 
             //- Return face-gradient transform diagonal
