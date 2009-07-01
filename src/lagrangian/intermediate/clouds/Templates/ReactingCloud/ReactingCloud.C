@@ -86,12 +86,12 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                     this->name() + "rhoTrans" + name(i),
-                     this->db().time().timeName(),
-                     this->db(),
-                     IOobject::NO_READ,
-                     IOobject::NO_WRITE,
-                     false
+                    this->name() + "rhoTrans" + Foam::name(i),
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 this->mesh(),
                 dimensionedScalar("zero", dimMass, 0.0)
