@@ -22,26 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    timeVaryingUniformFixedValueTetPolyPatchFields
+
+Description
+
+SourceFiles
+    timeVaryingUniformFixedValueTetPolyPatchFields.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "oscillatingFixedValueTetPolyPatchFields.H"
-#include "tetFemMatrices.H"
-#include "tetPolyPatchFields.H"
-#include "tetPolyBoundaryMesh.H"
-#include "tetPolyMesh.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef timeVaryingUniformFixedValueTetPolyPatchFields_H
+#define timeVaryingUniformFixedValueTetPolyPatchFields_H
+
+#include "tetPolyPatchField.H"
+#include "TimeVaryingUniformFixedValuePointPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchFields(oscillatingFixedValue, tetPolyPatch, TetPolyPatch);
+makePointPatchFieldTypedefs
+(
+    timeVaryingUniformFixedValue,
+    TimeVaryingUniformFixedValue,
+    tetPointMesh,
+    tetPolyPatch,
+    tetPolyPatch,
+    tetFemMatrix,
+    TetPolyPatch
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

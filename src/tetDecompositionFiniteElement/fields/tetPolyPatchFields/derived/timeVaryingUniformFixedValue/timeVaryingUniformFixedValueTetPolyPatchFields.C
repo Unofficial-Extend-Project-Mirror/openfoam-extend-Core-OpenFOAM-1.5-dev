@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "oscillatingFixedValueTetPolyPatchFields.H"
+#include "timeVaryingUniformFixedValueTetPolyPatchFields.H"
 #include "tetFemMatrices.H"
 #include "tetPolyPatchFields.H"
 #include "tetPolyBoundaryMesh.H"
@@ -38,7 +38,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePointPatchFields(oscillatingFixedValue, tetPolyPatch, TetPolyPatch);
+makePointPatchFields(timeVaryingUniformFixedValue, tetPolyPatch, TetPolyPatch);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

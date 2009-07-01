@@ -123,6 +123,7 @@ derivedTetPolyPatchFields = $(tetPolyPatchFields)/derived
 $(derivedTetPolyPatchFields)/global/globalTetPolyPatchFields.C
 $(derivedTetPolyPatchFields)/componentMixed/componentMixedTetPolyPatchVectorField.C
 $(derivedTetPolyPatchFields)/oscillatingFixedValue/oscillatingFixedValueTetPolyPatchFields.C
+$(derivedTetPolyPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueTetPolyPatchFields.C
 $(derivedTetPolyPatchFields)/slip/slipTetPolyPatchFields.C
 
 elementPatchFields = fields/elementPatchFields
