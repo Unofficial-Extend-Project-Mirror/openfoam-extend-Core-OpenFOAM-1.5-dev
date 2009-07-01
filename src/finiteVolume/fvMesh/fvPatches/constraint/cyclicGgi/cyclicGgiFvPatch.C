@@ -157,39 +157,4 @@ Foam::tmp<Foam::vectorField> Foam::cyclicGgiFvPatch::delta() const
 }
 
 
-Foam::tmp<Foam::labelField> Foam::cyclicGgiFvPatch::interfaceInternalField
-(
-    const unallocLabelList& internalData
-) const
-{
-    return patchInternalField(internalData);
-}
-
-
-Foam::tmp<Foam::labelField> Foam::cyclicGgiFvPatch::transfer
-(
-    const Pstream::commsTypes,
-    const unallocLabelList& interfaceData
-) const
-{
-    notImplemented
-    (
-        "cyclicGgiFvPatchField<Type>::"
-        "transfer(const unallocLabelList& interfaceData) const"
-    );
-
-    return labelField::null();
-}
-
-
-Foam::tmp<Foam::labelField> Foam::cyclicGgiFvPatch::internalFieldTransfer
-(
-    const Pstream::commsTypes,
-    const unallocLabelList& iF
-) const
-{
-    return shadow().patchInternalField(iF);
-}
-
-
 // ************************************************************************* //
