@@ -1268,7 +1268,7 @@ int main(int argc, char *argv[])
         ++faceGroupEndIndexIter
     )
     {
-        // get face type and name
+        // Get face type and name
         const word& curPatchType = patchTypeIDs[faceGroupZoneIDIter()];
 
         const word& curPatchName = patchNameIDs[faceGroupZoneIDIter()];
@@ -1282,7 +1282,7 @@ int main(int argc, char *argv[])
         // Record zone index
         zoneToPatchName[faceGroupZoneIDIter()] = curPatchName;
 
-        // make patch labels
+        // Make patch labels
         label faceLabel = faceGroupStartIndexIter() - 1;
 
         faceList patchFaces(faceGroupEndIndexIter() - faceLabel);
@@ -1307,7 +1307,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        //inlets and outlets
+        // Inlets and outlets
         if
         (
             curPatchType == "pressure"
@@ -1372,7 +1372,7 @@ int main(int argc, char *argv[])
         else if
         (
             curPatchType == ""
-        ) //unnamed face regions default to interior patches
+        ) // Unnamed face regions default to interior patches
         {
             Info<< "Patch " << faceGroupZoneIDIter()
                 << ": Faces are defined but "
@@ -1439,14 +1439,14 @@ int main(int argc, char *argv[])
         {
             faceSet pFaceSet(pShapeMesh, patchNames[patchI], sz);
 
-            forAll(bFaces, j)
+            forAll (bFaces, j)
             {
                 const face& f = bFaces[j];
                 label cMeshFace = findFace(pShapeMesh, f);
                 meshFaces[j] = cMeshFace;
                 pFaceSet.insert(cMeshFace);
             }
-            if(writeSets)
+            if (writeSets)
             {
                 Info<< "Writing patch " << patchNames[patchI]
                     << " of size " << sz << " to faceSet." << endl;
@@ -1462,9 +1462,13 @@ int main(int argc, char *argv[])
         //it will be put in a default wall boundary
         //internal boundaries are simply ignored
 
-        if(patchTypes[patchI] != "internal" && !pShapeMesh.isInternalFace(meshFaces[0]))
+        if
+        (
+            patchTypes[patchI] != "internal"
+         && !pShapeMesh.isInternalFace(meshFaces[0])
+        )
         {
-            //first face is external and has valid non-internal type
+            // First face is external and has valid non-internal type
 
             //check all faces for externalness just to be sure
             //and mark patch number to global list
@@ -1494,7 +1498,7 @@ int main(int argc, char *argv[])
                 facePatchID[faceI - pShapeMesh.nInternalFaces()] = nBoundaries;
             }
 
-            //add to boundary patch
+            // Add to boundary patch
 
             Info<< "Adding new patch " << patchNames[patchI]
                 << " of type " << patchTypes[patchI]
@@ -1541,7 +1545,7 @@ int main(int argc, char *argv[])
         }
         defaultBoundaryFaces.shrink();
 
-        if(defaultBoundaryFaces.size() != 0)
+        if (defaultBoundaryFaces.size() != 0)
         {
             Warning << " fluent mesh has " << defaultBoundaryFaces.size()
                     << " undefined boundary faces." << endl
@@ -1724,7 +1728,7 @@ int main(int argc, char *argv[])
         );
 
         OFstream boundaryCellZonesFile(bczf);
-        forAll(boundaryZones, bzI)
+        forAll (boundaryZones, bzI)
         {
             forAll(boundaryZones[bzI], bzII)
             {
