@@ -88,8 +88,6 @@ void Foam::ggiFvPatch::makeWeights(scalarField& w) const
         scalarField masterWeights(shadow().size());
         shadow().makeWeights(masterWeights);
 
-        // Note: for partial coverage in cyclic GGI, bridging requires
-        // weights to be zero. HJ, 18/Jan/2009
         w = interpolate(1 - masterWeights);
 
         if (bridgeOverlap())
@@ -107,7 +105,6 @@ void Foam::ggiFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     if (ggiPolyPatch_.master())
     {
-        //dc = 1.0/max(nf() & fvPatch::delta(), 0.05*mag(fvPatch::delta()));
         dc = 1.0/max(nf() & delta(), 0.05*mag(delta()));
 
         if (bridgeOverlap())
@@ -154,10 +151,14 @@ void Foam::ggiFvPatch::makeCorrVecs(vectorField& cv) const
         cv = vector::zero;
     }
 
-    if(debug)
+    if (debug)
     {
         WarningIn("ggiFvPatch::makeCorrVecs(vectorField& cv)")
-            << (enableGgiNonOrthogonalCorrection_ ? "--  Enabling" : "--  Disabling")
+            << (
+                   enableGgiNonOrthogonalCorrection_ ?
+                   "--  Enabling" :
+                   "--  Disabling"
+               )
             << " GGI non-orthogonality correction for patch: "
             << this->ggiPolyPatch_.name()
             << endl;
