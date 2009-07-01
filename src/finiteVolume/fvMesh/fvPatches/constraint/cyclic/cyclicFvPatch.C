@@ -49,6 +49,9 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
     scalarField deltas = nf() & fvPatch::delta();
     label sizeby2 = deltas.size()/2;
 
+    scalar maxMatchError = 0;
+    label errorFace = -1;
+
     for (label facei = 0; facei < sizeby2; facei++)
     {
         scalar avFa = (magFa[facei] + magFa[facei + sizeby2])/2.0;
@@ -59,14 +62,15 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
           > cyclicPolyPatch::areaMatchTol
         )
         {
-            FatalErrorIn("cyclicFvPatch::makeWeights(scalarField& w) const")
-                << "face " << facei << " and " << facei + sizeby2
-                <<  " areas do not match by "
-                << 100*mag(magFa[facei] - magFa[facei + sizeby2])/avFa
-                << "% -- possible face ordering problem." << nl
-                << "Cyclic area match tolerance = "
-                << cyclicPolyPatch::areaMatchTol << " patch: " << name()
-                << abort(FatalError);
+            // Found error.  Look for largest matching error
+            maxMatchError =
+                Foam::max
+                (
+                    maxMatchError,
+                    mag(magFa[facei] - magFa[facei + sizeby2])/avFa
+                );
+
+            errorFace = facei;
         }
 
         scalar di = deltas[facei];
@@ -74,6 +78,21 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
 
         w[facei] = dni/(di + dni);
         w[facei + sizeby2] = 1 - w[facei];
+    }
+
+    // Check for error in matching
+    if (maxMatchError > cyclicPolyPatch::areaMatchTol)
+    {
+        scalar avFa = (magFa[errorFace] + magFa[errorFace + sizeby2])/2.0;
+
+        FatalErrorIn("cyclicFvPatch::makeWeights(scalarField& w) const")
+            << "face " << errorFace << " and " << errorFace + sizeby2
+            <<  " areas do not match by "
+            << 100*mag(magFa[errorFace] - magFa[errorFace + sizeby2])/avFa
+            << "% -- possible face ordering problem." << nl
+            << "Cyclic area match tolerance = "
+            << cyclicPolyPatch::areaMatchTol << " patch: " << name()
+            << abort(FatalError);
     }
 }
 
