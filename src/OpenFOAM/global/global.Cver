@@ -36,7 +36,12 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #include "foamVersion.H"
 
-const char* const Foam::FOAMversion = WM_PROJECT_VERSION;
+#define STRINGIFY(s) #s
+#define STR_FOAM_DEV_REVISION_NUMBER(s) STRINGIFY(s)
+
+const char* const Foam::FOAMversion           = WM_PROJECT_VERSION;
+const char* const Foam::FOAMDevRevisionNumber = STR_FOAM_DEV_REVISION_NUMBER(FOAM_DEV_REVISION_NUMBER);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Static initializers for string::null, word::null and fileName::null

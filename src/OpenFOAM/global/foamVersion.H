@@ -48,6 +48,7 @@ SourceFiles
 namespace Foam
 {
     extern const char* const FOAMversion;
+    extern const char* const FOAMDevRevisionNumber;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

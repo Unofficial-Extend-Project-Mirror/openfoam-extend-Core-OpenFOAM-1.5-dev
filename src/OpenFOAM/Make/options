@@ -5,3 +5,9 @@ LIB_LIBS = \
     $(FOAM_LIBBIN)/libOSspecific.o \
     -L$(FOAM_LIBBIN)/dummy -lPstream \
     -lz
+
+// Special rule for global/global.Cver: 
+// We force the recompilation so the revision number will always be up-to-date
+$(OBJECTS_DIR)/global.o: FORCE
+
+FORCE:
