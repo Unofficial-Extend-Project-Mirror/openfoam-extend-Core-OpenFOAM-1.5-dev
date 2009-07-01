@@ -156,6 +156,7 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
     }
 
     tmp<Field<Type> > tpnf(ggiPatch_.interpolate(sField));
+    Field<Type>& pnf = tpnf(); 
 
     if (ggiPatch_.bridgeOverlap())
     {
@@ -167,7 +168,7 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
         Field<Type> bridgeField =
             transform(I - 2.0*sqr(nHat), this->patchInternalField());
 
-        ggiPatch_.bridge(bridgeField, tpnf());
+        ggiPatch_.bridge(bridgeField, pnf);
     }
 
     return tpnf;
@@ -178,14 +179,6 @@ template<class Type>
 void ggiFvPatchField<Type>::initEvaluate
 (
     const Pstream::commsTypes commsType
-)
-{}
-
-
-template<class Type>
-void ggiFvPatchField<Type>::evaluate
-(
-    const Pstream::commsTypes
 )
 {
     Field<Type> pf
@@ -213,28 +206,22 @@ void ggiFvPatchField<Type>::evaluate
 
 
 template<class Type>
-void ggiFvPatchField<Type>::initInterfaceMatrixUpdate
+void ggiFvPatchField<Type>::evaluate
 (
-    const scalarField& psiInternal,
-    scalarField&,
-    const lduMatrix&,
-    const scalarField&,
-    const direction,
-    const Pstream::commsTypes commsType
-) const
+    const Pstream::commsTypes
+)
 {}
 
 
-// Return matrix product for coupled boundary
 template<class Type>
-void ggiFvPatchField<Type>::updateInterfaceMatrix
+void ggiFvPatchField<Type>::initInterfaceMatrixUpdate
 (
     const scalarField& psiInternal,
     scalarField& result,
     const lduMatrix&,
     const scalarField& coeffs,
     const direction cmpt,
-    const Pstream::commsTypes
+    const Pstream::commsTypes commsType
 ) const
 {
     // Get shadow face-cells and assemble shadow field
@@ -249,9 +236,6 @@ void ggiFvPatchField<Type>::updateInterfaceMatrix
 
     scalarField pnf = ggiPatch_.interpolate(sField);
 
-    // Consider patching pnf to eliminate the flux
-    // HJ, 21/Jan/2009
-
     // Multiply the field by coefficients and add into the result
     const unallocLabelList& fc = ggiPatch_.faceCells();
 
@@ -260,6 +244,20 @@ void ggiFvPatchField<Type>::updateInterfaceMatrix
         result[fc[elemI]] -= coeffs[elemI]*pnf[elemI];
     }
 }
+
+
+// Return matrix product for coupled boundary
+template<class Type>
+void ggiFvPatchField<Type>::updateInterfaceMatrix
+(
+    const scalarField& psiInternal,
+    scalarField& result,
+    const lduMatrix&,
+    const scalarField& coeffs,
+    const direction cmpt,
+    const Pstream::commsTypes
+) const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
