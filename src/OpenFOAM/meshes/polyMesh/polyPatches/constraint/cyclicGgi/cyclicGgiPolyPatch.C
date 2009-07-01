@@ -69,7 +69,7 @@ void Foam::cyclicGgiPolyPatch::checkDefinition() const
     // patches must specify the same information If not, well,
     // we stop the simulation and ask for a fix.
 
-    if(shadowIndex() < 0)
+    if (shadowIndex() < 0)
     {
         // No need to check anything, the shadow is not initialized properly.
         // This will happen with blockMesh when defining cyclicGGI patches.
@@ -264,37 +264,22 @@ void Foam::cyclicGgiPolyPatch::calcTransforms()
 
     // All transforms are constant: size = 1.  HJ, 18/Feb/2009
 
-    if (mag(rotationAngle_) > 0)
+    if (mag(rotationAngle_) > SMALL)
     {
-        //- Rotation tensor computed from rotationAxis_ and rotationAngle_
-        if (master())
-        {
-            forwardT_ = tensorField
-            (
-                1,
-                RodriguesRotation(rotationAxis_,  -rotationAngle_)
-            );
+        // Rotation tensor computed from rotationAxis_ and rotationAngle_
+        // Note: cyclics already have opposing signs for the rotation
+        //       so there is no need for a special practice.  HJ, 30/Jun/2009
+        forwardT_ = tensorField
+        (
+            1,
+            RodriguesRotation(rotationAxis_,  -rotationAngle_)
+        );
 
-            reverseT_ = tensorField
-            (
-                1,
-                RodriguesRotation(rotationAxis_, rotationAngle_)
-            );
-        }
-        else
-        {
-            forwardT_ = tensorField
-            (
-                1,
-                RodriguesRotation(rotationAxis_,  rotationAngle_)
-            );
-
-            reverseT_ = tensorField
-            (
-                1,
-                RodriguesRotation(rotationAxis_, -rotationAngle_)
-            );
-        }
+        reverseT_ = tensorField
+        (
+            1,
+            RodriguesRotation(rotationAxis_, rotationAngle_)
+        );
     }
     else
     {
