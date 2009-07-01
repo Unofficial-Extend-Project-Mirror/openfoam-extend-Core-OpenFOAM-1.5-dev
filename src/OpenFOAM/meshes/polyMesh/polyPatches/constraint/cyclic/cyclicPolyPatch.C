@@ -34,6 +34,7 @@ License
 #include "matchPoints.H"
 #include "EdgeMap.H"
 #include "Time.H"
+#include "RodriguesRotation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,8 +105,12 @@ void Foam::cyclicPolyPatch::calcTransforms()
             ),
             points
         );
+
         pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
-        scalarField half0Tols(calcFaceTol(half0, half0.points(), half0Ctrs));
+        scalarField half0Tols
+        (
+            calcFaceTol(half0, half0.points(), half0Ctrs)
+        );
 
         primitivePatch half1
         (
@@ -122,26 +127,30 @@ void Foam::cyclicPolyPatch::calcTransforms()
         // Dump halves
         if (debug)
         {
-            fileName casePath(boundaryMesh().mesh().time().path());
+            fileName fvPath(boundaryMesh().mesh().time().path()/"VTK");
 
-            fileName nm0(casePath/name()+"_half0_faces.obj");
+            mkDir(fvPath);
+            fileName nm0(fvPath/name()+"_half0_faces");
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half0"
-                << " faces to OBJ file " << nm0 << endl;
-            writeOBJ(nm0, half0, half0.points());
+                << " faces to file " << nm0 << endl;
+            half0.writeVTK(nm0, half0, points);
 
-            fileName nm1(casePath/name()+"_half1_faces.obj");
+            fileName nm1(fvPath/name()+"_half1_faces");
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half1"
-                << " faces to OBJ file " << nm1 << endl;
-            writeOBJ(nm1, half1, half1.points());
+                << " faces to file " << nm1 << endl;
+            half1.writeVTK(nm1, half1, points);
         }
 
         vectorField half0Normals(half0.size());
         vectorField half1Normals(half1.size());
 
+        scalar maxMatchError = 0;
+        label errorFace = -1;
+
         for (label facei = 0; facei < size()/2; facei++)
         {
             half0Normals[facei] = operator[](facei).normal(points);
-            label nbrFacei = facei+size()/2;
+            label nbrFacei = facei + size()/2;
             half1Normals[facei] = operator[](nbrFacei).normal(points);
 
             scalar magSf = mag(half0Normals[facei]);
@@ -156,30 +165,16 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 half0Normals[facei] = point(1, 0, 0);
                 half1Normals[facei] = half0Normals[facei];
             }
-            else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol_)
+            else if
+            (
+                mag(magSf - nbrMagSf)/avSf
+             > coupledPolyPatch::matchTol_
+            )
             {
-                FatalErrorIn
-                (
-                    "cyclicPolyPatch::calcTransforms()"
-                )   << "face " << facei << " area does not match neighbour "
-                    << nbrFacei << " by "
-                    << 100*mag(magSf - nbrMagSf)/avSf
-                    << "% -- possible face ordering problem." << endl
-                    << "patch:" << name()
-                    << " my area:" << magSf
-                    << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << coupledPolyPatch::matchTol_
-                     << endl
-                    << "Mesh face:" << start()+facei
-                    << " vertices:"
-                    << IndirectList<point>(points, operator[](facei))()
-                    << endl
-                    << "Neighbour face:" << start()+nbrFacei
-                    << " vertices:"
-                    << IndirectList<point>(points, operator[](nbrFacei))()
-                    << endl
-                    << "Rerun with cyclic debug flag set"
-                    << " for more information." << exit(FatalError);
+                // Error in area matching.  Find largest error
+                maxMatchError =
+                    Foam::max(maxMatchError, mag(magSf - nbrMagSf)/avSf);
+                errorFace = facei;
             }
             else
             {
@@ -188,16 +183,137 @@ void Foam::cyclicPolyPatch::calcTransforms()
             }
         }
 
+        // Check for error in face matching
+        if (maxMatchError > coupledPolyPatch::matchTol_)
+        {
+            label nbrFacei = errorFace + size()/2;
+            scalar magSf = mag(half0Normals[errorFace]);
+            scalar nbrMagSf = mag(half1Normals[errorFace]);
+            scalar avSf = (magSf + nbrMagSf)/2.0;
 
-        // Calculate transformation tensors
-        calcTransformTensors
-        (
-            half0Ctrs,
-            half1Ctrs,
-            half0Normals,
-            half1Normals,
-            half0Tols
-        );
+            FatalErrorIn
+            (
+                "cyclicPolyPatch::calcTransforms()"
+            )   << "face " << errorFace
+                << " area does not match neighbour "
+                << nbrFacei << " by "
+                << 100*mag(magSf - nbrMagSf)/avSf
+                << "% -- possible face ordering problem." << endl
+                << "patch:" << name()
+                << " my area:" << magSf
+                << " neighbour area:" << nbrMagSf
+                << " matching tolerance:" << coupledPolyPatch::matchTol_
+                << endl
+                << "Mesh face:" << start() + errorFace
+                << " vertices:"
+                << IndirectList<point>(points, operator[](errorFace))()
+                << endl
+                << "Neighbour face:" << start() + nbrFacei
+                << " vertices:"
+                << IndirectList<point>(points, operator[](nbrFacei))()
+                << endl
+                << "Other errors also exist, only the largest is reported. "
+                << "Please rerun with cyclic debug flag set"
+                << " for more information." << exit(FatalError);
+        }
+
+        if (transform_ == ROTATIONAL)
+        {
+            if (debug)
+            {
+                Info<< "Prescribed transform: "
+                    << transformTypeNames[ROTATIONAL]
+                    << ".  Calculating transforms using Rodrigues Rotation.  "
+                    << "Axis = " << rotationAxis_
+                    << " centre = " << rotationCentre_
+                    << " angle = " << rotationAngle_ << endl;
+            }
+
+            forwardT_ = tensorField
+            (
+                1,
+                RodriguesRotation(rotationAxis_,  rotationAngle_)
+            );
+
+            reverseT_ = tensorField
+            (
+                1,
+                RodriguesRotation(rotationAxis_, -rotationAngle_)
+            );
+        }
+        else if (transform_ == TRANSLATIONAL)
+        {
+            if (debug)
+            {
+                Info<< "Prescribed transform: "
+                    << transformTypeNames[TRANSLATIONAL] << endl;
+
+                forwardT_.setSize(0);
+                reverseT_.setSize(0);
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Unknown transform: calculating transform from "
+                    << "geometry" << endl;
+            }
+
+            // Calculate transformation tensors
+            calcTransformTensors
+            (
+                half0Ctrs,
+                half1Ctrs,
+                half0Normals,
+                half1Normals,
+                half0Tols
+            );
+
+            // Check transformation tensors
+            if (forwardT_.size() > 1 || reverseT_.size() > 1)
+            {
+                SeriousErrorIn
+                (
+                    "void cyclicPolyPatch::calcTransforms()"
+                )   << "Transformation tensor is not constant for the cyclic "
+                    << "patch.  Please reconsider your setup and definition of "
+                    << "cyclic boundaries." << endl;
+            }
+        }
+
+        if (debug)
+        {
+            // Check the transformation
+            scalar maxDistance = 0;
+
+            forAll (half0Ctrs, faceI)
+            {
+                maxDistance =
+                    Foam::max
+                    (
+                        maxDistance,
+                        mag
+                        (
+                            Foam::transform(reverseT_[0], half0Ctrs[faceI])
+                          - half1Ctrs[faceI]
+                        )/(mag(half1Ctrs[faceI] - half0Ctrs[faceI]) + SMALL)
+                    );
+            }
+
+            // Check max distance between face centre and
+            // transformed face centre
+            if (maxDistance > sqrt(areaMatchTol))
+            {
+                SeriousErrorIn
+                (
+                    "void cyclicPolyPatch::calcTransforms()"
+                )   << "Relative difference in transformation = "
+                    << 100*maxDistance
+                    << "%. Please check the definition of the transformation"
+                    << endl;
+            }
+        }
     }
 }
 
@@ -435,7 +551,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
         }
     }
 
-    if (mag(n0 & n1) < 1-coupledPolyPatch::matchTol_)
+    if (mag(n0 & n1) < 1 - coupledPolyPatch::matchTol_)
     {
         if (debug)
         {
@@ -562,6 +678,7 @@ bool Foam::cyclicPolyPatch::matchAnchors
             }
         }
     }
+
     return fullMatch;
 }
 
@@ -621,7 +738,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     featureCos_(0.9),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
-    rotationCentre_(point::zero)
+    rotationCentre_(point::zero),
+    rotationAngle_(0)
 {}
 
 
@@ -639,7 +757,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     featureCos_(0.9),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
-    rotationCentre_(point::zero)
+    rotationCentre_(point::zero),
+    rotationAngle_(0)
 {
     dict.readIfPresent("featureCos", featureCos_);
 
@@ -652,11 +771,33 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             {
                 dict.lookup("rotationAxis") >> rotationAxis_;
                 dict.lookup("rotationCentre") >> rotationCentre_;
+                rotationAngle_ = readScalar(dict.lookup("rotationAngle"));
+
+                // Check rotation axis
+                if (mag(rotationAxis_) < SMALL)
+                {
+                    FatalErrorIn
+                    (
+                        "cyclicPolyPatch::cyclicPolyPatch\n"
+                        "(\n"
+                        "    const word& name,\n"
+                        "    const dictionary& dict,\n"
+                        "    const label index,\n"
+                        "    const polyBoundaryMesh& bm\n"
+                        ")"
+                    )   << "Incorrect rotation axis: " << rotationAxis_
+                        << abort(FatalError);
+                }
+                 
+                rotationAxis_ /= mag(rotationAxis_);
+
+                // Check rotation axis if appropriate
+
                 break;
             }
             default:
             {
-                // no additioanl info required
+                // no additional info required
             }
         }
     }
@@ -675,7 +816,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     featureCos_(pp.featureCos_),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
-    rotationCentre_(pp.rotationCentre_)
+    rotationCentre_(pp.rotationCentre_),
+    rotationAngle_(pp.rotationAngle_)
 {}
 
 
@@ -694,7 +836,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     featureCos_(pp.featureCos_),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
-    rotationCentre_(pp.rotationCentre_)
+    rotationCentre_(pp.rotationCentre_),
+    rotationAngle_(pp.rotationAngle_)
 {}
 
 
@@ -909,6 +1052,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
                 }
             }
         }
+
         coupledEdges.setSize(coupleI);
 
 
@@ -1319,6 +1463,8 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
             os.writeKeyword("rotationAxis") << rotationAxis_
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationCentre") << rotationCentre_
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("rotationAngle") << rotationAngle_
                 << token::END_STATEMENT << nl;
             break;
         }

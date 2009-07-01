@@ -104,8 +104,11 @@ private:
         //- Axis of rotation for rotational cyclics
         vector rotationAxis_;
 
-        //- point on axis of rotation for rotational cyclics
+        //- Point on axis of rotation for rotational cyclics
         point rotationCentre_;
+
+        //- Angle of rotation for rotational cyclics
+        scalar rotationAngle_;
 
 
     // Private member functions
