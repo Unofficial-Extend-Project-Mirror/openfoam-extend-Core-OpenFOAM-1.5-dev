@@ -189,10 +189,13 @@ Foam::overlapGgiPolyPatch::patchToPatch() const
     {
         if (!patchToPatchPtr_)
         {
-            Info<< "Initializing the GGI interpolator between "
-                << "master/shadow patches: "
-                << name() << "/" << shadowName()
-                << endl;
+            if (debug)
+            {
+                Info<< "Initializing the GGI interpolator between "
+                    << "master/shadow patches: "
+                    << name() << "/" << shadowName()
+                    << endl;
+            }
 
             calcPatchToPatch();
         }
