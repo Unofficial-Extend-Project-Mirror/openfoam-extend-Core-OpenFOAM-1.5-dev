@@ -849,7 +849,9 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::needReference() const
         }
     }
 
-    reduce(needRef, andOp<bool>());
+    // There is no need to reduce the condition, since all boundaries are
+    // present on all processors.  HJ, 30/Jun/2009
+//     reduce(needRef, andOp<bool>());
 
     return needRef;
 }
