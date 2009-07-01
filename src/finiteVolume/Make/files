@@ -83,6 +83,7 @@ $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatch
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fluxCorrectedVelocity/fluxCorrectedVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/flux/fluxFvPatchFields.C
 $(derivedFvPatchFields)/freestream/freestreamFvPatchFields.C
 $(derivedFvPatchFields)/freestreamPressure/freestreamPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/inletOutlet/inletOutletFvPatchFields.C
