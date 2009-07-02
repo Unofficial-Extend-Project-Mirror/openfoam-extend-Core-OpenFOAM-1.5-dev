@@ -73,7 +73,7 @@ then
   if [ "$?" -eq 0 ]
   then
      # We are not using svnversion here because this can take a while sometimes.
-     FOAM_DEV_SVN_REVISION_NUMBER=`$SVN_CMD info $WM_PROJECT_DIR | grep "Last Changed Rev:" | awk '{print $4}'`;
+     FOAM_DEV_SVN_REVISION_NUMBER=`LC_ALL=C $SVN_CMD info $WM_PROJECT_DIR | grep "Last Changed Rev:" | awk '{print $4}'`;
   fi
 fi
 
