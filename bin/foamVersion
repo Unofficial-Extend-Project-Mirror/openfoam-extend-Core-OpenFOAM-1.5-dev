@@ -72,7 +72,15 @@ then
 
   if [ "$?" -eq 0 ]
   then
-     # We are not using svnversion here because this can take a while sometimes.
+     # We are not using svnversion here because it is recursive, and this can take a while.
+     #
+     # We are forcing LC_ALL=C in order to get rid of any locale variations in the ouput of
+     # the command $SVN_CMD
+     #
+     # We are grabbing the revision number associated to "Last Changed Rev:" for the svn repository
+     # branch associated with $WM_PROJECT_DIR. That way, we will not pickup changes in revision number
+     # coming from other parts of the Subversion repository.
+     #
      FOAM_DEV_SVN_REVISION_NUMBER=`LC_ALL=C $SVN_CMD info $WM_PROJECT_DIR | grep "Last Changed Rev:" | awk '{print $4}'`;
   fi
 fi
