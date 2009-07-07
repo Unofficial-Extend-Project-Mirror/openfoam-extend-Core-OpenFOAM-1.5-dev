@@ -46,13 +46,6 @@ namespace Foam
     addToRunTimeSelectionTable(fvPatch, ggiFvPatch, polyPatch);
 }
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const bool Foam::ggiFvPatch::enableGgiNonOrthogonalCorrection_
-(
-    debug::optimisationSwitch("enableGgiNonOrthogonalCorrection", 0)
-);
-
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -134,35 +127,13 @@ void Foam::ggiFvPatch::makeCorrVecs(vectorField& cv) const
 {
     // Non-orthogonality correction on a ggi interface
     // MB, 7/April/2009
-    if(enableGgiNonOrthogonalCorrection_)
-    {
-        // Full non-orthogonality treatment
 
-        // Calculate correction vectors on coupled patches
-        const scalarField& patchDeltaCoeffs = deltaCoeffs();
+    // Calculate correction vectors on coupled patches
+    const scalarField& patchDeltaCoeffs = deltaCoeffs();
 
-        vectorField patchDeltas = delta();
-        vectorField n = nf();
-        cv = n - patchDeltas*patchDeltaCoeffs;
-    }
-    else
-    {
-        // No non-orthogonality correction on a ggi interface
-        cv = vector::zero;
-    }
-
-    if (debug)
-    {
-        WarningIn("ggiFvPatch::makeCorrVecs(vectorField& cv)")
-            << (
-                   enableGgiNonOrthogonalCorrection_ ?
-                   "--  Enabling" :
-                   "--  Disabling"
-               )
-            << " GGI non-orthogonality correction for patch: "
-            << this->ggiPolyPatch_.name()
-            << endl;
-    }
+    vectorField patchDeltas = delta();
+    vectorField n = nf();
+    cv = n - patchDeltas*patchDeltaCoeffs;
 }
 
 

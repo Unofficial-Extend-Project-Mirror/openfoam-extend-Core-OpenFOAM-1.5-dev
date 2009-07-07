@@ -155,7 +155,7 @@ public:
             const regionCoupleFvPatchField<Type>& shadowPatchField() const;
 
             //- Return neighbour field given internal cell data
-            tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type> > patchNeighbourField() const;
 
             //- Evaluate the patch field
             virtual void evaluate

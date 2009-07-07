@@ -95,6 +95,7 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
     if (master())
     {
         // Create interpolation for zones
+        Info<< "Creating interpolation.  forwardT(): " << forwardT() << endl;
         patchToPatchPtr_ =
             new ggiZoneInterpolation
             (
@@ -403,14 +404,20 @@ void Foam::ggiPolyPatch::initGeometry()
 
 void Foam::ggiPolyPatch::calcGeometry()
 {
+    polyPatch::calcGeometry();
+
+    // Note: Calculation of transforms must be forced before the
+    //       reconFaceCellCentres in order to correctly set the transformation
+    //       in the interpolation routines
+    // HJ, 3/Jul/2009
+    calcTransforms();
+
     // Reconstruct the cell face centres
     if (patchToPatchPtr_ && master())
     {
         reconFaceCellCentres();
     }
 
-    calcTransforms();
-    polyPatch::calcGeometry();
 }
 
 
@@ -443,6 +450,7 @@ void Foam::ggiPolyPatch::updateMesh()
 void Foam::ggiPolyPatch::calcTransforms()
 {
     // Simplest GGI: no transform or separation.  HJ, 24/Oct/2008
+    Info<< "Cacl transforms in GGI" << endl;
     forwardT_.setSize(0);
     reverseT_.setSize(0);
     separation_.setSize(0);

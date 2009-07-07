@@ -40,14 +40,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const bool Foam::overlapGgiFvPatch::enableGgiNonOrthogonalCorrection_
-(
-    debug::optimisationSwitch("enableGgiNonOrthogonalCorrection", 0)
-);
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // Make patch weighting factors
@@ -94,31 +86,13 @@ void Foam::overlapGgiFvPatch::makeCorrVecs(vectorField& cv) const
 {
     // Non-orthogonality correction on a ggi interface
     // MB, 7/April/2009
-    if(enableGgiNonOrthogonalCorrection_)
-    {
-        // Full non-orthogonality treatment
+    
+    // Calculate correction vectors on coupled patches
+    const scalarField& patchDeltaCoeffs = deltaCoeffs();
 
-        // Calculate correction vectors on coupled patches
-        const scalarField& patchDeltaCoeffs = deltaCoeffs();
-
-        vectorField patchDeltas = delta();
-        vectorField n = nf();
-        cv = n - patchDeltas*patchDeltaCoeffs;
-    }
-    else
-    {
-        // No non-orthogonality correction on a ggi interface
-        cv = vector::zero;
-    }
-
-    if(debug)
-    {
-        WarningIn("ggiFvPatch::makeCorrVecs(vectorField& cv)")
-            << (enableGgiNonOrthogonalCorrection_ ? "--  Enabling" : "--  Disabling")
-            << " GGI non-orthogonality correction for patch: "
-            << this->overlapGgiPolyPatch_.name()
-            << endl;
-    }
+    vectorField patchDeltas = delta();
+    vectorField n = nf();
+    cv = n - patchDeltas*patchDeltaCoeffs;
 }
 
 

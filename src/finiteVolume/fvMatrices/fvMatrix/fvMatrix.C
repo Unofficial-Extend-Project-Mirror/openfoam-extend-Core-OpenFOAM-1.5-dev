@@ -169,7 +169,7 @@ void Foam::fvMatrix<Type>::addBoundarySource
 
             const unallocLabelList& addr = lduAddr().patchAddr(patchI);
 
-            forAll(addr, facei)
+            forAll (addr, facei)
             {
                 source[addr[facei]] += cmptMultiply(pbc[facei], pnf[facei]);
             }

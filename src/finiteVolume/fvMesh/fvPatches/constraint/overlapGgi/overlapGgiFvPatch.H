@@ -72,13 +72,6 @@ class overlapGgiFvPatch
 
 protected:
 
-    // Static Protected Data
-
-        //- Enable the evaluation of non-orthogonality correctors
-        //  on a ggi interface
-        static const bool enableGgiNonOrthogonalCorrection_;
-
-
     // Protected Member functions
 
         //- Make patch weighting factors

@@ -158,7 +158,7 @@ public:
             //- Return neighbour field given internal field
             //  This is a dummy function: returning patch values 
             //  due to scheduling issues.  HJ, 11/May/2009
-            tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type> > patchNeighbourField() const;
 
 
         // Evaluation functions

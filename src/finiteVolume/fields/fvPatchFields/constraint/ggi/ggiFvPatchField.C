@@ -181,6 +181,11 @@ void ggiFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
+    if (!this->updated())
+    {
+        this->updateCoeffs();
+    }
+
     Field<Type> pf
     (
         this->patch().weights()*this->patchInternalField()
@@ -210,7 +215,12 @@ void ggiFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
 )
-{}
+{
+    if (!this->updated())
+    {
+        this->updateCoeffs();
+    }
+}
 
 
 template<class Type>

@@ -178,6 +178,11 @@ void cyclicGgiFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
+    if (!this->updated())
+    {
+        this->updateCoeffs();
+    }
+
     Field<Type> pf
     (
         this->patch().weights()*this->patchInternalField()
@@ -207,7 +212,12 @@ void cyclicGgiFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
 )
-{}
+{
+    if (!this->updated())
+    {
+        this->updateCoeffs();
+    }
+}
 
 
 template<class Type>
@@ -232,7 +242,7 @@ void cyclicGgiFvPatchField<Type>::initInterfaceMatrixUpdate
     }
 
     // Transform according to the transformation tensor, using the slave
-    // side transform.  Warning: forwardT() has got the size of the slave
+    // side transform.  Warning: forwardT() corresponds to the slave
     // patch.  HJ, 12/Jan/2009
     transformCoupleField(sField, cmpt);
 
