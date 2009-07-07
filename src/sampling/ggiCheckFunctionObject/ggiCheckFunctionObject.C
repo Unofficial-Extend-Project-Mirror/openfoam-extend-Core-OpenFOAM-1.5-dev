@@ -30,6 +30,7 @@ Author
 #include "ggiCheckFunctionObject.H"
 #include "addToRunTimeSelectionTable.H"
 #include "ggiFvsPatchFields.H"
+#include "cyclicGgiFvsPatchFields.H"
 #include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -116,6 +117,38 @@ bool Foam::ggiCheckFunctionObject::execute()
                     gSumMag(phi.boundaryField()[shadowPatchI]);
 
                 Info<< "GGI pair (" << ggiPatch.name() << ", "
+                    << ggiPatch.shadow().name()
+                    << ") : " << localFluxMag << " " << shadowFluxMag
+                    << " Diff = " << localFlux + shadowFlux << " or "
+                    << mag(localFlux + shadowFlux)/(localFluxMag + SMALL)*100
+                    << " %" << endl;
+            }
+        }
+        else if (isA<cyclicGgiFvsPatchScalarField>(phi.boundaryField()[patchI]))
+        {
+            if (!visited[patchI])
+            {
+                visited[patchI] = true;
+
+                // Calculate local and shadow flux
+                scalar localFlux = gSum(phi.boundaryField()[patchI]);
+                scalar localFluxMag = gSumMag(phi.boundaryField()[patchI]);
+
+                const cyclicGgiPolyPatch& ggiPatch =
+                    refCast<const cyclicGgiPolyPatch>
+                    (
+                        phi.boundaryField()[patchI].patch().patch()
+                    );
+
+                const label shadowPatchI = ggiPatch.shadowIndex();
+
+                visited[shadowPatchI] = true;
+
+                scalar shadowFlux = gSum(phi.boundaryField()[shadowPatchI]);
+                scalar shadowFluxMag =
+                    gSumMag(phi.boundaryField()[shadowPatchI]);
+
+                Info<< "Cyclic GGI pair (" << ggiPatch.name() << ", "
                     << ggiPatch.shadow().name()
                     << ") : " << localFluxMag << " " << shadowFluxMag
                     << " Diff = " << localFlux + shadowFlux << " or "
