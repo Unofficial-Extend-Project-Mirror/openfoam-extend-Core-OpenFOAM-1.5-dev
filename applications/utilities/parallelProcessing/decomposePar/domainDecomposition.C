@@ -271,7 +271,7 @@ bool domainDecomposition::writeDecomposition()
         (
             IOobject
             (
-                polyMesh::defaultRegion,
+                name(),
                 "constant",
                 processorDb
             ),

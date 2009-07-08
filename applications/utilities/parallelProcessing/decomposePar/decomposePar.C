@@ -33,6 +33,9 @@ Usage
 
     - decomposePar [OPTION]
 
+    @param -region \n
+    Region to decompose.
+
     @param -cellDist \n
     Write the cell distribution as a labelList for use with 'manual'
     decomposition method and as a volScalarField for post-processing.
@@ -95,6 +98,7 @@ Usage
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::validOptions.insert("region", "name");
     argList::validOptions.insert("cellDist", "");
     argList::validOptions.insert("copyUniform", "");
     argList::validOptions.insert("fields", "");
@@ -110,6 +114,14 @@ int main(int argc, char *argv[])
     bool filterPatches(args.options().found("filterPatches"));
     bool forceOverwrite(args.options().found("force"));
     bool ifRequiredDecomposition(args.options().found("ifRequired"));
+
+    // Get region name
+    word regionName = fvMesh::defaultRegion;
+
+    if (args.options().found("region"))
+    {
+        regionName = args.options()["region"];
+    }
 
 #   include "createTime.H"
 
@@ -160,6 +172,13 @@ int main(int argc, char *argv[])
     {
         bool procDirsProblem = true;
 
+        if (regionName != fvMesh::defaultRegion)
+        {
+            decomposeFieldsOnly = false;
+            procDirsProblem = false;
+        }
+
+
         if (ifRequiredDecomposition && nProcs == nDomains)
         {
             // we can reuse the decomposition
@@ -170,45 +189,45 @@ int main(int argc, char *argv[])
             Info<< "Using existing processor directories" << nl;
         }
 
-        if (forceOverwrite)
-        {
-            Info<< "Removing " << nProcs
-                << " existing processor directories" << endl;
+//         if (forceOverwrite)
+//         {
+//             Info<< "Removing " << nProcs
+//                 << " existing processor directories" << endl;
 
-            // remove existing processor dirs
-            // reverse order to avoid gaps if someone interrupts the process
-            for (label procI = nProcs-1; procI >= 0; --procI)
-            {
-                fileName procDir
-                (
-                    runTime.path()/(word("processor") + name(procI))
-                );
+//             // remove existing processor dirs
+//             // reverse order to avoid gaps if someone interrupts the process
+//             for (label procI = nProcs-1; procI >= 0; --procI)
+//             {
+//                 fileName procDir
+//                 (
+//                     runTime.path()/(word("processor") + name(procI))
+//                 );
 
-                rmDir(procDir);
-            }
+//                 rmDir(procDir);
+//             }
 
-            procDirsProblem = false;
-        }
+//             procDirsProblem = false;
+//         }
 
-        if (procDirsProblem)
-        {
-            FatalErrorIn(args.executable())
-                << "Case is already decomposed with " << nProcs
-                << " domains, use the -force option or manually" << nl
-                << "remove processor directories before decomposing. e.g.,"
-                << nl
-                << "    rm -rf " << runTime.path().c_str() << "/processor*"
-                << nl
-                << exit(FatalError);
-        }
+//         if (procDirsProblem)
+//         {
+//             FatalErrorIn(args.executable())
+//                 << "Case is already decomposed with " << nProcs
+//                 << " domains, use the -force option or manually" << nl
+//                 << "remove processor directories before decomposing. e.g.,"
+//                 << nl
+//                 << "    rm -rf " << runTime.path().c_str() << "/processor*"
+//                 << nl
+//                 << exit(FatalError);
+//         }
     }
 
-    Info<< "Create mesh" << endl;
+    Info<< "Create mesh for region " << regionName << endl;
     domainDecomposition mesh
     (
         IOobject
         (
-            domainDecomposition::defaultRegion,
+            regionName,
             runTime.timeName(),
             runTime
         )
@@ -231,7 +250,7 @@ int main(int argc, char *argv[])
             (
                 runTime.path()
               / mesh.facesInstance()
-              / polyMesh::defaultRegion
+              / regionName
               / "cellDecomposition"
             );
 
@@ -555,7 +574,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                regionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -892,7 +911,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    fvMesh::defaultRegion,
+                    regionName,
                     processorDb.timeName(),
                     processorDb
                 )
