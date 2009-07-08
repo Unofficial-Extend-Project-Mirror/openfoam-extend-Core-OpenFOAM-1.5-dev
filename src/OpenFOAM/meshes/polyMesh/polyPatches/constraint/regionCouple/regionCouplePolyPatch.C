@@ -423,7 +423,7 @@ void Foam::regionCouplePolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
     os.writeKeyword("shadowRegion") 
-        << shadowPatchName_ << token::END_STATEMENT << nl;
+        << shadowRegionName_ << token::END_STATEMENT << nl;
     os.writeKeyword("shadowPatch") 
         << shadowPatchName_ << token::END_STATEMENT << nl;
     os.writeKeyword("attached") 
