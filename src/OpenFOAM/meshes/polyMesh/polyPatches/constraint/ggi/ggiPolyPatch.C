@@ -95,7 +95,6 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
     if (master())
     {
         // Create interpolation for zones
-        Info<< "Creating interpolation.  forwardT(): " << forwardT() << endl;
         patchToPatchPtr_ =
             new ggiZoneInterpolation
             (
@@ -365,13 +364,10 @@ const Foam::ggiZoneInterpolation& Foam::ggiPolyPatch::patchToPatch() const
     {
         if (!patchToPatchPtr_)
         {
-            if (debug)
-            {
-                Info<< "Initializing the GGI interpolator between "
-                    << "master/shadow patches: "
-                    << name() << "/" << shadowName()
-                    << endl;
-            }
+            Info<< "Initializing the GGI interpolator between "
+                << "master/shadow patches: "
+                << name() << "/" << shadowName()
+                << endl;
 
             calcPatchToPatch();
         }
@@ -450,7 +446,6 @@ void Foam::ggiPolyPatch::updateMesh()
 void Foam::ggiPolyPatch::calcTransforms()
 {
     // Simplest GGI: no transform or separation.  HJ, 24/Oct/2008
-    Info<< "Cacl transforms in GGI" << endl;
     forwardT_.setSize(0);
     reverseT_.setSize(0);
     separation_.setSize(0);

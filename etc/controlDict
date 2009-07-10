@@ -816,7 +816,7 @@ OptimisationSwitches
     commsType       nonBlocking; //scheduled; //blocking;
 //     commsType       blocking; //scheduled; //blocking;
     floatTransfer   0;// Floating transfer not realiable
-    nProcsSimpleSum 16;
+    nProcsSimpleSum 0;
 
     nSquaredProjection    0;
 }
@@ -832,8 +832,7 @@ Tolerances
     primitiveMeshFaceFlatnessThreshold 0.8;
 
     // Geometric matching tolerances
-//     cyclicMatchTol      1e-4;
-    cyclicMatchTol      1.22e-4;
+    cyclicMatchTol      1e-4;
     processorMatchTol   1e-4;
 
     // Volumetric closed domain
