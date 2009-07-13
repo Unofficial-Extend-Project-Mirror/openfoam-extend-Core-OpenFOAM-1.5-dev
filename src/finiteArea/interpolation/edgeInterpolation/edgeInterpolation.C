@@ -561,15 +561,17 @@ void edgeInterpolation::makeCorrectionVectors() const
 
     if (owner.size() > 0)
     {
-        NonOrthogCoeff =
-            max
-            (
-                Foam::asin
-                (
-                    deltaCoeffs*
-                    mag(CorrVecs.internalField())
-                )*180.0/M_PI
-            );
+        scalarField sinAlpha = deltaCoeffs*mag(CorrVecs.internalField());
+
+        forAll(sinAlpha, edgeI)
+        {
+            if (sinAlpha[edgeI] > 1)
+            {
+                sinAlpha[edgeI] = 1;
+            }
+        }
+
+        NonOrthogCoeff = max(Foam::asin(sinAlpha)*180.0/M_PI);
     }
 
     if (debug)
