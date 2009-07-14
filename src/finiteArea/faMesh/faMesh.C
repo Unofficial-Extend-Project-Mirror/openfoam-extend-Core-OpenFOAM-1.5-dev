@@ -767,10 +767,10 @@ const indirectPrimitivePatch& faMesh::patch() const
         (
             IndirectList<face>
             (
-                mesh_.faces(),
+                mesh_.allFaces(),
                 faceLabels_
             ),
-            mesh_.points()
+            mesh_.allPoints()
         );
     }
         
@@ -786,10 +786,10 @@ indirectPrimitivePatch& faMesh::patch()
         (
             IndirectList<face>
             (
-                mesh_.faces(), 
+                mesh_.allFaces(), 
                 faceLabels_
             ),
-            mesh_.points()
+            mesh_.allPoints()
         );
     }
         

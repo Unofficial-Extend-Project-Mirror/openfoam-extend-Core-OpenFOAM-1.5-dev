@@ -251,8 +251,8 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject and polyMesh reference
-        faMesh(const polyMesh& m);
+        //- Construct from polyMesh
+        explicit faMesh(const polyMesh& m);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFaPatches() member function

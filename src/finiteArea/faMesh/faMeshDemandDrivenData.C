@@ -35,7 +35,6 @@ Description
 #include "fac.H"
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
-// #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -88,11 +87,10 @@ void faMesh::calcPatchStarts() const
 
     patchStarts[0] = nInternalEdges();
 
-    for(label i=1; i<boundary().size(); i++)
+    for(label i = 1; i < boundary().size(); i++)
     {
         patchStarts[i] =
-            patchStarts[i-1]
-          + boundary()[i-1].size();
+            patchStarts[i - 1] + boundary()[i - 1].size();
     }
 }
 
@@ -291,11 +289,9 @@ void faMesh::calcCentres() const
             *this,
             dimLength
         );
-
     areaVectorField& centres = *centresPtr_;
 
     const pointField& localPoints = points();
-
     const faceList& localFaces = faces();
 
     forAll (localFaces, faceI)
@@ -408,7 +404,6 @@ void faMesh::calcS() const
         *this,
         dimVolume
     );
-
     DimensionedField<scalar, areaMesh>& S = *SPtr_;
 
     const pointField& localPoints = points();
@@ -457,9 +452,10 @@ void faMesh::calcFaceAreaNormals() const
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
+    vectorField& nInternal = faceAreaNormals.internalField();
     forAll (localFaces, faceI)
     {
-        faceAreaNormals.internalField()[faceI] =
+        nInternal[faceI] =
             localFaces[faceI].normal(localPoints)/
             localFaces[faceI].mag(localPoints);
     }
