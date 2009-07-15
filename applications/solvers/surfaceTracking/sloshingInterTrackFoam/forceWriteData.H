@@ -3,7 +3,7 @@
         runTime.timePath()/"curvature.dat"
     );
 
-    const vectorField& C = interface.aMesh().centres().internalField();
+    const vectorField& C = interface.aMesh().areaCentres().internalField();
     const scalarField& K = interface.aMesh().faceCurvatures().internalField();
 
 //     const scalarField divUs = fac::div(Us)().internalField();

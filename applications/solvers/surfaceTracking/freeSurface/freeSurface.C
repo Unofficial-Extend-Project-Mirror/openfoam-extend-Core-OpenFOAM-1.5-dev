@@ -346,7 +346,7 @@ void freeSurface::updateDisplacementDirections()
 
 
             // Correction of control points postion
-            const vectorField& Cf = aMesh().centres().internalField();
+            const vectorField& Cf = aMesh().areaCentres().internalField();
 
             controlPoints() = 
                 facesDisplacementDir()*
@@ -1385,7 +1385,7 @@ void freeSurface::smooth()
 
         scalarField deltaH = facesDisplacementDir()&
         (
-            aMesh().centres().internalField()
+            aMesh().areaCentres().internalField()
           - controlPoints()
         );
 

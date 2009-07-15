@@ -149,7 +149,7 @@ void freeSurface::makeControlPoints()
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
-                aMesh().centres().internalField()
+                aMesh().areaCentres().internalField()
             );
     }
 }
