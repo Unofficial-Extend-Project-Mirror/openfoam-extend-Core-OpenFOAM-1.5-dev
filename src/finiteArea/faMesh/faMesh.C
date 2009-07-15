@@ -891,11 +891,11 @@ const edgeScalarField& faMesh::magLe() const
 }
 
 
-const areaVectorField& faMesh::centres() const
+const areaVectorField& faMesh::areaCentres() const
 {
     if (!centresPtr_)
     {
-        calcCentres();
+        calcAreaCentres();
     }
 
     return *centresPtr_;

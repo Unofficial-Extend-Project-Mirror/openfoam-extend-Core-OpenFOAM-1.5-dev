@@ -69,7 +69,7 @@ public:
 
     const areaVectorField& C()
     {
-        return mesh_.centres();
+        return mesh_.areaCentres();
     }
 };
 

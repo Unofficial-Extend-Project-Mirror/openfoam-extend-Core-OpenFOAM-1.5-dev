@@ -103,6 +103,7 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
     const unallocLabelList& owner = mesh.owner();
     const unallocLabelList& neighbour = mesh.neighbour();
     const vectorField& n = mesh.faceAreaNormals().internalField();
+    const vectorField& c = mesh.areaCentres().internalField();
 
     forAll(weights, edge)
     {
@@ -110,13 +111,13 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
 
         if(edgeFlux_[edge] > 0)
         {
-            d = mesh.centres()[neighbour[edge]] - mesh.centres()[owner[edge]];
+            d = c[neighbour[edge]] - c[owner[edge]];
             d -= n[owner[edge]]*(n[owner[edge]]&d);
             d /= mag(d)/mesh.edgeInterpolation::lPN().internalField()[edge];
         }
         else
         {
-            d = mesh.centres()[neighbour[edge]] - mesh.centres()[owner[edge]];
+            d = c[neighbour[edge]] - c[owner[edge]];
             d -= n[neighbour[edge]]*(n[neighbour[edge]]&d);
             d /= mag(d)/mesh.edgeInterpolation::lPN().internalField()[edge];
         }
@@ -158,11 +159,12 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
             vectorField pGradcN =
                 gradc.boundaryField()[patchI].patchNeighbourField();
 
-            vectorField CP = 
-                mesh.centres().boundaryField()[patchI].patchInternalField();
+            vectorField CP = mesh.areaCentres().boundaryField()[patchI]
+                .patchInternalField();
 
             vectorField CN = 
-                mesh.centres().boundaryField()[patchI].patchNeighbourField();
+                mesh.areaCentres().boundaryField()[patchI]
+                .patchNeighbourField();
 
             vectorField nP = 
                 mesh.faceAreaNormals().boundaryField()[patchI]
@@ -172,7 +174,8 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
                 mesh.faceAreaNormals().boundaryField()[patchI]
                .patchNeighbourField();
 
-            scalarField pLPN = mesh.edgeInterpolation::lPN().boundaryField()[patchI];
+            scalarField pLPN =
+                mesh.edgeInterpolation::lPN().boundaryField()[patchI];
 
             forAll(pWeights, edgeI)
             {

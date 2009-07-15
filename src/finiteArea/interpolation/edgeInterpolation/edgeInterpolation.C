@@ -238,7 +238,7 @@ void edgeInterpolation::makeLPN() const
 
     // Set local references to mesh data
     const edgeVectorField& edgeCentres = mesh().edgeCentres();
-    const areaVectorField& faceCentres = mesh().centres();
+    const areaVectorField& faceCentres = mesh().areaCentres();
     const unallocLabelList& owner = mesh().owner();
     const unallocLabelList& neighbour = mesh().neighbour();
 
@@ -320,7 +320,7 @@ void edgeInterpolation::makeWeights() const
 
     // Set local references to mesh data
     const edgeVectorField& edgeCentres = mesh().edgeCentres();
-    const areaVectorField& faceCentres = mesh().centres();
+    const areaVectorField& faceCentres = mesh().areaCentres();
     const unallocLabelList& owner = mesh().owner();
     const unallocLabelList& neighbour = mesh().neighbour();
 
@@ -409,7 +409,7 @@ void edgeInterpolation::makeDeltaCoeffs() const
 
     // Set local references to mesh data
     const edgeVectorField& edgeCentres = mesh().edgeCentres();
-    const areaVectorField& faceCentres = mesh().centres();
+    const areaVectorField& faceCentres = mesh().areaCentres();
     const unallocLabelList& owner = mesh().owner();
     const unallocLabelList& neighbour = mesh().neighbour();
     const edgeVectorField& lengths = mesh().Le();
@@ -507,7 +507,7 @@ void edgeInterpolation::makeCorrectionVectors() const
     edgeVectorField& CorrVecs = *correctionVectors_;
 
     // Set local references to mesh data
-    const areaVectorField& faceCentres = mesh().centres();
+    const areaVectorField& faceCentres = mesh().areaCentres();
 
     const unallocLabelList& owner = mesh().owner();
     const unallocLabelList& neighbour = mesh().neighbour();
@@ -626,7 +626,7 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
     edgeVectorField& SkewCorrVecs = *skewCorrectionVectors_;
 
     // Set local references to mesh data
-    const areaVectorField& C = mesh().centres();
+    const areaVectorField& C = mesh().areaCentres();
     const edgeVectorField& Ce = mesh().edgeCentres();
 
     const unallocLabelList& owner = mesh().owner();

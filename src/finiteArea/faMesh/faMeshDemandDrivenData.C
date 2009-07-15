@@ -133,7 +133,7 @@ void faMesh::calcLe() const
     const edgeList& pEdges = edges();
 
     const edgeVectorField& eCentres = edgeCentres();
-    const areaVectorField& fCentres = centres();
+    const areaVectorField& fCentres = areaCentres();
 
     const edgeVectorField& edgeNormals = edgeAreaNormals();
 
@@ -259,11 +259,11 @@ void faMesh::calcMagLe() const
     }
 }
 
-void faMesh::calcCentres() const
+void faMesh::calcAreaCentres() const
 {
     if (debug)
     {
-        Info<< "void faMesh::calcCentres() const : "
+        Info<< "void faMesh::calcAreaCentres() const : "
             << "Calculating face centres" << endl;
     }
 
@@ -271,7 +271,7 @@ void faMesh::calcCentres() const
     {
         FatalErrorIn
         (
-            "void faMesh::calcCentres() const"
+            "void faMesh::calcAreaCentres() const"
         )   << "centresPtr_ already allocated"
             << abort(FatalError);
     }
@@ -682,7 +682,7 @@ void faMesh::calcEdgeTransformTensors() const
 
     const edgeVectorField& Ne = edgeAreaNormals();
     const areaVectorField& Nf = faceAreaNormals();
-    const areaVectorField& Cf = centres();
+    const areaVectorField& Cf = areaCentres();
     const edgeVectorField& Ce = edgeCentres();
 
     // Internal edges transformation tensors

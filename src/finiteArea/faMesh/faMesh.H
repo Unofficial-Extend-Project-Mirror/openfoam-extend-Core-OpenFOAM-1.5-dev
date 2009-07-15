@@ -199,7 +199,7 @@ class faMesh
             void calcMagLe() const;
 
             //- Calculate face centres
-            void calcCentres() const;
+            void calcAreaCentres() const;
 
             //- Calculate edge centres
             void calcEdgeCentres() const;
@@ -422,7 +422,7 @@ public:
             const edgeScalarField& magLe() const;
 
             //- Return face centres as areaVectorField
-            const areaVectorField& centres() const;
+            const areaVectorField& areaCentres() const;
 
             //- Return edge centres as edgeVectorField
             const edgeVectorField& edgeCentres() const;

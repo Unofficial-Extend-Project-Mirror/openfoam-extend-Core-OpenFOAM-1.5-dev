@@ -377,7 +377,7 @@ const unallocLabelList& faPatch::edgeFaces() const
 // Return the patch edge centres
 const vectorField& faPatch::edgeCentres() const
 {
-    return boundaryMesh().mesh().centres().boundaryField()[index()];
+    return boundaryMesh().mesh().areaCentres().boundaryField()[index()];
 }
 
 
@@ -413,7 +413,8 @@ tmp<vectorField> faPatch::edgeFaceCentres() const
     vectorField& fc = tfc();
 
     // get reference to global face centres
-    const vectorField& gfc = boundaryMesh().mesh().centres().internalField();
+    const vectorField& gfc =
+        boundaryMesh().mesh().areaCentres().internalField();
 
     const unallocLabelList& faceLabels = edgeFaces();
 
