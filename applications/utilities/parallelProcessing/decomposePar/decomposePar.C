@@ -868,25 +868,25 @@ int main(int argc, char *argv[])
         // Construct the area fields
         // ~~~~~~~~~~~~~~~~~~~~~~~~
         PtrList<areaScalarField> areaScalarFields;
-        readFields(mesh, objects, areaScalarFields);
+        readFields(aMesh, objects, areaScalarFields);
 
         PtrList<areaVectorField> areaVectorFields;
-        readFields(mesh, objects, areaVectorFields);
+        readFields(aMesh, objects, areaVectorFields);
 
         PtrList<areaSphericalTensorField> areaSphericalTensorFields;
-        readFields(mesh, objects, areaSphericalTensorFields);
+        readFields(aMesh, objects, areaSphericalTensorFields);
 
         PtrList<areaSymmTensorField> areaSymmTensorFields;
-        readFields(mesh, objects, areaSymmTensorFields);
+        readFields(aMesh, objects, areaSymmTensorFields);
 
         PtrList<areaTensorField> areaTensorFields;
-        readFields(mesh, objects, areaTensorFields);
+        readFields(aMesh, objects, areaTensorFields);
 
 
         // Construct the edge fields
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         PtrList<edgeScalarField> edgeScalarFields;
-        readFields(mesh, objects, edgeScalarFields);
+        readFields(aMesh, objects, edgeScalarFields);
 
         Info << endl;
 
