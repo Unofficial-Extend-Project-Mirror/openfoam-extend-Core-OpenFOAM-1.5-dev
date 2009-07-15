@@ -119,9 +119,6 @@ class PatchToPatchInterpolation
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PatchToPatchInterpolation(const PatchToPatchInterpolation&);
-
         //- Disallow default bitwise assignment
         void operator=(const PatchToPatchInterpolation&);
 
@@ -162,6 +159,12 @@ public:
             const ToPatch& toPatch,
             const intersection::algorithm alg = intersection::FULL_RAY,
             const intersection::direction dir = intersection::VECTOR
+        );
+
+        //- Construct as copy
+        PatchToPatchInterpolation
+        (
+            const PatchToPatchInterpolation<FromPatch, ToPatch>&
         );
 
 

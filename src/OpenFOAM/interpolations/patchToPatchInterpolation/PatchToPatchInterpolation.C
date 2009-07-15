@@ -113,6 +113,26 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::PatchToPatchInterpolation
 {}
 
 
+// Construct as copy
+template<class FromPatch, class ToPatch>
+PatchToPatchInterpolation<FromPatch, ToPatch>::PatchToPatchInterpolation
+(
+    const PatchToPatchInterpolation<FromPatch, ToPatch>& ppi
+)
+:
+    fromPatch_(ppi.fromPatch_),
+    toPatch_(ppi.toPatch_),
+    alg_(ppi.alg_),
+    dir_(ppi.dir_),
+    pointAddressingPtr_(NULL),
+    pointWeightsPtr_(NULL),
+    pointDistancePtr_(NULL),
+    faceAddressingPtr_(NULL),
+    faceWeightsPtr_(NULL),
+    faceDistancePtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 template<class FromPatch, class ToPatch>
