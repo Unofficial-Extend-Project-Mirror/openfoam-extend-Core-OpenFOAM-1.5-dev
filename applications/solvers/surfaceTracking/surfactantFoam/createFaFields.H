@@ -19,7 +19,7 @@ dimensioned<scalar> Cs0
     1.0
 );
 
-const areaVectorField& R = aMesh.centres();
+const areaVectorField& R = aMesh.areaCentres();
 
 Cs = Cs0*(1.0 + R.component(vector::X)/mag(R));
 
