@@ -39,9 +39,11 @@ SourceFiles
 
 #include "tetPolyMesh.H"
 #include "tetPointMesh.H"
+#include "elementMesh.H"
 #include "tetPolyPatch.H"
 #include "PointPatchFieldMapperPatchRef.H"
-#include "tetPolyPatchField.H"
+#include "tetPolyPatchFields.H"
+#include "elementPatchFields.H"
 #include "GeometricField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +57,6 @@ namespace Foam
 
 class tetPointFieldDecomposer
 {
-
 public:
 
         //- Patch field decomposer class
@@ -223,12 +224,20 @@ public:
 
     // Member Functions
 
-        //- Decompose field
+        //- Decompose point field
         template<class Type>
         tmp<GeometricField<Type, tetPolyPatchField, tetPointMesh> >
         decomposeField
         (
             const GeometricField<Type, tetPolyPatchField, tetPointMesh>&
+        ) const;
+
+        //- Decompose element field
+        template<class Type>
+        tmp<GeometricField<Type, elementPatchField, elementMesh> >
+        decomposeField
+        (
+            const GeometricField<Type, elementPatchField, elementMesh>&
         ) const;
 
         template<class GeoField>

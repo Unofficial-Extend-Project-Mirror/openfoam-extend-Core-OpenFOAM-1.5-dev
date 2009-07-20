@@ -40,8 +40,10 @@ SourceFiles
 #include "Time.H"
 #include "tetPolyMesh.H"
 #include "tetPointMesh.H"
+#include "elementMesh.H"
 #include "IOobjectList.H"
-#include "tetPolyPatchField.H"
+#include "tetPolyPatchFields.H"
+#include "elementPatchFields.H"
 #include "PointPatchFieldMapper.H"
 #include "GeometricField.H"
 #include "labelIOList.H"
@@ -166,21 +168,35 @@ public:
 
     // Member Functions
 
-        //- Reconstruct field
+        //- Reconstruct point field
         template<class Type>
         tmp<GeometricField<Type, tetPolyPatchField, tetPointMesh> >
-        reconstructField
+        reconstructTetPointField
         (
             const IOobject& fieldIoObject
         );
 
-        //- Reconstruct and write all fields
+        //- Reconstruct element field
         template<class Type>
-        void reconstructFields
+        tmp<GeometricField<Type, elementPatchField, elementMesh> >
+        reconstructElementField
+        (
+            const IOobject& fieldIoObject
+        );
+
+        //- Reconstruct and write all point fields
+        template<class Type>
+        void reconstructTetPointFields
         (
             const IOobjectList& objects
         );
 
+        //- Reconstruct and write all element fields
+        template<class Type>
+        void reconstructElementFields
+        (
+            const IOobjectList& objects
+        );
 };
 
 

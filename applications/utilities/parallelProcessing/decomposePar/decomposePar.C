@@ -77,6 +77,7 @@ Usage
 #include "tensorIOField.H"
 
 #include "tetPointFields.H"
+#include "elementFields.H"
 #include "tetFemMatrices.H"
 #include "tetPointFieldDecomposer.H"
 
@@ -348,6 +349,9 @@ int main(int argc, char *argv[])
     PtrList<tetPointSymmTensorField> tetPointSymmTensorFields;
     PtrList<tetPointTensorField> tetPointTensorFields;
 
+    PtrList<elementScalarField> elementScalarFields;
+    PtrList<elementVectorField> elementVectorFields;
+
     if
     (
         objects.lookupClass("tetPointScalarField").size() > 0
@@ -355,6 +359,9 @@ int main(int argc, char *argv[])
      || objects.lookupClass("tetPointSphericalTensorField").size() > 0
      || objects.lookupClass("tetPointSymmTensorField").size() > 0
      || objects.lookupClass("tetPointTensorField").size() > 0
+
+     || objects.lookupClass("elementScalarField").size() > 0
+     || objects.lookupClass("elementVectorField").size() > 0
     )
     {
         tetMeshPtr = new tetPolyMesh(mesh);
@@ -365,6 +372,9 @@ int main(int argc, char *argv[])
         readFields(tetMesh, objects, tetPointSphericalTensorFields);
         readFields(tetMesh, objects, tetPointSymmTensorFields);
         readFields(tetMesh, objects, tetPointTensorFields);
+
+        readFields(tetMesh, objects, elementScalarFields);
+        readFields(tetMesh, objects, elementVectorFields);
     }
 
 
@@ -739,6 +749,9 @@ int main(int argc, char *argv[])
             fieldDecomposer.decomposeFields(tetPointSphericalTensorFields);
             fieldDecomposer.decomposeFields(tetPointSymmTensorFields);
             fieldDecomposer.decomposeFields(tetPointTensorFields);
+
+            fieldDecomposer.decomposeFields(elementScalarFields);
+            fieldDecomposer.decomposeFields(elementVectorFields);
         }
 
 

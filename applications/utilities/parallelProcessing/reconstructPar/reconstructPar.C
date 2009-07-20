@@ -250,6 +250,9 @@ int main(int argc, char *argv[])
          || objects.lookupClass(tetPointSphericalTensorField::typeName).size()
          || objects.lookupClass(tetPointSymmTensorField::typeName).size()
          || objects.lookupClass(tetPointTensorField::typeName).size()
+
+         || objects.lookupClass(elementScalarField::typeName).size()
+         || objects.lookupClass(elementVectorField::typeName).size()
         )
         {
             Info << "Reconstructing tet point fields" << nl << endl;
@@ -277,11 +280,16 @@ int main(int argc, char *argv[])
             );
 
             // Reconstruct tet point fields
-            tetPointReconstructor.reconstructFields<scalar>(objects);
-            tetPointReconstructor.reconstructFields<vector>(objects);
-            tetPointReconstructor.reconstructFields<sphericalTensor>(objects);
-            tetPointReconstructor.reconstructFields<symmTensor>(objects);
-            tetPointReconstructor.reconstructFields<tensor>(objects);
+            tetPointReconstructor.reconstructTetPointFields<scalar>(objects);
+            tetPointReconstructor.reconstructTetPointFields<vector>(objects);
+            tetPointReconstructor.
+                reconstructTetPointFields<sphericalTensor>(objects);
+            tetPointReconstructor.
+                reconstructTetPointFields<symmTensor>(objects);
+            tetPointReconstructor.reconstructTetPointFields<tensor>(objects);
+
+            tetPointReconstructor.reconstructElementFields<scalar>(objects);
+            tetPointReconstructor.reconstructElementFields<vector>(objects);
         }
         else
         {

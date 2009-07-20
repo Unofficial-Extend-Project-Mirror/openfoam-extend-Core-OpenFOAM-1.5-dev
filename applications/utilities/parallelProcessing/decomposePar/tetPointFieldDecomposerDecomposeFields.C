@@ -35,7 +35,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 template<class Type>
 tmp<GeometricField<Type, tetPolyPatchField, tetPointMesh> >
 tetPointFieldDecomposer::decomposeField
@@ -115,6 +114,103 @@ tetPointFieldDecomposer::decomposeField
     return tmp<GeometricField<Type, tetPolyPatchField, tetPointMesh> >
     (
         new GeometricField<Type, tetPolyPatchField, tetPointMesh>
+        (
+            IOobject
+            (
+                field.name(),
+                processorMesh_().time().timeName(),
+                processorMesh_(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            processorMesh_,
+            field.dimensions(),
+            internalField,
+            patchFields
+        )
+    );
+}
+
+
+template<class Type>
+tmp<GeometricField<Type, elementPatchField, elementMesh> >
+tetPointFieldDecomposer::decomposeField
+(
+    const GeometricField<Type, elementPatchField, elementMesh>& field
+) const
+{
+    // Create and map the internal field values
+    Field<Type> internalField(field.internalField(), cellAddressing_);
+
+    // Create and map the patch field values
+    PtrList<elementPatchField<Type> > patchFields
+    (
+        boundaryAddressing_.size() + 1
+    );
+
+    forAll (boundaryAddressing_, patchI)
+    {
+        if (boundaryAddressing_[patchI] >= 0)
+        {
+            patchFields.set
+            (
+                patchI,
+                elementPatchField<Type>::New
+                (
+                    field.boundaryField()
+                        [boundaryAddressing_[patchI]],
+                    processorMesh_.boundary()[patchI],
+                    DimensionedField<Type, elementMesh>::null(),
+                    *patchFieldDecompPtrs_[patchI]
+                )
+            );
+        }
+        else
+        {
+            patchFields.set
+            (
+                patchI,
+                new ProcessorPointPatchField
+                <
+                    elementPatchField,
+                    elementMesh,
+                    tetPolyPatch,
+                    processorTetPolyPatch,
+                    DummyMatrix,
+                    Type
+                >
+                (
+                    processorMesh_.boundary()[patchI],
+                    DimensionedField<Type, elementMesh>::null()
+                )
+            );
+        }
+    }
+
+    // Add the global patch by hand.  This needs to be present on
+    // all processors
+    patchFields.set
+    (
+        patchFields.size() - 1,
+        new GlobalPointPatchField
+        <
+            elementPatchField,
+            elementMesh,
+            tetPolyPatch,
+            globalTetPolyPatch,
+            DummyMatrix,
+            Type
+        >
+        (
+            processorMesh_.boundary().globalPatch(),
+            DimensionedField<Type, elementMesh>::null()
+        )
+    );
+
+    // Create the field for the processor
+    return tmp<GeometricField<Type, elementPatchField, elementMesh> >
+    (
+        new GeometricField<Type, elementPatchField, elementMesh>
         (
             IOobject
             (

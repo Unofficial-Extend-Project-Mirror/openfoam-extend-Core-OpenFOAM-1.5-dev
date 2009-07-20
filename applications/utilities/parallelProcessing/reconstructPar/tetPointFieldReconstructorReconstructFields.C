@@ -38,7 +38,7 @@ namespace Foam
 
 template<class Type>
 tmp<GeometricField<Type, tetPolyPatchField, tetPointMesh> >
-tetPointFieldReconstructor::reconstructField
+tetPointFieldReconstructor::reconstructTetPointField
 (
     const IOobject& fieldIoObject
 )
@@ -161,9 +161,145 @@ tetPointFieldReconstructor::reconstructField
 }
 
 
-// Reconstruct and write all volume fields
 template<class Type>
-void tetPointFieldReconstructor::reconstructFields
+tmp<GeometricField<Type, elementPatchField, elementMesh> >
+tetPointFieldReconstructor::reconstructElementField
+(
+    const IOobject& fieldIoObject
+)
+{
+    // Read the field for all the processors
+    PtrList<GeometricField<Type, elementPatchField, elementMesh> > procFields
+    (
+        procMeshes_.size()
+    );
+
+    forAll (procMeshes_, procI)
+    {
+        procFields.set
+        (
+            procI,
+            new GeometricField<Type, elementPatchField, elementMesh>
+            (
+                IOobject
+                (
+                    fieldIoObject.name(),
+                    procMeshes_[procI]().time().timeName(),
+                    procMeshes_[procI](),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                procMeshes_[procI]
+            )
+        );
+    }
+
+
+    // Create the internalField
+    Field<Type> internalField(mesh_.nCells());
+
+    // Create the patch fields
+    PtrList<elementPatchField<Type> > patchFields(mesh_.boundary().size());
+
+
+    forAll (procMeshes_, procI)
+    {
+        const GeometricField<Type, elementPatchField, elementMesh>&
+            procField = procFields[procI];
+
+        // Set the cell values in the reconstructed field
+        internalField.rmap
+        (
+            procField.internalField(),
+            cellProcAddressing_[procI]
+        );
+
+        // Set the boundary patch values in the reconstructed field
+        forAll(boundaryProcAddressing_[procI], patchI)
+        {
+            // Get patch index of the original patch
+            const label curBPatch = boundaryProcAddressing_[procI][patchI];
+
+            // Get addressing slice for this patch
+            const labelList::subList cp =
+                procMeshes_[procI]().boundaryMesh()[patchI].patchSlice
+                (
+                    faceProcAddressing_[procI]
+                );
+
+            // check if the boundary patch is not a processor patch
+            if (curBPatch >= 0)
+            {
+                if (!patchFields(curBPatch))
+                {
+                    patchFields.set
+                    (
+                        curBPatch,
+                        elementPatchField<Type>::New
+                        (
+                            procField.boundaryField()[patchI],
+                            mesh_.boundary()[curBPatch],
+                            DimensionedField<Type, elementMesh>::null(),
+                            tetPolyPatchFieldReconstructor
+                            (
+                                mesh_.boundary()[curBPatch].size(),
+                                procField.boundaryField()[patchI].size()
+                            )
+                        )
+                    );
+                }
+
+                // If the field stores values, do the rmap
+                if (patchFields[curBPatch].storesFieldData())
+                {
+                    const label curPatchStart =
+                        mesh_().boundaryMesh()[curBPatch].start();
+
+                    labelList reverseAddressing(cp.size());
+
+                    forAll(cp, faceI)
+                    {
+                        // Subtract one to take into account offsets for
+                        // face direction.  
+                        reverseAddressing[faceI] = cp[faceI] - 1
+                            - curPatchStart;
+                    }
+
+                    patchFields[curBPatch].rmap
+                    (
+                        procField.boundaryField()[patchI],
+                        reverseAddressing
+                    );
+                }
+            }
+        }
+    }
+
+    // Now construct and write the field
+    // setting the internalField and patchFields
+    return tmp<GeometricField<Type, elementPatchField, elementMesh> >
+    (
+        new GeometricField<Type, elementPatchField, elementMesh>
+        (
+            IOobject
+            (
+                fieldIoObject.name(),
+                mesh_().time().timeName(),
+                mesh_(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            procFields[0].dimensions(),
+            internalField,
+            patchFields
+        )
+    );
+}
+
+
+template<class Type>
+void tetPointFieldReconstructor::reconstructTetPointFields
 (
     const IOobjectList& objects
 )
@@ -188,7 +324,41 @@ void tetPointFieldReconstructor::reconstructFields
         {
             Info<< "        " << fieldIter()->name() << endl;
 
-            reconstructField<Type>(*fieldIter())().write();
+            reconstructTetPointField<Type>(*fieldIter())().write();
+        }
+
+        Info<< endl;
+    }
+}
+
+
+template<class Type>
+void tetPointFieldReconstructor::reconstructElementFields
+(
+    const IOobjectList& objects
+)
+{
+    word fieldClassName
+    (
+        GeometricField<Type, elementPatchField, elementMesh>::typeName
+    );
+
+    IOobjectList fields = objects.lookupClass(fieldClassName);
+
+    if (fields.size())
+    {
+        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
+
+        for
+        (
+            IOobjectList::iterator fieldIter = fields.begin();
+            fieldIter != fields.end();
+            ++fieldIter
+        )
+        {
+            Info<< "        " << fieldIter()->name() << endl;
+
+            reconstructElementField<Type>(*fieldIter())().write();
         }
 
         Info<< endl;
