@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.4                                   |
@@ -10,61 +10,52 @@ FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          sampleDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 interpolationScheme cellPointFace;
 
-writeFormat     xmgr;
+setFormat     xmgr;
 
-sampleSets
+sets
 (
-
-    face
+    PSD_0
     {
-        name            magU_0;
+        type            uniform;
         axis            distance;
-        start           (0.076  0.0000001  0.0005);
-        end             (0.084  0.0000001  0.0005);
+        start           (0.076  0.0000001  0.00005);
+        end             (0.084  0.0000001  0.00005);
         nPoints         200;
     }
 
-
-    face
+    PSD_04
     {
-        name            magU_04;
+        type            uniform;
         axis            distance;
-        start           (0.076  0.0004  0.0005);
-        end             (0.084  0.0004  0.0005);
+        start           (0.076  0.0004  0.00005);
+        end             (0.084  0.0004  0.00005);
         nPoints         200;
     }
 
-
-    face
+    PSD_049
     {
-        name            magU_049;
+        type            uniform;
         axis            distance;
-        start           (0.076  0.00049  0.0005);
-        end             (0.084  0.00049  0.0005);
+        start           (0.076  0.00049  0.00005);
+        end             (0.084  0.00049  0.00005);
         nPoints         200;
     }
-
-
 );
+
+surfaces
+();
 
 fields
 (
-    mag(U)
+    PSD
 );
 
 
