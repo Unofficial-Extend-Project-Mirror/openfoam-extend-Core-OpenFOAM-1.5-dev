@@ -237,7 +237,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             IOobject
             (
                 "cells",
-                time().findInstance(meshDir(), "cells"),
+                // Find the cells file on the basis of the faces file
+                // HJ, 8/Jul/2009
+//                 time().findInstance(meshDir(), "cells"),
+                time().findInstance(meshDir(), "faces"),
                 meshSubDir,
                 *this,
                 IOobject::MUST_READ,
