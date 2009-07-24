@@ -41,19 +41,19 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(faMesh, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(faMesh, 0);
+}
 
-word faMesh::meshSubDir = "faMesh";
+Foam::word Foam::faMesh::meshSubDir = "faMesh";
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void faMesh::setPrimitiveMeshData()
+void Foam::faMesh::setPrimitiveMeshData()
 {
     if (debug)
     {
@@ -73,16 +73,16 @@ void faMesh::setPrimitiveMeshData()
 
     for (label curEdge = 0; curEdge < nIntEdges; curEdge++)
     {
-        edges_[++edgeI] =
-            bp.edges()[curEdge];
+        edges_[++edgeI] = bp.edges()[curEdge];
     }
 
     forAll (boundary(), patchI)
     {
-        forAll (boundary()[patchI], eI)
+        const faPatch& curP = boundary()[patchI];
+
+        forAll (curP, eI)
         {
-            edges_[++edgeI] =
-                bp.edges()[boundary()[patchI][eI]];
+            edges_[++edgeI] = bp.edges()[curP[eI]];
         }
     }
 
@@ -107,9 +107,11 @@ void faMesh::setPrimitiveMeshData()
 
     forAll (boundary(), patchI)
     {
-        forAll (boundary()[patchI], eI)
+        const faPatch& curP = boundary()[patchI];
+
+        forAll (curP, eI)
         {
-            edgeOwner_[++edgeI] = bpef[boundary()[patchI][eI]][0];
+            edgeOwner_[++edgeI] = bpef[curP[eI]][0];
         }
     }
 
@@ -121,7 +123,7 @@ void faMesh::setPrimitiveMeshData()
 }
 
 
-void faMesh::clearGeomNotAreas() const
+void Foam::faMesh::clearGeomNotAreas() const
 {
     if (debug)
     {
@@ -144,7 +146,7 @@ void faMesh::clearGeomNotAreas() const
 }
 
 
-void faMesh::clearGeom() const
+void Foam::faMesh::clearGeom() const
 {
     if (debug)
     {
@@ -159,7 +161,7 @@ void faMesh::clearGeom() const
 }
 
 
-void faMesh::clearAddressing() const
+void Foam::faMesh::clearAddressing() const
 {
     if (debug)
     {
@@ -171,7 +173,7 @@ void faMesh::clearAddressing() const
 }
 
 
-void faMesh::clearOut() const
+void Foam::faMesh::clearOut() const
 {
     clearGeom();
     clearAddressing();
@@ -180,7 +182,7 @@ void faMesh::clearOut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-faMesh::faMesh(const polyMesh& pMesh)
+Foam::faMesh::faMesh(const polyMesh& pMesh)
 :
     GeoMesh<polyMesh>(pMesh),
     edgeInterpolation(*this),
@@ -263,7 +265,7 @@ faMesh::faMesh(const polyMesh& pMesh)
 
 
 // Construct from components without boundary.
-faMesh::faMesh
+Foam::faMesh::faMesh
 (
     const polyMesh& pMesh,
     const labelList& faceLabels
@@ -327,7 +329,7 @@ faMesh::faMesh
 
 
 // Construct from definition field
-faMesh::faMesh
+Foam::faMesh::faMesh
 (
     const polyMesh& m,
     const fileName& defFile
@@ -633,7 +635,7 @@ faMesh::faMesh
 
 
 // Construct from polyPatch
-faMesh::faMesh
+Foam::faMesh::faMesh
 (
     const polyMesh& m,
     const label polyPatchID
@@ -740,26 +742,38 @@ faMesh::faMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-faMesh::~faMesh()
+Foam::faMesh::~faMesh()
 {
     clearOut();
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-fileName faMesh::meshDir() const
+Foam::fileName Foam::faMesh::meshDir() const
 {
     return mesh_.dbDir()/meshSubDir;
 }
 
 
-const Time& faMesh::time() const
+const Foam::Time& Foam::faMesh::time() const
 {
     return mesh_.time();
 }
 
 
-const indirectPrimitivePatch& faMesh::patch() const
+const Foam::fileName& Foam::faMesh::pointsInstance() const
+{
+    return mesh_.pointsInstance();
+}
+
+
+const Foam::fileName& Foam::faMesh::facesInstance() const
+{
+    return mesh_.facesInstance();
+}
+
+
+const Foam::indirectPrimitivePatch& Foam::faMesh::patch() const
 {
     if (!patchPtr_)
     {
@@ -778,7 +792,7 @@ const indirectPrimitivePatch& faMesh::patch() const
 }
 
 
-indirectPrimitivePatch& faMesh::patch()
+Foam::indirectPrimitivePatch& Foam::faMesh::patch()
 {
     if (!patchPtr_)
     {
@@ -797,25 +811,25 @@ indirectPrimitivePatch& faMesh::patch()
 }
 
 
-const pointField& faMesh::points() const
+const Foam::pointField& Foam::faMesh::points() const
 {
     return patch().localPoints();
 }
 
 
-const edgeList& faMesh::edges() const
+const Foam::edgeList& Foam::faMesh::edges() const
 {
     return edges_;
 }
 
 
-const faceList& faMesh::faces() const
+const Foam::faceList& Foam::faMesh::faces() const
 {
     return patch().localFaces();
 }
 
 
-void faMesh::addFaPatches(const List<faPatch*>& p)
+void Foam::faMesh::addFaPatches(const List<faPatch*>& p)
 {
     if (debug)
     {
@@ -846,19 +860,19 @@ void faMesh::addFaPatches(const List<faPatch*>& p)
 }
 
 
-const objectRegistry& faMesh::db() const
+const Foam::objectRegistry& Foam::faMesh::db() const
 {
     return mesh_.db();
 }
 
 
-const faBoundaryMesh& faMesh::boundary() const
+const Foam::faBoundaryMesh& Foam::faMesh::boundary() const
 {
     return boundary_;
 }
 
 
-const labelList& faMesh::patchStarts() const
+const Foam::labelList& Foam::faMesh::patchStarts() const
 {
     if (!patchStartsPtr_)
     {
@@ -869,7 +883,7 @@ const labelList& faMesh::patchStarts() const
 }
 
 
-const edgeVectorField& faMesh::Le() const
+const Foam::edgeVectorField& Foam::faMesh::Le() const
 {
     if (!LePtr_)
     {
@@ -880,7 +894,7 @@ const edgeVectorField& faMesh::Le() const
 }
 
 
-const edgeScalarField& faMesh::magLe() const
+const Foam::edgeScalarField& Foam::faMesh::magLe() const
 {
     if (!magLePtr_)
     {
@@ -891,7 +905,7 @@ const edgeScalarField& faMesh::magLe() const
 }
 
 
-const areaVectorField& faMesh::areaCentres() const
+const Foam::areaVectorField& Foam::faMesh::areaCentres() const
 {
     if (!centresPtr_)
     {
@@ -902,7 +916,7 @@ const areaVectorField& faMesh::areaCentres() const
 }
 
 
-const edgeVectorField& faMesh::edgeCentres() const
+const Foam::edgeVectorField& Foam::faMesh::edgeCentres() const
 {
     if (!edgeCentresPtr_)
     {
@@ -913,7 +927,8 @@ const edgeVectorField& faMesh::edgeCentres() const
 }
 
 
-const DimensionedField<scalar, areaMesh>& faMesh::S() const
+const Foam::DimensionedField<Foam::scalar, Foam::areaMesh>&
+Foam::faMesh::S() const
 {
     if (!SPtr_)
     {
@@ -924,7 +939,8 @@ const DimensionedField<scalar, areaMesh>& faMesh::S() const
 }
 
 
-const DimensionedField<scalar, areaMesh>& faMesh::S0() const
+const Foam::DimensionedField<Foam::scalar, Foam::areaMesh>&
+Foam::faMesh::S0() const
 {
     if (!S0Ptr_)
     {
@@ -937,7 +953,8 @@ const DimensionedField<scalar, areaMesh>& faMesh::S0() const
 }
 
 
-const DimensionedField<scalar, areaMesh>& faMesh::S00() const
+const Foam::DimensionedField<Foam::scalar, Foam::areaMesh>&
+Foam::faMesh::S00() const
 {
     if (!S00Ptr_)
     {
@@ -961,7 +978,7 @@ const DimensionedField<scalar, areaMesh>& faMesh::S00() const
 }
 
 
-const areaVectorField& faMesh::faceAreaNormals() const
+const Foam::areaVectorField& Foam::faMesh::faceAreaNormals() const
 {
     if (!faceAreaNormalsPtr_)
     {
@@ -972,7 +989,7 @@ const areaVectorField& faMesh::faceAreaNormals() const
 }
 
 
-const edgeVectorField& faMesh::edgeAreaNormals() const
+const Foam::edgeVectorField& Foam::faMesh::edgeAreaNormals() const
 {
     if (!edgeAreaNormalsPtr_)
     {
@@ -983,7 +1000,7 @@ const edgeVectorField& faMesh::edgeAreaNormals() const
 }
 
 
-const vectorField& faMesh::pointAreaNormals() const
+const Foam::vectorField& Foam::faMesh::pointAreaNormals() const
 {
     if (!pointAreaNormalsPtr_)
     {
@@ -994,7 +1011,7 @@ const vectorField& faMesh::pointAreaNormals() const
 }
 
 
-const areaScalarField& faMesh::faceCurvatures() const
+const Foam::areaScalarField& Foam::faMesh::faceCurvatures() const
 {
     if (!faceCurvaturesPtr_)
     {
@@ -1005,7 +1022,8 @@ const areaScalarField& faMesh::faceCurvatures() const
 }
 
 
-const FieldField<Field, tensor>& faMesh::edgeTransformTensors() const
+const Foam::FieldField<Foam::Field, Foam::tensor>&
+Foam::faMesh::edgeTransformTensors() const
 {
     if (!edgeTransformTensorsPtr_)
     {
@@ -1017,7 +1035,7 @@ const FieldField<Field, tensor>& faMesh::edgeTransformTensors() const
 
 
 // Return global mesh data
-const faGlobalMeshData& faMesh::globalData() const
+const Foam::faGlobalMeshData& Foam::faMesh::globalData() const
 {
     if (!globalMeshDataPtr_)
     {
@@ -1028,7 +1046,7 @@ const faGlobalMeshData& faMesh::globalData() const
 }
 
 
-const lduAddressing& faMesh::lduAddr() const
+const Foam::lduAddressing& Foam::faMesh::lduAddr() const
 {
     if (!lduPtr_)
     {
@@ -1039,7 +1057,8 @@ const lduAddressing& faMesh::lduAddr() const
 }
 
 
-tmp<scalarField> faMesh::movePoints(const vectorField& newPoints)
+Foam::tmp<Foam::scalarField>
+Foam::faMesh::movePoints(const vectorField& newPoints)
 {
     moving_ = true;
 
@@ -1088,7 +1107,7 @@ tmp<scalarField> faMesh::movePoints(const vectorField& newPoints)
 
 
 //- Return true if point normals should be corrected for a patch
-bool faMesh::correctPatchPointNormals(const label patchID) const
+bool Foam::faMesh::correctPatchPointNormals(const label patchID) const
 {
     if((patchID < 0) || (patchID >= boundary().size()))
     {
@@ -1109,7 +1128,7 @@ bool faMesh::correctPatchPointNormals(const label patchID) const
 
 
 //- Set patch point normals corrections
-boolList& faMesh::correctPatchPointNormals() const
+Foam::boolList& Foam::faMesh::correctPatchPointNormals() const
 {
     if(!correctPatchPointNormalsPtr_)
     {
@@ -1121,7 +1140,7 @@ boolList& faMesh::correctPatchPointNormals() const
 }
 
 
-bool faMesh::write() const
+bool Foam::faMesh::write() const
 {
     faceLabels_.write();
     boundary_.write();
@@ -1132,19 +1151,16 @@ bool faMesh::write() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool faMesh::operator!=(const faMesh& m) const
+bool Foam::faMesh::operator!=(const faMesh& m) const
 {
     return &m != this;
 }
 
-bool faMesh::operator==(const faMesh& m) const
+
+bool Foam::faMesh::operator==(const faMesh& m) const
 {
     return &m == this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

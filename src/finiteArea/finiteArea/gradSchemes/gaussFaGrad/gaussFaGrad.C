@@ -54,11 +54,11 @@ tmp
 gaussGrad<Type>::grad
 (
     const GeometricField<Type, faPatchField, areaMesh>& vsf
-)
+) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
 
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > tGrad
+    tmp<GeometricField<GradType, faPatchField, areaMesh> > tgGrad
     (
         fac::edgeIntegrate
         (
@@ -67,35 +67,52 @@ gaussGrad<Type>::grad
         )
     );
 
+    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad();
 
     // Remove component of gradient normal to surface (area)
     const areaVectorField& n = vsf.mesh().faceAreaNormals();
 
-    tGrad() -= n*(n&tGrad());
+    gGrad -= n*(n & gGrad);
+    gGrad.correctBoundaryConditions();
+
+    gGrad.rename("grad(" + vsf.name() + ')');
+    correctBoundaryConditions(vsf, gGrad);
+
+    return tgGrad;
+}
 
 
-    tGrad().rename("grad(" + vsf.name() + ')');
-
+template<class Type>
+void gaussGrad<Type>::correctBoundaryConditions
+(
+    const GeometricField<Type, faPatchField, areaMesh>& vsf,
+    GeometricField
+    <
+        typename outerProduct<vector, Type>::type, faPatchField, areaMesh
+    >& gGrad
+)
+{
     forAll(vsf.boundaryField(), patchI)
     {
         if (!vsf.boundaryField()[patchI].coupled())
         {
             vectorField m =
-                this->mesh().Le().boundaryField()[patchI]
-                /this->mesh().magLe().boundaryField()[patchI];
+                vsf.mesh().Le().boundaryField()[patchI]
+                /vsf.mesh().magLe().boundaryField()[patchI];
 
-            tGrad().boundaryField()[patchI] = 
-                m*vsf.boundaryField()[patchI].snGrad();
+            // Zeljko Tukovic
+//             gGrad.boundaryField()[patchI] = 
+//                 m*vsf.boundaryField()[patchI].snGrad();
 
-//             tGrad().boundaryField()[patchI] += m *
-//             (
-//                 vsf.boundaryField()[patchI].snGrad()
-//               - (n & tGrad().boundaryField()[patchI])
-//             );
+            //HJ Not sure: should this be a complete correction or just the
+            //   tangential part?  HJ, 24/Jul/2009
+            gGrad.boundaryField()[patchI] += m*
+            (
+                vsf.boundaryField()[patchI].snGrad()
+              - (m & gGrad.boundaryField()[patchI])
+            );
         }
     }
-
-    return tGrad;
 }
 
 

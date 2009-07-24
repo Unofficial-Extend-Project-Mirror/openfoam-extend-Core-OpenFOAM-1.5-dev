@@ -24,8 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "gaussFaGrad.H"
 #include "faMesh.H"
+#include "leastSquaresFaGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -33,7 +33,7 @@ namespace Foam
 {
 namespace fa
 {
-    makeFaGradScheme(gaussGrad)
+    makeFaGradScheme(leastSquaresFaGrad)
 }
 }
 

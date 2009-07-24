@@ -23,15 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Simple central-difference lnGrad scheme with non-orthogonal correction.
+    lnGrad scheme with limited non-orthogonal correction.
+
+    The limiter is controlled by a coefficient with a value between 0 and 1
+    which when 0 switches the correction off and the scheme behaves as
+    uncorrectedLnGrad, when set to 1 the full correction is applied and the
+    scheme behaves as correctedLnGrad and when set to 0.5 the limiter is
+    calculated such that the non-orthogonal contribution does not exceed the
+    orthogonal part.
 
 \*---------------------------------------------------------------------------*/
 
-#include "correctedLnGrad.H"
+#include "fa.H"
+#include "limitedLnGrad.H"
 #include "areaFields.H"
 #include "edgeFields.H"
-#include "linearEdgeInterpolation.H"
-#include "gaussFaGrad.H"
+#include "correctedLnGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,10 +50,10 @@ namespace Foam
 namespace fa
 {
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * *< * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-correctedLnGrad<Type>::~correctedLnGrad()
+limitedLnGrad<Type>::~limitedLnGrad()
 {}
 
 
@@ -54,60 +61,42 @@ correctedLnGrad<Type>::~correctedLnGrad()
 
 template<class Type>
 tmp<GeometricField<Type, faePatchField, edgeMesh> >
-correctedLnGrad<Type>::correction
+limitedLnGrad<Type>::correction
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 ) const
 {
-    const faMesh& mesh = this->mesh();
+    GeometricField<Type, faePatchField, edgeMesh> corr = 
+        correctedLnGrad<Type>(this->mesh()).correction(vf);
 
-    // construct GeometricField<Type, faePatchField, edgeMesh>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tssf
+    edgeScalarField limiter
     (
-        new GeometricField<Type, faePatchField, edgeMesh>
+        min
         (
-            IOobject
-            (
-                "lnGradCorr("+vf.name()+')',
-                vf.instance(),
-                vf.db()
+            limitCoeff_
+           *mag(lnGradScheme<Type>::lnGrad(vf, deltaCoeffs(vf), "orthSnGrad"))
+           /(
+                (1 - limitCoeff_)*mag(corr)
+              + dimensionedScalar("small", corr.dimensions(), SMALL)
             ),
-            mesh,
-            vf.dimensions()*mesh.deltaCoeffs().dimensions()
+            dimensionedScalar("one", dimless, 1.0)
         )
     );
-    GeometricField<Type, faePatchField, edgeMesh>& ssf = tssf();
 
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    if (fa::debug)
     {
-        ssf.replace
-        (
-            cmpt,
-            mesh.correctionVectors()
-          & linearEdgeInterpolation
-            <
-                typename 
-                outerProduct<vector, typename pTraits<Type>::cmptType>::type
-            >(mesh).interpolate
-            (
-                gradScheme<typename pTraits<Type>::cmptType>::New
-                (
-                    mesh,
-                    mesh.gradScheme(ssf.name())
-                )()
-//                 gaussGrad<typename pTraits<Type>::cmptType>(mesh)
-               .grad(vf.component(cmpt))
-            )
-        );
+        Info<< "limitedLnGrad :: limiter min: " << min(limiter.internalField())
+            << " max: "<< max(limiter.internalField())
+            << " avg: " << average(limiter.internalField()) << endl;
     }
 
-    return tssf;
+    return limiter*corr;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fa
+} // End namespace fv
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

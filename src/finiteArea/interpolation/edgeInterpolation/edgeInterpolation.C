@@ -405,6 +405,7 @@ void edgeInterpolation::makeDeltaCoeffs() const
         dimless/dimLength
     );
     edgeScalarField& DeltaCoeffs = *differenceFactors_;
+    scalarField& dc = DeltaCoeffs.internalField();
 
 
     // Set local references to mesh data
@@ -466,8 +467,11 @@ void edgeInterpolation::makeDeltaCoeffs() const
         // Edge normal - area tangent
         edgeNormal = lengths[edgeI]/mag(lengths[edgeI]);
 
-        DeltaCoeffs.internalField()[edgeI] =
-            1.0/(lPN*(unitDelta&edgeNormal));
+        // Delta coefficient as per definition
+//         dc[edgeI] = 1.0/(lPN*(unitDelta & edgeNormal));
+
+        // Stabilised form for bad meshes.  HJ, 23/Jul/2009
+        dc[edgeI] = 1.0/max((lPN*(unitDelta & edgeNormal)), 0.05*lPN);
     }
 
 
@@ -518,14 +522,12 @@ void edgeInterpolation::makeCorrectionVectors() const
     const edgeList& edges = mesh().edges();
     const pointField& points = mesh().points();
 
-
     scalarField deltaCoeffs(owner.size());
-
 
     forAll(owner, edgeI)
     {
         // Edge normal - area normal
-        vector edgeNormal = lengths[edgeI]^edges[edgeI].vec(points);
+        vector edgeNormal = lengths[edgeI] ^ edges[edgeI].vec(points);
         edgeNormal /= mag(edgeNormal);
 
         // Unit delta vector
@@ -533,8 +535,7 @@ void edgeInterpolation::makeCorrectionVectors() const
             faceCentres[neighbour[edgeI]]
           - faceCentres[owner[edgeI]];
 
-        unitDelta -=
-            edgeNormal*(edgeNormal&unitDelta);
+        unitDelta -= edgeNormal*(edgeNormal & unitDelta);
 
         unitDelta /= mag(unitDelta);
 
@@ -542,7 +543,7 @@ void edgeInterpolation::makeCorrectionVectors() const
         edgeNormal = lengths[edgeI]/magLengths[edgeI];
 
         // Delta coeffs
-        deltaCoeffs[edgeI] = 1.0/(unitDelta&edgeNormal);
+        deltaCoeffs[edgeI] = 1.0/(unitDelta & edgeNormal);
 
         // Edge correction vector
         CorrVecs.internalField()[edgeI] =
@@ -565,10 +566,7 @@ void edgeInterpolation::makeCorrectionVectors() const
 
         forAll(sinAlpha, edgeI)
         {
-            if (sinAlpha[edgeI] > 1)
-            {
-                sinAlpha[edgeI] = 1;
-            }
+            sinAlpha[edgeI] = max(-1, min(sinAlpha[edgeI], 1));
         }
 
         NonOrthogCoeff = max(Foam::asin(sinAlpha)*180.0/M_PI);

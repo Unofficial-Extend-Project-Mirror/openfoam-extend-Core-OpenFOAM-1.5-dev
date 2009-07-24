@@ -22,9 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Central-difference snGrad scheme with limited non-orthogonal correction.
+    The limiter is controlled by a coefficient with a value between 0 and 1
+    which when zero switches the limiter off and the scheme behaves as
+    correctedSnGrad, and when set to 1 the limiter is calculated such that the
+    non-orthogonal contribution does not exceed the orthogonal part.
+
 \*---------------------------------------------------------------------------*/
 
-#include "gaussFaGrad.H"
+#include "limitedLnGrad.H"
 #include "faMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,7 +40,7 @@ namespace Foam
 {
 namespace fa
 {
-    makeFaGradScheme(gaussGrad)
+    makeLnGradScheme(limitedLnGrad)
 }
 }
 

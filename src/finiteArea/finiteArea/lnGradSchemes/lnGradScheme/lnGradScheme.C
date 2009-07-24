@@ -110,7 +110,8 @@ tmp<GeometricField<Type, faePatchField, edgeMesh> >
 lnGradScheme<Type>::lnGrad
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
-    const tmp<edgeScalarField>& tdeltaCoeffs
+    const tmp<edgeScalarField>& tdeltaCoeffs,
+    const word& lnGradName
 )
 {
     const faMesh& mesh = vf.mesh();
@@ -122,7 +123,7 @@ lnGradScheme<Type>::lnGrad
         (
             IOobject
             (
-                "lnGrad("+vf.name()+')',
+                lnGradName + vf.name() + ')',
                 vf.instance(),
                 vf.db(),
                 IOobject::NO_READ,

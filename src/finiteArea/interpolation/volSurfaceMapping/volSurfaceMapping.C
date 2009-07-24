@@ -56,17 +56,23 @@ Foam::tmp<Foam::Field<Type> > Foam::volSurfaceMapping::mapToSurface
     );
     Field<Type>& result = tresult();
 
-    const polyBoundaryMesh& bm = mesh_().boundaryMesh();
+    // Get reference to volume mesh
+    const polyMesh& pMesh = mesh_();
+    const polyBoundaryMesh& bm = pMesh.boundaryMesh();
 
     label patchID, faceID;
 
     // Grab droplet cloud source by identifying patch and face
     forAll (faceLabels, i)
     {
-        patchID = bm.whichPatch(faceLabels[i]);
-        faceID = bm[patchID].whichFace(faceLabels[i]);
+        // Escape if face is beyond active faces, eg belongs to a face zone
+        if (faceLabels[i] < pMesh.nFaces())
+        {
+            patchID = bm.whichPatch(faceLabels[i]);
+            faceID = bm[patchID].whichFace(faceLabels[i]);
 
-        result[i] = df[patchID][faceID];
+            result[i] = df[patchID][faceID];
+        }
     }
 
     return tresult;
@@ -83,19 +89,24 @@ void Foam::volSurfaceMapping::mapToVolume
     // Grab labels for all faces in faMesh
     const labelList& faceLabels = mesh_.faceLabels();
 
-    const polyBoundaryMesh& bm = mesh_().boundaryMesh();
+    // Get reference to volume mesh
+    const polyMesh& pMesh = mesh_();
+    const polyBoundaryMesh& bm = pMesh.boundaryMesh();
 
     label patchID, faceID;
 
     const Field<Type>& afi = af.internalField();
 
-    // 
     forAll (faceLabels, i)
     {
-        patchID = bm.whichPatch(faceLabels[i]);
-        faceID = bm[patchID].whichFace(faceLabels[i]);
+        // Escape if face is beyond active faces, eg belongs to a face zone
+        if (faceLabels[i] < pMesh.nFaces())
+        {
+            patchID = bm.whichPatch(faceLabels[i]);
+            faceID = bm[patchID].whichFace(faceLabels[i]);
 
-        bf[patchID][faceID] = afi[i];
+            bf[patchID][faceID] = afi[i];
+        }
     }
 }
 

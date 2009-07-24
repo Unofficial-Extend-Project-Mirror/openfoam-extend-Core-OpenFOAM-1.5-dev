@@ -23,104 +23,87 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    volSurfaceMapping
+    Foam::leastSquaresFaVectors
 
 Description
-    Volume to surface and surface to volume mapping 
+    Least-squares gradient scheme vectors for the Finite Area method
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
-    volSurfaceMapping.C
+    leastSquaresFaVectors.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef volSurfaceMapping_H
-#define volSurfaceMapping_H
+#ifndef leastSquaresFaVectors_H
+#define leastSquaresFaVectors_H
 
+#include "MeshObject.H"
 #include "faMesh.H"
+#include "edgeFieldsFwd.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<class Type> class fvPatchField;
-
 /*---------------------------------------------------------------------------*\
-                        Class volSurfaceMapping Declaration
+                     Class leastSquaresFaVectors Declaration
 \*---------------------------------------------------------------------------*/
 
-class volSurfaceMapping
+class leastSquaresFaVectors
+:
+    public MeshObject<faMesh, leastSquaresFaVectors>
 {
     // Private data
 
-        //- Reference to mesh
-        const faMesh& mesh_;
+        //- Least-squares gradient vectors
+        mutable edgeVectorField* pVectorsPtr_;
+        mutable edgeVectorField* nVectorsPtr_;
 
 
-    // Private Member Functions
+    // Private member functions
 
-        //- Disallow default bitwise copy construct
-        volSurfaceMapping(const volSurfaceMapping&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const volSurfaceMapping&);
+        //- Construct Least-squares gradient vectors
+        void makeLeastSquaresVectors() const;
 
 
 public:
 
+    // Declare name of the class and its debug switch
+    TypeName("leastSquaresFaVectors");
+
+
     // Constructors
 
-        //- Construct null
-        volSurfaceMapping();
-
-        //- Construct from mesh
-        volSurfaceMapping(const faMesh& mesh)
-        :
-            mesh_(mesh)
-        {}
+        //- Construct given an faMesh
+        explicit leastSquaresFaVectors(const faMesh&);
 
 
-    // Destructor - default
+    // Destructor
+
+        virtual ~leastSquaresFaVectors();
 
 
-    // Member Functions
+    // Member functions
 
-        //- Map droplet cloud sources to surface
-        template<template<class> class PatchField, class Type>
-        tmp<Field<Type> > mapToSurface
-        (
-            const FieldField<PatchField, Type>& df
-        ) const;
+        //- Return reference to owner least square vectors
+        const edgeVectorField& pVectors() const;
 
-        //- Map surface field to volume boundary field
-        template<class Type>
-        void mapToVolume
-        (
-            const GeometricField<Type, faPatchField, areaMesh>& af,
-            FieldField<fvPatchField, Type>& bf
-        ) const;
+        //- Return reference to neighbour least square vectors
+        const edgeVectorField& nVectors() const;
 
-        template<class Type>
-        void mapToVolume
-        (
-            const tmp<GeometricField<Type, faPatchField, areaMesh> >& taf,
-            FieldField<fvPatchField, Type>& bf
-        ) const;
+
+        //- Delete the least square vectors when the mesh moves
+        virtual bool movePoints() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "volSurfaceMapping.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

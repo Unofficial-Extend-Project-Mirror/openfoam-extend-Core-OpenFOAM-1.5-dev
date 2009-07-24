@@ -121,26 +121,15 @@ public:
             return mesh_;
         }
 
-
-        //- Return the lnGrad of the given cell field
-        //  with the given owner and neighbour weigting factors
-        static tmp<GeometricField<Type, faePatchField, edgeMesh> >
-        lnGrad
-        (
-            const GeometricField<Type, faPatchField, areaMesh>&,
-            const tmp<edgeScalarField>&,
-            const tmp<edgeScalarField>&
-        );
-
         //- Return the lnGrad of the given cell field
         //  with the given weigting factors
         static tmp<GeometricField<Type, faePatchField, edgeMesh> >
         lnGrad
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
-            const tmp<edgeScalarField>&
+            const tmp<edgeScalarField>&,
+            const word& snGradName = "lnGrad"
         );
-
 
         //- Return the interpolation weighting factors for the given field
         virtual tmp<edgeScalarField> deltaCoeffs

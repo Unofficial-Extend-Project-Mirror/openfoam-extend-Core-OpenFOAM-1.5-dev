@@ -298,6 +298,14 @@ public:
             //- Return reference to time
             const Time& time() const;
 
+            //- Return the current instance directory for points
+            //  Used in the consruction of gemometric mesh data dependent
+            //  on points
+            const fileName& pointsInstance() const;
+
+            //- Return the current instance directory for faces
+            const fileName& facesInstance() const;
+
 
             //- Mesh size parameters
 

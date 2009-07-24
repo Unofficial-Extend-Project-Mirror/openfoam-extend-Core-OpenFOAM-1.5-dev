@@ -23,24 +23,30 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gaussGrad
+    Foam::fa::limitedLnGrad
 
 Description
-    Basic second-order gradient scheme using face-interpolation
-    and Gauss' theorem.
+    Central-difference lnGrad scheme with limited non-orthogonal correction.
+
+    The limiter is controlled by a coefficient with a value between 0 and 1
+    which when 0 switches the correction off and the scheme behaves as
+    uncorrectedSnGrad, when set to 1 the full correction is applied and the
+    scheme behaves as correctedSnGrad and when set to 0.5 the limiter is
+    calculated such that the non-orthogonal contribution does not exceed the
+    orthogonal part.
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
-    gaussFaGrad.C
-    gaussFaGrads.C
+    limitedLnGrad.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef gaussFaGrad_H
-#define gaussFaGrad_H
+#ifndef limitedLnGrad_H
+#define limitedLnGrad_H
 
-#include "faGradScheme.H"
-#include "edgeInterpolationScheme.H"
-#include "linearEdgeInterpolation.H"
+#include "lnGradScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,95 +59,92 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gaussGrad Declaration
+                           Class limitedLnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class gaussGrad
+class limitedLnGrad
 :
-    public fa::gradScheme<Type>
+    public lnGradScheme<Type>
 {
     // Private data
 
-        tmp<edgeInterpolationScheme<Type> > tinterpScheme_;
- 
+        //- Limiter.  0 = no limiting, 1 = full limiting
+        scalar limitCoeff_;
+
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        gaussGrad(const gaussGrad&);
-
         //- Disallow default bitwise assignment
-        void operator=(const gaussGrad&);
+        void operator=(const limitedLnGrad&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("Gauss");
+    TypeName("limited");
 
 
     // Constructors
 
         //- Construct from mesh
-        gaussGrad(const faMesh& mesh)
+        limitedLnGrad(const faMesh& mesh)
         :
-            gradScheme<Type>(mesh),
-            tinterpScheme_(new linearEdgeInterpolation<Type>(mesh))
+            lnGradScheme<Type>(mesh)
         {}
 
-        //- Construct from Istream
-        gaussGrad(const faMesh& mesh, Istream& is)
+
+        //- Construct from mesh and data stream
+        limitedLnGrad(const faMesh& mesh, Istream& is)
         :
-            gradScheme<Type>(mesh),
-            tinterpScheme_(NULL)
+            lnGradScheme<Type>(mesh),
+            limitCoeff_(readScalar(is))
         {
-            if (is.eof())
+            if (limitCoeff_ < 0 || limitCoeff_ > 1)
             {
-                tinterpScheme_ =
-                    tmp<edgeInterpolationScheme<Type> >
-                    (
-                        new linearEdgeInterpolation<Type>(mesh)
-                    );
-            }
-            else
-            {
-                tinterpScheme_ =
-                    tmp<edgeInterpolationScheme<Type> >
-                    (
-                        edgeInterpolationScheme<Type>::New(mesh, is)
-                    );
+                FatalIOErrorIn
+                (
+                    "limitedLnGrad(const faMesh& mesh, Istream& is) : ",
+                    is
+                )   << "limitCoeff is specified as " << limitCoeff_
+                    << " but should be >= 0 && <= 1"
+                    << exit(FatalIOError);
             }
         }
 
 
+    // Destructor
+
+        virtual ~limitedLnGrad();
+
+
     // Member Functions
 
-        //- Return the gradient of the given field calculated
-        //  using Gauss' theorem on the interpolated field
-        tmp
-        <
-            GeometricField
-            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
-        > grad
+        //- Return the interpolation weighting factors for the given field
+        virtual tmp<edgeScalarField> deltaCoeffs
         (
             const GeometricField<Type, faPatchField, areaMesh>&
-        ) const;
+        ) const
+        {
+            return this->mesh().deltaCoeffs();
+        }
 
-        //- Correct the boundary values of the gradient using the patchField
-        // snGrad functions
-        static void correctBoundaryConditions
-        (
-            const GeometricField<Type, faPatchField, areaMesh>&,
-            GeometricField
-            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>&
-        );
+        //- Return true if this scheme uses an explicit correction
+        virtual bool corrected() const
+        {
+            return !this->mesh().orthogonal();
+        }
+
+        //- Return the explicit correction to the limitedLnGrad
+        //  for the given field
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        correction(const GeometricField<Type, faPatchField, areaMesh>&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fa
+} // End namespace fv
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -150,7 +153,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussFaGrad.C"
+#   include "limitedLnGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

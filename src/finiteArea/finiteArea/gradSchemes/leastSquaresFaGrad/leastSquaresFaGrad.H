@@ -23,32 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    gradScheme
+    Foam::fa::leastSquaresFaGrad
 
 Description
-    Abstract base class for gradient schemes.
+    Second-order gradient scheme using least-squares.
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
-    faGradScheme.C
-    faGradSchemes.C
+    leastSquaresFaGrad.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faGradScheme_H
-#define faGradScheme_H
+#ifndef leastSquaresFaGrad_H
+#define leastSquaresFaGrad_H
 
-#include "tmp.H"
-#include "areaFieldsFwd.H"
-#include "edgeFieldsFwd.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
+#include "faGradScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class faMesh;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,75 +52,46 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gradScheme Declaration
+                      Class leastSquaresFaGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class gradScheme
+class leastSquaresFaGrad
 :
-    public refCount
+    public fa::gradScheme<Type>
 {
-    // Private data
-
-        const faMesh& mesh_;
-
-
     // Private Member Functions
 
-        //- Disallow copy construct
-        gradScheme(const gradScheme&);
+        //- Disallow default bitwise copy construct
+        leastSquaresFaGrad(const leastSquaresFaGrad&);
 
         //- Disallow default bitwise assignment
-        void operator=(const gradScheme&);
+        void operator=(const leastSquaresFaGrad&);
 
 
 public:
 
-    // Declare run-time constructor selection tables
-
-        declareRunTimeSelectionTable
-        (
-            tmp,
-            gradScheme,
-            Istream,
-            (const faMesh& mesh, Istream& schemeData),
-            (mesh, schemeData)
-        );
+    //- Runtime type information
+    TypeName("leastSquares");
 
 
     // Constructors
 
         //- Construct from mesh
-        gradScheme(const faMesh& mesh)
+        leastSquaresFaGrad(const faMesh& mesh)
         :
-            mesh_(mesh)
+            gradScheme<Type>(mesh)
         {}
 
-
-    // Selectors
-
-        //- Return a pointer to a new gradScheme created on freestore
-        static tmp<gradScheme<Type> > New
-        (
-            const faMesh& mesh,
-            Istream& schemeData
-        );
-
-
-    // Destructor
-
-        virtual ~gradScheme();
+        //- Construct from Istream
+        leastSquaresFaGrad(const faMesh& mesh, Istream&)
+        :
+            gradScheme<Type>(mesh)
+        {}
 
 
     // Member Functions
 
-        //- Return mesh reference
-        const faMesh& mesh() const
-        {
-            return mesh_;
-        }
-
-        //- Calculate and return the grad of the given field
         virtual tmp
         <
             GeometricField
@@ -132,7 +99,7 @@ public:
         > grad
         (
             const GeometricField<Type, faPatchField, areaMesh>&
-        ) const = 0;
+        ) const;
 };
 
 
@@ -146,26 +113,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Add the patch constructor functions to the hash tables
-
-#define makeFaGradTypeScheme(SS, Type)                                         \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                              \
-                                                                               \
-gradScheme<Type>::addIstreamConstructorToTable<SS<Type> >                      \
-    add##SS##Type##IstreamConstructorToTable_;
-
-
-#define makeFaGradScheme(SS)                                                   \
-                                                                               \
-makeFaGradTypeScheme(SS, scalar)                                               \
-makeFaGradTypeScheme(SS, vector)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
-#   include "faGradScheme.C"
+#   include "leastSquaresFaGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
