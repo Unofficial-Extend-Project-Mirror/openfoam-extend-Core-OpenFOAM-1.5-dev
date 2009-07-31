@@ -47,10 +47,7 @@
         thermof.set
         (
             i,
-            autoPtr<basicThermo>
-            (
-                basicThermo::New(fluidRegions[i])
-            ).ptr()
+            basicThermo::New(fluidRegions[i]).ptr()
         );
 
         Info<< "    Adding to rhof\n" << endl;
@@ -85,7 +82,7 @@
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                thermof[i].rho()*thermof[i].Cp()*thermof[i].alpha()
+                thermof[i].Cp()*thermof[i].alpha()
             )
         );
 

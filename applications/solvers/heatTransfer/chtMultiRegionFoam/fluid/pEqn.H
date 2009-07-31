@@ -51,10 +51,10 @@
                 )
               - fvc::domainIntegrate(thermof[i].psi()*thermof[i].p())
             )/fvc::domainIntegrate(thermof[i].psi());
-
+        pdf[i] == thermof[i].p() - (rhof[i]*ghf[i] + pRef);
         rhof[i] = thermof[i].rho();
     }
 
     // Update thermal conductivity
-    Kf[i] = rhof[i]*thermof[i].Cp()*turb[i].alphaEff();
+    Kf[i] = thermof[i].Cp()*turb[i].alphaEff();
 }
