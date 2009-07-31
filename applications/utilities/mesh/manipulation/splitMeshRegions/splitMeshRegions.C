@@ -376,48 +376,49 @@ void subsetVolFields
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
-//     forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
-//     {
-//         const GeoField& fld = *iter();
 
-//         Info<< "Mapping field " << fld.name() << endl;
+    forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
+    {
+        const GeoField& fld = *iter();
 
-//         tmp<GeoField> tSubFld
-//         (
-//             fvMeshSubset::interpolate
-//             (
-//                 fld,
-//                 subMesh,
-//                 patchMap,
-//                 cellMap,
-//                 faceMap
-//             )
-//         );
+        Info<< "Mapping field " << fld.name() << endl;
 
-//         // Hack: set value to 0 for introduced patches (since don't
-//         //       get initialised.
-//         forAll(tSubFld().boundaryField(), patchI)
-//         {
-//             const fvPatchField<typename GeoField::value_type>& pfld =
-//                 tSubFld().boundaryField()[patchI];
+        tmp<GeoField> tSubFld
+        (
+            fvMeshSubset::meshToMesh
+            (
+                fld,
+                subMesh,
+                patchMap,
+                cellMap,
+                faceMap
+            )
+        );
 
-//             if
-//             (
-//                 isA<calculatedFvPatchField<typename GeoField::value_type> >
-//                 (pfld)
-//             )
-//             {
-//                 tSubFld().boundaryField()[patchI] ==
-//                     pTraits<typename GeoField::value_type>::zero;
-//             }
-//         }
+        // Hack: set value to 0 for introduced patches (since don't
+        //       get initialised.
+        forAll(tSubFld().boundaryField(), patchI)
+        {
+            const fvPatchField<typename GeoField::value_type>& pfld =
+                tSubFld().boundaryField()[patchI];
 
-//         // Store on subMesh
-//         GeoField* subFld = tSubFld.ptr();
-//         subFld->rename(fld.name());
-//         subFld->writeOpt() = IOobject::AUTO_WRITE;
-//         subFld->store();
-//     }
+            if
+            (
+                isA<calculatedFvPatchField<typename GeoField::value_type> >
+                (pfld)
+            )
+            {
+                tSubFld().boundaryField()[patchI] ==
+                    pTraits<typename GeoField::value_type>::zero;
+            }
+        }
+
+        // Store on subMesh
+        GeoField* subFld = tSubFld.ptr();
+        subFld->rename(fld.name());
+        subFld->writeOpt() = IOobject::AUTO_WRITE;
+        subFld->store();
+    }
 }
 
 
