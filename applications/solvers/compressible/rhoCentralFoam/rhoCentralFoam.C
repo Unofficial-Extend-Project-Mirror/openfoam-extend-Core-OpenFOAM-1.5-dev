@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
         {
             solve
             (
-                fvm::ddt(rho, U) - fvc::ddt(rho,U)
+                fvm::ddt(rho, U) - fvc::ddt(rho, U)
               - fvm::laplacian(mu, U)
               - fvc::div(tauMC)
             );
