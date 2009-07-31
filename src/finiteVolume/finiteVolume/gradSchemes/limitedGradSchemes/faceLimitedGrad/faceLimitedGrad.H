@@ -75,9 +75,9 @@ class faceLimitedGrad
         inline void limitFace
         (
             scalar& limiter,
-            const scalar maxDelta,
-            const scalar minDelta,
-            const scalar extrapolate
+            const scalar& maxDelta,
+            const scalar& minDelta,
+            const scalar& extrapolate
         ) const;
 
 
