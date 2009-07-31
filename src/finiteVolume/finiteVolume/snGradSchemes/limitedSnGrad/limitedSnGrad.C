@@ -39,7 +39,6 @@ Description
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "correctedSnGrad.H"
-#include "localMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
