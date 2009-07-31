@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << endl;
 
+        mesh.readUpdate();
+
         IOobject Uheader
         (
             "U",
