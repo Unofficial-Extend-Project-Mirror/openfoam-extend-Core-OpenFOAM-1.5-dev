@@ -56,7 +56,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class limitedSnGrad Declaration
+                         Class limitedSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
