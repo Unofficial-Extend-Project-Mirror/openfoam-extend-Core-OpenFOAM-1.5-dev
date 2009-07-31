@@ -42,7 +42,6 @@ SourceFiles
 #include "volFields.H"
 #include "pointFields.H"
 #include "vtkMesh.H"
-#include "indirectPrimitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
 
 using namespace Foam;
@@ -66,8 +65,6 @@ class patchWriter
 
     const bool nearCellValue_;
 
-    const fileName fName_;
-
     const labelList patchIDs_;
 
     std::ofstream os_;
@@ -75,6 +72,7 @@ class patchWriter
     label nPoints_;
 
     label nFaces_;
+
 
 public:
 

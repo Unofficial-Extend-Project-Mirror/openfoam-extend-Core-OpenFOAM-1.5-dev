@@ -45,7 +45,6 @@ Foam::lagrangianWriter::lagrangianWriter
 :
     vMesh_(vMesh),
     binary_(binary),
-    fName_(fName),
     cloudName_(cloudName),
     os_(fName.c_str())
 {

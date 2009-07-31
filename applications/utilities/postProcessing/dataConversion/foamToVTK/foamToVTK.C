@@ -90,6 +90,9 @@ Usage
     The quoting is required to avoid shell expansions and to pass the
     information as a single argument.
 
+    @param -faMesh \n
+    Write finite area mesh and fields
+
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
     interpolation: on the internal field it interpolates the whole volfield
@@ -138,12 +141,15 @@ Note
 #include "Cloud.H"
 #include "passiveParticle.H"
 
+#include "faCFD.H"
+
 #include "vtkMesh.H"
 #include "readFields.H"
 #include "writeFuns.H"
 
 #include "internalWriter.H"
 #include "patchWriter.H"
+#include "faMeshWriter.H"
 #include "lagrangianWriter.H"
 
 #include "writeFaceSet.H"
@@ -239,6 +245,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("allPatches","");
     argList::validOptions.insert("excludePatches","patches to exclude");
     argList::validOptions.insert("noFaceZones","");
+    argList::validOptions.insert("faMesh","");
     argList::validOptions.insert("noLinks","");
 
 #   include "setRootCase.H"
@@ -469,7 +476,7 @@ int main(int argc, char *argv[])
         readFields(vMesh, vMesh, objects, selectedFields, vtf);
         print("    volTensorFields            :", Info, vtf);
 
-        label nVolFields =
+        const label nVolFields =
                 vsf.size()
               + vvf.size()
               + vSpheretf.size()
@@ -912,6 +919,75 @@ int main(int argc, char *argv[])
         }
 
 
+
+        //---------------------------------------------------------------------
+        //
+        // Write surface fields
+        //
+        //---------------------------------------------------------------------
+
+        if (args.options().found("faMesh"))
+        {
+            mkDir(fvPath/"faMesh");
+
+            fileName faFileName =
+                fvPath/"faMesh"/"faMesh"
+              + "_"
+              + name(timeI)
+              + ".vtk";
+
+            // Create FA mesh
+            faMesh aMesh(vMesh.mesh());
+
+            PtrList<areaScalarField> asf;
+            readFieldsNoSubset(vMesh, aMesh, objects, selectedFields, asf);
+            print("    areaScalarFields           :", Info, asf);
+
+            PtrList<areaVectorField> avf;
+            readFieldsNoSubset(vMesh, aMesh, objects, selectedFields, avf);
+            print("    areaVectorFields           :", Info, avf);
+
+            const label nAreaFields =
+                asf.size()
+              + avf.size();
+
+            faMeshWriter writer
+            (
+                vMesh,
+                aMesh,
+                binary,
+                faFileName
+            );
+
+            writeFuns::writeCellDataHeader
+            (
+                writer.os(),
+                aMesh.nFaces(),
+                nAreaFields
+            );
+
+            // Write areaFields
+            writer.write(asf);
+            writer.write(avf);
+
+            if (!noPointValues)
+            {
+                writeFuns::writePointDataHeader
+                (
+                    writer.os(),
+                    aMesh.nPoints(),
+                    nAreaFields
+                );
+
+                // Interpolated areaFields
+                PrimitivePatchInterpolation<indirectPrimitivePatch> pInterp
+                (
+                    aMesh.patch()
+                );
+                writer.write(pInterp, asf);
+                writer.write(pInterp, avf);
+            }
+        }
 
         //---------------------------------------------------------------------
         //

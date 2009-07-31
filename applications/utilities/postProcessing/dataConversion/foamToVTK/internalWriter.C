@@ -42,7 +42,6 @@ Foam::internalWriter::internalWriter
 :
     vMesh_(vMesh),
     binary_(binary),
-    fName_(fName),
     os_(fName.c_str())
 {
     const fvMesh& mesh = vMesh_.mesh();

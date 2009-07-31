@@ -2,6 +2,7 @@ foamToVTK.C
 internalWriter.C
 lagrangianWriter.C
 patchWriter.C
+faMeshWriter.C
 writeFuns.C
 writePatchGeom.C
 writeFaceSet.C

@@ -44,7 +44,6 @@ Foam::patchWriter::patchWriter
     vMesh_(vMesh),
     binary_(binary),
     nearCellValue_(nearCellValue),
-    fName_(fName),
     patchIDs_(patchIDs),
     os_(fName.c_str())
 {

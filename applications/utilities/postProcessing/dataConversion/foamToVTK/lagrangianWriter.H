@@ -62,8 +62,6 @@ class lagrangianWriter
 
     const bool binary_;
 
-    const fileName fName_;
-
     const word cloudName_;
 
     std::ofstream os_;

@@ -74,8 +74,20 @@ public:
 
     // Write header
 
-        static void writeHeader(std::ostream&, const bool, const string&);
-        static void writeCellDataHeader(std::ostream&, const label, const label);
+        static void writeHeader
+        (
+            std::ostream&,
+            const bool,
+            const string&
+        );
+
+        static void writeCellDataHeader
+        (
+            std::ostream&,
+            const label,
+            const label
+        );
+
         static void writePointDataHeader
         (
             std::ostream&,
