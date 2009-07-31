@@ -66,8 +66,6 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
             << endl;
     }
 
-    const fvMesh& mesh = mesh_;
-
     pVectorsPtr_ = new surfaceVectorField
     (
         IOobject
@@ -104,9 +102,9 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
     const unallocLabelList& owner = mesh_.owner();
     const unallocLabelList& neighbour = mesh_.neighbour();
 
-    const volVectorField& C = mesh.C();
-    const surfaceScalarField& w = mesh.weights();
-//     const surfaceScalarField& magSf = mesh.magSf();
+    const volVectorField& C = mesh_.C();
+    const surfaceScalarField& w = mesh_.weights();
+//     const surfaceScalarField& magSf = mesh_.magSf();
 
 
     // Set up temporary storage for the dd tensor (before inversion)
@@ -129,7 +127,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
     {
         const fvsPatchScalarField& pw = w.boundaryField()[patchi];
         // Note: least squares in 1.4.1 and other OpenCFD versions
-        // are wrong becaus eof incorrect weighting.  HJ, 23/Oct/2008
+        // are wrong because of incorrect weighting.  HJ, 23/Oct/2008
 //         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
@@ -137,16 +135,16 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
         // Build the d-vectors
         vectorField pd = 
-            mesh.Sf().boundaryField()[patchi]
+            mesh_.Sf().boundaryField()[patchi]
            /(
-               mesh.magSf().boundaryField()[patchi]
-              *mesh.deltaCoeffs().boundaryField()[patchi]
+               mesh_.magSf().boundaryField()[patchi]
+              *mesh_.deltaCoeffs().boundaryField()[patchi]
            );
 
-        if (!mesh.orthogonal())
+        if (!mesh_.orthogonal())
         {
-            pd -= mesh.correctionVectors().boundaryField()[patchi]
-                /mesh.deltaCoeffs().boundaryField()[patchi];
+            pd -= mesh_.correctionVectors().boundaryField()[patchi]
+                /mesh_.deltaCoeffs().boundaryField()[patchi];
         }
 
         if (p.coupled())
@@ -203,16 +201,16 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
         // Build the d-vectors
         vectorField pd =
-            mesh.Sf().boundaryField()[patchi]
+            mesh_.Sf().boundaryField()[patchi]
            /(
-               mesh.magSf().boundaryField()[patchi]
-              *mesh.deltaCoeffs().boundaryField()[patchi]
+               mesh_.magSf().boundaryField()[patchi]
+              *mesh_.deltaCoeffs().boundaryField()[patchi]
            );
 
-        if (!mesh.orthogonal())
+        if (!mesh_.orthogonal())
         {
-            pd -= mesh.correctionVectors().boundaryField()[patchi]
-                /mesh.deltaCoeffs().boundaryField()[patchi];
+            pd -= mesh_.correctionVectors().boundaryField()[patchi]
+                /mesh_.deltaCoeffs().boundaryField()[patchi];
         }
 
 
@@ -243,14 +241,14 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
     // For 3D meshes check the determinant of the dd tensor and switch to
     // Gauss if it is less than 3
-    if (mesh.nGeometricD() == 3)
+    if (mesh_.nGeometricD() == 3)
     {
         label nBadCells = 0;
 
-        const cellList& cells = mesh.cells();
-        const scalarField& V = mesh.V();
-        const surfaceVectorField& Sf = mesh.Sf();
-        const surfaceScalarField& w = mesh.weights();
+        const cellList& cells = mesh_.cells();
+        const scalarField& V = mesh_.V();
+        const surfaceVectorField& Sf = mesh_.Sf();
+        const surfaceScalarField& w = mesh_.weights();
 
         forAll (dd, celli)
         {
@@ -264,7 +262,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
                 {
                     label facei = c[cellFacei];
 
-                    if (mesh.isInternalFace(facei))
+                    if (mesh_.isInternalFace(facei))
                     {
                         scalar wf = max(min(w[facei], 0.8), 0.2);
 
@@ -279,14 +277,14 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
                     }
                     else
                     {
-                        label patchi = mesh.boundaryMesh().whichPatch(facei);
+                        label patchi = mesh_.boundaryMesh().whichPatch(facei);
 
-                        if (mesh.boundary()[patchi].size())
+                        if (mesh_.boundary()[patchi].size())
                         {
                             label patchFacei = 
-                                facei - mesh.boundaryMesh()[patchi].start();
+                                facei - mesh_.boundaryMesh()[patchi].start();
 
-                            if (mesh.boundary()[patchi].coupled())
+                            if (mesh_.boundary()[patchi].coupled())
                             {
                                 scalar wf = max
                                 (
