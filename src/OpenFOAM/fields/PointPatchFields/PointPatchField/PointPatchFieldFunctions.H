@@ -347,6 +347,7 @@ inline void opFunc                                                            \
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type2>& f2 \
 ){}                                                                           \
                                                                               \
+                                                                              \
 template                                                                      \
 <                                                                             \
     template<class> class PatchField,                                         \
@@ -367,6 +368,7 @@ inline void opFunc                                                            \
     const VectorSpace<Form,Cmpt,nCmpt>& vs                                    \
 ){}                                                                           \
                                                                               \
+                                                                              \
 template                                                                      \
 <                                                                             \
     template<class> class PatchField,                                         \
@@ -386,6 +388,7 @@ inline void opFunc                                                            \
     const VectorSpace<Form,Cmpt,nCmpt>& vs,                                   \
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>& f1 \
 ){}
+
 
 PRODUCT_OPERATOR(outerProduct, *, outer)
 PRODUCT_OPERATOR(crossProduct, ^, cross)
@@ -408,6 +411,7 @@ void hdual
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -420,6 +424,7 @@ void hdual
     PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&,
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, vector>&
 ){}
+
 
 template
 <
@@ -434,6 +439,7 @@ void diag
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -446,6 +452,7 @@ void tr
     PointPatchField<PatchField, Mesh, PointPatch, MatrixType, scalar>&,
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
+
 
 template
 <
@@ -460,6 +467,7 @@ void dev
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -472,6 +480,7 @@ void dev2
     PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&,
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
+
 
 template
 <
@@ -486,6 +495,7 @@ void det
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -499,18 +509,6 @@ void inv
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
-template
-<
-    template<class> class PatchField,
-    class Mesh,
-    class PointPatch,
-    template<class> class MatrixType
->
-void hinv
-(
-    PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&,
-    const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
-){}
 
 template
 <
@@ -525,6 +523,7 @@ void symm
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -538,6 +537,7 @@ void skew
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
 
+
 template
 <
     template<class> class PatchField,
@@ -550,6 +550,7 @@ void eigenValues
     PointPatchField<PatchField, Mesh, PointPatch, MatrixType, vector>&,
     const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
 ){}
+
 
 template
 <
