@@ -26,6 +26,7 @@ License
 
 #include "fvMeshSubset.H"
 #include "calculatedFvPatchFields.H"
+#include "emptyFvPatchFields.H"
 #include "calculatedFvsPatchFields.H"
 #include "calculatedPointPatchFields.H"
 
@@ -35,6 +36,110 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::meshToMesh
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const fvMesh& sMesh,
+    const labelList& patchMap,
+    const labelList& cellMap,
+    const labelList& faceMap
+)
+{
+    // Create and map the internal-field values
+    Field<Type> internalField(vf.internalField(), cellMap);
+
+    // Create and map the patch field values
+    PtrList<fvPatchField<Type> > patchFields(patchMap.size());
+
+    forAll (patchFields, patchI)
+    {
+        // Set the first one by hand as it corresponds to the
+        // exposed internal faces.  Additional interpolation can be put here
+        // as necessary.  
+        if (patchMap[patchI] == -1)
+        {
+            patchFields.set
+            (
+                patchI,
+                new emptyFvPatchField<Type>
+                (
+                    sMesh.boundary()[patchI],
+                    DimensionedField<Type, volMesh>::null()
+                )
+            );
+        }
+        else
+        {
+            // Construct addressing
+            const fvPatch& subPatch = sMesh.boundary()[patchI];
+            const fvPatch& basePatch = vf.mesh().boundary()[patchMap[patchI]];
+            label baseStart = basePatch.patch().start();
+            label baseSize = basePatch.size();
+
+            labelList directAddressing(subPatch.size());
+
+            forAll(directAddressing, i)
+            {
+                label baseFaceI = faceMap[subPatch.patch().start()+i];
+
+                if (baseFaceI >= baseStart && baseFaceI < baseStart+baseSize)
+                {
+                    directAddressing[i] = baseFaceI-baseStart;
+                }
+                else
+                {
+                    // Mapped from internal face. Do what? Map from element
+                    // 0 for now.
+                    directAddressing[i] = 0;
+                }
+            }
+
+            patchFields.set
+            (
+                patchI,
+                fvPatchField<Type>::New
+                (
+                    vf.boundaryField()[patchMap[patchI]],
+                    sMesh.boundary()[patchI],
+                    DimensionedField<Type, volMesh>::null(),
+                    patchFieldSubset
+                    (
+                        vf.boundaryField()[patchMap[patchI]].size(),
+                        directAddressing
+                    )
+                )
+            );
+
+            // What to do with exposed internal faces if put into this patch?
+        }
+    }
+
+
+    // Create the complete field from the pieces
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tresF
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                "subset"+vf.name(),
+                sMesh.time().timeName(),
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sMesh,
+            vf.dimensions(),
+            internalField,
+            patchFields
+        )
+    );
+
+    return tresF;
+}
+
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate

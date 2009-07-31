@@ -92,6 +92,13 @@ public:
 
         // Constructors
 
+            //- Construct from components
+            patchFieldSubset(const label sbm, const labelList& da)
+            :
+                sizeBeforeMapping_(sbm),
+                directAddressing_(da)
+            {}
+
             //- Construct given addressing
             patchFieldSubset(const fvMeshSubset& ms, const label patchNo)
             :
@@ -360,6 +367,22 @@ public:
 
 
         // Field mapping
+
+            //- Map volume field given map addressing
+            //  - it does not patch up the exposed patches with surface fields
+            //  - it does not handle patch type creation correctly
+            //  Please use only in dummy mapping operations
+            //  HJ, 31/Jul/2009
+            template<class Type>
+            static tmp<GeometricField<Type, fvPatchField, volMesh> >
+            meshToMesh
+            (
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                const fvMesh& sMesh,
+                const labelList& patchMap,
+                const labelList& cellMap,
+                const labelList& faceMap
+            );
 
             //- Map volume field
             template<class Type>
