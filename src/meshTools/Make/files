@@ -12,6 +12,7 @@ cellFeatures/cellFeatures.C
 coordinateSystems/coordinateSystem.C
 coordinateSystems/coordinateSystems.C
 coordinateSystems/parabolicCylindricalCS.C
+coordinateSystems/ellipticCylindricalCS.C
 coordinateSystems/toroidalCS.C
 coordinateSystems/cartesianCS.C
 coordinateSystems/newCoordinateSystem.C
