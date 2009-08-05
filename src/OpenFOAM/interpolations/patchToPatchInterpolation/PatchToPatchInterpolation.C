@@ -120,6 +120,7 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::PatchToPatchInterpolation
     const PatchToPatchInterpolation<FromPatch, ToPatch>& ppi
 )
 :
+    PatchToPatchInterpolationName(),
     fromPatch_(ppi.fromPatch_),
     toPatch_(ppi.toPatch_),
     alg_(ppi.alg_),
