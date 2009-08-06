@@ -38,7 +38,7 @@ boundaryField
         type            totalPressure;
         U               U;
         phi             phi;
-        rho             none;
+        rho             rho;
         psi             none;
         gamma           1;
         p0              uniform 0;
