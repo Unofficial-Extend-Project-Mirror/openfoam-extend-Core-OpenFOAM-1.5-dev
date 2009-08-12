@@ -237,7 +237,14 @@ void graph::write(const fileName& fName, const word& format) const
 
 Ostream& operator<<(Ostream& os, const graph& g)
 {
+    // Write size of list and start contents delimiter
+    os << nl << g.x().size() << nl << token::BEGIN_LIST << nl;
+
     g.writeTable(os);
+
+    // Write end of contents delimiter
+    os << token::END_LIST;
+
     os.check("Ostream& operator<<(Ostream&, const graph&)");
     return os;
 }
