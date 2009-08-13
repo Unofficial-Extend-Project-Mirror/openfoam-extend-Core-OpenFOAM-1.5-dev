@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::XX)
+                sigma.component(symmTensor::XX)
             );
             sigmaxx.write();
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::YY)
+                sigma.component(symmTensor::YY)
             );
             sigmayy.write();
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::ZZ)
+                sigma.component(symmTensor::ZZ)
             );
             sigmazz.write();
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::XY)
+                sigma.component(symmTensor::XY)
             );
             sigmaxy.write();
 
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::XZ)
+                sigma.component(symmTensor::XZ)
             );
             sigmaxz.write();
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                sigma.component(tensor::YZ)
+                sigma.component(symmTensor::YZ)
             );
             sigmayz.write();
 
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ
                 ),
-                0.0*sigma.component(tensor::YZ)
+                0.0*sigma.component(symmTensor::YZ)
             );
 
             forAll(sigmaUn.boundaryField(), patchI)
