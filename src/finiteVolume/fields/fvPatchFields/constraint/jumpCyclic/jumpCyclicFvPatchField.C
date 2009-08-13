@@ -105,8 +105,8 @@ tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf();
 
-    tmp<Field<scalar> > tjf = jump();
-    const Field<scalar>& jf = tjf();
+    tmp<Field<Type> > tjf = jump();
+    const Field<Type>& jf = tjf();
 
     label sizeby2 = this->size()/2;
 
@@ -156,8 +156,8 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 
     if (long(&psiInternal) == long(&this->internalField()))
     {
-        tmp<Field<scalar> > tjf = jump();
-        const Field<scalar>& jf = tjf();
+        // Get component of jump.  HJ, 11/Aug/2009
+        const Field<scalar> jf = jump()().component(cmpt);
 
         for (label facei=0; facei<sizeby2; facei++)
         {
