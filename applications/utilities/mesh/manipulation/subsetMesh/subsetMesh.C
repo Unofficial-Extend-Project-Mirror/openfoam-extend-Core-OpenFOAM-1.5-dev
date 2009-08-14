@@ -347,6 +347,68 @@ int main(int argc, char *argv[])
     meshSubset.subMesh().write();
 
 
+    // Write out mesh mapping information
+    labelIOList pointMap
+    (
+        IOobject
+        (
+            "pointMap",
+            meshSubset.subMesh().dbDir(),
+            polyMesh::meshSubDir,
+            meshSubset.subMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        meshSubset.pointMap()
+    );
+    pointMap.write();
+
+    labelIOList faceMap
+    (
+        IOobject
+        (
+            "faceMap",
+            meshSubset.subMesh().dbDir(),
+            polyMesh::meshSubDir,
+            meshSubset.subMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        meshSubset.faceMap()
+    );
+    faceMap.write();
+
+    labelIOList cellMap
+    (
+        IOobject
+        (
+            "cellMap",
+            meshSubset.subMesh().dbDir(),
+            polyMesh::meshSubDir,
+            meshSubset.subMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        meshSubset.cellMap()
+    );
+    cellMap.write();
+
+    labelIOList patchMap
+    (
+        IOobject
+        (
+            "patchMap",
+            meshSubset.subMesh().dbDir(),
+            polyMesh::meshSubDir,
+            meshSubset.subMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        meshSubset.patchMap()
+    );
+    patchMap.write();
+
+
     // Subsetting adds 'subset' prefix. Rename field to be like original.
     forAll(scalarFlds, i)
     {
