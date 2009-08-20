@@ -32,13 +32,11 @@ License
 // Construct from components
 Foam::faMeshWriter::faMeshWriter
 (
-    const vtkMesh& vMesh,
     const faMesh& aMesh,
     const bool binary,
     const fileName& fName
 )
 :
-    vMesh_(vMesh),
     aMesh_(aMesh),
     binary_(binary),
     os_(fName.c_str())

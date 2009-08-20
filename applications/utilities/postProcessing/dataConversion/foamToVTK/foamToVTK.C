@@ -953,7 +953,6 @@ int main(int argc, char *argv[])
 
             faMeshWriter writer
             (
-                vMesh,
                 aMesh,
                 binary,
                 faFileName

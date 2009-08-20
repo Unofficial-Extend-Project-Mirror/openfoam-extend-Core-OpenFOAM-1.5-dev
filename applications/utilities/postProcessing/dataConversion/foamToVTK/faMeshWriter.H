@@ -40,7 +40,6 @@ SourceFiles
 #include "faMesh.H"
 #include "OFstream.H"
 #include "areaFields.H"
-#include "vtkMesh.H"
 #include "indirectPrimitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
 
@@ -59,9 +58,6 @@ class volPointInterpolation;
 
 class faMeshWriter
 {
-    //- Reference to vtk mesh
-    const vtkMesh& vMesh_;
-
     //- Reference to FA mesh
     const faMesh& aMesh_;
 
@@ -79,7 +75,6 @@ public:
         //- Construct from components
         faMeshWriter
         (
-            const vtkMesh&,
             const faMesh&,
             const bool binary,
             const fileName&
@@ -94,11 +89,26 @@ public:
             return os_;
         }
 
-        //- Write areaFields
+        //- Write areaField
+        template<class Type>
+        void write
+        (
+            const GeometricField<Type, faPatchField, areaMesh>&
+        );
+
+        //- Write list of area fields
         template<class Type>
         void write
         (
             const PtrList<GeometricField<Type, faPatchField, areaMesh> >&
+        );
+
+        //- Interpolate and write areaField
+        template<class Type>
+        void write
+        (
+            const PrimitivePatchInterpolation<indirectPrimitivePatch>&,
+            const GeometricField<Type, faPatchField, areaMesh>&
         );
 
         //- Interpolate and write areaFields

@@ -32,23 +32,31 @@ License
 template<class Type>
 void Foam::faMeshWriter::write
 (
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        << aMesh_.nFaces() << " float" << std::endl;
+
+    DynamicList<floatScalar> fField
+    (
+        pTraits<Type>::nComponents*aMesh_.nFaces()
+    );
+
+    writeFuns::insert(fld.internalField(), fField);
+    writeFuns::write(os_, binary_, fField);
+}
+
+
+template<class Type>
+void Foam::faMeshWriter::write
+(
     const PtrList<GeometricField<Type, faPatchField, areaMesh> >& flds
 )
 {
     forAll(flds, fieldI)
     {
-        const GeometricField<Type, faPatchField, areaMesh>& fld = flds[fieldI];
-
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
-            << aMesh_.nFaces() << " float" << std::endl;
-
-        DynamicList<floatScalar> fField
-        (
-            pTraits<Type>::nComponents*aMesh_.nFaces()
-        );
-
-        writeFuns::insert(fld.internalField(), fField);
-        writeFuns::write(os_, binary_, fField);
+        write(flds[fieldI]);
     }
 }
 
@@ -62,23 +70,32 @@ void Foam::faMeshWriter::write
 {
     forAll(flds, fieldI)
     {
-        const GeometricField<Type, faPatchField, areaMesh>& fld = flds[fieldI];
-
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
-            << aMesh_.nPoints() << " float" << std::endl;
-
-        DynamicList<floatScalar> fField
-        (
-            pTraits<Type>::nComponents*aMesh_.nPoints()
-        );
-
-        writeFuns::insert
-        (
-            pInter.faceToPointInterpolate(fld.internalField())(),
-            fField
-        );
-        writeFuns::write(os_, binary_, fField);
+        write(pInter, flds[fieldI]);
     }
+}
+
+
+template<class Type>
+void Foam::faMeshWriter::write
+(
+    const PrimitivePatchInterpolation<indirectPrimitivePatch>& pInter,
+    const GeometricField<Type, faPatchField, areaMesh>& fld
+)
+{
+    os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        << aMesh_.nPoints() << " float" << std::endl;
+
+    DynamicList<floatScalar> fField
+    (
+        pTraits<Type>::nComponents*aMesh_.nPoints()
+    );
+
+    writeFuns::insert
+    (
+        pInter.faceToPointInterpolate(fld.internalField())(),
+        fField
+    );
+    writeFuns::write(os_, binary_, fField);
 }
 
 
