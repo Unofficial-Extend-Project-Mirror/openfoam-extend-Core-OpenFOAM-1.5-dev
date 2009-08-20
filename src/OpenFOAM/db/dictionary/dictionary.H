@@ -275,7 +275,7 @@ public:
 
             //- Add a scalar entry
             //  optionally overwrite an existing entry
-            void add (const word& keyword, const scalar, bool overwrite=false);
+            void add(const word& keyword, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
             //  optionally merge with an existing sub-dictionary
