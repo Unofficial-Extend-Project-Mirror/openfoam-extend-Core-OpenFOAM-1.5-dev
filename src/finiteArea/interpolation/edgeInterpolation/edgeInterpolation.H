@@ -86,10 +86,6 @@ class edgeInterpolation
         //- Skew correction vectors
         mutable edgeVectorField* skewCorrectionVectors_;
 
-//         //- Least-squares gradient vectors
-//         mutable edgeVectorField* leastSquarePvectors_;
-//         mutable edgeVectorField* leastSquareNvectors_;
-
 
     // Private member functions
 
@@ -168,11 +164,6 @@ public:
         //- Return reference to skew vectors array
         const edgeVectorField& skewCorrectionVectors() const;
 
-//         //- Return reference to owner least square vectors
-//         const edgeVectorField& leastSquarePvectors() const;
-
-//         //- Return reference to neighbour least square vectors
-//         const edgeVectorField& leastSquareNvectors() const;
 
         //- Do what is neccessary if the mesh has moved
         bool movePoints();
