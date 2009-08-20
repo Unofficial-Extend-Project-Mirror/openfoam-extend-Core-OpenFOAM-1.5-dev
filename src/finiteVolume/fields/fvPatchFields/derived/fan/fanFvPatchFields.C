@@ -52,19 +52,18 @@ void fanFvPatchField<scalar>::updateCoeffs()
 
     if (f_.size() > 1)
     {
-        const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
-        (
-            "phi"
-        );
-        
         const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
+            patch().lookupPatchField<surfaceScalarField, scalar>("phi");
 
         scalarField Un =
             scalarField::subField(phip, size()/2)
            /scalarField::subField(patch().magSf(), size()/2);
 
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        if
+        (
+            phip.dimensionedInternalField().dimensions()
+         == dimDensity*dimVelocity*dimArea
+        )
         {
             Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
         }

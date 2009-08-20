@@ -50,21 +50,6 @@ fanFvPatchField<Type>::fanFvPatchField
 template<class Type>
 fanFvPatchField<Type>::fanFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    jumpCyclicFvPatchField<Type>(ptf, p, iF, mapper),
-    f_(ptf.f_),
-    jump_(ptf.jump_, mapper)
-{}
-
-
-template<class Type>
-fanFvPatchField<Type>::fanFvPatchField
-(
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
@@ -92,6 +77,21 @@ fanFvPatchField<Type>::fanFvPatchField
         this->evaluate(Pstream::blocking);
     }
 }
+
+
+template<class Type>
+fanFvPatchField<Type>::fanFvPatchField
+(
+    const fanFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    jumpCyclicFvPatchField<Type>(ptf, p, iF, mapper),
+    f_(ptf.f_),
+    jump_(ptf.jump_, mapper)
+{}
 
 
 template<class Type>
@@ -181,7 +181,8 @@ template<class Type>
 void fanFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("patchType") << "cyclic" << token::END_STATEMENT << nl;
+    os.writeKeyword("patchType")
+        << cyclicFvPatch::typeName << token::END_STATEMENT << nl;
 
     IOstream::streamFormat fmt0 = os.format(IOstream::ASCII);
     os.writeKeyword("f") << f_ << token::END_STATEMENT << nl;

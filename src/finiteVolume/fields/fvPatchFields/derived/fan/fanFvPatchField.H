@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class jumpCyclicFvPatch Declaration
+                      Class fanFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
