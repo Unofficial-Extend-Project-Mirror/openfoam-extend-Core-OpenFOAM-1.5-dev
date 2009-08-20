@@ -84,10 +84,10 @@ public:
         const word& name() const;
 
         //- ReadData function required for regIOobject read operation
-        bool readData(Istream&);
+        virtual bool readData(Istream&);
 
         //- WriteData function required for regIOobject write operation
-        bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream&) const;
 
 
     // Member operators
