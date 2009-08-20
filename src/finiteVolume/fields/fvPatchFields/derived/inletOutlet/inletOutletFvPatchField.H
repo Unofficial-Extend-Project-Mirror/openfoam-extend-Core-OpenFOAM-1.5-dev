@@ -129,6 +129,21 @@ public:
 
     // Member functions
 
+        // Access
+
+            //- Return the name of phi
+            const word& phiName() const
+            {
+                return phiName_;
+            }
+
+            //- Return reference to the name of phi to allow adjustment
+            word& phiName()
+            {
+                return phiName_;
+            }
+
+
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 

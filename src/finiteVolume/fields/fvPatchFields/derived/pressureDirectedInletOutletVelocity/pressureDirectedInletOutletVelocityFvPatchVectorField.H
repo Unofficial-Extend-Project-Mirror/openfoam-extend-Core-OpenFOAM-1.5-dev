@@ -54,6 +54,10 @@ class pressureDirectedInletOutletVelocityFvPatchVectorField
 {
     // Private data
     
+        //- Name of flux field
+        word phiName_;
+
+        //- Inlet direction
         vectorField inletDir_;
 
 
@@ -133,8 +137,16 @@ public:
         }
 
 
-
     // Member functions
+
+        // Access
+
+            //- Return the name of phi
+            const word& phiName() const
+            {
+                return phiName_;
+            }
+
 
         // Mapping functions
 

@@ -45,6 +45,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    phiName_("phi"),
     inletDir_(p.size())
 {
     refValue() = *this;
@@ -63,6 +64,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
+    phiName_(ptf.phiName_),
     inletDir_(ptf.inletDir_, mapper)
 {}
 
@@ -76,9 +78,16 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    phiName_("phi"),
     inletDir_("inletDirection", dict, p.size())
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+
+    if (dict.found("phi"))
+    {
+        dict.lookup("phi") >> phiName_;
+    }
+
     refValue() = *this;
     refGrad() = vector::zero;
     valueFraction() = 0.0;
@@ -92,6 +101,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf),
+    phiName_(pivpvf.phiName_),
     inletDir_(pivpvf.inletDir_)
 {}
 
@@ -104,6 +114,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf, iF),
+    phiName_(pivpvf.phiName_),
     inletDir_(pivpvf.inletDir_)
 {}
 
@@ -116,6 +127,7 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
+
     inletDir_.autoMap(m);
 }
 
@@ -143,7 +155,7 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>("phi");
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
@@ -181,10 +193,11 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void pressureDirectedInletOutletVelocityFvPatchVectorField::
-write(Ostream& os) const
+void
+pressureDirectedInletOutletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     inletDir_.writeEntry("inletDirection", os);
     writeEntry("value", os);
 }
