@@ -45,7 +45,8 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
             "fvSchemes",
             obr.time().system(),
             obr,
-            IOobject::MUST_READ,
+//             IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,  // Allow default dictionary creation
             IOobject::NO_WRITE
         )
     ),
@@ -126,6 +127,20 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     defaultFluxRequired_(false)
 {
+    if (!headerOk())
+    {
+        if (debug)
+        {
+            InfoIn
+            (
+                "fvSchemes::fvSchemes(const objectRegistry& obr)"
+            )   << "fvSchemes dictionary not found.  Creating default."
+                << endl;
+        }
+
+        regIOobject::write();
+    }
+
     read();
 }
 
@@ -511,6 +526,37 @@ bool fvSchemes::fluxRequired(const word& name) const
     {
         return defaultFluxRequired_;
     }
+}
+
+
+bool fvSchemes::writeData(Ostream& os) const
+{
+    // Write dictionaries
+    os << nl << "ddtSchemes";
+    ddtSchemes_.write(os, true);
+
+    os << nl << "d2dt2Schemes";
+    d2dt2Schemes_.write(os, true);
+
+    os << nl << "interpolationSchemes";
+    interpolationSchemes_.write(os, true);
+
+    os << nl << "divSchemes";
+    divSchemes_.write(os, true);
+
+    os << nl << "gradSchemes";
+    gradSchemes_.write(os, true);
+
+    os << nl << "snGradSchemes";
+    snGradSchemes_.write(os, true);
+
+    os << nl << "laplacianSchemes";
+    laplacianSchemes_.write(os, true);
+
+    os << nl << "fluxRequired";
+    fluxRequired_.write(os, true);
+
+    return true;
 }
 
 
