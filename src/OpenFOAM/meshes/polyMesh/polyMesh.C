@@ -904,7 +904,10 @@ void Foam::polyMesh::addZones
         }
 
         pointZones_.writeOpt() = IOobject::AUTO_WRITE;
-        pointZones_.write();
+
+        // Temporarily disable zone writing on creation
+        // Auto-write should be sufficient.  HJ, 20/Aug/2009
+//         pointZones_.write();
     }
 
     // Face zones
@@ -919,7 +922,10 @@ void Foam::polyMesh::addZones
         }
 
         faceZones_.writeOpt() = IOobject::AUTO_WRITE;
-        faceZones_.write();
+
+        // Temporarily disable zone writing on creation
+        // Auto-write should be sufficient.  HJ, 20/Aug/2009
+//         faceZones_.write();
     }
 
     // Cell zones
@@ -934,7 +940,10 @@ void Foam::polyMesh::addZones
         }
 
         cellZones_.writeOpt() = IOobject::AUTO_WRITE;
-        cellZones_.write();
+
+        // Temporarily disable zone writing on creation
+        // Auto-write should be sufficient.  HJ, 20/Aug/2009
+//         cellZones_.write();
     }
 }
 
