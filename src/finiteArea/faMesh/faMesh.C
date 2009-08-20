@@ -39,8 +39,6 @@ Description
 #include "wedgeFaPatch.H"
 #include "faPatchData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam

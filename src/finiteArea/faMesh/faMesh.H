@@ -245,6 +245,7 @@ public:
     //- Runtime type information
     TypeName("faMesh");
 
+
     //- Return the mesh sub-directory name (usually "faMesh")
     static word meshSubDir;
 
