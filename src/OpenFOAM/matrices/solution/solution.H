@@ -101,10 +101,31 @@ public:
             ITstream& solver(const word& name) const;
 
 
+        // Edit
+
+            //- Return access to relaxation factors dictionary
+            dictionary& relaxationFactors()
+            {
+                return relaxationFactors_;
+            }
+
+            //- Return access to solvers dictionary
+            dictionary& solvers()
+            {
+                return solvers_;
+            }
+
+
         // Read
 
             //- Read the solution dictionary
             bool read();
+
+
+        // Write
+
+            //- WriteData function required for regIOobject write operation
+            virtual bool writeData(Ostream&) const;
 };
 
 

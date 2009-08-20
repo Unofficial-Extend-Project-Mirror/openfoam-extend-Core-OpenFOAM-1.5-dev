@@ -31,6 +31,7 @@ License
 
 int Foam::solution::debug(Foam::debug::debugSwitch("solution", false));
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
@@ -42,13 +43,26 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
             dictName,
             obr.time().system(),
             obr,
-            IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,  // Allow default dictionary creation
             IOobject::NO_WRITE
         )
     ),
     relaxationFactors_(ITstream("relaxationFactors", tokenList())()),
     solvers_(ITstream("solvers", tokenList())())
 {
+    if (!headerOk())
+    {
+        if (debug)
+        {
+            InfoIn
+            (
+                "Foam::solution::solution(const objectRegistry& obr, "
+                "const fileName& dictName)"
+            )   << "Solution dictionary not found.  Adding default entries"
+                << endl;
+        }
+    }
+
     read();
 }
 
@@ -57,7 +71,14 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
 
 bool Foam::solution::read()
 {
-    if (regIOobject::read())
+    bool readOk = false;
+
+    if (headerOk())
+    {
+        readOk = regIOobject::read();
+    }
+
+    if (readOk)
     {
         const dictionary& dict = solutionDict();
 
@@ -73,10 +94,8 @@ bool Foam::solution::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return readOk;
 }
 
 
@@ -136,6 +155,19 @@ Foam::ITstream& Foam::solution::solver(const word& name) const
     }
 
     return solvers_.lookup(name);
+}
+
+
+bool Foam::solution::writeData(Ostream& os) const
+{
+    // Write dictionaries
+    os << nl << "solvers";
+    solvers_.write(os, true);
+
+    os << nl << "relaxationFactors";
+    relaxationFactors_.write(os, true);
+
+    return true;
 }
 
 
