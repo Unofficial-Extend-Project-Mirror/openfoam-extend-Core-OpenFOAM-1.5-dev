@@ -75,6 +75,7 @@ class Time
         //- The controlDict
         IOdictionary controlDict_;
 
+
 public:
 
         //- Write control options
@@ -372,6 +373,9 @@ public:
             //- Reset the time and time-index
             virtual void setTime(const scalar, const label newIndex);
 
+            //- Reset stop-run control
+            virtual void setStopAt(const stopAtControls&);
+
             //- Reset end time
             virtual void setEndTime(const dimensionedScalar&);
 
@@ -380,6 +384,12 @@ public:
 
             //- Reset time step
             virtual void setDeltaT(const dimensionedScalar&);
+
+            //- Reset write control
+            virtual void setWriteControl(const writeControls&);
+
+            //- Reset write interval
+            virtual void setWriteInterval(const scalar);
 
             //- Reset time step
             virtual void setDeltaT(const scalar);
