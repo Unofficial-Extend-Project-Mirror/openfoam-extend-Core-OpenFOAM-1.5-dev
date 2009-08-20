@@ -38,6 +38,7 @@ namespace Foam
 
 int faSchemes::debug(Foam::debug::debugSwitch("faSchemes", false));
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 faSchemes::faSchemes(const objectRegistry& obr)
@@ -49,7 +50,8 @@ faSchemes::faSchemes(const objectRegistry& obr)
             "faSchemes",
             obr.time().system(),
             obr,
-            IOobject::MUST_READ,
+//             IOobject::MUST_READ,
+            IOobject::READ_IF_PRESENT,  // Allow default dictionary creation
             IOobject::NO_WRITE
         )
     ),
@@ -69,6 +71,18 @@ faSchemes::faSchemes(const objectRegistry& obr)
     defaultLaplacianScheme_("default", tokenList()),
     fluxRequired_(ITstream("fluxRequired", tokenList())())
 {
+    if (!headerOk())
+    {
+        if (debug)
+        {
+            InfoIn
+            (
+                "faSchemes::faSchemes(const objectRegistry& obr)"
+            )   << "faSchemes dictionary not found.  Creating default."
+                << endl;
+        }
+    }
+
     read();
 }
 
@@ -77,40 +91,21 @@ faSchemes::faSchemes(const objectRegistry& obr)
 
 bool faSchemes::read()
 {
-    if (regIOobject::read())
+    bool readOk = false;
+
+    if (headerOk())
+    {
+        readOk = regIOobject::read();
+    }
+
+    if (readOk)
     {
         const dictionary& dict = schemesDict();
 
+        // ddt Schemes
         if (dict.found("ddtSchemes"))
         {
             ddtSchemes_ = dict.subDict("ddtSchemes");
-        }
-        else if (dict.found("timeScheme"))
-        {
-            // For backward compatibility.
-            // The timeScheme will be deprecated with warning or removed in 2.4.
-
-            word timeSchemeName(dict.lookup("timeScheme"));
-
-            if (timeSchemeName == "EulerImplicit")
-            {
-                timeSchemeName = "Euler";
-            }
-            else if (timeSchemeName == "BackwardDifferencing")
-            {
-                timeSchemeName = "backward";
-            }
-            else if (timeSchemeName == "SteadyState")
-            {
-                timeSchemeName = "steadyState";
-            }
-
-            if (ddtSchemes_.found("default"))
-            {
-                ddtSchemes_.remove("default");
-            }
-
-            ddtSchemes_.add("default", timeSchemeName);
         }
         else
         {
@@ -127,6 +122,7 @@ bool faSchemes::read()
         }
 
 
+        // d2dt2 schemes
         if (dict.found("d2dt2Schemes"))
         {
             d2dt2Schemes_ = dict.subDict("d2dt2Schemes");
@@ -169,6 +165,7 @@ bool faSchemes::read()
         }
 
 
+        // Interpolation schemes
         if (dict.found("interpolationSchemes"))
         {
             interpolationSchemes_ = dict.subDict("interpolationSchemes");
@@ -189,7 +186,16 @@ bool faSchemes::read()
         }
 
 
-        divSchemes_ = dict.subDict("divSchemes");
+        // Div schemes
+        if (dict.found("divSchemes"))
+        {
+            divSchemes_ = dict.subDict("divSchemes");
+
+        }
+        else
+        {
+            divSchemes_.add("default", "none");
+        }
 
         if
         (
@@ -201,7 +207,16 @@ bool faSchemes::read()
         }
 
 
-        gradSchemes_ = dict.subDict("gradSchemes");
+        // Grad schemes
+        if (dict.found("gradSchemes"))
+        {
+            gradSchemes_ = dict.subDict("gradSchemes");
+
+        }
+        else
+        {
+            gradSchemes_.add("default", "none");
+        }
 
         if
         (
@@ -213,6 +228,7 @@ bool faSchemes::read()
         }
 
 
+        // lnGrad schemes
         if (dict.found("lnGradSchemes"))
         {
             lnGradSchemes_ = dict.subDict("lnGradSchemes");
@@ -232,7 +248,16 @@ bool faSchemes::read()
         }
 
 
-        laplacianSchemes_ = dict.subDict("laplacianSchemes");
+        // laplacian schemes
+        if (dict.found("laplacianSchemes"))
+        {
+            laplacianSchemes_ = dict.subDict("laplacianSchemes");
+
+        }
+        else
+        {
+            laplacianSchemes_.add("default", "none");
+        }
 
         if
         (
@@ -244,17 +269,14 @@ bool faSchemes::read()
         }
 
 
+        // Flux required
         if (dict.found("fluxRequired"))
         {
             fluxRequired_ = dict.subDict("fluxRequired");
         }
+    }
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return readOk;
 }
 
 
@@ -394,6 +416,37 @@ ITstream& faSchemes::laplacianScheme(const word& name) const
 bool faSchemes::fluxRequired(const word& name) const
 {
     return fluxRequired_.found(name);
+}
+
+
+bool faSchemes::writeData(Ostream& os) const
+{
+    // Write dictionaries
+    os << nl << "ddtSchemes";
+    ddtSchemes_.write(os, true);
+
+    os << nl << "d2dt2Schemes";
+    d2dt2Schemes_.write(os, true);
+
+    os << nl << "interpolationSchemes";
+    interpolationSchemes_.write(os, true);
+
+    os << nl << "divSchemes";
+    divSchemes_.write(os, true);
+
+    os << nl << "gradSchemes";
+    gradSchemes_.write(os, true);
+
+    os << nl << "lnGradSchemes";
+    lnGradSchemes_.write(os, true);
+
+    os << nl << "laplacianSchemes";
+    laplacianSchemes_.write(os, true);
+
+    os << nl << "fluxRequired";
+    fluxRequired_.write(os, true);
+
+    return true;
 }
 
 

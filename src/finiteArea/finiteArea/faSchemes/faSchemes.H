@@ -123,10 +123,67 @@ public:
             bool fluxRequired(const word& name) const;
 
 
+        // Edit
+
+            //- Return access to ddt schemes
+            dictionary& ddtSchemes()
+            {
+                return ddtSchemes_;
+            }
+
+            //- Return access to d2dt2 schemes
+            dictionary& d2dt2Schemes()
+            {
+                return d2dt2Schemes_;
+            }
+
+            //- Return access to interpolation schemes
+            dictionary& interpolationSchemes()
+            {
+                return interpolationSchemes_;
+            }
+
+            //- Return access to div schemes
+            dictionary& divSchemes()
+            {
+                return divSchemes_;
+            }
+
+            //- Return access to grad schemes
+            dictionary& gradSchemes()
+            {
+                return gradSchemes_;
+            }
+
+            //- Return access to lnGrad schemes
+            dictionary& lnGradSchemes()
+            {
+                return lnGradSchemes_;
+            }
+
+            //- Return access to laplacian schemes
+            dictionary& laplacianSchemes()
+            {
+                return laplacianSchemes_;
+            }
+
+            //- Return access to flux required
+            dictionary& fluxRequired()
+            {
+                return fluxRequired_;
+            }
+
+
         // Read
 
             //- Read the faSchemes
             bool read();
+
+
+        // Write
+
+            //- WriteData function required for regIOobject write operation
+            virtual bool writeData(Ostream&) const;
 };
 
 
