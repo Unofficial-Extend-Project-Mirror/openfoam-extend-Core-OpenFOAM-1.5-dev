@@ -54,6 +54,7 @@ class pressureInletOutletVelocityFvPatchVectorField
 {
     // Private data
 
+        //- Name of flux field
         word phiName_;
 
         //- Optional tangential velocity component
