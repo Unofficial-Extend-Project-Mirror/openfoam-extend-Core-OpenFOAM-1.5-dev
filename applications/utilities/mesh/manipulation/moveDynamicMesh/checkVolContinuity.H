@@ -39,7 +39,7 @@ if (mesh.moving())
     if (nMotionErrors > 0)
     {
         Info<< "Number of motion errors: " << nMotionErrors
-            << " (nCells = " << mesh.nCells() << endl;
+            << " out of nCells = " << mesh.nCells() << endl;
     }
 
     Info<< "volume continuity errors : "
