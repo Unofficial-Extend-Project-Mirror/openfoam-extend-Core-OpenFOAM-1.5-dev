@@ -28,7 +28,7 @@ solvers
         minCoarseEqns   30;
         nMaxLevels      100;
         scale           on;
-        smoother        ILU;
+        smoother        GaussSeidel;
 
         minIter         0;
         maxIter         500;
