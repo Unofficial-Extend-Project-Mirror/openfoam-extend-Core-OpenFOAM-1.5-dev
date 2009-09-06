@@ -163,7 +163,7 @@ then
         exit $?
     elif [ ! -d $MakeDir ]
     then
-	if [ $WM_ARCH == "darwinPpc" -o $WM_ARCH == "darwinIntel" ]
+	if [ $WM_ARCH = "darwinPpc" -o $WM_ARCH = "darwinIntel" ]
 	then
 	    # MacOS X find doesn't have a -printf
 	    liste=""
