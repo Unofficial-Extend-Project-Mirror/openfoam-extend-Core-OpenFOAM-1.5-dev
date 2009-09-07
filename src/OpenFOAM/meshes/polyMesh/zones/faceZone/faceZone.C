@@ -460,10 +460,11 @@ bool Foam::faceZone::checkDefinition(const bool report) const
                 )   << "Zone " << name()
                     << " contains invalid face label " << addr[i] << nl
                     << "Valid face labels are 0.."
-                    << zoneMesh().mesh().allFaces().size()-1 << endl;
+                    << zoneMesh().mesh().allFaces().size() - x1 << endl;
             }
         }
     }
+
     return boundaryError;
 }
 
