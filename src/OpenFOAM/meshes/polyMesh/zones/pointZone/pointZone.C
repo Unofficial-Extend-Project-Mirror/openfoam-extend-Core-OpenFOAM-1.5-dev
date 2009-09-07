@@ -200,7 +200,7 @@ bool Foam::pointZone::checkDefinition(const bool report) const
 
     forAll(addr, i)
     {
-        if (addr[i] < 0 || addr[i] >= zoneMesh_.mesh().points().size())
+        if (addr[i] < 0 || addr[i] >= zoneMesh_.mesh().allPoints().size())
         {
             boundaryError = true;
 
@@ -213,7 +213,7 @@ bool Foam::pointZone::checkDefinition(const bool report) const
                 )   << "Zone " << name()
                     << " contains invalid point label " << addr[i] << nl
                     << "Valid point labels are 0.."
-                    << zoneMesh_.mesh().points().size() - 1 << endl;
+                    << zoneMesh_.mesh().allPoints().size() - 1 << endl;
             }
         }
     }
