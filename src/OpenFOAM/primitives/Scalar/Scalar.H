@@ -192,6 +192,12 @@ inline Scalar cmptDivide(const Scalar s1, const Scalar s2)
     return s1/s2;
 }
 
+inline Scalar cmptSumMultiply(const Scalar s1, const Scalar s2)
+{
+    return s1*s2;
+}
+
+
 inline Scalar cmptMax(const Scalar s)
 {
     return s;

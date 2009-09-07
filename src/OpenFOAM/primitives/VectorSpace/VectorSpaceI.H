@@ -351,6 +351,17 @@ inline VectorSpace<Form, Cmpt, nCmpt> cmptDivide
 
 
 template<class Form, class Cmpt, int nCmpt>
+inline Cmpt cmptSumMultiply
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs1,
+    const VectorSpace<Form, Cmpt, nCmpt>& vs2
+)
+{
+    return cmptSum(cmptMultiply(vs1, vs2));
+}
+
+
+template<class Form, class Cmpt, int nCmpt>
 inline VectorSpace<Form, Cmpt, nCmpt> stabilise
 (
     const VectorSpace<Form, Cmpt, nCmpt>& vs,
