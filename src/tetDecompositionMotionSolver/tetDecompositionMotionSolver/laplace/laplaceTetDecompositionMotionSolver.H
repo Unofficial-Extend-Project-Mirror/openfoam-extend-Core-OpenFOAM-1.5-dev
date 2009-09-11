@@ -136,7 +136,7 @@ public:
         {
             return solverPerf_;
         }
-    
+
         //- Return pointer to motion diffusivity
         const elementScalarField& motionGamma() const
         {

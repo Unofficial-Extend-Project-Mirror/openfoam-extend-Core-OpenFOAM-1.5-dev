@@ -92,21 +92,27 @@ Foam::tmp<Foam::pointField>
 Foam::tetDecompositionMotionSolver::curPoints() const
 {
     // Process current point positions
-    tmp<pointField> tcurPoints
+
+    // Grab all point locations
+    tmp<pointField> tcurPoints(new pointField(tetMesh_().allPoints()));
+    pointField& cp = tcurPoints();
+
+    // Move live points from mesh motion
+    vectorField mp
     (
-        new pointField
+        vectorField::subField
         (
-            tetMesh_().points()
-          + vectorField
-            (
-                vectorField::subField
-                (
-                    motionU_.internalField(),
-                    tetMesh_().nPoints()
-                )
-            )*tetMesh_.time().deltaT().value()
-        )
+            motionU_.internalField(),
+            tetMesh_().nPoints()
+        )*tetMesh_.time().deltaT().value()
     );
+
+    // Note: mp is the size of live points, while cp contains all points.
+    //       Looping over the smaller array.  HJ, 5/Sep/2009
+    forAll (mp, i)
+    {
+        cp[i] += mp[i];
+    }
 
     twoDCorrectPoints(tcurPoints());
 
