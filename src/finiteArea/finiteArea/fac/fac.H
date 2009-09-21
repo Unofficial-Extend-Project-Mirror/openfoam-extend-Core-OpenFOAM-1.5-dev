@@ -41,6 +41,7 @@ Description
 #include "facGrad.H"
 #include "facLaplacian.H"
 #include "facEdgeIntegrate.H"
+#include "facAverage.H"
 #include "facLnGrad.H"
 #include "facDdt.H"
 

@@ -66,7 +66,7 @@ class faMeshLduAddressing;
                            Class faMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class faMesh      
+class faMesh
 :
     public GeoMesh<polyMesh>,
     public lduMesh,
