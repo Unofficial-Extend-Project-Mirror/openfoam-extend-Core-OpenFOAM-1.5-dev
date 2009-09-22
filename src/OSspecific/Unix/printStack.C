@@ -265,7 +265,11 @@ char **backtrace_symbols(void **bt,unsigned nr)
         int result=dladdr(bt[i],&info);
 
         char tmp[1000];
+#       ifdef darwin
+        sprintf(tmp,"%s(%s+%p) [%p]",info.dli_fname,info.dli_sname,(void *)((unsigned long)bt[i]-(unsigned long)info.dli_saddr),bt[i]);
+#       else
         sprintf(tmp,"%s(%s+%p) [%p]",info.dli_fname,info.dli_sname,(void *)((unsigned int)bt[i]-(unsigned int)info.dli_saddr),bt[i]);
+#       endif
         strings[i]=(char *)malloc(strlen(tmp)+1);
         strcpy(strings[i],tmp);
     }
