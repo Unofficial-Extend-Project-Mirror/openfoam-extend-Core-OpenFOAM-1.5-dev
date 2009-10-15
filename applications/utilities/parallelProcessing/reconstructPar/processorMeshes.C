@@ -240,7 +240,10 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
                 << abort(FatalError);
         }
 
-        forAll(pointProcAddressingI, pointI)
+        // Only live points carry reconstruction data.  Reconsider
+        // HJ, 6/Sep/2009
+        for (label pointI = 0; pointI < meshes_[procI].nPoints(); pointI++)
+//         forAll(pointProcAddressingI, pointI)
         {
             newPoints[pointProcAddressingI[pointI]] = procPoints[pointI];
         }
