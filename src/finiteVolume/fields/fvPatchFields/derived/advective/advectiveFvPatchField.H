@@ -51,7 +51,7 @@ Description
     @endverbatim
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
-    BC fron this class and overriding advectionSpeed() e.g. in
+    BC from this class and overriding advectionSpeed() e.g. in
     waveTransmissiveFvPatchField the advectionSpeed() calculates and returns
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
@@ -72,7 +72,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class advectiveFvPatch Declaration
+                      Class advectiveFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

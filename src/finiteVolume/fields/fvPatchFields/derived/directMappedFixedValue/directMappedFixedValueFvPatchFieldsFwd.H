@@ -27,6 +27,7 @@ License
 #ifndef directMappedFixedValueFvPatchFieldsFwd_H
 #define directMappedFixedValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

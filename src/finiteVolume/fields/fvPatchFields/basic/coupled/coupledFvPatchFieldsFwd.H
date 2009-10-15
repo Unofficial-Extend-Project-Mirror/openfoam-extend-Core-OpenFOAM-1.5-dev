@@ -27,6 +27,7 @@ License
 #ifndef coupledFvPatchFieldsFwd_H
 #define coupledFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

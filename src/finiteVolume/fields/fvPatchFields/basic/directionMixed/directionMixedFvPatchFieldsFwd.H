@@ -27,6 +27,7 @@ License
 #ifndef directionMixedFvPatchFieldsFwd_H
 #define directionMixedFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -40,6 +40,7 @@ Contributor:
 #ifndef cyclicGgiFvPatchFieldsFwd_H
 #define cyclicGgiFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

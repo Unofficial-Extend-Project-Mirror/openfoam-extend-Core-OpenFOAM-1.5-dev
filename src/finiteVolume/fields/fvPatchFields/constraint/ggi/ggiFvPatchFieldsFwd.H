@@ -37,6 +37,7 @@ Author
 #ifndef ggiFvPatchFieldsFwd_H
 #define ggiFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

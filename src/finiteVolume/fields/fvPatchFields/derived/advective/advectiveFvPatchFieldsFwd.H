@@ -27,6 +27,7 @@ License
 #ifndef advectiveFvPatchFieldsFwd_H
 #define advectiveFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

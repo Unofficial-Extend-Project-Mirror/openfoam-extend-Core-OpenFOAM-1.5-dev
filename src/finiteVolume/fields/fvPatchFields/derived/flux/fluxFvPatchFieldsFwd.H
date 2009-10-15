@@ -27,6 +27,7 @@ License
 #ifndef fluxFvPatchFieldsFwd_H
 #define fluxFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

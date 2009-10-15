@@ -27,6 +27,7 @@ License
 #ifndef waveTransmissiveFvPatchFieldsFwd_H
 #define waveTransmissiveFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

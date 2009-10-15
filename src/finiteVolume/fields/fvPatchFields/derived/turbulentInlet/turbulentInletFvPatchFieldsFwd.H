@@ -27,6 +27,7 @@ License
 #ifndef turbulentInletFvPatchFieldsFwd_H
 #define turbulentInletFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

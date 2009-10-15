@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class inletOutletTotalTemperatureFvPatch Declaration
+           Class inletOutletTotalTemperatureFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 class inletOutletTotalTemperatureFvPatchScalarField
@@ -65,7 +65,7 @@ class inletOutletTotalTemperatureFvPatchScalarField
         //- Heat capacity ratio
         scalar gamma_;
 
-        //- Total pressure
+        //- Total temperature
         scalarField T0_;
 
 

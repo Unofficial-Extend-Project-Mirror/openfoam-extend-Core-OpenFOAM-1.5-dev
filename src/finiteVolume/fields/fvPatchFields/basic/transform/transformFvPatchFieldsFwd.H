@@ -27,6 +27,7 @@ License
 #ifndef transformFvPatchFieldsFwd_H
 #define transformFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

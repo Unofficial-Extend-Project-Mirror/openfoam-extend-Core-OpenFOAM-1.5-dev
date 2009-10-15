@@ -27,6 +27,7 @@ License
 #ifndef fixedGradientFvPatchFieldsFwd_H
 #define fixedGradientFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

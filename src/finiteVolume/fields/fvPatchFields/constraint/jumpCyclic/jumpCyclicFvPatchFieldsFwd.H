@@ -27,6 +27,7 @@ License
 #ifndef jumpCyclicFvPatchFieldsFwd_H
 #define jumpCyclicFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

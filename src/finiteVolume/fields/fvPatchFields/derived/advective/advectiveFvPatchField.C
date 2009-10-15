@@ -167,7 +167,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 template<class Type>
 tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
 {
-    const surfaceScalarField& phi = 
+    const surfaceScalarField& phi =
         this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
 
     fvsPatchField<scalar> phip = this->patch().lookupPatchField
@@ -210,7 +210,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
     );
     scalar deltaT = this->db().time().deltaT().value();
 
-    const GeometricField<Type, fvPatchField, volMesh>& field = 
+    const GeometricField<Type, fvPatchField, volMesh>& field =
         this->db().objectRegistry::
         lookupObject<GeometricField<Type, fvPatchField, volMesh> >
         (
@@ -228,8 +228,12 @@ void advectiveFvPatchField<Type>::updateCoeffs()
 
     // Non-reflecting outflow boundary
     // If lInf_ defined setup relaxation to the value fieldInf_.
+    // HJ, 25/Sep/2009
     if (lInf_ > SMALL)
     {
+        // HJ, This is wrong: the relaxation parameters are nonsensical.
+        // Consider solving ddt(p) + u . grad(p) = (p* - p)/tau instead
+
         // Calculate the field relaxation coefficient k (See notes)
         scalarField k = w*deltaT/lInf_;
 
@@ -239,7 +243,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
          || ddtScheme == fv::CrankNicholsonDdtScheme<scalar>::typeName
         )
         {
-            this->refValue() = 
+            this->refValue() =
             (
                 field.oldTime().boundaryField()[patchi] + k*fieldInf_
             )/(1.0 + k);

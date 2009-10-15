@@ -27,6 +27,7 @@ License
 #ifndef fixedValueFvPatchFieldsFwd_H
 #define fixedValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -397,7 +397,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
             str<< "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
         }
     }
-    
+
     // Determine interpolation onto face centres.
     triSurfaceTools::calcInterpolationWeights
     (
@@ -406,7 +406,6 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
         nearestVertex_,
         nearestVertexWeight_
     );
-
 
 
     // Read the times for which data is available
@@ -721,7 +720,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
     {
         const Field<Type>& fld = *this;
 
-        Type averagePsi = 
+        Type averagePsi =
             gSum(this->patch().magSf()*fld)
            /gSum(this->patch().magSf());
 

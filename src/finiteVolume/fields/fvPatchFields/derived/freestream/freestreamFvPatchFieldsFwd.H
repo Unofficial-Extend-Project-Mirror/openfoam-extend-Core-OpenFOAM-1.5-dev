@@ -27,6 +27,7 @@ License
 #ifndef freestreamFvPatchFieldsFwd_H
 #define freestreamFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

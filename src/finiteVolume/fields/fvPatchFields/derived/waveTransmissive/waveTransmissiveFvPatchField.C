@@ -119,7 +119,7 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
         reinterpret_cast<const scalar*>(NULL)
     );
 
-    const surfaceScalarField& phi = 
+    const surfaceScalarField& phi =
         this->db().objectRegistry::lookupObject<surfaceScalarField>
         (this->phiName_);
 

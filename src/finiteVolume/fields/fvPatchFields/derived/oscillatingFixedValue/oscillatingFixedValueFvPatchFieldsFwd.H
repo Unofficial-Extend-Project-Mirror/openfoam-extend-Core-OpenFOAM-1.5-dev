@@ -27,6 +27,7 @@ License
 #ifndef oscillatingFixedValueFvPatchFieldsFwd_H
 #define oscillatingFixedValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

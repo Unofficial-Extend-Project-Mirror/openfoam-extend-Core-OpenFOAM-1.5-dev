@@ -53,7 +53,8 @@ class pressureDirectedInletVelocityFvPatchVectorField
     public fixedValueFvPatchVectorField
 {
     // Private data
-    
+
+        //- Inlet direction
         vectorField inletDir_;
 
 

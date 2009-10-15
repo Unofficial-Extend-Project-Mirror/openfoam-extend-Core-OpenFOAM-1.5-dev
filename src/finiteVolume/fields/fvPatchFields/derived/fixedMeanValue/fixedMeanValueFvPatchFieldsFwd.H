@@ -32,6 +32,7 @@ Description
 #ifndef fixedMeanValueFvPatchFieldsFwd_H
 #define fixedMeanValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

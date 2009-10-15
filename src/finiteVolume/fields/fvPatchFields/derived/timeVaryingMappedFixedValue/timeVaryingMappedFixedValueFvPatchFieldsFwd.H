@@ -27,6 +27,7 @@ License
 #ifndef timeVaryingMappedFixedValueFvPatchFieldsFwd_H
 #define timeVaryingMappedFixedValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

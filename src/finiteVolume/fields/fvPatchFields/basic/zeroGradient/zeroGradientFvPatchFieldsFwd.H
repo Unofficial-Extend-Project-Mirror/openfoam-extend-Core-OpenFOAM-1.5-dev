@@ -27,6 +27,7 @@ License
 #ifndef zeroGradientFvPatchFieldsFwd_H
 #define zeroGradientFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

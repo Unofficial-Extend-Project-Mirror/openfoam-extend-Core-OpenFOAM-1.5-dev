@@ -27,6 +27,7 @@ License
 #ifndef partialSlipFvPatchFieldsFwd_H
 #define partialSlipFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

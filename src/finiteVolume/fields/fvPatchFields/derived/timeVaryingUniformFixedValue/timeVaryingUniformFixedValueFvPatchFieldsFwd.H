@@ -27,6 +27,7 @@ License
 #ifndef timeVaryingUniformFixedValueFvPatchFieldsFwd_H
 #define timeVaryingUniformFixedValueFvPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
