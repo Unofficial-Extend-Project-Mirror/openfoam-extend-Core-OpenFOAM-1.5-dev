@@ -70,7 +70,7 @@ autoPtr<compressible::RASModel> turbulence
 );
 
 Info<< "Creating field DpDt\n" << endl;
-volScalarField DpDt = 
+volScalarField DpDt =
     fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
 Info << "Constructing chemical mechanism" << endl;
