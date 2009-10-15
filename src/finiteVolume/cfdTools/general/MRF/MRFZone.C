@@ -284,7 +284,7 @@ void Foam::MRFZone::setMRFFaces()
         {
             setMRFFaces(faceType, labelList(0));
         }
-    }    
+    }
 }
 
 

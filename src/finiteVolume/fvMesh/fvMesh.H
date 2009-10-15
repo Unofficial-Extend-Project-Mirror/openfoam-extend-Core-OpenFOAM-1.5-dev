@@ -92,7 +92,7 @@ class fvMesh
         //- Current time index for cell volumes
         //  Note.  The whole mechanism will be replaced once the
         //  dimensionedField is created and the dimensionedField
-        //  will take care of the old-time levels.  
+        //  will take care of the old-time levels.
         mutable label curTimeIndex_;
 
         //- Cell volumes
