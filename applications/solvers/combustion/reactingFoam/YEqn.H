@@ -37,7 +37,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
             inertIndex = i;
         }
     }
-    
+
     Y[inertIndex] = scalar(1) - Yt;
     Y[inertIndex].max(0.0);
 }
