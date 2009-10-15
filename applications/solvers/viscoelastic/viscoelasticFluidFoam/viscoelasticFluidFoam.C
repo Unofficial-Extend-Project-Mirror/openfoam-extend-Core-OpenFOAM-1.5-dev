@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        // Pressure-velocity PISO corrector loop
+        // Pressure-velocity SIMPLE corrector loop
         for (int corr = 0; corr < nCorr; corr++)
         {
             // Momentum predictor
