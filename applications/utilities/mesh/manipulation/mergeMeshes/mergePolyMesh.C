@@ -333,11 +333,11 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         newOwn = own[faceI];
         if (newOwn > -1) newOwn = renumberCells[newOwn];
 
-        if (newPatch > -1) 
+        if (newPatch > -1)
         {
             newNei = -1;
-        } 
-        else 
+        }
+        else
         {
             newNei = nei[faceI];
             newNei = renumberCells[newNei];
@@ -373,7 +373,6 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
                 )
             );
     }
-        
 }
 
 
