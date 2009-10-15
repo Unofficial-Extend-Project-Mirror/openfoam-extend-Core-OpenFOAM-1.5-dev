@@ -93,7 +93,8 @@ public:
         const surfaceVectorField& nVectors() const;
 
 
-        //- Delete the least square vectors when the mesh moves
+        //- Update after mesh motion:
+        //  Delete the least square vectors when the mesh moves
         virtual bool movePoints() const;
 };
 
