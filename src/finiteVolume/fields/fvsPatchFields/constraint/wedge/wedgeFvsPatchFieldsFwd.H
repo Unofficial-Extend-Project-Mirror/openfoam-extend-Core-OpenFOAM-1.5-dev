@@ -27,6 +27,7 @@ License
 #ifndef wedgeFvsPatchFieldsFwd_H
 #define wedgeFvsPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

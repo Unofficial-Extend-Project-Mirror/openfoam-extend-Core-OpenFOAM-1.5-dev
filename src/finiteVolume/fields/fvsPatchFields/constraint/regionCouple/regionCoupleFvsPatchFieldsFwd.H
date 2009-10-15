@@ -36,6 +36,7 @@ Author
 #ifndef regionCoupleFvsPatchFieldsFwd_H
 #define regionCoupleFvsPatchFieldsFwd_H
 
+#include "fvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

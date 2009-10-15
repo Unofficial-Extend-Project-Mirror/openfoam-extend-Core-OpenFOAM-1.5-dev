@@ -30,6 +30,7 @@ Author
 #ifndef overlapGgiFvsPatchFieldsFwd_H
 #define overlapGgiFvsPatchFieldsFwd_H
 
+#include "fvsPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

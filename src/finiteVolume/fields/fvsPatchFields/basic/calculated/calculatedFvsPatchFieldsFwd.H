@@ -32,6 +32,7 @@ Description
 #ifndef calculatedFvsPatchFieldsFwd_H
 #define calculatedFvsPatchFieldsFwd_H
 
+#include "fvsPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
