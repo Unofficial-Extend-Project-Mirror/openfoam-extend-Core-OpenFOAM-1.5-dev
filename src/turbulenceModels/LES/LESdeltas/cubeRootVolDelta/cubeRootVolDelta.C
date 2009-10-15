@@ -70,9 +70,11 @@ void cubeRootVolDelta::calcDelta()
     }
     else
     {
-        FatalErrorIn("cubeRootVolDelta::calcDelta()")
+        delta_.internalField() = deltaCoeff_*pow(mesh().V(), 1.0/3.0);
+
+        WarningIn("cubeRootVolDelta::calcDelta()")
             << "Case is not 3D or 2D, LES is not applicable"
-            << exit(FatalError);
+            << endl;
     }
 }
 
