@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.4                                   |
@@ -36,25 +36,21 @@ PTT Linear   epsilon = 0.25       0.03     0.002   1.422
 
 rheology
 {
+    type multiMode;
 
-        type multiMode;
-
-        models
-        (
-
-                first
-                {
-                type PTT-Linear;
-                rho              rho [1 -3 0 0 0 0 0] 803.87097;
-                etaS             etaS [1 -1 -1 0 0 0 0] 0.002;
-                etaP             etaP [1 -1 -1 0 0 0 0] 1.422;
-                lambda           lambda [0 0 1 0 0 0 0] 0.03;
-                epsilon          epsilon [0 0 0 0 0 0 0] 0.25;
-                zeta             zeta [0 0 0 0 0 0 0] 0.0;
-                }
-
-        );
-
+    models
+    (
+        first
+        {
+            type             PTT-Linear;
+            rho              rho [1 -3 0 0 0 0 0] 803.87097;
+            etaS             etaS [1 -1 -1 0 0 0 0] 0.002;
+            etaP             etaP [1 -1 -1 0 0 0 0] 1.422;
+            lambda           lambda [0 0 1 0 0 0 0] 0.03;
+            epsilon          epsilon [0 0 0 0 0 0 0] 0.25;
+            zeta             zeta [0 0 0 0 0 0 0] 0.0;
+        }
+    );
 }
 
 
