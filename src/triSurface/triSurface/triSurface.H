@@ -65,7 +65,7 @@ class triSurface
         //- The number of bytes in the STL header
         static const int STLheaderSize = 80;
 
-        //- Patch information (face ordering nFaces/startFace only used 
+        //- Patch information (face ordering nFaces/startFace only used
         //  during reading and writing)
         geometricSurfacePatchList patches_;
 

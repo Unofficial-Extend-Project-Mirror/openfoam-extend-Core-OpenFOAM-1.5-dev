@@ -87,7 +87,7 @@ void faMesh::calcPatchStarts() const
 
     patchStarts[0] = nInternalEdges();
 
-    for(label i = 1; i < boundary().size(); i++)
+    for (label i = 1; i < boundary().size(); i++)
     {
         patchStarts[i] =
             patchStarts[i - 1] + boundary()[i - 1].size();
@@ -158,7 +158,7 @@ void faMesh::calcLe() const
                 )
             );
 
-        leInternal[edgeI] *= 
+        leInternal[edgeI] *=
             magLeInternal[edgeI]/mag(leInternal[edgeI]);
     }
 
@@ -235,7 +235,7 @@ void faMesh::calcMagLe() const
 
     const pointField& localPoints = points();
 
-    const edgeList::subList internalEdges = 
+    const edgeList::subList internalEdges =
         edgeList::subList(edges(), nInternalEdges());
 
 
@@ -248,7 +248,7 @@ void faMesh::calcMagLe() const
 
     forAll (boundary(), patchI)
     {
-        const edgeList::subList patchEdges = 
+        const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
         forAll (patchEdges, edgeI)
@@ -302,7 +302,7 @@ void faMesh::calcAreaCentres() const
 
     forAll (boundary(), patchI)
     {
-        const edgeList::subList patchEdges = 
+        const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
         forAll (patchEdges, edgeI)
@@ -349,7 +349,7 @@ void faMesh::calcEdgeCentres() const
 
     const pointField& localPoints = points();
 
-    const edgeList::subList internalEdges = 
+    const edgeList::subList internalEdges =
         edgeList::subList(edges(), nInternalEdges());
 
 
@@ -362,7 +362,7 @@ void faMesh::calcEdgeCentres() const
 
     forAll (boundary(), patchI)
     {
-        const edgeList::subList patchEdges = 
+        const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
         forAll (patchEdges, edgeI)
@@ -390,7 +390,7 @@ void faMesh::calcS() const
         )   << "SPtr_ already allocated"
             << abort(FatalError);
     }
-    
+
     SPtr_ = new DimensionedField<scalar, areaMesh>
     (
         IOobject
@@ -511,11 +511,11 @@ void faMesh::calcEdgeAreaNormals() const
 
 //     vectorField patchEdgeNormals(nEdges(), vector::zero);
 
-//     forAll(pointNormals, pointI)
+//     forAll (pointNormals, pointI)
 //     {
 //         const labelList& curPointEdges = patchPointEdges[pointI];
 
-//         forAll(curPointEdges, edgeI)
+//         forAll (curPointEdges, edgeI)
 //         {
 //             label curEdge = curPointEdges[edgeI];
 
@@ -534,7 +534,7 @@ void faMesh::calcEdgeAreaNormals() const
 //         edgeAreaNormals.internalField()[edgeI] =
 //             patchEdgeNormals[edgeI];
 //     }
-    
+
 //     forAll (boundary(), patchI)
 //     {
 //         const labelList& edgeLabels = boundary()[patchI];
@@ -550,15 +550,12 @@ void faMesh::calcEdgeAreaNormals() const
     forAll (edgeAreaNormals.internalField(), edgeI)
     {
         vector e = edges()[edgeI].vec(points());
-        
         e /= mag(e);
 
-        
-
-//         scalar wStart = 
+//         scalar wStart =
 //             1.0 - sqr(mag(e^pointNormals[edges()[edgeI].end()]));
 
-//         scalar wEnd = 
+//         scalar wEnd =
 //             1.0 - sqr(mag(e^pointNormals[edges()[edgeI].start()]));
 
 //         wStart = 1.0;
@@ -573,22 +570,19 @@ void faMesh::calcEdgeAreaNormals() const
 //         vector eCp = 0.5*
 //             (
 //                 points()[edges()[edgeI].start()] + pointNormals[edges()[edgeI].start()]
-//                 points()[edges()[edgeI].end()] + 
+//                 points()[edges()[edgeI].end()] +
 //             );
 
         edgeAreaNormals.internalField()[edgeI] =
-            pointNormals[edges()[edgeI].start()] 
+            pointNormals[edges()[edgeI].start()]
           + pointNormals[edges()[edgeI].end()];
 
-        edgeAreaNormals.internalField()[edgeI] -= 
+        edgeAreaNormals.internalField()[edgeI] -=
             e*(e&edgeAreaNormals.internalField()[edgeI]);
     }
 
-    
     edgeAreaNormals.internalField() /=
         mag(edgeAreaNormals.internalField());
-    
-    
 
     forAll (boundary(), patchI)
     {
@@ -604,10 +598,10 @@ void faMesh::calcEdgeAreaNormals() const
             vector e = patchEdges[edgeI].vec(points());
             e /= mag(e);
 
-            edgeAreaNormals.boundaryField()[patchI][edgeI] -= 
+            edgeAreaNormals.boundaryField()[patchI][edgeI] -=
                 e*(e&edgeAreaNormals.boundaryField()[patchI][edgeI]);
         }
-        
+
         edgeAreaNormals.boundaryField()[patchI] /=
             mag(edgeAreaNormals.boundaryField()[patchI]);
     }
@@ -686,7 +680,7 @@ void faMesh::calcEdgeTransformTensors() const
     const edgeVectorField& Ce = edgeCentres();
 
     // Internal edges transformation tensors
-    for(label edgeI=0; edgeI<nInternalEdges(); edgeI++)
+    for (label edgeI=0; edgeI<nInternalEdges(); edgeI++)
     {
         edgeTransformTensors.set(edgeI, new Field<tensor>(3, I));
 
@@ -699,7 +693,7 @@ void faMesh::calcEdgeTransformTensors() const
 
         // Edge transformation tensor
         vector il = E - Cf.internalField()[owner()[edgeI]];
-        
+
         il -= Ne.internalField()[edgeI]
             *(Ne.internalField()[edgeI]&il);
 
@@ -761,11 +755,11 @@ void faMesh::calcEdgeTransformTensors() const
     {
         const unallocLabelList& edgeFaces = boundary()[patchI].edgeFaces();
 
-        forAll(edgeFaces, edgeI)
+        forAll (edgeFaces, edgeI)
         {
             edgeTransformTensors.set
             (
-                boundary()[patchI].start() + edgeI, 
+                boundary()[patchI].start() + edgeI,
                 new Field<tensor>(2, I)
             );
 
@@ -778,7 +772,7 @@ void faMesh::calcEdgeTransformTensors() const
 
             // Edge transformation tensor
             vector il = E - Cf.internalField()[edgeFaces[edgeI]];
-        
+
             il -= Ne.boundaryField()[patchI][edgeI]
                 *(Ne.boundaryField()[patchI][edgeI]&il);
 
@@ -787,7 +781,7 @@ void faMesh::calcEdgeTransformTensors() const
             vector kl = Ne.boundaryField()[patchI][edgeI];
             vector jl = kl^il;
 
-            edgeTransformTensors[boundary()[patchI].start() + edgeI][0] = 
+            edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
                 tensor
                 (
                     il.x(), il.y(), il.z(),
@@ -806,7 +800,7 @@ void faMesh::calcEdgeTransformTensors() const
             kl = Nf.internalField()[edgeFaces[edgeI]];
             jl = kl^il;
 
-            edgeTransformTensors[boundary()[patchI].start() + edgeI][1] = 
+            edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
                 tensor
                 (
                     il.x(), il.y(), il.z(),
@@ -840,9 +834,9 @@ labelList faMesh::internalPoints() const
 
     SLList<label> internalPoints;
 
-    forAll(internal, pointI)
+    forAll (internal, pointI)
     {
-        if(internal[pointI])
+        if (internal[pointI])
         {
             internalPoints.append(pointI);
         }
@@ -876,9 +870,9 @@ labelList faMesh::boundaryPoints() const
 
     SLList<label> boundaryPoints;
 
-    forAll(internal, pointI)
+    forAll (internal, pointI)
     {
-        if(!internal[pointI])
+        if (!internal[pointI])
         {
             boundaryPoints.append(pointI);
         }
@@ -919,30 +913,30 @@ void faMesh::calcPointAreaNormals() const
     const faceList& faces = patch().localFaces();
     const labelListList& pointFaces = patch().pointFaces();
 
-    forAll(intPoints, pointI)
+    forAll (intPoints, pointI)
     {
         label curPoint = intPoints[pointI];
 
         faceList curFaceList(pointFaces[curPoint].size());
 
-        forAll(curFaceList, faceI)
+        forAll (curFaceList, faceI)
         {
             curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
         }
 
-        primitiveFacePatch curPatch (curFaceList, points);
+        primitiveFacePatch curPatch(curFaceList, points);
 
         labelList curPointPoints = curPatch.edgeLoops()[0];
 
-        for(int i=0; i<curPointPoints.size(); i++)
+        for (int i = 0; i < curPointPoints.size(); i++)
         {
             vector d1 =
                 points[curPatch.meshPoints()[curPointPoints[i]]]
               - points[curPoint];
 
-            label p = i+1;
+            label p = i + 1;
 
-            if(i == (curPointPoints.size()-1))
+            if (i == (curPointPoints.size() - 1))
             {
                 p = 0;
             }
@@ -961,13 +955,13 @@ void faMesh::calcPointAreaNormals() const
         }
     }
 
-    forAll(bndPoints, pointI)
+    forAll (bndPoints, pointI)
     {
         label curPoint = bndPoints[pointI];
 
         faceList curFaceList(pointFaces[curPoint].size());
 
-        forAll(curFaceList, faceI)
+        forAll (curFaceList, faceI)
         {
             curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
         }
@@ -980,34 +974,34 @@ void faMesh::calcPointAreaNormals() const
 
         label curPointLabel = -1;
 
-        for(label i=0; i<agglomFacePoints.size(); i++)
+        for (label i=0; i<agglomFacePoints.size(); i++)
         {
-            if(curPatch.meshPoints()[agglomFacePoints[i]] == curPoint)
+            if (curPatch.meshPoints()[agglomFacePoints[i]] == curPoint)
             {
                 curPointLabel = i;
             }
-            else if( curPointLabel != -1 )
+            else if ( curPointLabel != -1 )
             {
                 slList.append(curPatch.meshPoints()[agglomFacePoints[i]]);
             }
         }
 
-        for(label i=0; i<curPointLabel; i++)
+        for (label i=0; i<curPointLabel; i++)
         {
             slList.append(curPatch.meshPoints()[agglomFacePoints[i]]);
         }
 
         labelList curPointPoints(slList);
 
-        for(label i=0; i<(curPointPoints.size()-1); i++)
+        for (label i=0; i < (curPointPoints.size() - 1); i++)
         {
             vector d1 = points[curPointPoints[i]] - points[curPoint];
 
-            vector d2 = points[curPointPoints[i+1]] - points[curPoint];
+            vector d2 = points[curPointPoints[i + 1]] - points[curPoint];
 
-            vector n = (d1^d2)/mag(d1^d2);
+            vector n = (d1^d2)/mag(d1 ^ d2);
 
-            scalar sinAlpha = mag(d1^d2)/(mag(d1)*mag(d2));
+            scalar sinAlpha = mag(d1 ^ d2)/(mag(d1)*mag(d2));
 
             scalar w = sinAlpha/(mag(d1)*mag(d2));
 
@@ -1018,14 +1012,14 @@ void faMesh::calcPointAreaNormals() const
     // Correcte wedge points
     forAll (boundary(), patchI)
     {
-        if(boundary()[patchI].type() == wedgeFaPatch::typeName)
+        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
         {
             const wedgeFaPatch& wedgePatch =
                 refCast<const wedgeFaPatch>(boundary()[patchI]);
 
             labelList patchPoints = wedgePatch.pointLabels();
 
-            vector N = 
+            vector N =
                 transform
                 (
                     wedgePatch.edgeT(),
@@ -1034,9 +1028,9 @@ void faMesh::calcPointAreaNormals() const
 
             N /= mag(N);
 
-            forAll(patchPoints, pointI)
+            forAll (patchPoints, pointI)
             {
-                result[patchPoints[pointI]] 
+                result[patchPoints[pointI]]
                     -= N*(N&result[patchPoints[pointI]]);
             }
         }
@@ -1045,12 +1039,12 @@ void faMesh::calcPointAreaNormals() const
     // Axis point correction
     forAll (boundary(), patchI)
     {
-        if(boundary()[patchI].type() == wedgeFaPatch::typeName)
+        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
         {
             const wedgeFaPatch& wedgePatch =
                 refCast<const wedgeFaPatch>(boundary()[patchI]);
 
-            if(wedgePatch.axisPoint() > -1)
+            if (wedgePatch.axisPoint() > -1)
             {
                 result[wedgePatch.axisPoint()] =
                     wedgePatch.axis()
@@ -1067,10 +1061,9 @@ void faMesh::calcPointAreaNormals() const
     // Boundary points correction
     forAll (boundary(), patchI)
     {
-        if(correctPatchPointNormals(patchI) && !boundary()[patchI].coupled())
+        if (correctPatchPointNormals(patchI) && !boundary()[patchI].coupled())
         {
-            Info << "Correct: " << boundary()[patchI].name() << endl;
-            if(boundary()[patchI].ngbPolyPatchIndex() == -1)
+            if (boundary()[patchI].ngbPolyPatchIndex() == -1)
             {
                 FatalErrorIn
                     (
@@ -1083,9 +1076,9 @@ void faMesh::calcPointAreaNormals() const
             labelList patchPoints = boundary()[patchI].pointLabels();
             vectorField N = boundary()[patchI].ngbPolyPatchPointNormals();
 
-            forAll(patchPoints, pointI)
+            forAll (patchPoints, pointI)
             {
-                result[patchPoints[pointI]] 
+                result[patchPoints[pointI]]
                     -= N[pointI]*(N[pointI]&result[patchPoints[pointI]]);
             }
         }
@@ -1103,13 +1096,13 @@ void faMesh::calcPointAreaNormals() const
 
             vectorField patchPointNormals
             (
-                patchPointLabels.size(), 
+                patchPointLabels.size(),
                 vector::zero
             );
 
-            forAll(patchPointNormals, pointI)
+            forAll (patchPointNormals, pointI)
             {
-                patchPointNormals[pointI] = 
+                patchPointNormals[pointI] =
                     result[patchPointLabels[pointI]];
             }
 
@@ -1125,7 +1118,7 @@ void faMesh::calcPointAreaNormals() const
 
             vectorField ngbPatchPointNormals
             (
-                procPatch.neighbPoints().size(), 
+                procPatch.neighbPoints().size(),
                 vector::zero
             );
 
@@ -1141,8 +1134,8 @@ void faMesh::calcPointAreaNormals() const
 
             const labelList& nonGlobalPatchPoints =
                 procPatch.nonGlobalPatchPoints();
-            
-            forAll(nonGlobalPatchPoints, pointI)
+
+            forAll (nonGlobalPatchPoints, pointI)
             {
                 result[patchPointLabels[nonGlobalPatchPoints[pointI]]] +=
                     ngbPatchPointNormals
@@ -1162,7 +1155,7 @@ void faMesh::calcPointAreaNormals() const
             globalData().sharedPointLabels();
 
         vectorField spNormals(spLabels.size(), vector::zero);
-        forAll(spNormals, pointI)
+        forAll (spNormals, pointI)
         {
             spNormals[pointI] = result[spLabels[pointI]];
         }
@@ -1175,12 +1168,12 @@ void faMesh::calcPointAreaNormals() const
             vector::zero
         );
 
-        forAll(addr, i)
+        forAll (addr, i)
         {
             gpNormals[addr[i]] += spNormals[i];
         }
 
-        combineReduce(gpNormals, plusEqOp<vectorField >());
+        combineReduce(gpNormals, plusEqOp<vectorField>());
 
         // Extract local data
         forAll (addr, i)
@@ -1188,9 +1181,9 @@ void faMesh::calcPointAreaNormals() const
             spNormals[i] = gpNormals[addr[i]];
         }
 
-        forAll(spNormals, pointI)
+        forAll (spNormals, pointI)
         {
-            result[spLabels[pointI]] =  spNormals[pointI];
+            result[spLabels[pointI]] = spNormals[pointI];
         }
     }
 
