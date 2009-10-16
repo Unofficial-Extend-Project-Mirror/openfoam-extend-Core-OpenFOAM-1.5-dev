@@ -42,6 +42,12 @@ namespace Foam
         PrimitivePatch<face, SubList, const pointField&>,
         PrimitivePatch<face, SubList, const pointField&>
     >   patchToPatchInterpolation;
+
+    typedef PatchToPatchInterpolation
+    <
+        PrimitivePatch<face, List, const pointField&>,
+        PrimitivePatch<face, List, const pointField&>
+    >   zoneToZoneInterpolation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
