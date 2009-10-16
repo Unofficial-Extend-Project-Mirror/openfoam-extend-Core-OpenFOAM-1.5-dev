@@ -268,7 +268,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
         );
 
     faceAddressingPtr_ = new labelList(proj.size(), -1);
-    labelList& faceAddressing = *faceAddressingPtr_;        
+    labelList& faceAddressing = *faceAddressingPtr_;
 
     forAll (faceAddressing, faceI)
     {
