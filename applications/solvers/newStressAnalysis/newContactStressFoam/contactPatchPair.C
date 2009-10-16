@@ -374,7 +374,7 @@ void Foam::contactPatchPair::correct
             Upatches[masterIndex]
         )
       - Upatches[slaveIndex];
-        
+
     relUslave -= nSlavePatch*(nSlavePatch & relUslave);
     relUslave /= mag(relUslave) + VSMALL;
 
@@ -388,7 +388,7 @@ void Foam::contactPatchPair::correct
         slaveFrac*relUslave*
         min
         (
-            frictionCoeff_.value()*max(slavePressure, 0.0),
+            frictionCoeff_.value()*max(slavePressure, scalar(0)),
             magSlaveTangential
         );
 

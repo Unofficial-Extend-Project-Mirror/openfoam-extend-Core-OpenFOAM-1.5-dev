@@ -23,9 +23,9 @@
     volScalarField rhog = max(p*psig, 0.1*rhogSat);
     volScalarField rhol = rholSat + (p - pSat)*psil;
 
-    gamma = min(max((rhol - rho)/(rhol - rhog), 0.0), 1.0);
+    gamma = min(max((rhol - rho)/(rhol - rhog), scalar(0)), scalar(1);
 
     psiByRho =
-        (gamma*rhog + (1.0 - gamma)*rhol)
-       *(gamma*psig/rhog + (1.0 - gamma)*psil/rhol)/rho;
+        (gamma*rhog + (scalar(1) - gamma)*rhol)
+       *(gamma*psig/rhog + (scalar(1) - gamma)*psil/rhol)/rho;
 }

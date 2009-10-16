@@ -65,7 +65,7 @@ Foam::tmp<Foam::scalarField> Foam::W2::weights
     scalarField RBF(dist.size());
 
     RBF = neg(dist - radius_)*
-        Foam::max(pow4(1 - (dist/radius_)), 0.0)*(1 + 4*(dist/radius_));
+        Foam::max(pow4(1 - (dist/radius_)), scalar(0))*(1 + 4*(dist/radius_));
 
     return RBF;
 }
