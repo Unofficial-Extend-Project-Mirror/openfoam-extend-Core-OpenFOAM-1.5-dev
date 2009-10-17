@@ -26,7 +26,7 @@ Application
     sonicFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, turbulent flow of a 
+    Transient solver for trans-sonic/supersonic, turbulent flow of a
     compressible gas.
 
 \*---------------------------------------------------------------------------*/
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             U.correctBoundaryConditions();
         }
 
-        DpDt = 
+        DpDt =
             fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
         turbulence->correct();
