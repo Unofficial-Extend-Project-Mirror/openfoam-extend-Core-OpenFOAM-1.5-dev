@@ -126,7 +126,11 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     patchNames_(2*boundaryMesh().size()),
     pointZoneNames_(),
     faceZoneNames_(),
-    cellZoneNames_()
+    cellZoneNames_(),
+    pointZones_(),
+    faceZones_(),
+    faceZoneFlips_(),
+    cellZones_()
 {
     // Insert the original patches into the list
     wordList curPatchTypes = boundaryMesh().types();
@@ -151,6 +155,12 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     {
         pointZoneNames_.append(curPointZoneNames[zoneI]);
     }
+    const pointField& p = points();
+    const pointZoneMesh& pz = pointZones();
+    forAll(p, pointI)
+    {
+        pointZones_.append(pz.whichZone(pointI));
+    }
 
     // Face zones
     wordList curFaceZoneNames = faceZones().names();
@@ -163,6 +173,20 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     {
         faceZoneNames_.append(curFaceZoneNames[zoneI]);
     }
+    const faceList& f = faces();
+    const faceZoneMesh& fz = faceZones();
+    forAll(f, faceI)
+    {
+        label zoneID = fz.whichZone(faceI);
+        faceZones_.append(zoneID);
+
+        if(zoneID > -1)
+            faceZoneFlips_.append(fz[zoneID].flipMap()[faceI]);
+        else
+            faceZoneFlips_.append(false);
+    }
+    faceZones_.shrink();
+    faceZoneFlips_.shrink();
 
     // Cell zones
     wordList curCellZoneNames = cellZones().names();
@@ -175,6 +199,13 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     {
         cellZoneNames_.append(curCellZoneNames[zoneI]);
     }
+    const cellList& c = cells();
+    const cellZoneMesh& cz = cellZones();
+    forAll(c, cellI)
+    {
+        cellZones_.append(cz.whichZone(cellI));
+    }
+    cellZones_.shrink();
 }
 
 
@@ -207,7 +238,7 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         // Grab zone ID.  If a point is not in a zone, it will return -1
         zoneID = pz.whichZone(pointI);
 
-        if (zoneID > 0)
+        if (zoneID > -1)
         {
             // Translate zone ID into the new index
             zoneID = pointZoneIndices[zoneID];
@@ -224,6 +255,9 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
                     pointI < m.nPoints()  // Is in cell?
                 )
             );
+
+        pointZones_.append(zoneID);
+
     }
 
     // Add cells
@@ -244,7 +278,7 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         // Grab zone ID.  If a cell is not in a zone, it will return -1
         zoneID = cz.whichZone(cellI);
 
-        if (zoneID > 0)
+        if (zoneID > -1)
         {
             // Translate zone ID into the new index
             zoneID = cellZoneIndices[zoneID];
@@ -262,6 +296,8 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
                     zoneID                // Zone for cell
                 )
             );
+
+        cellZones_.append(zoneID);
     }
 
     // Add faces
@@ -372,7 +408,12 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
                     newZoneFlip
                 )
             );
+        faceZones_.append(newZone);
+        faceZoneFlips_.append(newZoneFlip);
     }
+
+    faceZones_.shrink();
+    faceZoneFlips_.shrink();
 }
 
 
@@ -436,6 +477,99 @@ void Foam::mergePolyMesh::merge()
     )
     {
 
+        List<pointZone*> pZones(pointZoneNames_.size());
+        List<faceZone*> fZones(faceZoneNames_.size());
+        List<cellZone*> cZones(cellZoneNames_.size());
+
+        if(pointZoneNames_.size() > 0)
+        {
+            Info << "Updating point zones" << endl;
+
+            List<DynamicList<label> > pzPoints(pointZoneNames_.size());
+            forAll(pointZones_, pointI)
+            {
+                label zoneID = pointZones_[pointI];
+
+                if(zoneID > -1)
+                    pzPoints[zoneID].append(pointI);
+            }
+
+            forAll(pZones, i)
+            {
+                pZones[i] = new pointZone
+                    (
+                        pointZoneNames_[i],
+                        pzPoints[i],
+                        i,
+                        pointZones()
+                    );
+            }
+        }
+
+        if(faceZoneNames_.size() > 0)
+        {
+            Info << "Updating face zones" << endl;
+
+            List<DynamicList<label> > fzFaces(faceZoneNames_.size());
+            List<DynamicList<bool> >  fzFlips(faceZoneNames_.size());
+
+            forAll(faceZones_, faceI)
+            {
+                label zoneID = faceZones_[faceI];
+
+                if(zoneID > -1)
+                {
+                    fzFaces[zoneID].append(faceI);
+                    fzFlips[zoneID].append(faceZoneFlips_[faceI]);
+                }
+            }
+
+            forAll(fZones, i)
+            {
+                fzFaces[i].shrink();
+                fzFlips[i].shrink();
+
+                fZones[i] = new faceZone
+                    (
+                        faceZoneNames_[i],
+                        fzFaces[i],
+                        fzFlips[i],
+                        i,
+                        faceZones()
+                    );
+            }
+        }
+
+        if(cellZoneNames_.size() > 0)
+        {
+            Info << "Updating cell zones" << endl;
+
+            List<DynamicList<label> > czCells(cellZoneNames_.size());
+            forAll(cellZones_, cellI)
+            {
+                label zoneID = cellZones_[cellI];
+
+                if(zoneID > -1)
+                    czCells[zoneID].append(cellI);
+            }
+
+            forAll(cZones, i)
+            {
+                czCells[i].shrink();
+
+                cZones[i] = new cellZone
+                    (
+                        cellZoneNames_[i],
+                        czCells[i],
+                        i,
+                        cellZones()
+                    );
+            }
+        }
+
+        removeZones();
+        addZones(pZones, fZones, cZones);
+        write();
     }
 
     // Change mesh. No inflation
