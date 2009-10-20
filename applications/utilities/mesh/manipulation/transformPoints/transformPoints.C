@@ -56,6 +56,7 @@ Description
 #include "transformField.H"
 #include "transformGeometricField.H"
 #include "IStringStream.H"
+#include "RodriguesRotation.H"
 
 using namespace Foam;
 
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
 {
     argList::validOptions.insert("translate", "vector");
     argList::validOptions.insert("rotate", "(vector vector)");
+    argList::validOptions.insert("rotateAlongVector", "(vector angleInDegree)");
     argList::validOptions.insert("rotateFields", "");
     argList::validOptions.insert("scale", "vector");
  
@@ -178,6 +180,25 @@ int main(int argc, char *argv[])
 
         Info<< "Rotating points by " << T << endl;
 
+        points = transform(T, points);
+
+        if (args.options().found("rotateFields"))
+        {
+            rotateFields(runTime, T);
+        }
+    }
+
+    if (args.options().found("rotateAlongVector"))
+    {
+        IStringStream rotateVectorOptions(args.options()["rotateAlongVector"]);
+
+        vector rotationAxis(rotateVectorOptions);
+        scalar rotationAngle = readScalar(rotateVectorOptions);
+
+        tensor T = RodriguesRotation(rotationAxis, rotationAngle);
+
+        Info << "Rotating points by " << T << endl;
+ 
         points = transform(T, points);
 
         if (args.options().found("rotateFields"))
