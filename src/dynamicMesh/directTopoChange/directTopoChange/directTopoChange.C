@@ -1715,7 +1715,12 @@ void Foam::directTopoChange::calcFaceZonePointMap
 
         const labelList& newZoneMeshPoints = newZone().meshPoints();
 
-        const Map<label>& oldZoneMeshPointMap = oldFaceZoneMeshPointMaps[zoneI];
+        const Map<label>& oldZoneMeshPointMap =
+            (
+                zoneI < oldFaceZoneMeshPointMaps.size() ?
+                oldFaceZoneMeshPointMaps[zoneI] :
+                oldFaceZoneMeshPointMaps[0]
+            );
 
         labelList& curFzPointRnb = faceZonePointMap[zoneI];
 
@@ -1723,7 +1728,11 @@ void Foam::directTopoChange::calcFaceZonePointMap
 
         forAll(newZoneMeshPoints, pointI)
         {
-            if (newZoneMeshPoints[pointI] < pointMap_.size())
+            if
+            (
+                newZoneMeshPoints[pointI] < pointMap_.size()
+             && zoneI < oldFaceZoneMeshPointMaps.size()
+            )
             {
                 Map<label>::const_iterator ozmpmIter =
                     oldZoneMeshPointMap.find
@@ -2007,14 +2016,32 @@ void Foam::directTopoChange::compactAndReorder
     // Grab old face zone mesh point maps.
     // These need to be saved before resetting the mesh and are used
     // later on to calculate the faceZone pointMaps.
-    oldFaceZoneMeshPointMaps.setSize(mesh.faceZones().size());
+
+    // First evaluate the number of old faceZones.
+    // We need to do this next part the hard way because if we are being
+    // called by mergeMeshes, the faceZones information is currently a
+    // mix of old and new faceZones while the mesh has yet to be updated.
+    // So while mesh.allFaces() will only return indices about old faces,
+    // mesh.faceZones() will return information about both the new and old
+    // faceZones faces.
+
+    DynamicList<Map<label> > dynOldFaceZoneMeshPointMaps;
 
     forAll(mesh.faceZones(), zoneI)
     {
-        const faceZone& oldZone = mesh.faceZones()[zoneI];
+        label maxFaceIndex = max(mesh.faceZones()[zoneI]);
 
-        oldFaceZoneMeshPointMaps[zoneI] = oldZone().meshPointMap();
+        // This should always be true for old faceZones faces
+        if(maxFaceIndex < mesh.allFaces().size())
+        {
+            const faceZone& oldZone = mesh.faceZones()[zoneI];
+            dynOldFaceZoneMeshPointMaps.append(oldZone().meshPointMap());
+        }
     }
+    // Transfer back to oldFaceZoneMeshPointMaps
+    dynOldFaceZoneMeshPointMaps.shrink();
+    oldFaceZoneMeshPointMaps.setSize(dynOldFaceZoneMeshPointMaps.size());
+    dynOldFaceZoneMeshPointMaps.transfer(oldFaceZoneMeshPointMaps);
 }
 
 
