@@ -144,7 +144,7 @@ template<class List>
 List createWithValues
 (
     const label sz,
-    const typename List::const_reference initValue,
+    typename List::const_reference initValue,
     const labelList& indices,
     typename List::const_reference setValue
 );
