@@ -57,8 +57,10 @@ class argList;
 
 class ensightMesh
 {
-        class nFacePrimitives
-        {
+public:
+
+    class nFacePrimitives
+    {
         public:
 
             label nPoints;
@@ -73,8 +75,9 @@ class ensightMesh
                 nQuads(0),
                 nPolys(0)
             {}
-        };
+    };
 
+private:
 
     // Private data
 
