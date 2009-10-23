@@ -178,9 +178,13 @@ void Foam::processorPolyPatch::calcGeometry()
         vectorField nbrFaceNormals(neighbFaceAreas_.size());
 
         // Calculate normals from areas and check
+
+        // Cache face areas
+        const vectorField::subField localFaceAreas = faceAreas();
+
         forAll(faceNormals, facei)
         {
-            scalar magSf = mag(faceAreas()[facei]);
+            scalar magSf = mag(localFaceAreas[facei]);
             scalar nbrMagSf = mag(neighbFaceAreas_[facei]);
             scalar avSf = (magSf + nbrMagSf)/2.0;
 
@@ -200,13 +204,13 @@ void Foam::processorPolyPatch::calcGeometry()
                 )   << "face " << facei << " area does not match neighbour by "
                     << 100*mag(magSf - nbrMagSf)/avSf
                     << "% -- possible face ordering problem." << endl
-                    << "patch:" << name()
+                    << "patch: " << name()
                     << " my area:" << magSf
-                    << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << coupledPolyPatch::matchTol_
+                    << " neighbour area: " << nbrMagSf
+                    << " matching tolerance: " << coupledPolyPatch::matchTol_
                     << endl
-                    << "Mesh face:" << start()+facei
-                    << " vertices:"
+                    << "Mesh face: " << start()+facei
+                    << " vertices: "
                     << IndirectList<point>(points(), operator[](facei))()
                     << endl
                     << "Rerun with processor debug flag set for"
@@ -214,7 +218,7 @@ void Foam::processorPolyPatch::calcGeometry()
             }
             else
             {
-                faceNormals[facei] = faceAreas()[facei]/magSf;
+                faceNormals[facei] = localFaceAreas[facei]/magSf;
                 nbrFaceNormals[facei] = neighbFaceAreas_[facei]/nbrMagSf;
             }
         }
