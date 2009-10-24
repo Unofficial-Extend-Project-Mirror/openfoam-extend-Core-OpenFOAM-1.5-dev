@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class freestreamPressureFvPatch Declaration
+                  Class freestreamPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class freestreamPressureFvPatchScalarField

@@ -31,7 +31,7 @@ Description
 Author
     Dubravko Matijasevic, FSB Zagreb.  All rights reserved.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "sixDOFqODE.H"
 
@@ -283,32 +283,32 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const sixDOFqODE& sds)
 {
     os.writeKeyword("mass") << tab << sds.mass_ << token::END_STATEMENT << nl;
     os.writeKeyword("momentOfInertia") << tab << sds.momentOfInertia_
-				       << token::END_STATEMENT << nl << nl;
+        << token::END_STATEMENT << nl << nl;
 
     os.writeKeyword("equilibriumPosition") << tab << sds.Xequilibrium_
-					   << token::END_STATEMENT << nl;
+        << token::END_STATEMENT << nl;
     os.writeKeyword("linearSpring") << tab << sds.linSpringCoeffs_
-				    << token::END_STATEMENT << nl;
+        << token::END_STATEMENT << nl;
     os.writeKeyword("linearDamping") << tab << sds.linDampingCoeffs_
-				     << token::END_STATEMENT << nl << nl;
+        << token::END_STATEMENT << nl << nl;
 
     os.writeKeyword("Xrel") << tab << sds.Xrel() << token::END_STATEMENT << nl;
     os.writeKeyword("U") << tab << sds.U() << token::END_STATEMENT << nl;
-    os.writeKeyword("rotationVector") << tab << sds.rotVector() 
-				      << token::END_STATEMENT << nl;
-    os.writeKeyword("rotationAngle") << tab << sds.rotAngle() 
-				     << token::END_STATEMENT << nl;
-    os.writeKeyword("omega") << tab << sds.omega() 
-			     << token::END_STATEMENT << nl << nl;
+    os.writeKeyword("rotationVector") << tab << sds.rotVector()
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("rotationAngle") << tab << sds.rotAngle()
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("omega") << tab << sds.omega()
+        << token::END_STATEMENT << nl << nl;
 
     os.writeKeyword("force") << tab << sds.force()
-				     << token::END_STATEMENT << nl;
+        << token::END_STATEMENT << nl;
     os.writeKeyword("moment") << tab << sds.moment()
-				     << token::END_STATEMENT << nl;
+        << token::END_STATEMENT << nl;
     os.writeKeyword("forceRelative") << tab << sds.forceRelative()
-				     << token::END_STATEMENT << nl;
-    os.writeKeyword("momentRelative") << tab << sds.momentRelative() 
-				      << token::END_STATEMENT << endl;
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("momentRelative") << tab << sds.momentRelative()
+        << token::END_STATEMENT << endl;
 
     return os;
 }

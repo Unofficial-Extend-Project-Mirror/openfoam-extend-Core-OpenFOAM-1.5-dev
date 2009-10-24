@@ -30,7 +30,7 @@ Description
 Author
     Hrvoje Jasak.  All rights reserved.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "tetPolyMeshLduAddressingFaceDecomp.H"
 #include "globalMeshData.H"

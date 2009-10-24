@@ -173,12 +173,12 @@ Foam::tetDecompositionMotionSolver::distortionEnergy() const
 
     elementScalarField& Ud = tUd();
 
-    elementTensorField gradU = 
+    elementTensorField gradU =
         tetFec::elementGrad(motionU_)*tetMesh().time().deltaT();
- 
+
     Ud = (1.0/2.0)*((gradU && gradU) + (gradU && gradU.T()))
        - (1.0/3.0)*tr(gradU)*tr(gradU);
-    
+
     return tUd;
 }
 
@@ -205,14 +205,14 @@ Foam::tetDecompositionMotionSolver::deformationEnergy() const
 
     elementScalarField& Ud = tUd();
 
-    elementTensorField gradU = 
-	tetFec::elementGrad(motionU_)*tetMesh().time().deltaT();
+    elementTensorField gradU =
+        tetFec::elementGrad(motionU_)*tetMesh().time().deltaT();
 
     scalar nu = 0.25;
 
     Ud = (1.0/2.0)*((gradU&&gradU) + (gradU&&gradU.T()));
        + (nu/(1.0+2.0*nu))*tr(gradU)*tr(gradU);
-    
+
     return tUd;
 }
 
@@ -245,9 +245,9 @@ Foam::tetDecompositionMotionSolver::totDistortionEnergy() const
         FatalErrorIn
         (
             "tetDecompositionMotionSolver::totDeformationEnergy()"
-	)   << "Total displacement field is not stored "
-	    << "in tetDecompositionMotionSolver object." << endl
-	    << exit(FatalError);
+        )   << "Total displacement field is not stored "
+            << "in tetDecompositionMotionSolver object." << endl
+            << exit(FatalError);
     }
 
     elementTensorField gradU = tetFec::elementGrad(totDisplacement());
@@ -287,8 +287,8 @@ Foam::tetDecompositionMotionSolver::totDeformationEnergy() const
         FatalErrorIn
         (
             "tetDecompositionMotionSolver::totDistortionEnergy()"
-	)   << "Total displacement field is not stored." << endl
-	    << exit(FatalError);
+        )   << "Total displacement field is not stored." << endl
+            << exit(FatalError);
     }
 
     elementTensorField gradU = tetFec::elementGrad(totDisplacement());
@@ -297,7 +297,7 @@ Foam::tetDecompositionMotionSolver::totDeformationEnergy() const
 
     Ud = (1.0/2.0)*((gradU && gradU) + (gradU && gradU.T()));
        + (nu/(1.0+2.0*nu))*tr(gradU)*tr(gradU);
-    
+
     return tUd;
 }
 
