@@ -454,7 +454,7 @@ GlobalPointPatchField
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template
 <
@@ -478,7 +478,7 @@ GlobalPointPatchField
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
 template
 <
@@ -820,7 +820,7 @@ tmp<scalarField> GlobalPointPatchField
     scalarField& cutCoeffs = tcutCoeffs();
 
     label coeffI = 0;
-        
+
     // Owner side
     // ~~~~~~~~~~
     forAll (cutOwn, edgeI)
@@ -1026,7 +1026,7 @@ void GlobalPointPatchField
     // Mesh points is used only for size
 
     // Coefficients are already ordered in the appropriate way. Just
-    // use the counter.  
+    // use the counter.
     label coeffI = 0;
     scalarField sumOffDiag(this->size(), 0);
 
