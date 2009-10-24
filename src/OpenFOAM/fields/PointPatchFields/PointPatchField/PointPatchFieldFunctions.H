@@ -517,6 +517,20 @@ template
     class PointPatch,
     template<class> class MatrixType
 >
+void hinv
+(
+    PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&,
+    const PointPatchField<PatchField, Mesh, PointPatch, MatrixType, tensor>&
+){}
+
+
+template
+<
+    template<class> class PatchField,
+    class Mesh,
+    class PointPatch,
+    template<class> class MatrixType
+>
 void symm
 (
     PointPatchField<PatchField, Mesh, PointPatch, MatrixType, symmTensor>&,

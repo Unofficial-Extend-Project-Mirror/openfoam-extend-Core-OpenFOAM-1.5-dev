@@ -114,6 +114,17 @@ dimensionedTensor inv(const dimensionedTensor& dt)
 }
 
 
+dimensionedTensor hinv(const dimensionedTensor& dt)
+{
+    return dimensionedTensor
+    (
+        "hinv("+dt.name()+')',
+        dimless/dt.dimensions(),
+        hinv(dt.value())
+    );
+}
+
+
 dimensionedSymmTensor symm(const dimensionedTensor& dt)
 {
     return dimensionedSymmTensor

@@ -62,8 +62,8 @@ template<class MasterPatch, class SlavePatch>
 scalar
 GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection
 (
-    const List<point2D>& poly1, 
-    const List<point2D>& poly2   
+    const List<point2D>& poly1,
+    const List<point2D>& poly2
 ) const
 {
     // Using pointers because clipping and subject may be swapped
@@ -78,7 +78,7 @@ GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection
 
     // Empty list so we can detect weird cases later
     List<point2D> clippedPolygon;
-    scalar intersectionArea = 0.0;   
+    scalar intersectionArea = 0.0;
 
     // First, let's get rid of the obvious:
     //  1: Neither polygons intersect one another
@@ -191,7 +191,8 @@ GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection
         {
             WarningIn
             (
-                "GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection"
+                "GGIInterpolation<MasterPatch, SlavePatch>::"
+                "polygonIntersection"
             )   << "Intersection might be wrong wrong: clipping side "
                 << intersectionArea/clippingArea << " subject: "
                 << intersectionArea/subjectArea << endl;
@@ -205,7 +206,7 @@ GGIInterpolation<MasterPatch, SlavePatch>::polygonIntersection
 // Compute the point in polygon problem using the computation of the
 // winding number. This technique is based on a paper by Hormann and
 // Agathos.
-// 
+//
 // This is based on the winding number technique, but optimized in
 // order to only evaluate quarter revolutions instead of the whole
 // arcos/sqrt basic algorithm.  When the GGI weighting factors will
@@ -239,8 +240,8 @@ GGIInterpolation<MasterPatch, SlavePatch>::isVertexInsidePolygon
     // Counter
     label nbrsOutside = 0;
 
-    // Iterate over all subject vertices, determining if they are inside/outside
-    // the clipping polygon
+    // Iterate over all subject vertices, determining if they are
+    // inside/outside the clipping polygon
     forAll(subjectPolygon, sPI)
     {
         switch (pip.evaluate(subjectPolygon[sPI]))
@@ -271,7 +272,7 @@ GGIInterpolation<MasterPatch, SlavePatch>::isVertexInsidePolygon
     // else, all the points are outside, which is not necessarily a
     // problem if the subject Polygon is enclosing partially or
     // completely the clipping polygon instead
-    
+
     return retValue;
 }
 
@@ -304,7 +305,7 @@ GGIInterpolation<MasterPatch, SlavePatch>::clipPolygon2DSutherlandHodgman
         clippingPolygon,
         subjectPolygon,
         sqrt(areaErrorTol_) // = distErrorTol
-    ).evaluate(); 
+    ).evaluate();
 }
 
 
@@ -318,7 +319,7 @@ scalar GGIInterpolation<MasterPatch, SlavePatch>::area2D
 {
     // For a non-self-intersecting (simple) polygon with n vertices,
     // the area is :
-    // A = 0.5 * sum(x(i)y(i+1) - x(i+1)y(i)  , i=1 to n; where n+1 = 0; 
+    // A = 0.5 * sum(x(i)y(i+1) - x(i+1)y(i)  , i=1 to n; where n+1 = 0;
     scalar area = 0;
 
     // We start with last term from Wolfram equation

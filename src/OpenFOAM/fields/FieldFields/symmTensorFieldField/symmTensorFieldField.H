@@ -60,6 +60,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
 UNARY_FUNCTION(symmTensor, symmTensor, inv)
+UNARY_FUNCTION(symmTensor, symmTensor, hinv)
 
 
 // * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //

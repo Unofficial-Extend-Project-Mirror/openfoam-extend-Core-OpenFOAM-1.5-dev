@@ -59,6 +59,13 @@ vector eigenValues(const symmTensor& t);
 vector eigenVector(const symmTensor& t, const scalar lambda);
 tensor eigenVectors(const symmTensor& t);
 
+// Tensor inverse with singular value decomposition
+// (Householder transformations)
+// HJ, 24/Oct/2009
+tensor hinv(const tensor& t);
+symmTensor hinv(const symmTensor& t);
+
+
 //- Specify data associated with tensor type is contiguous
 template<>
 inline bool contiguous<tensor>() {return true;}

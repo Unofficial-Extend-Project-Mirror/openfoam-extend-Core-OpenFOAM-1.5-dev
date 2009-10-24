@@ -306,8 +306,8 @@ vector eigenValues(const symmTensor& t)
             }
             else
             {
-                FatalErrorIn("eigenValues(const tensor&)")
-                    << "zero and complex eigenvalues in tensor: " << t
+                FatalErrorIn("eigenValues(const symmTensor&)")
+                    << "zero and complex eigenvalues in symmTensor: " << t
                     << abort(FatalError);
             }
         }
@@ -451,6 +451,74 @@ tensor eigenVectors(const symmTensor& t)
     evs.z() = eigenVector(t, evals.z());
 
     return evs;
+}
+
+
+// Matrix inversion with singular value decomposition
+tensor hinv(const tensor& t)
+{
+    static const scalar large = 1e10;
+    static const scalar small = 1e-10;
+
+    if (det(t) > small)
+    {
+        return inv(t);
+    }
+    else
+    {
+        vector eig = eigenValues(t);
+        tensor eigVecs = eigenVectors(t);
+
+        tensor zeroInv(tensor::zero);
+
+        if (mag(eig.z()) > large*mag(eig.x()))
+        {
+            // Make a tensor out of symmTensor sqr.  HJ, 24/Oct/2009
+            zeroInv +=
+                tensor(sqr(vector(eigVecs.xx(), eigVecs.xy(), eigVecs.xz())));
+        }
+
+        if (mag(eig.z()) > large*mag(eig.y()))
+        {
+            // Make a tensor out of symmTensor sqr.  HJ, 24/Oct/2009
+            zeroInv +=
+                tensor(sqr(vector(eigVecs.yx(), eigVecs.yy(), eigVecs.yz())));
+        }
+
+        return inv(t + zeroInv) - zeroInv;
+    }
+}
+
+
+symmTensor hinv(const symmTensor& t)
+{
+    static const scalar large = 1e10;
+    static const scalar small = 1e-10;
+
+    if (det(t) > small)
+    {
+        return inv(t);
+    }
+    else
+    {
+        vector eig = eigenValues(t);
+        tensor eigVecs = eigenVectors(t);
+
+        symmTensor zeroInv(symmTensor::zero);
+
+        if (mag(eig.z()) > large*mag(eig.x()))
+        {
+            zeroInv += sqr(vector(eigVecs.xx(), eigVecs.xy(), eigVecs.xz()));
+        }
+
+        if (mag(eig.z()) > large*mag(eig.y()))
+        {
+            // singular direction 1
+            zeroInv += sqr(vector(eigVecs.yx(), eigVecs.yy(), eigVecs.yz()));
+        }
+
+        return inv(t + zeroInv) - zeroInv;
+    }
 }
 
 

@@ -66,6 +66,7 @@ UNARY_FUNCTION(tensor, tensor, cof)
 UNARY_FUNCTION(tensor, tensor, inv)
 UNARY_FUNCTION(vector, tensor, eigenValues)
 UNARY_FUNCTION(tensor, tensor, eigenVectors)
+UNARY_FUNCTION(tensor, tensor, hinv)
 
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(tensor, symmTensor, eigenVectors)

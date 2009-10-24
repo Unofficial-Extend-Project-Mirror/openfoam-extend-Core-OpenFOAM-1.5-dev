@@ -83,8 +83,8 @@ class EigenSolver
             const T s,
             const T tau,
             const label i,
-            const label j, 
-            const label k, 
+            const label j,
+            const label k,
             const label l
         ) const;
 

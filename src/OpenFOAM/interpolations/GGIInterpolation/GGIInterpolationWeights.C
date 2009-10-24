@@ -27,9 +27,9 @@ Description
     primitivePatches
 
 Author
-    Hrvoje Jasak, Wikki Ltd.  All rights reserved 
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
-Modification by: 
+Modification by:
     Martin Beaudoin, Hydro-Quebec, (2008)
 
 \*---------------------------------------------------------------------------*/
@@ -150,10 +150,11 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
     const pointField& masterPatchPoints = masterPatch_.points();
     const vectorField masterPatchNormals = masterPatch_.faceNormals();
 
-    // Store the polygon made by projecting the face points onto the face normal
+    // Store the polygon made by projecting the face points onto the
+    // face normal
     // The master faces polygons
     List<pointField>  masterFace2DPolygon(masterPatch_.size());
- 
+
     // Tolerance factor for the Separation of Axes Theorem == distErrorTol_
 
     forAll(masterPatch_, faceMi)
@@ -197,18 +198,18 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
         //
         //
         //                                                       u  =  vector from face center to most distant projected master face point.
-        //                                               /       .        
+        //                                               /       .
         //           ^y                                / |       .      .w = normal to master face
-        //           |                               /   |       .    .                   
-        //           |                             /     |       .  .                 
-        //           |                            |      |       .                     
+        //           |                               /   |       .    .
+        //           |                             /     |       .  .
+        //           |                            |      |       .
         //           |                            |      /        .
         //           |                            |    /           .
         //           |                            |  /              .
         //           ---------> x                 |/                 .
         //          /                                                 v = w^u
-        //         /                                             
-        //        /                                             
+        //         /
+        //        /
         //       z
         //
         //
@@ -306,7 +307,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                 }
             }
 
-            // Apply the translation offset in order to keep the 
+            // Apply the translation offset in order to keep the
             // neighbErrorProjectionAlongW values to a minimum
             if (doSeparation())
             {
@@ -325,7 +326,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                 (
                     uvw,
                     currentMasterFaceCentre,
-                    curSlaveFacePoints, 
+                    curSlaveFacePoints,
                     neighbErrorProjectionAlongW
                 );
 
@@ -412,7 +413,7 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                     )   << "polygonIntersection is returning a "
                         << "zero surface area between " << nl
                         << "     Master face: " << faceMi
-                        << " and Neighbour face: " << curCMN[neighbI] 
+                        << " and Neighbour face: " << curCMN[neighbI]
                         << " intersection area = " << intersectionArea << nl
                         << "Please check the two quick-check algorithms for "
                         << "GGIInterpolation.  Something is  missing." << endl;
@@ -586,7 +587,7 @@ tmp<labelField>
 GGIInterpolation<MasterPatch, SlavePatch>::findNonOverlappingFaces
 (
     const scalarListList& patchWeights,
-    const scalar& nonOverlapFaceTol   //  = minimum sum of the neighbour weights
+    const scalar& nonOverlapFaceTol   //  = min sum of the neighbour weights
 ) const
 {
     tmp<labelField> tpatchFaceNonOverlapAddr(new labelField());

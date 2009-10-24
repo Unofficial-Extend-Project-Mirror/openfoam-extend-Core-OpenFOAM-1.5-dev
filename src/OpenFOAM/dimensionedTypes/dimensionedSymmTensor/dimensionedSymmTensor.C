@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionedSymmTensor.H"
+#include "tensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -143,6 +144,17 @@ dimensionedSymmTensor inv(const dimensionedSymmTensor& dt)
         "inv("+dt.name()+')',
         dimless/dt.dimensions(),
         inv(dt.value())
+    );
+}
+
+
+dimensionedSymmTensor hinv(const dimensionedSymmTensor& dt)
+{
+    return dimensionedSymmTensor
+    (
+        "hinv("+dt.name()+')',
+        dimless/dt.dimensions(),
+        hinv(dt.value())
     );
 }
 

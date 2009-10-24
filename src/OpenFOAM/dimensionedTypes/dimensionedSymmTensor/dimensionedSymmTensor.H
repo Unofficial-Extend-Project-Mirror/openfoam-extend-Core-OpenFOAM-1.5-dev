@@ -61,6 +61,7 @@ dimensionedSymmTensor dev2(const dimensionedSymmTensor&);
 dimensionedScalar det(const dimensionedSymmTensor&);
 dimensionedSymmTensor cof(const dimensionedSymmTensor&);
 dimensionedSymmTensor inv(const dimensionedSymmTensor&);
+dimensionedSymmTensor hinv(const dimensionedSymmTensor&);
 
 
 // global operators

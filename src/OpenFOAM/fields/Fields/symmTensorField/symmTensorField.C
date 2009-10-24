@@ -48,6 +48,9 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
+// This is a nasty hack for flat geometries.  For serious SVD, please use hinv
+// (Singular value decomposition and Householder transfromations)
+// HJ, 24/Oct/2009
 void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
 {
     if (!tf.size())
@@ -112,10 +115,28 @@ tmp<symmTensorField> inv(const UList<symmTensor>& tf)
     return result;
 }
 
+
 tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
 {
     tmp<symmTensorField> tRes = reuseTmp<symmTensor, symmTensor>::New(tf);
     inv(tRes(), tf());
+    reuseTmp<symmTensor, symmTensor>::clear(tf);
+    return tRes;
+}
+
+
+tmp<symmTensorField> hinv(const UList<symmTensor>& tf)
+{
+    tmp<symmTensorField> result(new symmTensorField(tf.size()));
+    hinv(result(), tf);
+    return result;
+}
+
+
+tmp<symmTensorField> hinv(const tmp<symmTensorField>& tf)
+{
+    tmp<symmTensorField> tRes = reuseTmp<symmTensor, symmTensor>::New(tf);
+    hinv(tRes(), tf());
     reuseTmp<symmTensor, symmTensor>::clear(tf);
     return tRes;
 }

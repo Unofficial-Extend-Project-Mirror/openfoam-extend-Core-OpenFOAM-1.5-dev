@@ -47,6 +47,7 @@ UNARY_FUNCTION(tensor, tensor, dev2, transform)
 UNARY_FUNCTION(scalar, tensor, det, transform)
 UNARY_FUNCTION(tensor, tensor, cof, cof)
 UNARY_FUNCTION(tensor, tensor, inv, inv)
+UNARY_FUNCTION(tensor, tensor, hinv, hinv)
 UNARY_FUNCTION(vector, tensor, eigenValues, sign)
 UNARY_FUNCTION(tensor, tensor, eigenVectors, transform)
 

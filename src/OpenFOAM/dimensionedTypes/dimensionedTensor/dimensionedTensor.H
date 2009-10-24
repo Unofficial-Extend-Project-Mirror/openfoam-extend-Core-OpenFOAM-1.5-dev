@@ -58,6 +58,7 @@ dimensionedTensor dev2(const dimensionedTensor&);
 dimensionedScalar det(const dimensionedTensor&);
 dimensionedTensor cof(const dimensionedTensor&);
 dimensionedTensor inv(const dimensionedTensor&);
+dimensionedTensor hinv(const dimensionedTensor&);
 dimensionedSymmTensor symm(const dimensionedTensor&);
 dimensionedSymmTensor twoSymm(const dimensionedTensor&);
 dimensionedTensor skew(const dimensionedTensor&);

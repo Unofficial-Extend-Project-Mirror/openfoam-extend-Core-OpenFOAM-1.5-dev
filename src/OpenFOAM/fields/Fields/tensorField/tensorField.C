@@ -47,6 +47,9 @@ UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
 UNARY_FUNCTION(tensor, tensor, cof)
 
+// This is a nasty hack for flat geometries.  For serious SVD, please use hinv
+// (Singular value decomposition and Householder transfromations)
+// HJ, 24/Oct/2009
 void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 {
     if (!tf.size())
@@ -104,12 +107,14 @@ void inv(Field<tensor>& tf, const UList<tensor>& tf1)
     }
 }
 
+
 tmp<tensorField> inv(const UList<tensor>& tf)
 {
     tmp<tensorField> result(new tensorField(tf.size()));
     inv(result(), tf);
     return result;
 }
+
 
 tmp<tensorField> inv(const tmp<tensorField>& tf)
 {
@@ -118,6 +123,24 @@ tmp<tensorField> inv(const tmp<tensorField>& tf)
     reuseTmp<tensor, tensor>::clear(tf);
     return tRes;
 }
+
+
+tmp<tensorField> hinv(const UList<tensor>& tf)
+{
+    tmp<tensorField> result(new tensorField(tf.size()));
+    hinv(result(), tf);
+    return result;
+}
+
+
+tmp<tensorField> hinv(const tmp<tensorField>& tf)
+{
+    tmp<tensorField> tRes = reuseTmp<tensor, tensor>::New(tf);
+    hinv(tRes(), tf());
+    reuseTmp<tensor, tensor>::clear(tf);
+    return tRes;
+}
+
 
 UNARY_FUNCTION(vector, tensor, eigenValues)
 UNARY_FUNCTION(tensor, tensor, eigenVectors)
