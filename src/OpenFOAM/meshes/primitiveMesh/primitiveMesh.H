@@ -547,7 +547,6 @@ public:
                 //- Check for negative cell volumes
                 bool checkCellVolumes
                 (
-                    
                     const bool report = false,
                     labelHashSet* setPtr = NULL
                 ) const;
