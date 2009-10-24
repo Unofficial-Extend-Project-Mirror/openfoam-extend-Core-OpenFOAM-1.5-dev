@@ -151,7 +151,6 @@ void Foam::ggiPolyPatch::clearOut()
     deleteDemandDrivenData(zoneAddressingPtr_);
 
     deleteDemandDrivenData(reconFaceCellCentresPtr_);
-   
 }
 
 
