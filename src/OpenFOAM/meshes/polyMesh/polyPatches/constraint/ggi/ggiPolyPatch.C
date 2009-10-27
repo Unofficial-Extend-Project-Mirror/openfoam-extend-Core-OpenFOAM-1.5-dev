@@ -107,6 +107,31 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
                 0,             // HJ, 24/Oct/2008
                 ggiInterpolation::AABB
             );
+
+        // Abort immediatly if uncovered faces are present and the option
+        // bridgeOverlap is not set.
+        if (
+            (
+                patchToPatch().uncoveredMasterFaces().size() > 0
+                &&
+                !bridgeOverlap()
+            )
+            ||
+            (
+                patchToPatch().uncoveredSlaveFaces().size() > 0
+                &&
+                !shadow().bridgeOverlap()
+            )
+        )
+        {
+            FatalErrorIn("void ggiPolyPatch::calcPatchToPatch() const")
+                << "Found uncovered faces for GGI interface "
+                << name() << "/" << shadowName()
+                << " while the bridgeOverlap option is not set in the boundary file." << endl
+                << "This is an unrecoverable error. Aborting."
+                << abort(FatalError);
+        }
+        
     }
     else
     {
