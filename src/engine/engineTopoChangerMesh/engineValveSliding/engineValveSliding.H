@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 2005-2007 Tommaso Lucchini
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,31 +22,32 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-CLASS
-    accordionEngineMesh
+Class
+        
 
-DESCRIPTION
-    Engine mesh class for canted valves engine. Layers are added/removed on the
-    piston, while mesh is deformed close to the valves. Attach/detach boundary
-    is used. There are no sliding interfaces.
+Description
 
-*/
-// ------------------------------------------------------------------------- //
 
-#ifndef accordionEngineMesh_H
-#define accordionEngineMesh_H
+SourceFiles
+
+Author
+	Tommaso Lucchini
+	
+\*---------------------------------------------------------------------------*/
+
+#ifndef engineValveSliding_H
+#define engineValveSliding_H
 
 #include "engineTopoChangerMesh.H"
 #include "enginePiston.H"
 #include "motionSolver.H"
 #include "polyPatchID.H"
-#include "thoboisValveBank.H"
+#include "thoboisSlidingValveBank.H"
 #include "twoDPointCorrector.H"
 
 #include "faceSet.H"
 #include "pointSet.H"
 #include "cellSet.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -55,11 +56,10 @@ namespace Foam
 // Class forward declarations
 
 /*---------------------------------------------------------------------------*\
-                           Class lateralValves Declaration
+                           Class verticalValves Declaration
 \*---------------------------------------------------------------------------*/
-class twoDPointCorrector;
 
-class accordionEngineMesh
+class engineValveSliding
 :
     public engineTopoChangerMesh
 {
@@ -68,55 +68,62 @@ class accordionEngineMesh
         //- Piston patch
         enginePiston piston_;
         
-        //- Lateral valves
-        thoboisValveBank valves_;
+        //- vertical valves
+        thoboisSlidingValveBank valves_;
                          
         //- Layering-to-deformation switch in crank-angle degrees
         scalar deformSwitch_;
         
-        //- Tolerance used when the piston faceZone is created
-        scalar delta_;
+        //- Top valve tolerance, when valve lift < tol, valve top layering is disabled
+        scalar valveTopTol_;
 
-        //- Distance from the piston patch
-        scalar offSet_;
-        
         //- Piston Position
         scalar pistonPosition_;
+        
+        //- Virtual position of the bottom of the valves
+        scalarField valveBottomPosition_;
 
-        //- Virtual piston position (pistonPosition + offSet)
-        scalar virtualPistonPosition_;
+        //- Virtual position of the bottom of the valves
+        scalarField valvePistonPosition_;
 
         //- deckHeight
         scalar deckHeight_;
-                               
+        
+        //- min valveHead z
+        scalarField minValveZ_;
+                        
+        //- tolerance for valve poppet faces (used to create a faceZone)
+        scalar poppetValveTol_;
+        
+        //- tolerance for valve poppet faces (used to create a faceZone)
+        scalar bottomValveTol_;
+        
         //- Motion solver
         autoPtr<motionSolver> msPtr_;
+        
+        //- Is the valve really closed
+        boolList isReallyClosed_;
+       
+        //- correct points motion after attach
+        Switch correctPointsMotion_;
 
-        //- Cylinder head name
-        word cylinderHeadName_;               
-        
-        //- Cylinder head name
-        word linerName_;               
-        
-        //- PistonFaceSet
-        word pistonAuxPoints_;
-        
-	Switch moveDetach_;
-        
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        accordionEngineMesh(const accordionEngineMesh&);
+        engineValveSliding(const engineValveSliding&);
 
         //- Disallow default bitwise assignment
-        void operator=(const accordionEngineMesh&);
+        void operator=(const engineValveSliding&);
 
         //- Make layering modifiers live
         void makeLayersLive();
 
-        //- Make attach-detach live
-        void makeDetachLive();
-       
+        //- Make Sliding interface modifiers live
+        void makeSlidersLive();
+
+        //- Is the sliding interface attached?
+        bool attached() const;
+        
         //- Prepare valve attach/detach
         void valveDetach();
 
@@ -132,19 +139,27 @@ class accordionEngineMesh
         
         //- Calculate the virtualPistonPosition, 
         void setVirtualPositions();
-                
+        
+        //- Correct the vertical motion for the points below the "virtual piston", 
+        void correctVerticalMotion();
+        
         bool realDeformation() const;
-                                                
+                        
+        bool inValve(const point& p, const label& i) const;
+        bool inPiston(const point& p) const;
+
+        bool isACylinderHeadFace(const labelList& cylHeadFaces, const label face);
+                        
 public:
 
     //- Runtime type information
-    TypeName("accordionEngineMesh");
+    TypeName("engineValveSliding");
 
 
     // Constructors
 
         //- Construct from database
-        explicit accordionEngineMesh(const IOobject& io);
+        explicit engineValveSliding(const IOobject& io);
 
 
     // Destructor - default
@@ -153,16 +168,18 @@ public:
     // Member Functions
 
         inline const enginePiston& piston() const;
-        inline const thoboisValveBank& valves() const;
+        inline const thoboisSlidingValveBank& valves() const;
         inline const scalar& deformSwitch() const;
-        inline const scalar& delta() const;
-        inline const scalar& offSet() const;
+        inline const scalar& valveTopTol() const;
         inline const scalar& pistonPosition() const;
         inline scalar& pistonPosition();
-        inline const scalar& virtualPistonPosition() const;
-        inline scalar& virtualPistonPosition();
         inline const scalar& deckHeight() const;
         inline scalar& deckHeight();
+        inline const scalarField& minValveZ() const;
+        inline scalarField& maxValveZ();
+        inline const scalar& poppetValveTol() const;
+        inline boolList& isReallyClosed();
+        inline const boolList& isReallyClosed() const;
 
 
         //- Return true for mesh deformation mode
@@ -188,8 +205,6 @@ public:
         //- Set boundary velocities
         void setBoundaryVelocity(volVectorField& U);
         
-        //- Generate the mesh from a series of square blocks
-        void generateMesh(){};
 };
 
 
@@ -198,7 +213,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#include "accordionEngineMeshI.H"
+#include "engineValveSlidingI.H"
 
 #endif
 

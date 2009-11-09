@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 
-#include "twoStrokeEngine.H"
+#include "twoStrokeTM.H"
 #include "slidingInterface.H"
 #include "layerAdditionRemoval.H"
 #include "surfaceFields.H"
@@ -34,12 +34,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::twoStrokeEngine::correctVerticalMotion()
-{
-}
+void Foam::twoStrokeTM::correctVerticalMotion()
+{}
 
 
-void Foam::twoStrokeEngine::calcMovingMasks() const
+void Foam::twoStrokeTM::calcMovingMasks() const
 {
     if (debug)
     {
@@ -80,17 +79,55 @@ void Foam::twoStrokeEngine::calcMovingMasks() const
             }
         }
     }
-           
+
+    if(foundScavPorts())
+    {
+        const word innerScavZoneName
+        (
+            scavInCylPatchName_  + "Zone"
+        );
+
+        const labelList& innerScavAddr =
+            faceZones()[faceZones().findZoneID(innerScavZoneName)];
+
+        forAll (innerScavAddr, faceI)
+        {
+            const face& curFace = f[innerScavAddr[faceI]];
+
+            forAll (curFace, pointI)
+            {
+                movingPointsMask[curFace[pointI]] = 1;
+            }
+        }
+
+        const word outerScavZoneName
+        (
+            scavInPortPatchName_ + "Zone"
+        );
+
+        const labelList& outerScavAddr =
+            faceZones()[faceZones().findZoneID(outerScavZoneName)];
+
+        forAll (outerScavAddr, faceI)
+        {
+            const face& curFace = f[outerScavAddr[faceI]];
+
+            forAll (curFace, pointI)
+            {
+                movingPointsMask[curFace[pointI]] = 0;
+            }
+        }
+    }
 }
 
 // Return moving points mask.  Moving points marked with 1
-const Foam::scalarField& Foam::twoStrokeEngine::movingPointsMask() const
+const Foam::scalarField& Foam::twoStrokeTM::movingPointsMask() const
 {
     if(movingPointsMaskPtr_)
     {
         movingPointsMaskPtr_ = NULL;
     }
-    
+
     if (!movingPointsMaskPtr_)
     {
         calcMovingMasks();
@@ -99,7 +136,8 @@ const Foam::scalarField& Foam::twoStrokeEngine::movingPointsMask() const
     return *movingPointsMaskPtr_;
 }
 
-void Foam::twoStrokeEngine::applyMovingMask()
-{
-}
+void Foam::twoStrokeTM::applyMovingMask()
+{}
 
+
+// ************************************************************************* //

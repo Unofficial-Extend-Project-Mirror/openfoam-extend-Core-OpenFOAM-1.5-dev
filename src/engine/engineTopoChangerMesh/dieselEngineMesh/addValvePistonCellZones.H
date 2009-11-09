@@ -108,7 +108,12 @@
                         valveTopPoints.append(pointI);
                     }
                 }
-                                                
+                                
+                if(!foundOne)
+                {
+                    Info << "NOT FOUND ONE FOR ADDING VALVE TOP POINT ZONES" << endl;
+                }
+                
                 pz.append
                 (
                     new pointZone
@@ -218,6 +223,11 @@
         
                 }
 
+                if(!foundOne)
+                {
+                    Info << "NOT FOUND ONE FOR ADDING VALVE TOP POINT ZONES" << endl;
+                }
+                
                 forAll(valveBottomPoint, pointI)
                 {
                     if(valveBottomPoint[pointI])

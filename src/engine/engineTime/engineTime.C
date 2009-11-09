@@ -128,6 +128,8 @@ void Foam::engineTime::readDict()
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 // Read the controlDict and set all the parameters
 bool Foam::engineTime::read()
 {
@@ -151,15 +153,13 @@ Foam::scalar Foam::engineTime::degToRad(const scalar deg) const
 
 Foam::scalar Foam::engineTime::degToTime(const scalar theta) const
 {
-    // 6 * rpm => deg/s
-    return theta/(6.0*rpm_.value());
+    return theta/(360.0*rpm_.value()/60.0);
 }
 
 
 Foam::scalar Foam::engineTime::timeToDeg(const scalar t) const
 {
-    // 6 * rpm => deg/s
-    return t*(6.0*rpm_.value());
+    return t*(360.0*rpm_.value()/60.0);
 }
 
 

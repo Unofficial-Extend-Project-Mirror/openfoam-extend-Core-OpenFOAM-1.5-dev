@@ -52,12 +52,12 @@ class twoStrokeEngine
         //- Piston patch
         enginePiston piston_;
         
-        //- Upper bowl patch
-        word scavInCylPatchName_;
+        //- scavenging ports patches
+        wordList scavInPortPatches_;
         
-        //- Lower bowl patch
-        word scavInPortPatchName_;       
-
+        //- scavenging cylinder patches
+        wordList scavInCylPatches_;
+                
         //- name of the head pointSet
         word headPointsSetName_;
         
@@ -82,13 +82,7 @@ class twoStrokeEngine
 
         //- Coordinate system
         autoPtr<coordinateSystem> csPtr_;
-
-        //- Are there scavenging ports?
-        bool foundScavPorts_;
         
-        //- Tolerance for closure of scavenging ports
-        scalar scavPortsTol_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -126,10 +120,7 @@ class twoStrokeEngine
         const scalarField& movingPointsMask() const;
 
         bool realDeformation() const;
-        
-        //- Are the scavenging ports opened?
-        bool portsOpened() const;
-        
+                
         void checkMotionFluxes();
                 
 public:
@@ -190,11 +181,6 @@ public:
             return piston_;
         }
 
-        const bool& foundScavPorts() const
-        {
-            return foundScavPorts_;
-        }
-        
         //- Return true for mesh deformation mode
         bool deformation() const
         {

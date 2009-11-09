@@ -30,7 +30,7 @@ C++
 
 AUTHOR
 	Tommaso Lucchini
-	
+
 */
 // ------------------------------------------------------------------------- //
 
@@ -64,19 +64,19 @@ class layerSmooth
 
         //- Piston patch
         simpleEnginePiston piston_;
-        
+
         //- Lateral valves
         verticalValveBank valves_;
-                         
+
         //- Layering-to-deformation switch in crank-angle degrees
         scalar deformSwitch_;
-        
+
         //- Tolerance used when the piston faceZone is created
         scalar delta_;
 
         //- Distance from the piston patch
         scalar offSet_;
-        
+
         //- Piston Position
         scalar pistonPosition_;
 
@@ -85,7 +85,7 @@ class layerSmooth
 
         //- deckHeight
         scalar deckHeight_;
-                               
+
         //- Motion solver
         autoPtr<motionSolver> msPtr_;
                

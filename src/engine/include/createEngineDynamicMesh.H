@@ -1,5 +1,4 @@
     Info<< "Create mesh\n" << endl;
-    
     autoPtr<engineTopoChangerMesh> meshPtr
     (
         engineTopoChangerMesh::New
@@ -14,4 +13,8 @@
     );
 
     engineTopoChangerMesh& mesh = meshPtr();
-//    mesh.constructAndClear();
+
+    Switch checkEngineMesh =
+    (
+        runTime.engineDict().lookup("checkMesh")
+    );

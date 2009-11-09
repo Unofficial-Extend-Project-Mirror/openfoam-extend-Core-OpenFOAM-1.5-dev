@@ -6,46 +6,50 @@
 
     forAll(valves_, valveI)
     {
-    
         vector valveVel =
             valves_[valveI].curVelocity()*valves_[valveI].cs().axis();
 
         {
-    
-            label movingPtsIndex = pZones.findZoneID("movingPointsV"+Foam::name(valveI + 1));
+            label movingPtsIndex =
+                pZones.findZoneID("movingPointsV"+Foam::name(valveI + 1));
             const labelList& movingPointsV = pZones[movingPtsIndex];
-    
+
             forAll(movingPointsV, mpI)
             {
                 constrainedPoints.append(movingPointsV[mpI]);
                 constrainedVelocity.append(valveVel);
-           
+
                 constraintSize++;
             }
-    
         }
-/*
-*/
+
         {
-    
-            label movingInternalPtsIndex = pZones.findZoneID("movingInternalPointsV"+Foam::name(valveI + 1));
-            const labelList& movingInternalPointsV = pZones[movingInternalPtsIndex];
-    
+
+            label movingInternalPtsIndex =
+                pZones.findZoneID
+                (
+                    "movingInternalPointsV"
+                  + Foam::name(valveI + 1)
+                );
+
+            const labelList& movingInternalPointsV =
+                pZones[movingInternalPtsIndex];
+
             forAll(movingInternalPointsV, mipI)
             {
                 constrainedPoints.append(movingInternalPointsV[mipI]);
                 constrainedVelocity.append(valveVel);
-            
+
                 constraintSize++;
             }
-                
         }
 
         {
 
-            label staticPtsIndex = pZones.findZoneID("staticPointsV"+Foam::name(valveI + 1));
+            label staticPtsIndex =
+                pZones.findZoneID("staticPointsV" + Foam::name(valveI + 1));
             const labelList& staticPointsV = pZones[staticPtsIndex];
-    
+
             forAll(staticPointsV, spI)
             {
                 constrainedPoints.append(staticPointsV[spI]);
@@ -55,16 +59,15 @@
             }
 
         }
-        
-/*        
-        if(piston().patchID().active())
+
+        if (piston().patchID().active())
         {
             vector pistonVel =
                 piston().cs().axis()*engineTime_.pistonSpeed().value();
-            
+
             label pistonPtsIndex = pZones.findZoneID("movingPistonPoints");
             const labelList& movingPointsP = pZones[pistonPtsIndex];
-    
+
             forAll(movingPointsP, mpI)
             {
                 constrainedPoints.append(movingPointsP[mpI]);
@@ -74,13 +77,7 @@
 
             }
         }
-*/
-        
-/*
-*/        
-
     }
-    
-    Info << "constraintSize = " << constraintSize << endl;
 
+    Info << "constraintSize = " << constraintSize << endl;
 }

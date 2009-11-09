@@ -43,7 +43,7 @@ Foam::engineMesh::engineMesh(const IOobject& io)
     linerIndex_(-1),
     cylinderHeadIndex_(-1),
     deckHeight_("deckHeight", dimLength, GREAT),
-    pistonPosition_("pistonPosition", dimLength, -GREAT)
+    pistonPosition_("deckHeight", dimLength, GREAT)
 {
     bool foundPiston = false;
     bool foundLiner = false;
@@ -80,14 +80,14 @@ Foam::engineMesh::engineMesh(const IOobject& io)
     }
 
     if (!foundLiner)
-    {
+    { 
         FatalErrorIn("engineMesh::engineMesh(const IOobject& io)")
             << "cannot find liner patch"
             << exit(FatalError);
     }
 
     if (!foundCylinderHead)
-    {
+    { 
         FatalErrorIn("engineMesh::engineMesh(const IOobject& io)")
             << "cannot find cylinderHead patch"
             << exit(FatalError);
@@ -96,25 +96,17 @@ Foam::engineMesh::engineMesh(const IOobject& io)
     {
         if (pistonIndex_ != -1)
         {
-            pistonPosition_.value() = -GREAT;
-            if (boundary()[pistonIndex_].patch().localPoints().size())
-            {
-                pistonPosition_.value() =
-                    max(boundary()[pistonIndex_].patch().localPoints()).z();
-            }
+            pistonPosition_.value() =
+                max(boundary()[pistonIndex_].patch().localPoints()).z();
         }
-        reduce(pistonPosition_.value(), maxOp<scalar>());
+        reduce(pistonPosition_.value(), minOp<scalar>());
 
         if (cylinderHeadIndex_ != -1)
         {
-            deckHeight_.value() = GREAT;
-            if (boundary()[cylinderHeadIndex_].patch().localPoints().size())
-            {
-                deckHeight_.value() = min
-                (
-                    boundary()[cylinderHeadIndex_].patch().localPoints()
-                ).z();
-            }
+            deckHeight_.value() = min
+            (
+                boundary()[cylinderHeadIndex_].patch().localPoints()
+            ).z();
         }
         reduce(deckHeight_.value(), minOp<scalar>());
 

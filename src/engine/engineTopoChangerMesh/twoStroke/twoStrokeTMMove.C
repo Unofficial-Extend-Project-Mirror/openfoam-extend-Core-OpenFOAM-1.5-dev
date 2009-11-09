@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 
-#include "twoStrokeEngine.H"
+#include "twoStrokeTM.H"
 #include "slidingInterface.H"
 #include "layerAdditionRemoval.H"
 #include "surfaceFields.H"
@@ -34,8 +34,8 @@ License
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-void Foam::twoStrokeEngine::makeLayersLive()
-{
+void Foam::twoStrokeTM::makeLayersLive()
+{ 
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable layering
@@ -51,7 +51,7 @@ void Foam::twoStrokeEngine::makeLayersLive()
         }
         else
         {
-            FatalErrorIn("void Foam::twoStrokeEngine::makeLayersLive()")
+            FatalErrorIn("void Foam::twoStrokeTM::makeLayersLive()")
                 << "Don't know what to do with mesh modifier "
                 << modI << " of type " << morphs[modI].type()
                 << abort(FatalError);
@@ -59,7 +59,7 @@ void Foam::twoStrokeEngine::makeLayersLive()
     }
 }
 
-void Foam::twoStrokeEngine::makeSlidersLive()
+void Foam::twoStrokeTM::makeSlidersLive()
 {
     const polyTopoChanger& morphs = topoChanger_;
 
@@ -85,7 +85,7 @@ void Foam::twoStrokeEngine::makeSlidersLive()
 
 }
 
-bool Foam::twoStrokeEngine::attached() const
+bool Foam::twoStrokeTM::attached() const
 {
     const polyTopoChanger& morphs = topoChanger_;
 
@@ -124,23 +124,14 @@ bool Foam::twoStrokeEngine::attached() const
 }
 
 
-bool Foam::twoStrokeEngine::update()
+bool Foam::twoStrokeTM::update()
 {
     // Detaching the interface
     if (attached())
     {
         Info << "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
-
-        // Changing topology by hand
-        autoPtr<mapPolyMesh> topoChangeMap5 = topoChanger_.changeMesh();
-
-        if (topoChangeMap5->hasMotionPoints() && topoChangeMap5.valid())
-        {
-            Info << "Topology change; executing pre-motion after "
-                << "sliding detach" << endl;
-            movePoints(topoChangeMap5->preMotionPoints());
-        }
+        topoChanger_.changeMesh();
 
         Info << "sliding interfaces successfully decoupled!!!" << endl;
     }
@@ -151,13 +142,10 @@ bool Foam::twoStrokeEngine::update()
 
     Info << "Executing layer action" << endl;
 
+
     // Piston Layering
 
     makeLayersLive();
-    // Changing topology by hand
-
-
-// /* Tommaso, 23/5/2008
 
     // Find piston mesh modifier
     const label pistonLayerID =
@@ -197,15 +185,14 @@ bool Foam::twoStrokeEngine::update()
     bool meshChanged = topoChangeMap.valid();
 
     // Work array for new points position.
-    pointField newPoints = allPoints();
+    pointField newPoints = points();
 
     if (meshChanged)
     {
 
         if (topoChangeMap->hasMotionPoints())
         {
-            Info<< "Topology change; executing pre-motion after "
-                << "dynamic layering" << endl;
+            Info << "Topology change; executing pre-motion" << endl;
             movePoints(topoChangeMap->preMotionPoints());
             newPoints = topoChangeMap->preMotionPoints();
         }
@@ -256,7 +243,8 @@ bool Foam::twoStrokeEngine::update()
             point& p = newPoints[pointI];
 
             if (scaleDisp[pointI])
-            {                p.z() += movingPointsM[pointI]*
+            {
+                p.z() += movingPointsM[pointI]*
                     deltaZ
                   * (deckHeight() - p.z())/(deckHeight() - pistonPosition());
             }
@@ -293,8 +281,7 @@ bool Foam::twoStrokeEngine::update()
                     {
                         newPoints[i].z() =
                         (1.0 - movingPointsM[i])*newPoints[i].z()
-                        +
-                        movingPointsM[i] *
+                      + movingPointsM[i] *
                         (pistonTopZ + 0.9*minLayerThickness);
                     }
                 }
@@ -302,95 +289,19 @@ bool Foam::twoStrokeEngine::update()
         }
     }
 
-
     movePoints(newPoints);
     deleteDemandDrivenData(movingPointsMaskPtr_);
-
     pistonPosition() += deltaZ;
 
-//*/ //Tommaso, 23/5/2008
-
     {
-        // Grab old points to correct the motion
-        pointField oldPointsNew = oldAllPoints();
-
         // Attach the interface
         Info << "Coupling sliding interfaces" << endl;
         makeSlidersLive();
 
         // Changing topology by hand
-        autoPtr<mapPolyMesh> topoChangeMap4 = topoChanger_.changeMesh();
+        autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
 
-        bool meshChanged = topoChangeMap4.valid();
-
-        if (meshChanged)
-        {
-            if (topoChangeMap4->hasMotionPoints())
-            {
-                Info<< "Topology change; executing pre-motion after "
-                    << "sliding attach" << endl;
-
-//                 Info<< "topoChangeMap4->preMotionPoints().size() = "
-//                     << topoChangeMap4->preMotionPoints().size() << nl
-//                     << "allPoints.size() = " << allPoints().size() << nl
-//                     << "points.size() = " << points().size() << endl;
-
-                movePoints(topoChangeMap4->preMotionPoints());
-                newPoints = points();
-            }
-
-            {
-                pointField mappedOldPointsNew(allPoints().size());
-
-                mappedOldPointsNew.map
-                (
-                    oldPointsNew, topoChangeMap4->pointMap()
-                );
-
-                forAll(scavInPortPatches_, patchi)
-                {
-                    const labelList& cutPointsAddressing =
-                        pointZones()
-                        [
-                            pointZones().findZoneID
-                            (
-                                "cutPointZone" + Foam::name(patchi + 1)
-                            )
-                        ];
-
-                    forAll(cutPointsAddressing, i)
-                    {
-                        mappedOldPointsNew[cutPointsAddressing[i]] =
-                            newPoints[cutPointsAddressing[i]];
-                    }
-
-                    forAll(cutPointsAddressing, i)
-                    {
-                        if
-                        (
-                            newPoints[cutPointsAddressing[i]].z()
-                          > virtualPistonPosition()
-                        )
-                        {
-                            mappedOldPointsNew[cutPointsAddressing[i]].z() =
-                                newPoints[cutPointsAddressing[i]].z();
-                        }
-                        else
-                        {
-                            mappedOldPointsNew[cutPointsAddressing[i]].z() =
-                                newPoints[cutPointsAddressing[i]].z() - deltaZ;
-                        }
-                    }
-                }
-                pointField newPoints = allPoints();
-
-                movePoints(mappedOldPointsNew);
-
-                resetMotion();
-                setV0();
-                movePoints(newPoints);
-            }
-        }
+        Info << "Sliding interfaces coupled: " << attached() << endl;
     }
 
     return true;

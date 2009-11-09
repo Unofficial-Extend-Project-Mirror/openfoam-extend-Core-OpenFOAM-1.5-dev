@@ -77,7 +77,7 @@ Foam::thoboisValve::thoboisValve
     const word& stemPatchName,
     const word& detachInCylinderPatchName,
     const word& detachInPortPatchName,
-    const labelList& detachFaces,
+    const word& detachFacesName,
     const graph& liftProfile,
     const scalar minLift,
     const scalar diameter,
@@ -98,7 +98,7 @@ Foam::thoboisValve::thoboisValve
     stemPatch_(stemPatchName, mesh.boundaryMesh()),
     detachInCylinderPatch_(detachInCylinderPatchName, mesh.boundaryMesh()),
     detachInPortPatch_(detachInPortPatchName, mesh.boundaryMesh()),
-    detachFaces_(detachFaces),
+    detachFacesName_(detachFacesName),
     liftProfile_(liftProfile),
     liftProfileStart_(min(liftProfile_.x())),
     liftProfileEnd_(max(liftProfile_.x())),
@@ -145,7 +145,7 @@ Foam::thoboisValve::thoboisValve
         dict.lookup("detachInPortPatch"),
         mesh.boundaryMesh()
     ),
-    detachFaces_(dict.lookup("detachFaces")),
+    detachFacesName_(dict.lookup("detachFaces")),
     liftProfile_
     (
         "theta",
@@ -252,7 +252,7 @@ void Foam::thoboisValve::writeDict(Ostream& os) const
         << token::END_STATEMENT << nl
         << "detachInPortPatch " << detachInPortPatch_.name()
         << token::END_STATEMENT << nl
-        << "detachFaces " << detachFaces_ << token::END_STATEMENT << nl
+        << "detachFaces " << detachFacesName_ << token::END_STATEMENT << nl
         << "liftProfile " << nl << token::BEGIN_BLOCK
         << liftProfile_ << token::END_BLOCK << token::END_STATEMENT << nl
         << "minLift " << minLift_ << token::END_STATEMENT << nl

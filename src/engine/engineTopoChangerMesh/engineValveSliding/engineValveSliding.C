@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright held by original author
+    \\  /    A nd           | Copyright (C) 2005-2007 Tommaso Lucchini
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,9 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    verticalValvesGambit
+
 \*---------------------------------------------------------------------------*/
 
-#include "accordionEngineMesh.H"
+#include "engineValveSliding.H"
 #include "layerAdditionRemoval.H"
 #include "attachDetach.H"
 #include "componentMixedTetPolyPatchVectorField.H"
@@ -44,8 +47,8 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(accordionEngineMesh, 0);
-    addToRunTimeSelectionTable(engineTopoChangerMesh, accordionEngineMesh, IOobject);
+    defineTypeNameAndDebug(engineValveSliding, 0);
+    addToRunTimeSelectionTable(engineTopoChangerMesh, engineValveSliding, IOobject);
 }
 
 
@@ -54,46 +57,37 @@ namespace Foam
 
 
     
-bool Foam::accordionEngineMesh::realDeformation() const
+bool Foam::engineValveSliding::realDeformation() const
 {
-
-    if (virtualPistonPosition() + engTime().pistonDisplacement().value() > deckHeight_ - SMALL)
-    {
-        return true;
-    }
-    else
-    {
-        return deformation();
-    }
+    return deformation();
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::accordionEngineMesh::accordionEngineMesh
+Foam::engineValveSliding::engineValveSliding
 (
     const IOobject& io
 )
 :
     engineTopoChangerMesh(io),
     piston_(*this, engTime().engineDict().subDict("piston")),
-    valves_(*this, engTime().engineDict().lookup("accordionEngineMesh")),
+    valves_(*this, engTime().engineDict().lookup("engineValveSliding")),
     deformSwitch_(readScalar(engTime().engineDict().lookup("deformAngle"))),
-    delta_(readScalar(engTime().engineDict().lookup("delta"))),
-    offSet_(readScalar(engTime().engineDict().lookup("offSet"))),
+    valveTopTol_(readScalar(engTime().engineDict().lookup("valveTopTol"))),
     pistonPosition_(-GREAT),
-    virtualPistonPosition_(-GREAT),
     deckHeight_(GREAT),
+    minValveZ_(nValves()),
+    poppetValveTol_(readScalar(engTime().engineDict().lookup("poppetValveTol"))),
+    bottomValveTol_(readScalar(engTime().engineDict().lookup("bottomValveTol"))),
     msPtr_(motionSolver::New(*this)),
-    cylinderHeadName_(engTime().engineDict().lookup("cylinderHeadName")),
-    linerName_(engTime().engineDict().lookup("linerName")),
-    pistonAuxPoints_(engTime().engineDict().lookup("pistonAuxPoints")),
-    moveDetach_(engTime().engineDict().lookup("moveDetach"))
+    isReallyClosed_(valves().size(), false),
+    correctPointsMotion_(engTime().engineDict().lookup("correctPointsMotion"))
 
+    
 {
     // Add zones and modifiers if not already there.
     addZonesAndModifiers();
-   
 }
 
 
@@ -103,7 +97,7 @@ Foam::accordionEngineMesh::accordionEngineMesh
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::accordionEngineMesh::setBoundaryVelocity(volVectorField& U)
+void Foam::engineValveSliding::setBoundaryVelocity(volVectorField& U)
 {
     
     
@@ -114,6 +108,39 @@ void Foam::accordionEngineMesh::setBoundaryVelocity(volVectorField& U)
         vector valveVel =
             valves()[valveI].curVelocity()*valves()[valveI].cs().axis();
 
+        // If valve is present in geometry, set the motion
+        if (valves()[valveI].curtainInPortPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].curtainInPortPatchID().index()] ==
+//                valveVel;
+                vector::zero;
+        }
+
+        // If valve is present in geometry, set the motion
+        if (valves()[valveI].curtainInCylinderPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].curtainInCylinderPatchID().index()] ==
+//                valveVel;
+                vector::zero;
+        }
+
+        // If valve is present in geometry, set the motion
+        if (valves()[valveI].poppetPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].poppetPatchID().index()] ==
+                valveVel;
+        }
+
+        if (valves()[valveI].bottomPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].bottomPatchID().index()] ==
+                valveVel;
+        }
+
         
         // If valve is present in geometry, set the motion
         if (valves()[valveI].stemPatchID().active())
@@ -123,30 +150,42 @@ void Foam::accordionEngineMesh::setBoundaryVelocity(volVectorField& U)
                 valveVel;
         }
 
-        // If valve is present in geometry, set the motion
-        if (valves()[valveI].detachInPortPatchID().active())
-        {
-            // Bottom of the valve moves with given velocity
-            U.boundaryField()[valves()[valveI].detachInPortPatchID().index()] ==
-                vector::zero;
-            U.oldTime().boundaryField()[valves()[valveI].detachInPortPatchID().index()] ==
-                vector::zero;
-        }
-
-        // If valve is present in geometry, set the motion
-        if (valves()[valveI].detachInCylinderPatchID().active())
-        {
-            // Bottom of the valve moves with given velocity
-            U.boundaryField()[valves()[valveI].detachInCylinderPatchID().index()] ==
-               vector::zero;
-            U.oldTime().boundaryField()[valves()[valveI].detachInCylinderPatchID().index()] ==
-               vector::zero;
-        }
      
     }
 
 }
 
+bool Foam::engineValveSliding::inValve(const point& p, const label& i) const
+{
+    scalar valveX = valves_[i].cs().origin().x();
+    scalar valveY = valves_[i].cs().origin().y();
+    return (sqrt(sqr(p.x()-valveX)+sqr(p.y()-valveY)) < 0.5*valves_[i].diameter());
+}
+
+bool Foam::engineValveSliding::inPiston(const point& p) const
+{
+    scalar pistonX = piston_.cs().origin().x();
+    scalar pistonY = piston_.cs().origin().y();
+    return (sqrt(sqr(p.x()-pistonX)+sqr(p.y()-pistonY)) < 0.5*engTime().bore().value());
+}
+
+
+bool Foam::engineValveSliding::isACylinderHeadFace
+(
+    const labelList& cylHeadFaces, 
+    const label face
+)
+{
+    forAll(cylHeadFaces, i)
+    {
+        if(cylHeadFaces[i] == face)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 
 

@@ -11,7 +11,7 @@
             correctedMeshPhi[cutFaces[facei]] = 0.0; 
         }
 
-        setPhi(correctedMeshPhi);
+//        setPhi(correctedMeshPhi);
 
         Info << "max mesh phi, corrected cut faces = " << max(mag(phi().internalField())) << endl;
         Info << "max mesh phi, corrected cut faces = " << min(mag(phi().internalField())) << endl;
@@ -45,7 +45,7 @@
      //   Info << "corrected mesh phi, liner = " <<  correctedMeshPhi.boundaryField()[boundaryMesh().findPatchID("liner")];
                 
         
-        setPhi(correctedMeshPhi);
+//        setPhi(correctedMeshPhi);
         
         Info << "max mesh phi after correction = " << max(mag(phi())) << endl;
         Info << "min mesh phi after correction = " << min(mag(phi())) << endl;

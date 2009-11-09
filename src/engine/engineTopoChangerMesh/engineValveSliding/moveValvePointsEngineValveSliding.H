@@ -1,16 +1,17 @@
     // valves
-    label constraintSize = 0;
-
     forAll(valves_,valveI)
     {
+        vector valveVel =
+            valves_[valveI].curVelocity()*valves_[valveI].cs().axis();
 
-          vector valveVel =
-               valves_[valveI].curVelocity()*valves_[valveI].cs().axis();
-
+//         scalar valveDeltaX = valves_[valveI].curVelocity()*
+//             valves_[valveI].cs().axis().x()*engTime().deltaT().value() ;
+//         scalar valveDeltaY = valves_[valveI].curVelocity()*
+//             valves_[valveI].cs().axis().y()*engTime().deltaT().value() ;
         scalar valveDeltaZ = valves_[valveI].curVelocity()*
             valves_[valveI].cs().axis().z()*engTime().deltaT().value() ;
 
-        if(valves_[valveI].curLift() > valves_[valveI].deformationLift())
+        if(valves_[valveI].curLift() >= valves_[valveI].deformationLift())
         {
             bool isMoving(false);
 
@@ -32,14 +33,10 @@
             {
                 List<bool> valveTopPoint(newPoints.size(), false);
 
-//                 const scalarField& movingPointsTop =
-//                     movingPointsMaskTop(valveI);
-
                 label layeringVPtsIndex =
                     pointZones().findZoneID
                     (
-                        "movingPointsTopZoneV"
-                      + Foam::name(valveI+1)
+                        "movingPointsTopZoneV" + Foam::name(valveI+1)
                     );
 
                 const labelList& layeringVPoints =
@@ -48,18 +45,29 @@
                 forAll(layeringVPoints, i)
                 {
                     point& p = newPoints[layeringVPoints[i]];
+
+                    p += valveVel * engTime().deltaT().value();
+
+/*
+
+
+                    p.x() += valveDeltaX*
+                         (valves_[valveI].cs().axis().x()/
+                         mag(valves_[valveI].cs().axis()));
+                    p.y() += valveDeltaY*
+                         (valves_[valveI].cs().axis().y()/
+                         mag(valves_[valveI].cs().axis()));
                     p.z() += valveDeltaZ*
                          (valves_[valveI].cs().axis().z()/
                          mag(valves_[valveI].cs().axis()));
-
+*/
                     valveTopPoint[layeringVPoints[i]] = true;
                 }
 
                 label movingTopPtsVIndex =
                     pointZones().findZoneID
                     (
-                        "movingPointsV"
-                      + Foam::name(valveI+1)
+                        "movingPointsV" + Foam::name(valveI+1)
                     );
 
                 const labelList& movingTopPointsV =
@@ -71,13 +79,23 @@
                     {
 
                         point& p = newPoints[movingTopPointsV[i]];
+                        p += valveVel * engTime().deltaT().value();
+
+/*
+                        p.x() += valveDeltaX*
+                            (valves_[valveI].cs().axis().x()/
+                            mag(valves_[valveI].cs().axis()));
+
+                        p.y() += valveDeltaY*
+                            (valves_[valveI].cs().axis().y()/
+                            mag(valves_[valveI].cs().axis()));
+
                         p.z() += valveDeltaZ*
                             (valves_[valveI].cs().axis().z()/
                             mag(valves_[valveI].cs().axis()));
+*/
                     }
                 }
-
-                deleteDemandDrivenData(movingPointsMaskTopPtr_);
             }
             else
             {
@@ -85,12 +103,11 @@
             }
 
 /*
-            {
+	        {
                 label movingPtsIndex =
                     pointZones().findZoneID
                     (
-                        "movingPointsV"
-                      + Foam::name(valveI + 1)
+                        "movingPointsV"+Foam::name(valveI + 1)
                     );
 
                 const labelList& movingPointsV = pointZones()[movingPtsIndex];
@@ -102,38 +119,8 @@
 
                     constraintSize++;
                 }
+
             }
 */
         }
-
-       if (valves_[valveI].bottomPatchID().active())
-       {
-           const scalarField& movingPointsBottom =
-               movingPointsMaskBottom(valveI);
-
-           {
-               List<bool> valveBottomPoint(newPoints.size(), false);
-
-               label valveBottomPtsIndex =
-                   pointZones().findZoneID
-                   (
-                       "movingPointsBottomZoneV"
-                      + Foam::name(valveI+1)
-                   );
-
-               const labelList& valveBottomPoints =
-                   pointZones()[valveBottomPtsIndex];
-
-               forAll(valveBottomPoints, i)
-               {
-                   point& p = newPoints[valveBottomPoints[i]];
-                   p.z() +=    valveDeltaZ*
-                           (valves_[valveI].cs().axis().z()/
-                           mag(valves_[valveI].cs().axis()));
-               }
-
-           }
-
-           deleteDemandDrivenData(movingPointsMaskBottomPtr_);
-       }
     }

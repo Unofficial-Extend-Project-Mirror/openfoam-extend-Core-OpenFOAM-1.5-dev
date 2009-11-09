@@ -93,7 +93,8 @@ class thoboisValve
             polyPatchID detachInPortPatch_;
 
             //- Faces to detach
-            labelList detachFaces_;
+            //labelList detachFaces_;
+	    word detachFacesName_;
            
         // Valve lift data
 
@@ -161,7 +162,7 @@ public:
             const word& stemPatchName,
             const word& detachInCylinderPatchName,
             const word& detachInPortPatchName,
-            const labelList& detachFaces,
+            const word& detachFacesName,
             const graph& liftProfile,
             const scalar minLift,
             const scalar diameter,
@@ -250,9 +251,9 @@ public:
             }
 
             //- Return face labels of detach curtain
-            const labelList& detachFaces() const
+            const word& detachFacesName() const
             {
-                return detachFaces_;
+                return detachFacesName_;
             }
             
             const word& staticPointsName() const

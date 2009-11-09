@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "twoStrokeEngine.H"
+#include "twoStrokeTM.H"
 #include "layerAdditionRemoval.H"
 #include "componentMixedTetPolyPatchVectorField.H"
 #include "mapPolyMesh.H"
@@ -40,24 +40,19 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(twoStrokeEngine, 0);
-    addToRunTimeSelectionTable
-    (
-        engineTopoChangerMesh,
-        twoStrokeEngine,
-        IOobject
-    );
+    defineTypeNameAndDebug(twoStrokeTM, 0);
+    addToRunTimeSelectionTable(engineTopoChangerMesh, twoStrokeTM, IOobject);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::twoStrokeEngine::realDeformation() const
+bool Foam::twoStrokeTM::realDeformation() const
 {
     if
     (
         virtualPistonPosition() + engTime().pistonDisplacement().value()
-      > deckHeight()-engTime().clearance().value() - SMALL
+      > deckHeight()-engTime().clearance().value()-SMALL
     )
     {
         return true;
@@ -72,19 +67,19 @@ bool Foam::twoStrokeEngine::realDeformation() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::twoStrokeEngine::twoStrokeEngine
+Foam::twoStrokeTM::twoStrokeTM
 (
     const IOobject& io
 )
 :
     engineTopoChangerMesh(io),
     piston_(*this, engTime().engineDict().subDict("piston")),
-    scavInPortPatches_(engTime().engineDict().lookup("scavInPortPatches")),
-    scavInCylPatches_(engTime().engineDict().lookup("scavInCylPatches")),
-    headPointsSetName_(engTime().engineDict().lookup("headPointsSetName")),
-    movingCellSetName_(engTime().engineDict().lookup("movingCellSetName")),
+    scavInCylPatchName_(engTime().engineDict().lookup("scavInCylPatch")),
+    scavInPortPatchName_(engTime().engineDict().lookup("scavInPortPatch")),
     movingPointsMaskPtr_(NULL),
     deformSwitch_(readScalar(engTime().engineDict().lookup("deformAngle"))),
+    delta_(readScalar(engTime().engineDict().lookup("delta"))),
+    offSet_(readScalar(engTime().engineDict().lookup("offSet"))),
     pistonPosition_(-GREAT),
     virtualPistonPosition_(-GREAT),
     deckHeight_(GREAT),
@@ -95,45 +90,15 @@ Foam::twoStrokeEngine::twoStrokeEngine
             "coordinateSystem",
             engTime().engineDict().subDict("coordinateSystem")
         )
-    )
-
+    ),
+    foundScavPorts_
+    (
+        boundaryMesh().findPatchID(scavInCylPatchName_) != -1
+        &&
+        boundaryMesh().findPatchID(scavInPortPatchName_) != -1
+    ),
+    scavPortsTol_(readScalar(engTime().engineDict().lookup("scavPortsTol")))
 {
-    if(scavInPortPatches_.size() != scavInCylPatches_.size())
-    {
-            FatalErrorIn
-            (
-                "Foam::twoStrokeEngine::twoStrokeEngine(const IOobject& io)"
-            )   << "The size of the scavenging-cylinder patches is not"
-                << "the same of the scavenging-port patches"
-                << abort(FatalError);
-    }
-
-    forAll(scavInPortPatches_, patchi)
-    {
-        if(boundaryMesh().findPatchID(scavInPortPatches_[patchi]) == -1)
-        {
-            FatalErrorIn
-            (
-                "Foam::twoStrokeEngine::twoStrokeEngine(const IOobject& io)"
-            )   << "patch called" << scavInPortPatches_[patchi]
-                << "does not exist"
-                << abort(FatalError);
-        }
-    }
-
-    forAll(scavInCylPatches_, patchi)
-    {
-        if(boundaryMesh().findPatchID(scavInCylPatches_[patchi]) == -1)
-        {
-            FatalErrorIn
-            (
-                "Foam::twoStrokeEngine::twoStrokeEngine(const IOobject& io)"
-            )   << "patch called" << scavInCylPatches_[patchi]
-                << "does not exist"
-                << abort(FatalError);
-        }
-    }
-
     // Add zones and modifiers if not already there.
     addZonesAndModifiers();
 }
@@ -145,7 +110,7 @@ Foam::twoStrokeEngine::twoStrokeEngine
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::twoStrokeEngine::setBoundaryVelocity(volVectorField& U)
+void Foam::twoStrokeTM::setBoundaryVelocity(volVectorField& U)
 {
     vector pistonVel = piston().cs().axis()*engTime().pistonSpeed().value();
 
@@ -154,11 +119,35 @@ void Foam::twoStrokeEngine::setBoundaryVelocity(volVectorField& U)
 
 //    U.boundaryField()[piston().patchID().index()] = pistonVel;
 
-    forAll(scavInPortPatches_, patchi)
+    Info << "setting the boundary velocity" << endl;
+    U.boundaryField()[boundaryMesh().findPatchID(scavInPortPatchName_)]
+    == pistonVel;
+
+}
+
+bool Foam::twoStrokeTM::portsOpened() const
+{
+
+    scalar maxScavPortsZ = max
+       (
+           boundary()[boundaryMesh().findPatchID(scavInPortPatchName_)].
+           patch().localPoints()
+       ).z();
+
+    scalar minLinerZ = min
+       (
+           boundary()[boundaryMesh().findPatchID(scavInCylPatchName_)].
+           patch().localPoints()
+       ).z();
+
+
+    if (maxScavPortsZ - scavPortsTol_ < minLinerZ)
     {
-        U.boundaryField()
-            [boundaryMesh().findPatchID(scavInPortPatches_[patchi])] ==
-            pistonVel;
+        return false;
+    }
+    else
+    {
+        return true;
     }
 }
 

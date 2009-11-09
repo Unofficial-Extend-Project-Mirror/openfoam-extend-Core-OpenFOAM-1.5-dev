@@ -202,8 +202,13 @@ Foam::pistonLayer::pistonLayer
     pistonPosition_(-GREAT),
     virtualPistonPosition_(-GREAT),
     deckHeight_(GREAT),
-    scalePoints_(engTime().engineDict().lookup("scalePoints"))
+    scalePoints_(engTime().engineDict().lookup("scalePoints")),
+    movePointsBelowPiston_(false)
 {
+    if(engTime().engineDict().found("movePointsBelowPiston"))
+    {
+        movePointsBelowPiston_ = engTime().engineDict().lookup("movePointsBelowPiston");
+    }
     // Add zones and modifiers if not already there.
     addZonesAndModifiers();
 }
@@ -305,7 +310,8 @@ bool Foam::pistonLayer::update()
     label nScaled = nPoints();
     List<bool> pistonPoint(newPoints.size(), false);
     List<bool> headPoint(newPoints.size(), false);
-
+    List<bool> pistonBelowPoint(newPoints.size(), false);
+    
     forAll(pistonPoints, i)
     {
         label pointI = pistonPoints[i];
@@ -318,7 +324,6 @@ bool Foam::pistonLayer::update()
             nScaled--;
         }
     }
-    
 
     forAll(headPoints, i)
     {
@@ -326,6 +331,18 @@ bool Foam::pistonLayer::update()
         scaleDisp[headPoints[i]] = false;
         nScaled--;
     }
+
+    forAll(points(), i)
+    {
+        if(points()[i].z() < pistonPosition() && !pistonPoint[i])
+        {
+            scaleDisp[i] = false;
+            pistonBelowPoint[i] = true;
+        }
+    }
+
+    
+
     
     if (realDeformation && scalePoints_)
     {
@@ -344,12 +361,23 @@ bool Foam::pistonLayer::update()
             }
             else
             {
-                if (!headPoint[pointI])
+                if (!headPoint[pointI] && !pistonBelowPoint[pointI])
                 {
                     p.z() += deltaZ;
                 }
             }
         }
+        
+        // TOMMASO, 9/12/2008, mesh refinement
+        
+        forAll(points(), i)
+        {
+            if(!pistonPoint[i] && movePointsBelowPiston_ && newPoints[i].z() < pistonPosition())
+            {
+                point& p = newPoints[i];
+                p.z() += deltaZ;
+            }
+        }   
     }
     else
     {
@@ -360,8 +388,19 @@ bool Foam::pistonLayer::update()
         {
             point& p = newPoints[pistonPoints[i]];
             p.z() += deltaZ;
-            pistonTopZ = max(pistonTopZ, p.z());
+            pistonTopZ = max(pistonTopZ, p.z());            
         }
+        // TOMMASO, 9/12/2008, mesh refinement
+        forAll(points(), i)
+        {
+            if(!pistonPoint[i] && movePointsBelowPiston_ && newPoints[i].z() < pistonPosition())
+            {
+                point& p = newPoints[i];
+                p.z() += deltaZ;
+                pistonBelowPoint[i] = true;
+            }
+        }   
+
 
 
         // NN! fix. only needed for compression
@@ -371,7 +410,7 @@ bool Foam::pistonLayer::update()
             // check if piston-points have moved beyond the layer above
             forAll(newPoints, i)
             {
-                if (!pistonPoint[i])
+                if (!pistonPoint[i] && !pistonBelowPoint[i])
                 {
                     if (virtualPistonPosition() > newPoints[i].z())
                     {
@@ -381,6 +420,7 @@ bool Foam::pistonLayer::update()
             }
             
         }
+
     }
 
     movePoints(newPoints);

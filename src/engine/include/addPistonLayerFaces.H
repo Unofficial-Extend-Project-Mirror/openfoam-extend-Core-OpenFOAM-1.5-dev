@@ -5,11 +5,13 @@
     
         faceSet pistonFaceSet(*this, piston().pistonFaceSetName());
         
-        labelList pistonLabels(pistonFaceSet.toc());
+//        labelList pistonLabels(pistonFaceSet.toc());
+
+//        Info << pistonLabels << endl;
 
 
 
-        SortableList<label> pistonFacesSort(pistonLabels);
+//        SortableList<label> pistonFacesSort(pistonLabels);
         
 //        Info << "1" << endl;
                 
@@ -17,19 +19,19 @@
 
 //        Info << "2" << endl;
         
-        pistonFacesSort.sort();
+//        pistonFacesSort.sort();
         
 //        Info << pistonFacesSort << endl;
         
 //        boolList flipPistonFaces(pistonFaceSet.size(), false);
-        boolList flipPistonFaces(pistonFacesSort.size(), false);
+        boolList flipPistonFaces(pistonFaceSet.toc().size(), false);
 //        label nSet = pistonFaceSet.size();
-        label nSet = pistonFacesSort.size();
+        label nSet = pistonFaceSet.toc().size();
         label nFlip = 0;
                 
         forAll (flipPistonFaces, facei)
         {
-            scalar scalProd = (faceAreas()[pistonFacesSort[facei]] & vector(0, 0, 1));
+            scalar scalProd = (faceAreas()[pistonFaceSet.toc()[facei]] & vector(0, 0, 1));
             if(scalProd < 0)
             {
                 flipPistonFaces[facei] = true;
@@ -46,7 +48,7 @@
             (
                 "pistonLayerFaces",
 //                pistonFaceSet.toc(),
-                pistonFacesSort,
+                pistonFaceSet.toc(),
 //                boolList(pistonFaceSet.size(), true),
                 flipPistonFaces,
                 nFaceZones,
