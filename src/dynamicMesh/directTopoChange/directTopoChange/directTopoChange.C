@@ -65,7 +65,7 @@ void Foam::directTopoChange::renumber
     DynamicList<label>& elems
 )
 {
-    forAll(elems, elemI)
+    forAll (elems, elemI)
     {
         if (elems[elemI] >= 0)
         {
@@ -82,7 +82,7 @@ void Foam::directTopoChange::renumberReverseMap
     DynamicList<label>& elems
 )
 {
-    forAll(elems, elemI)
+    forAll (elems, elemI)
     {
         label val = elems[elemI];
 
@@ -130,7 +130,7 @@ void Foam::directTopoChange::renumberCompact
 {
     label newElemI = 0;
 
-    forAll(elems, elemI)
+    forAll (elems, elemI)
     {
         label newVal = map[elems[elemI]];
 
@@ -158,7 +158,7 @@ void Foam::directTopoChange::countMap
     nMerge = 0;
     nRemove = 0;
 
-    forAll(map, newCellI)
+    forAll (map, newCellI)
     {
         label oldCellI = map[newCellI];
 
@@ -186,7 +186,7 @@ void Foam::directTopoChange::countMap
         }
     }
 
-    forAll(reverseMap, oldCellI)
+    forAll (reverseMap, oldCellI)
     {
         label newCellI = reverseMap[oldCellI];
 
@@ -214,7 +214,7 @@ void Foam::directTopoChange::writeMeshStats(const polyMesh& mesh, Ostream& os)
 
     labelList patchSizes(patches.size());
     labelList patchStarts(patches.size());
-    forAll(patches, patchI)
+    forAll (patches, patchI)
     {
         patchSizes[patchI] = patches[patchI].size();
         patchStarts[patchI] = patches[patchI].start();
@@ -239,7 +239,7 @@ void Foam::directTopoChange::getMergeSets
     // Per new cell the number of old cells that have been merged into it
     labelList nMerged(cellMap.size(), 1);
 
-    forAll(reverseCellMap, oldCellI)
+    forAll (reverseCellMap, oldCellI)
     {
         label newCellI = reverseCellMap[oldCellI];
 
@@ -256,7 +256,7 @@ void Foam::directTopoChange::getMergeSets
 
     label nSets = 0;
 
-    forAll(nMerged, cellI)
+    forAll (nMerged, cellI)
     {
         if (nMerged[cellI] > 1)
         {
@@ -272,7 +272,7 @@ void Foam::directTopoChange::getMergeSets
 
     cellsFromCells.setSize(nSets);
 
-    forAll(reverseCellMap, oldCellI)
+    forAll (reverseCellMap, oldCellI)
     {
         label newCellI = reverseCellMap[oldCellI];
 
@@ -416,7 +416,7 @@ void Foam::directTopoChange::makeCells
     // 2. Calculate offsets
 
     cellFaceOffsets[0] = 0;
-    forAll(nNbrs, cellI)
+    forAll (nNbrs, cellI)
     {
         cellFaceOffsets[cellI+1] = cellFaceOffsets[cellI] + nNbrs[cellI];
     }
@@ -481,7 +481,7 @@ void Foam::directTopoChange::makeCellCells
     labelList& offsets = cellCells.offsets();
 
     label sumSize = 0;
-    forAll(nNbrs, cellI)
+    forAll (nNbrs, cellI)
     {
         sumSize += nNbrs[cellI];
         offsets[cellI] = sumSize;
@@ -604,7 +604,7 @@ void Foam::directTopoChange::getFaceOrder
     // First unassigned face
     label newFaceI = 0;
 
-    forAll(cellMap_, cellI)
+    forAll (cellMap_, cellI)
     {
         label startOfCell = cellFaceOffsets[cellI];
         label nFaces = cellFaceOffsets[cellI+1] - startOfCell;
@@ -651,7 +651,7 @@ void Foam::directTopoChange::getFaceOrder
 
         nbr.sort();
 
-        forAll(nbr, i)
+        forAll (nbr, i)
         {
             if (nbr[i] != -1)
             {
@@ -680,7 +680,7 @@ void Foam::directTopoChange::getFaceOrder
 
     label faceI = patchStarts[0];
 
-    forAll(patchStarts, patchI)
+    forAll (patchStarts, patchI)
     {
         patchStarts[patchI] = faceI;
         faceI += patchSizes[patchI];
@@ -709,7 +709,7 @@ void Foam::directTopoChange::getFaceOrder
     }
 
     // Check done all faces.
-    forAll(oldToNew, faceI)
+    forAll (oldToNew, faceI)
     {
         if (oldToNew[faceI] == -1)
         {
@@ -802,7 +802,7 @@ void Foam::directTopoChange::compact
         {
             nInternalPoints = -1;
 
-            forAll(points_, pointI)
+            forAll (points_, pointI)
             {
                 if (!pointRemoved(pointI) && !retiredPoints_.found(pointI))
                 {
@@ -813,7 +813,7 @@ void Foam::directTopoChange::compact
         }
         else
         {
-            forAll(points_, pointI)
+            forAll (points_, pointI)
             {
                 if (!pointRemoved(pointI) && !retiredPoints_.found(pointI))
                 {
@@ -822,7 +822,7 @@ void Foam::directTopoChange::compact
             }
 
             // Mark boundary points
-            forAll(faceOwner_, faceI)
+            forAll (faceOwner_, faceI)
             {
                 if
                 (
@@ -834,7 +834,7 @@ void Foam::directTopoChange::compact
                     // Valid boundary face
                     const face& f = faces_[faceI];
 
-                    forAll(f, fp)
+                    forAll (f, fp)
                     {
                         label pointI = f[fp];
 
@@ -852,7 +852,7 @@ void Foam::directTopoChange::compact
                                     << " at position " << faceI << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
-                            } 
+                            }
                             localPointMap[pointI] = newPointI++;
                         }
                     }
@@ -863,7 +863,7 @@ void Foam::directTopoChange::compact
             nInternalPoints = nActivePoints - nBoundaryPoints;
 
             // Move the boundary addressing up
-            forAll(localPointMap, pointI)
+            forAll (localPointMap, pointI)
             {
                 if (localPointMap[pointI] != -1)
                 {
@@ -874,7 +874,7 @@ void Foam::directTopoChange::compact
             newPointI = 0;
 
             // Mark internal points
-            forAll(faceOwner_, faceI)
+            forAll (faceOwner_, faceI)
             {
                 if
                 (
@@ -886,7 +886,7 @@ void Foam::directTopoChange::compact
                     // Valid internal face
                     const face& f = faces_[faceI];
 
-                    forAll(f, fp)
+                    forAll (f, fp)
                     {
                         label pointI = f[fp];
 
@@ -945,7 +945,7 @@ void Foam::directTopoChange::compact
         renumber(localPointMap, retiredPoints_);
 
         // Use map to relabel face vertices
-        forAll(faces_, faceI)
+        forAll (faces_, faceI)
         {
             face& f = faces_[faceI];
 
@@ -970,7 +970,7 @@ void Foam::directTopoChange::compact
         labelList localFaceMap(faces_.size(), -1);
         label newFaceI = 0;
 
-        forAll(faces_, faceI)
+        forAll (faces_, faceI)
         {
             if (!faceRemoved(faceI) && faceOwner_[faceI] >= 0)
             {
@@ -979,7 +979,7 @@ void Foam::directTopoChange::compact
         }
         nActiveFaces_ = newFaceI;
 
-        forAll(faces_, faceI)
+        forAll (faces_, faceI)
         {
             if (!faceRemoved(faceI) && faceOwner_[faceI] < 0)
             {
@@ -1019,7 +1019,7 @@ void Foam::directTopoChange::compact
             localCellMap = -1;
 
             newCellI = 0;
-            forAll(cellMap_, cellI)
+            forAll (cellMap_, cellI)
             {
                 if (!cellRemoved(cellI))
                 {
@@ -1050,9 +1050,9 @@ void Foam::directTopoChange::compact
             renumberKey(localCellMap, cellFromEdge_);
             renumberKey(localCellMap, cellFromFace_);
 
-            // Renumber owner/neighbour. Take into account if neighbour suddenly
-            // gets lower cell than owner.
-            forAll(faceOwner_, faceI)
+            // Renumber owner/neighbour. Take into account if neighbour
+            // suddenly gets lower cell than owner.
+            forAll (faceOwner_, faceI)
             {
                 label own = faceOwner_[faceI];
                 label nei = faceNeighbour_[faceI];
@@ -1130,7 +1130,7 @@ Foam::labelList Foam::directTopoChange::selectFaces
 {
     label nFaces = 0;
 
-    forAll(faceLabels, i)
+    forAll (faceLabels, i)
     {
         label faceI = faceLabels[i];
 
@@ -1154,7 +1154,7 @@ Foam::labelList Foam::directTopoChange::selectFaces
 
         nFaces = 0;
 
-        forAll(faceLabels, i)
+        forAll (faceLabels, i)
         {
             label faceI = faceLabels[i];
 
@@ -1180,7 +1180,7 @@ void Foam::directTopoChange::calcPatchPointMap
 {
     patchPointMap.setSize(boundary.size());
 
-    forAll(boundary, patchI)
+    forAll (boundary, patchI)
     {
         const labelList& meshPoints = boundary[patchI].meshPoints();
 
@@ -1190,7 +1190,7 @@ void Foam::directTopoChange::calcPatchPointMap
 
         curPatchPointRnb.setSize(meshPoints.size());
 
-        forAll(meshPoints, i)
+        forAll (meshPoints, i)
         {
             if (meshPoints[i] < pointMap_.size())
             {
@@ -1460,7 +1460,7 @@ void Foam::directTopoChange::resetZones
         // Distribute points per zone
 
         labelListList addressing(pointZones.size());
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             addressing[zoneI].setSize(nPoints[zoneI]);
         }
@@ -1475,7 +1475,7 @@ void Foam::directTopoChange::resetZones
 
         // So now we both have old zones and the new addressing.
         // Invert the addressing to get pointZoneMap.
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             const pointZone& oldZone = pointZones[zoneI];
             const labelList& newZoneAddr = addressing[zoneI];
@@ -1483,7 +1483,7 @@ void Foam::directTopoChange::resetZones
             labelList& curPzRnb = pointZoneMap[zoneI];
             curPzRnb.setSize(newZoneAddr.size());
 
-            forAll(newZoneAddr, i)
+            forAll (newZoneAddr, i)
             {
                 if (newZoneAddr[i] < pointMap_.size())
                 {
@@ -1497,7 +1497,7 @@ void Foam::directTopoChange::resetZones
         }
 
         // Reset the addresing on the zone
-        forAll(newMesh.pointZones(), zoneI)
+        forAll (newMesh.pointZones(), zoneI)
         {
             if (debug)
             {
@@ -1542,7 +1542,7 @@ void Foam::directTopoChange::resetZones
         labelListList addressing(faceZones.size());
         boolListList flipMode(faceZones.size());
 
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             addressing[zoneI].setSize(nFaces[zoneI]);
             flipMode[zoneI].setSize(nFaces[zoneI]);
@@ -1562,7 +1562,7 @@ void Foam::directTopoChange::resetZones
 
         // So now we both have old zones and the new addressing.
         // Invert the addressing to get faceZoneFaceMap.
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             const faceZone& oldZone = faceZones[zoneI];
             const labelList& newZoneAddr = addressing[zoneI];
@@ -1571,7 +1571,7 @@ void Foam::directTopoChange::resetZones
 
             curFzFaceRnb.setSize(newZoneAddr.size());
 
-            forAll(newZoneAddr, i)
+            forAll (newZoneAddr, i)
             {
                 if (newZoneAddr[i] < faceMap_.size())
                 {
@@ -1587,7 +1587,7 @@ void Foam::directTopoChange::resetZones
 
 
         // Reset the addresing on the zone
-        forAll(newMesh.faceZones(), zoneI)
+        forAll (newMesh.faceZones(), zoneI)
         {
             if (debug)
             {
@@ -1616,7 +1616,7 @@ void Foam::directTopoChange::resetZones
 
         labelList nCells(cellZones.size(), 0);
 
-        forAll(cellZone_, cellI)
+        forAll (cellZone_, cellI)
         {
             label zoneI = cellZone_[cellI];
 
@@ -1637,13 +1637,13 @@ void Foam::directTopoChange::resetZones
         }
 
         labelListList addressing(cellZones.size());
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             addressing[zoneI].setSize(nCells[zoneI]);
         }
         nCells = 0;
 
-        forAll(cellZone_, cellI)
+        forAll (cellZone_, cellI)
         {
             label zoneI = cellZone_[cellI];
 
@@ -1655,7 +1655,7 @@ void Foam::directTopoChange::resetZones
 
         // So now we both have old zones and the new addressing.
         // Invert the addressing to get cellZoneMap.
-        forAll(addressing, zoneI)
+        forAll (addressing, zoneI)
         {
             const cellZone& oldZone = cellZones[zoneI];
             const labelList& newZoneAddr = addressing[zoneI];
@@ -1664,7 +1664,7 @@ void Foam::directTopoChange::resetZones
 
             curCellRnb.setSize(newZoneAddr.size());
 
-            forAll(newZoneAddr, i)
+            forAll (newZoneAddr, i)
             {
                 if (newZoneAddr[i] < cellMap_.size())
                 {
@@ -1679,7 +1679,7 @@ void Foam::directTopoChange::resetZones
         }
 
         // Reset the addresing on the zone
-        forAll(newMesh.cellZones(), zoneI)
+        forAll (newMesh.cellZones(), zoneI)
         {
             if (debug)
             {
@@ -1709,7 +1709,7 @@ void Foam::directTopoChange::calcFaceZonePointMap
 
     faceZonePointMap.setSize(faceZones.size());
 
-    forAll(faceZones, zoneI)
+    forAll (faceZones, zoneI)
     {
         const faceZone& newZone = faceZones[zoneI];
 
@@ -1726,7 +1726,7 @@ void Foam::directTopoChange::calcFaceZonePointMap
 
         curFzPointRnb.setSize(newZoneMeshPoints.size());
 
-        forAll(newZoneMeshPoints, pointI)
+        forAll (newZoneMeshPoints, pointI)
         {
             if
             (
@@ -1766,7 +1766,7 @@ Foam::face Foam::directTopoChange::rotateFace
 {
     face newF(f.size());
 
-    forAll(f, fp)
+    forAll (f, fp)
     {
         label fp1 = (fp + nPos) % f.size();
 
@@ -1799,7 +1799,7 @@ void Foam::directTopoChange::reorderCoupledFaces
     labelList rotation(faces_.size(), 0);
 
     // Send ordering
-    forAll(boundary, patchI)
+    forAll (boundary, patchI)
     {
         if (syncParallel || !isA<processorPolyPatch>(boundary[patchI]))
         {
@@ -1823,7 +1823,7 @@ void Foam::directTopoChange::reorderCoupledFaces
 
     bool anyChanged = false;
 
-    forAll(boundary, patchI)
+    forAll (boundary, patchI)
     {
         if (syncParallel || !isA<processorPolyPatch>(boundary[patchI]))
         {
@@ -1851,13 +1851,13 @@ void Foam::directTopoChange::reorderCoupledFaces
                 // Merge patch face reordering into mesh face reordering table
                 label start = patchStarts[patchI];
 
-                forAll(patchFaceMap, patchFaceI)
+                forAll (patchFaceMap, patchFaceI)
                 {
                     oldToNew[patchFaceI + start] =
                         start + patchFaceMap[patchFaceI];
                 }
 
-                forAll(patchFaceRotation, patchFaceI)
+                forAll (patchFaceRotation, patchFaceI)
                 {
                     rotation[patchFaceI + start] =
                         patchFaceRotation[patchFaceI];
@@ -1879,7 +1879,7 @@ void Foam::directTopoChange::reorderCoupledFaces
         reorderCompactFaces(oldToNew.size(), oldToNew);
 
         // Rotate faces (rotation is already in new face indices).
-        forAll(rotation, faceI)
+        forAll (rotation, faceI)
         {
             if (rotation[faceI] != 0)
             {
@@ -2005,7 +2005,7 @@ void Foam::directTopoChange::compactAndReorder
     oldPatchNMeshPoints.setSize(boundary.size());
     oldPatchStarts.setSize(boundary.size());
 
-    forAll(boundary, patchI)
+    forAll (boundary, patchI)
     {
         // Copy old face zone mesh point maps
         oldPatchMeshPointMaps[patchI] = boundary[patchI].meshPointMap();
@@ -2027,12 +2027,12 @@ void Foam::directTopoChange::compactAndReorder
 
     DynamicList<Map<label> > dynOldFaceZoneMeshPointMaps;
 
-    forAll(mesh.faceZones(), zoneI)
+    forAll (mesh.faceZones(), zoneI)
     {
         label maxFaceIndex = max(mesh.faceZones()[zoneI]);
 
         // This should always be true for old faceZones faces
-        if(maxFaceIndex < mesh.allFaces().size())
+        if (maxFaceIndex < mesh.allFaces().size())
         {
             const faceZone& oldZone = mesh.faceZones()[zoneI];
             dynOldFaceZoneMeshPointMaps.append(oldZone().meshPointMap());
@@ -2190,7 +2190,7 @@ void Foam::directTopoChange::addMesh
 )
 {
     label maxRegion = nPatches_ - 1;
-    forAll(patchMap, i)
+    forAll (patchMap, i)
     {
         maxRegion = max(maxRegion, patchMap[i]);
     }
@@ -2210,11 +2210,11 @@ void Foam::directTopoChange::addMesh
         // Precalc offset zones
         labelList newZoneID(points.size(), -1);
 
-        forAll(pointZones, zoneI)
+        forAll (pointZones, zoneI)
         {
             const labelList& pointLabels = pointZones[zoneI];
 
-            forAll(pointLabels, j)
+            forAll (pointLabels, j)
             {
                 newZoneID[pointLabels[j]] = pointZoneMap[zoneI];
             }
@@ -2253,11 +2253,11 @@ void Foam::directTopoChange::addMesh
         // Precalc offset zones
         labelList newZoneID(nAllCells, -1);
 
-        forAll(cellZones, zoneI)
+        forAll (cellZones, zoneI)
         {
             const labelList& cellLabels = cellZones[zoneI];
 
-            forAll(cellLabels, j)
+            forAll (cellLabels, j)
             {
                 label cellI = cellLabels[j];
 
@@ -2319,12 +2319,12 @@ void Foam::directTopoChange::addMesh
         labelList newZoneID(nAllFaces, -1);
         boolList zoneFlip(nAllFaces, false);
 
-        forAll(faceZones, zoneI)
+        forAll (faceZones, zoneI)
         {
             const labelList& faceLabels = faceZones[zoneI];
             const boolList& flipMap = faceZones[zoneI].flipMap();
 
-            forAll(faceLabels, j)
+            forAll (faceLabels, j)
             {
                 newZoneID[faceLabels[j]] = faceZoneMap[zoneI];
                 zoneFlip[faceLabels[j]] = flipMap[j];
@@ -2352,7 +2352,7 @@ void Foam::directTopoChange::addMesh
         }
 
         // 2. Patch faces
-        forAll(patches, patchI)
+        forAll (patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
@@ -2369,7 +2369,7 @@ void Foam::directTopoChange::addMesh
                     << "Are patches in incremental order?"
                     << abort(FatalError);
             }
-            forAll(pp, patchFaceI)
+            forAll (pp, patchFaceI)
             {
                 label faceI = pp.start() + patchFaceI;
 
@@ -2617,7 +2617,7 @@ void Foam::directTopoChange::movePoints(const pointField& newPoints)
             << abort(FatalError);
     }
 
-    forAll(points_, pointI)
+    forAll (points_, pointI)
     {
         points_[pointI] = newPoints[pointI];
     }
@@ -3012,7 +3012,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::directTopoChange::changeMesh
         // (appended points (i.e. from nowhere) get value zero)
         pointField renumberedMeshPoints(newPoints.size());
 
-        forAll(pointMap_, newPointI)
+        forAll (pointMap_, newPointI)
         {
             label oldPointI = pointMap_[newPointI];
 
@@ -3351,7 +3351,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::directTopoChange::makeMesh
 
         List<polyPatch*> newBoundary(oldPatches.size());
 
-        forAll(oldPatches, patchI)
+        forAll (oldPatches, patchI)
         {
             newBoundary[patchI] = oldPatches[patchI].clone
             (
@@ -3372,7 +3372,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::directTopoChange::makeMesh
     const pointZoneMesh& oldPointZones = mesh.pointZones();
     List<pointZone*> pZonePtrs(oldPointZones.size());
     {
-        forAll(oldPointZones, i)
+        forAll (oldPointZones, i)
         {
             pZonePtrs[i] = new pointZone
             (
@@ -3387,7 +3387,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::directTopoChange::makeMesh
     const faceZoneMesh& oldFaceZones = mesh.faceZones();
     List<faceZone*> fZonePtrs(oldFaceZones.size());
     {
-        forAll(oldFaceZones, i)
+        forAll (oldFaceZones, i)
         {
             fZonePtrs[i] = new faceZone
             (
@@ -3403,7 +3403,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::directTopoChange::makeMesh
     const cellZoneMesh& oldCellZones = mesh.cellZones();
     List<cellZone*> cZonePtrs(oldCellZones.size());
     {
-        forAll(oldCellZones, i)
+        forAll (oldCellZones, i)
         {
             cZonePtrs[i] = new cellZone
             (
