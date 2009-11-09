@@ -147,28 +147,42 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 
 
 template<class Type>
+tmp<scalarField> waveTransmissiveFvPatchField<Type>::supercritical() const
+{
+    // Lookup the velocity and compressibility of the patch
+    const fvPatchField<scalar>& psip = this->patch().lookupPatchField
+    (
+        psiName_,
+        reinterpret_cast<const volScalarField*>(NULL),
+        reinterpret_cast<const scalar*>(NULL)
+    );
+
+    const fvPatchVectorField& U =
+        this->patch().lookupPatchField
+        (
+            "U",
+            reinterpret_cast<const volVectorField*>(NULL),
+            reinterpret_cast<const vector*>(NULL)
+        );
+
+    // Calculate the speed of the field wave w
+    // by summing the component of the velocity normal to the boundary
+    // and the speed of sound (sqrt(gamma_/psi)).
+    return pos
+    (
+        mag(U.patchInternalField() & this->patch().Sf())/this->patch().magSf()
+      - sqrt(gamma_/psip)
+    );
+}
+
+
+template<class Type>
 void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
-    fvPatchField<Type>::write(os);
-    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
-
-    if (this->rhoName_ != "Undefined")
-    {
-        os.writeKeyword("rho") << this->rhoName_ << token::END_STATEMENT << nl;
-    }
+    advectiveFvPatchField<Type>::write(os);
 
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << endl;
-
-    if (this->lInf_ > SMALL)
-    {
-        os.writeKeyword("fieldInf") << this->fieldInf_
-            << token::END_STATEMENT << endl;
-        os.writeKeyword("lInf") << this->lInf_
-            << token::END_STATEMENT << endl;
-    }
-
-    this->writeEntry("value", os);
 }
 
 

@@ -130,9 +130,6 @@ public:
         // Evaluation functions
 
             //- Return neighbour field given internal cell data
-            //  This is a dummy function: returning patch values 
-            //  due to scheduling issues in parallel communication.
-            //  See processofFvPatchField for details HJ, 11/May/2009
             virtual tmp<Field<Type> > patchNeighbourField() const;
 
             //- Initialise the evaluation of the patch field
@@ -167,7 +164,7 @@ public:
             ) const;
 
 
-        //- GGI coupled interface functions
+        // GGI coupled interface functions
 
             //- Does the patch field perform the transfromation
             virtual bool doTransform() const

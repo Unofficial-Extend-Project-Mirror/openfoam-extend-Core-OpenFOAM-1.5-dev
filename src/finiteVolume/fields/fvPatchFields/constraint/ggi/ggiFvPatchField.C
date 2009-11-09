@@ -31,7 +31,8 @@ Contributor
 Note on parallelisation
     In order to handle parallelisation correctly, I need to rely on the fact
     that all patches that require a global gather-scatter come before
-    processor patches.  In that case, the 
+    processor patches.  In that case, the communication pattern
+    will be correct without intervention.  HJ, 6/Aug/2009
 
 \*---------------------------------------------------------------------------*/
 
@@ -156,7 +157,7 @@ tmp<Field<Type> > ggiFvPatchField<Type>::patchNeighbourField() const
     }
 
     tmp<Field<Type> > tpnf(ggiPatch_.interpolate(sField));
-    Field<Type>& pnf = tpnf(); 
+    Field<Type>& pnf = tpnf();
 
     if (ggiPatch_.bridgeOverlap())
     {
@@ -256,7 +257,6 @@ void ggiFvPatchField<Type>::initInterfaceMatrixUpdate
 }
 
 
-// Return matrix product for coupled boundary
 template<class Type>
 void ggiFvPatchField<Type>::updateInterfaceMatrix
 (

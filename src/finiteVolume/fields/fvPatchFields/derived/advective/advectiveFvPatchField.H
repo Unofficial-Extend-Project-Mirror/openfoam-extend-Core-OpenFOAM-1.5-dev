@@ -42,11 +42,14 @@ Description
     @verbatim
         outlet
         {
-            type            advective;
-            phi             phi;
-            // rho          rho; // Not needed, phi volumetric
-            // fieldInf     1e5; // Optional
-            // lInf         0.1; // Optional
+            type                    advective;
+            phi                     phi;
+            // rho                  rho; // Not needed, phi volumetric
+            // fieldInf             1e5; // Optional
+            // lInf                 0.1; // Optional
+
+            inletOutlet             true; // Correct for back-flow
+            correctSupercritical    true;
         }
     @endverbatim
 
@@ -55,6 +58,13 @@ Description
     waveTransmissiveFvPatchField the advectionSpeed() calculates and returns
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
+
+    Steady-state handling has been added by Hrvoje Jasak.
+    Supercritical outlet handling has been added by Hrvoje Jasak.
+    HJ, 27/Oct/2009
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
     advectiveFvPatchField.C
@@ -65,6 +75,7 @@ SourceFiles
 #define advectiveFvPatchField_H
 
 #include "mixedFvPatchFields.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,6 +107,12 @@ protected:
 
         //- Relaxation length-scale
         scalar lInf_;
+
+        //- Inlet-outlet treatment
+        Switch inletOutlet_;
+
+        //- Supercritical correction treatment
+        Switch correctSupercritical_;
 
 
 public:
@@ -195,11 +212,42 @@ public:
                 return lInf_;
             }
 
+            //- Return inlet-outlet treatment switch
+            bool inletOutlet() const
+            {
+                return inletOutlet_;
+            }
+
+            //- Return reference to inlet-outlet treatment switch
+            //  to allow adjustment
+            bool& inletOutlet()
+            {
+                return inletOutlet_;
+            }
+
+            //- Return supercritical outlet treatment switch
+            bool correctSupercritical() const
+            {
+                return correctSupercritical_;
+            }
+
+            //- Return reference to supercritical treatment switch
+            //  to allow adjustment
+            bool& correctSupercritical()
+            {
+                return correctSupercritical_;
+            }
+
 
         // Evaluation functions
 
             //- Calculate and return the advection speed at the boundary
             virtual tmp<scalarField> advectionSpeed() const;
+
+            //- Calculate and return the supercritical switch at the boundary
+            //  Supercritical = 1 converts the outlet to zeroGradient
+            //  Supercritical = 0 no correction
+            virtual tmp<scalarField> supercritical() const;
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

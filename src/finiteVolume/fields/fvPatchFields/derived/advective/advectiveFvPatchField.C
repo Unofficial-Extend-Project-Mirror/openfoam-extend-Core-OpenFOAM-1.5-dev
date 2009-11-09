@@ -31,6 +31,7 @@ License
 #include "EulerDdtScheme.H"
 #include "CrankNicholsonDdtScheme.H"
 #include "backwardDdtScheme.H"
+#include "steadyStateDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,29 +51,14 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_("Undefined"),
     rhoName_("Undefined"),
     fieldInf_(pTraits<Type>::zero),
-    lInf_(0.0)
+    lInf_(0.0),
+    inletOutlet_(false),
+    correctSupercritical_(false)
 {
     this->refValue() = pTraits<Type>::zero;
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 0.0;
 }
-
-
-template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
-(
-    const advectiveFvPatchField& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    mixedFvPatchField<Type>(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    fieldInf_(ptf.fieldInf_),
-    lInf_(ptf.lInf_)
-{}
 
 
 template<class Type>
@@ -87,7 +73,9 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_(dict.lookup("phi")),
     rhoName_("Undefined"),
     fieldInf_(pTraits<Type>::zero),
-    lInf_(0.0)
+    lInf_(0.0),
+    inletOutlet_(dict.lookup("inletOutlet")),
+    correctSupercritical_(dict.lookup("correctSupercritical"))
 {
     if (dict.found("value"))
     {
@@ -136,6 +124,25 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 template<class Type>
 advectiveFvPatchField<Type>::advectiveFvPatchField
 (
+    const advectiveFvPatchField& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    mixedFvPatchField<Type>(ptf, p, iF, mapper),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_),
+    fieldInf_(ptf.fieldInf_),
+    lInf_(ptf.lInf_),
+    inletOutlet_(ptf.inletOutlet_),
+    correctSupercritical_(ptf.correctSupercritical_)
+{}
+
+
+template<class Type>
+advectiveFvPatchField<Type>::advectiveFvPatchField
+(
     const advectiveFvPatchField& ptpsf
 )
 :
@@ -143,7 +150,9 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_(ptpsf.phiName_),
     rhoName_(ptpsf.rhoName_),
     fieldInf_(ptpsf.fieldInf_),
-    lInf_(ptpsf.lInf_)
+    lInf_(ptpsf.lInf_),
+    inletOutlet_(ptpsf.inletOutlet_),
+    correctSupercritical_(ptpsf.correctSupercritical_)
 {}
 
 
@@ -158,7 +167,9 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_(ptpsf.phiName_),
     rhoName_(ptpsf.rhoName_),
     fieldInf_(ptpsf.fieldInf_),
-    lInf_(ptpsf.lInf_)
+    lInf_(ptpsf.lInf_),
+    inletOutlet_(ptpsf.inletOutlet_),
+    correctSupercritical_(ptpsf.correctSupercritical_)
 {}
 
 
@@ -196,19 +207,20 @@ tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
 
 
 template<class Type>
+tmp<scalarField> advectiveFvPatchField<Type>::supercritical() const
+{
+    // In base class, the condition is never supercritical
+    return tmp<scalarField>(new scalarField(this->size(), scalar(0)));
+}
+
+
+template<class Type>
 void advectiveFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
         return;
     }
-
-    word ddtScheme
-    (
-        this->dimensionedInternalField().mesh()
-       .ddtScheme(this->dimensionedInternalField().name())
-    );
-    scalar deltaT = this->db().time().deltaT().value();
 
     const GeometricField<Type, fvPatchField, volMesh>& field =
         this->db().objectRegistry::
@@ -217,9 +229,34 @@ void advectiveFvPatchField<Type>::updateCoeffs()
             this->dimensionedInternalField().name()
         );
 
+    word ddtScheme
+    (
+        this->dimensionedInternalField().mesh().ddtScheme(field.name())
+    );
+
     // Calculate the advection speed of the field wave
     // If the wave is incoming set the speed to 0.
     scalarField w = Foam::max(advectionSpeed(), scalar(0));
+
+    // Get time-step
+    scalarField deltaT(this->size(), this->db().time().deltaT().value());
+
+    // For steady-state, calculate formal deltaT from the
+    // under-relaxation factor
+    if (ddtScheme == fv::steadyStateDdtScheme<Type>::typeName)
+    {
+        // Get under-relaxation factor
+//         scalar urf =
+//             this->dimensionedInternalField().mesh().relaxationFactor
+//             (
+//                 field.name()
+//             );
+
+//         deltaT = urf/(1 - urf)*1/(w*this->patch().deltaCoeffs() + SMALL);
+
+        // Set delta t for Co = 1
+        deltaT = 1/(w*this->patch().deltaCoeffs() + SMALL);
+    }
 
     // Calculate the field wave coefficient alpha (See notes)
     scalarField alpha = w*deltaT*this->patch().deltaCoeffs();
@@ -231,16 +268,13 @@ void advectiveFvPatchField<Type>::updateCoeffs()
     // HJ, 25/Sep/2009
     if (lInf_ > SMALL)
     {
-        // HJ, This is wrong: the relaxation parameters are nonsensical.
-        // Consider solving ddt(p) + u . grad(p) = (p* - p)/tau instead
-
         // Calculate the field relaxation coefficient k (See notes)
         scalarField k = w*deltaT/lInf_;
 
         if
         (
-            ddtScheme == fv::EulerDdtScheme<scalar>::typeName
-         || ddtScheme == fv::CrankNicholsonDdtScheme<scalar>::typeName
+            ddtScheme == fv::EulerDdtScheme<Type>::typeName
+         || ddtScheme == fv::CrankNicholsonDdtScheme<Type>::typeName
         )
         {
             this->refValue() =
@@ -250,7 +284,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
 
             this->valueFraction() = (1.0 + k)/(1.0 + alpha + k);
         }
-        else if (ddtScheme == fv::backwardDdtScheme<scalar>::typeName)
+        else if (ddtScheme == fv::backwardDdtScheme<Type>::typeName)
         {
             this->refValue() =
             (
@@ -260,6 +294,15 @@ void advectiveFvPatchField<Type>::updateCoeffs()
             )/(1.5 + k);
 
             this->valueFraction() = (1.5 + k)/(1.5 + alpha + k);
+        }
+        else if (ddtScheme == fv::steadyStateDdtScheme<Type>::typeName)
+        {
+            this->refValue() =
+            (
+                field.prevIter().boundaryField()[patchi] + k*fieldInf_
+            )/(1.0 + k);
+
+            this->valueFraction() = (1.0 + k)/(1.0 + alpha + k);
         }
         else
         {
@@ -278,15 +321,15 @@ void advectiveFvPatchField<Type>::updateCoeffs()
     {
         if
         (
-            ddtScheme == fv::EulerDdtScheme<scalar>::typeName
-         || ddtScheme == fv::CrankNicholsonDdtScheme<scalar>::typeName
+            ddtScheme == fv::EulerDdtScheme<Type>::typeName
+         || ddtScheme == fv::CrankNicholsonDdtScheme<Type>::typeName
         )
         {
             this->refValue() = field.oldTime().boundaryField()[patchi];
 
             this->valueFraction() = 1.0/(1.0 + alpha);
         }
-        else if (ddtScheme == fv::backwardDdtScheme<scalar>::typeName)
+        else if (ddtScheme == fv::backwardDdtScheme<Type>::typeName)
         {
             this->refValue() =
             (
@@ -295,6 +338,12 @@ void advectiveFvPatchField<Type>::updateCoeffs()
             )/1.5;
 
             this->valueFraction() = 1.5/(1.5 + alpha);
+        }
+        else if (ddtScheme == fv::steadyStateDdtScheme<Type>::typeName)
+        {
+            this->refValue() = field.prevIter().boundaryField()[patchi];
+
+            this->valueFraction() = 1.0/(1.0 + alpha);
         }
         else
         {
@@ -308,6 +357,70 @@ void advectiveFvPatchField<Type>::updateCoeffs()
                 << " in file " << this->dimensionedInternalField().objectPath()
                 << exit(FatalError);
         }
+    }
+
+    // Get access to flux field
+    fvsPatchField<scalar> phip = this->patch().lookupPatchField
+    (
+        phiName_,
+        reinterpret_cast<const surfaceScalarField*>(NULL),
+        reinterpret_cast<const scalar*>(NULL)
+    );
+
+    // Treatment for supercritical inlet or outlet.  HJ, 28/Oct/2009
+    // If the flow is faster than critical speed, the boundary condition
+    // needs to behave as zero gradient at outflow and fixed value at inflow.
+    // This is the case when eg.  a wave-transmissive pressure outlet
+    // becomes supersonic.  Face selection for supercritical outlet is
+    // done through a supercritical() virtual function: return 1 if
+    // flow is supercritical and zero otherwise
+    if (correctSupercritical_)
+    {
+        this->valueFraction() =
+        (
+            // If the flow is going out
+            // - set zero gradient for supercritical; otherwise use current
+            pos(phip)*
+            (
+                (scalar(1) - this->supercritical())
+              + this->supercritical()*this->valueFraction()
+            )
+            // If the flow is going in
+            // - set fixed value for supercritical; otherwise use current
+          + neg(phip)*
+            (
+                this->supercritical()
+              + (scalar(1) - this->supercritical())*this->valueFraction()
+            )
+        );
+
+        this->refValue() =
+            // If the flow is going out
+            // - for supercritical, the value does not matter.  use fieldInf_
+            // - for subcritical, use current value
+            pos(phip)*
+            (
+                this->supercritical()*fieldInf_
+              + (scalar(1) - this->supercritical())*this->refValue()
+            )
+            // If the flow is going in
+            // - for supercritical use fieldInf_
+          + neg(phip)*
+            (
+                this->supercritical()*fieldInf_
+              + (scalar(1) - this->supercritical())*this->refValue()
+            );
+    }
+
+    // Inlet-outlet treatment at the boundary.  HJ, 28/Oct/2009
+    // If the flux is outgoing, the normal condition is used
+    // if the flux is incoming, incoming value is set to fieldInf_
+    // (value = fieldInf, valueFraction = 1)
+    if (inletOutlet_)
+    {
+        this->refValue() = pos(phip)*this->refValue() + neg(phip)*fieldInf_;
+        this->refGrad() = pTraits<Type>::zero;
+        this->valueFraction() = pos(phip)*this->valueFraction() + neg(phip);
     }
 
     mixedFvPatchField<Type>::updateCoeffs();
@@ -325,13 +438,17 @@ void advectiveFvPatchField<Type>::write(Ostream& os) const
         os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     }
 
-    if (lInf_ > SMALL)
-    {
-        os.writeKeyword("fieldInf") << fieldInf_
-            << token::END_STATEMENT << endl;
-        os.writeKeyword("lInf") << lInf_
-            << token::END_STATEMENT << endl;
-    }
+    os.writeKeyword("fieldInf") << fieldInf_
+        << token::END_STATEMENT << endl;
+
+    os.writeKeyword("lInf") << lInf_
+        << token::END_STATEMENT << endl;
+
+    os.writeKeyword("inletOutlet") << inletOutlet_
+        << token::END_STATEMENT << nl;
+
+    os.writeKeyword("correctSupercritical") << correctSupercritical_
+        << token::END_STATEMENT << nl;
 
     this->writeEntry("value", os);
 }

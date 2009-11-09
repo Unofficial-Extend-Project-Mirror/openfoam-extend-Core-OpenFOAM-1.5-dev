@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class waveTransmissiveFvPatch Declaration
+                   Class waveTransmissiveFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -151,6 +151,11 @@ public:
 
             //- Calculate and return the advection speed at the boundary
             virtual tmp<scalarField> advectionSpeed() const;
+
+            //- Calculate and return the supercritical switch at the boundary
+            //  Supercritical = 1 converts the outlet to zeroGradient
+            //  Supercritical = 0 no correction
+            virtual tmp<scalarField> supercritical() const;
 
 
         //- Write
