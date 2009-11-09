@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class objectRegistry Declaration
+                      Class objectRegistry Declaration
 \*---------------------------------------------------------------------------*/
 
 class objectRegistry
@@ -82,7 +82,7 @@ public:
 
     // Constructors
 
-        //- Construct the time objectRegistry given an initial estimate 
+        //- Construct the time objectRegistry given an initial estimate
         //  for the number of entries
         explicit objectRegistry
         (
