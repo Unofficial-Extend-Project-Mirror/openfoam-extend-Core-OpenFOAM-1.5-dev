@@ -264,6 +264,25 @@ Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cp() const
 
 
 template<class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::Cv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCv(new scalarField(T.size()));
+    scalarField& cv = tCv();
+
+    forAll(T, facei)
+    {
+        cv[facei] = this->patchFaceMixture(patchi, facei).Cv(T[facei]);
+    }
+
+    return tCv;
+}
+
+
+template<class MixtureType>
 Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cv() const
 {
     const fvMesh& mesh = T_.mesh();

@@ -122,6 +122,16 @@ public:
             //- Heat capacity at constant pressure [J/kg/K]
             virtual tmp<volScalarField> Cp() const;
 
+            //- Heat capacity at constant volume for patch [J/kg/K]
+            virtual tmp<scalarField> Cv
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
+
+            //- Heat capacity at constant pressure [J/kg/K]
+            virtual tmp<volScalarField> Cv() const;
+
             //- Unburnt gas enthalpy for cell-set [J/kg]
             virtual tmp<scalarField> hu
             (

@@ -271,6 +271,64 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cp() const
 
 
 template<class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::Cv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCv(new scalarField(T.size()));
+
+    scalarField& cv = tCv();
+
+    forAll(T, facei)
+    {
+        cv[facei] = this->patchFaceMixture(patchi, facei).Cv(T[facei]);
+    }
+
+    return tCv;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cv() const
+{
+    const fvMesh& mesh = T_.mesh();
+
+    tmp<volScalarField> tCv
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Cv",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionSet(0, 2, -2, -1, 0)
+        )
+    );
+
+    volScalarField& cv = tCv();
+
+    forAll(T_, celli)
+    {
+        cv[celli] = this->cellMixture(celli).Cv(T_[celli]);
+    }
+
+    forAll(T_.boundaryField(), patchi)
+    {
+        cv.boundaryField()[patchi] = Cv(T_.boundaryField()[patchi], patchi);
+    }
+
+    return tCv;
+}
+
+
+template<class MixtureType>
 Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
 (
     const scalarField& Tu,

@@ -236,6 +236,21 @@ public:
                 return volScalarField::null();
             }
 
+            //- Heat capacity at constant voluve for patch [J/kg/K]
+            virtual tmp<scalarField> Cv
+            (
+                const scalarField& T,
+                const label patchi
+            ) const
+            {
+                notImplemented
+                (
+                    "basicThermo::Cv"
+                    "(const scalarField& T, const label patchi) const"
+                );
+                return tmp<scalarField>(NULL);
+            }
+
             //- Heat capacity at constant volume [J/kg/K]
             virtual tmp<volScalarField> Cv() const
             {
