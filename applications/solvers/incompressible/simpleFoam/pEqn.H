@@ -15,7 +15,8 @@
         );
 
         pEqn.setReference(pRefCell, pRefValue);
-        // retain the residual from the first iteration
+
+        // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
             eqnResidual = pEqn.solve().initialResidual();
