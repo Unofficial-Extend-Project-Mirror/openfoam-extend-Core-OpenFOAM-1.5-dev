@@ -23,25 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fv::faceLimitedGrad
+    Foam::fa::edgeLimitedGrad
 
 Description
-    faceLimitedGrad gradient scheme applied to a runTime selected base gradient
+    edgeLimitedGrad gradient scheme applied to a runTime selected base gradient
     scheme.
 
-    The scalar limiter based on limiting the extrapolated face values
-    between the face-neighbour cell values and is applied to all components
+    The scalar limiter based on limiting the extrapolated edge values
+    between the edge-neighbour cell values and is applied to all components
     of the gradient.
 
 SourceFiles
-    faceLimitedGrad.C
+    edgeLimitedFaGrads.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceLimitedGrad_H
-#define faceLimitedGrad_H
+#ifndef edgeLimitedGrad_H
+#define edgeLimitedGrad_H
 
-#include "gradScheme.H"
+#include "faGradScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,21 +50,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace fv
+namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class faceLimitedGrad Declaration
+                       Class edgeLimitedGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class faceLimitedGrad
+class edgeLimitedGrad
 :
-    public fv::gradScheme<Type>
+    public fa::gradScheme<Type>
 {
     // Private Data
 
-        tmp<fv::gradScheme<Type> > basicGradScheme_;
+        tmp<fa::gradScheme<Type> > basicGradScheme_;
 
         //- Limiter coefficient
         scalar k_;
@@ -72,7 +72,7 @@ class faceLimitedGrad
 
     // Private Member Functions
 
-        inline void limitFace
+        inline void limitEdge
         (
             scalar& limiter,
             const scalar maxDelta,
@@ -82,32 +82,32 @@ class faceLimitedGrad
 
 
         //- Disallow default bitwise copy construct
-        faceLimitedGrad(const faceLimitedGrad&);
+        edgeLimitedGrad(const edgeLimitedGrad&);
 
         //- Disallow default bitwise assignment
-        void operator=(const faceLimitedGrad&);
+        void operator=(const edgeLimitedGrad&);
 
 
 public:
 
     //- RunTime type information
-    TypeName("faceLimited");
+    TypeName("edgeLimited");
 
 
     // Constructors
 
         //- Construct from mesh and schemeData
-        faceLimitedGrad(const fvMesh& mesh, Istream& schemeData)
+        edgeLimitedGrad(const faMesh& mesh, Istream& schemeData)
         :
             gradScheme<Type>(mesh),
-            basicGradScheme_(fv::gradScheme<Type>::New(mesh, schemeData)),
+            basicGradScheme_(fa::gradScheme<Type>::New(mesh, schemeData)),
             k_(readScalar(schemeData))
         {
             if (k_ < 0 || k_ > 1)
             {
                 FatalIOErrorIn
                 (
-                    "faceLimitedGrad(const fvMesh& mesh, Istream& schemeData)",
+                    "edgeLimitedGrad(const faMesh& mesh, Istream& schemeData)",
                     schemeData
                 )   << "coefficient = " << k_
                     << " should be >= 0 and <= 1"
@@ -121,17 +121,17 @@ public:
         tmp
         <
             GeometricField
-            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
         > grad
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, faPatchField, areaMesh>&
         ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fv
+} // End namespace fa
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

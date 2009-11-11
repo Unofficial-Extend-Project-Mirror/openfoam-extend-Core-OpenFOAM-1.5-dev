@@ -37,7 +37,7 @@ Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved.
 
 SourceFiles
-    faceLimitedFaGrad.C
+    faceLimitedFaGrads.C
 
 \*---------------------------------------------------------------------------*/
 

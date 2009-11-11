@@ -88,6 +88,7 @@ $(gradSchemes)/leastSquaresFaGrad/leastSquaresFaGrads.C
 
 limitedGradSchemes = $(gradSchemes)/limitedGradSchemes
 $(limitedGradSchemes)/faceLimitedFaGrad/faceLimitedFaGrads.C
+$(limitedGradSchemes)/edgeLimitedFaGrad/edgeLimitedFaGrads.C
 
 lnGradSchemes = finiteArea/lnGradSchemes
 $(lnGradSchemes)/lnGradScheme/lnGradSchemes.C
