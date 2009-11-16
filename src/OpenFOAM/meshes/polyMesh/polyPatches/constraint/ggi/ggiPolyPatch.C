@@ -105,6 +105,7 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
                 separation(),
                 0,             // Non-overlapping face tolerances
                 0,             // HJ, 24/Oct/2008
+                true,          // Rescale weighting factors.  Bug fix, MB.
                 ggiInterpolation::AABB
             );
 
