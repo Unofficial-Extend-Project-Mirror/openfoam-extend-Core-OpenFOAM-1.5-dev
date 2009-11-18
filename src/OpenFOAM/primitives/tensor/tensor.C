@@ -185,11 +185,6 @@ vector eigenValues(const tensor& t)
 
 vector eigenVector(const tensor& t, const scalar lambda)
 {
-    if (mag(lambda) < SMALL)
-    {
-        return vector::zero;
-    }
-
     // Construct the matrix for the eigenvector problem
     tensor A(t - lambda*I);
 
@@ -251,9 +246,35 @@ tensor eigenVectors(const tensor& t)
     vector evals(eigenValues(t));
 
     tensor evs;
-    evs.x() = eigenVector(t, evals.x());
-    evs.y() = eigenVector(t, evals.y());
-    evs.z() = eigenVector(t, evals.z());
+
+    // Test for null eigen values to return a not null eigen vector
+    // Jovani Favero, 18/Nov/2009
+    if (mag(evals.x()) < SMALL)
+    {
+        evs.x() = vector(0, 0, 1);
+    }
+    else
+    {
+        evs.x() = eigenVector(t, evals.x());
+    }
+
+    if (mag(evals.y()) < SMALL)
+    {
+        evs.y() = vector(0, 1, 0);
+    }
+    else
+    {
+        evs.y() = eigenVector(t, evals.y());
+    }
+
+    if (mag(evals.z()) < SMALL)
+    {
+        evs.z() = vector(1, 0, 0);
+    }
+    else
+    {
+        evs.z() = eigenVector(t, evals.z());
+    }
 
     return evs;
 }
@@ -380,11 +401,6 @@ vector eigenValues(const symmTensor& t)
 
 vector eigenVector(const symmTensor& t, const scalar lambda)
 {
-    if (mag(lambda) < SMALL)
-    {
-        return vector::zero;
-    }
-
     // Construct the matrix for the eigenvector problem
     symmTensor A(t - lambda*I);
 
@@ -446,9 +462,35 @@ tensor eigenVectors(const symmTensor& t)
     vector evals(eigenValues(t));
 
     tensor evs;
-    evs.x() = eigenVector(t, evals.x());
-    evs.y() = eigenVector(t, evals.y());
-    evs.z() = eigenVector(t, evals.z());
+
+    // Test for null eigen values to return a not null eigen vector.
+    // Jovani Favero, 18/Nov/2009
+    if (mag(evals.x()) < SMALL)
+    {
+        evs.x() = vector(0, 0, 1);
+    }
+    else
+    {
+        evs.x() = eigenVector(t, evals.x());
+    }
+
+    if (mag(evals.y()) < SMALL)
+    {
+        evs.y() = vector(0, 1, 0);
+    }
+    else
+    {
+        evs.y() = eigenVector(t, evals.y());
+    }
+
+    if (mag(evals.z()) < SMALL)
+    {
+        evs.z() = vector(1,0,0);
+    }
+    else
+    {
+        evs.z() = eigenVector(t, evals.z());
+    }
 
     return evs;
 }
@@ -470,6 +512,18 @@ tensor hinv(const tensor& t)
         tensor eigVecs = eigenVectors(t);
 
         tensor zeroInv(tensor::zero);
+
+        // Test if all eigen values are zero.
+        // If this happens then eig.z() = SMALL, and hinv(t)
+        // returns a zero tensor.
+        // Jovani Favero, 18/Nov/2009
+        if (mag(eig.z()) == large*mag(eig.z()))
+        {
+            zeroInv +=
+                tensor(sqr(vector(eigVecs.zx(), eigVecs.zy(), eigVecs.zz())));
+
+            eig.z() += SMALL;
+        }
 
         if (mag(eig.z()) > large*mag(eig.x()))
         {
@@ -505,6 +559,16 @@ symmTensor hinv(const symmTensor& t)
         tensor eigVecs = eigenVectors(t);
 
         symmTensor zeroInv(symmTensor::zero);
+
+        // Test if all eigen values are zero,
+        // If this happens then eig.z() = SMALL
+        // and hinv(t) return a zero tensor.
+        // Jovani Favero, 18/Nov/2009
+        if (mag(eig.z()) == large*mag(eig.z()))
+        {
+            zeroInv += sqr(vector(eigVecs.zx(), eigVecs.zy(), eigVecs.zz()));
+            eig.z() += SMALL;
+        }
 
         if (mag(eig.z()) > large*mag(eig.x()))
         {
