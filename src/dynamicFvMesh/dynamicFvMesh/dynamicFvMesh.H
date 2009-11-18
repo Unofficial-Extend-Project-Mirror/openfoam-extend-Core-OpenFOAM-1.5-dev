@@ -87,6 +87,32 @@ public:
         explicit dynamicFvMesh(const IOobject& io);
 
 
+        //- Construct from components without boundary.
+        //  Boundary is added using addPatches() member function
+        explicit dynamicFvMesh
+        (
+            const IOobject& io,
+            const pointField& points,
+            const faceList& faces,
+            const labelList& owner,
+            const labelList& neighbour,
+            const bool syncPar = true
+        );
+
+
+        //- Construct from components with cells rather than owner
+        //  and neighbour without boundary.
+        //  Boundary is added using addPatches() member function
+        explicit dynamicFvMesh
+        (
+            const IOobject& io,
+            const pointField& points,
+            const faceList& faces,
+            const cellList& cells,
+            const bool syncPar = true
+        );
+
+
     // Selectors
 
         //- Select null constructed

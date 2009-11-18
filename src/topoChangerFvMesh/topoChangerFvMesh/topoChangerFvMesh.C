@@ -44,6 +44,50 @@ Foam::topoChangerFvMesh::topoChangerFvMesh(const IOobject& io)
 {}
 
 
+Foam::topoChangerFvMesh::topoChangerFvMesh
+(
+    const IOobject& io,
+    const pointField& points,
+    const faceList& faces,
+    const labelList& owner,
+    const labelList& neighbour,
+    const bool syncPar
+)
+:
+    dynamicFvMesh
+    (
+        io,
+        points,
+        faces,
+        owner,
+        neighbour,
+        syncPar
+    ),
+    topoChanger_(*this)
+{}
+
+
+Foam::topoChangerFvMesh::topoChangerFvMesh
+(
+    const IOobject& io,
+    const pointField& points,
+    const faceList& faces,
+    const cellList& cells,
+    const bool syncPar
+)
+:
+    dynamicFvMesh
+    (
+        io,
+        points,
+        faces,
+        cells,
+        syncPar
+    ),
+    topoChanger_(*this)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::topoChangerFvMesh::~topoChangerFvMesh()
