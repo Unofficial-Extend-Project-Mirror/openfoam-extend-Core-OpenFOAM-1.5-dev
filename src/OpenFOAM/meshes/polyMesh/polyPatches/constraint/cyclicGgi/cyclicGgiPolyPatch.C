@@ -26,7 +26,7 @@ Author
     Martin Beaudoin, Hydro-Quebec, (2008)
 
 Contributor
-    Hrvoje Jasak, Wikki Ltd. 
+    Hrvoje Jasak, Wikki Ltd.
 
 \*---------------------------------------------------------------------------*/
 
@@ -114,6 +114,9 @@ void Foam::cyclicGgiPolyPatch::checkDefinition() const
             tensor rot = RodriguesRotation(rotationAxis_,  -rotationAngle_);
 
             transform(transformedPoints, rot, transformedPoints);
+
+            // Add separation offset to transformed points.  HJ, 24/Nov/2009
+            transformedPoints += cyclicShadow().separationOffset();
 
             standAlonePatch::writeVTK
             (

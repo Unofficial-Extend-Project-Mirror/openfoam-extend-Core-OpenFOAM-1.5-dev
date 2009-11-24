@@ -72,7 +72,7 @@ public:
 
         //- Define a return type for isVertexInsidePolygon.
         //  The names are rather obvious
-        // on vertex, or on edge or inside == inside 
+        // on vertex, or on edge or inside == inside
         enum insideOutside
         {
             ALL_OUTSIDE,
@@ -265,7 +265,7 @@ class GGIInterpolation
         ) const;
 
         //- Detect is the points from a subject polygon are inside or
-        //  outside a clipping polygon 
+        //  outside a clipping polygon
         insideOutside isVertexInsidePolygon
         (
             const List<point2D>& clippingPolygon,

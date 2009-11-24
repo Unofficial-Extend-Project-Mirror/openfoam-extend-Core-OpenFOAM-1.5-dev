@@ -102,7 +102,7 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
                 shadow().zone()(),
                 forwardT(),
                 reverseT(),
-                separation(),
+                shadow().separation(), // Slave-to-master separation. Bug fix
                 0,             // Non-overlapping face tolerances
                 0,             // HJ, 24/Oct/2008
                 true,          // Rescale weighting factors.  Bug fix, MB.
@@ -111,7 +111,8 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
 
         // Abort immediatly if uncovered faces are present and the option
         // bridgeOverlap is not set.
-        if (
+        if
+        (
             (
                 patchToPatch().uncoveredMasterFaces().size() > 0
                 &&
@@ -128,11 +129,11 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
             FatalErrorIn("void ggiPolyPatch::calcPatchToPatch() const")
                 << "Found uncovered faces for GGI interface "
                 << name() << "/" << shadowName()
-                << " while the bridgeOverlap option is not set in the boundary file." << endl
+                << " while the bridgeOverlap option is not set "
+                << "in the boundary file." << endl
                 << "This is an unrecoverable error. Aborting."
                 << abort(FatalError);
         }
-        
     }
     else
     {
