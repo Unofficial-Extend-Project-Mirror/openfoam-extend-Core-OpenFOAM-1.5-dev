@@ -72,7 +72,7 @@ void Foam::ggiPolyPatch::calcZoneAddressing() const
     }
 
     // Check zone addressing
-    if (min(addr) < 0)
+    if (addr.size() > 0 && min(addr) < 0)
     {
         FatalErrorIn("void ggiPolyPatch::calcZoneAddressing() const")
             << "Problem with patch-to zone addressing: some patch faces "
