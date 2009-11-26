@@ -31,24 +31,48 @@
 #
 #------------------------------------------------------------------------------
 
+#
+# FUNCTIONS
+#
+printUsage () {
+cat <<EOF
+   Usage : ${0##*/} " [-l] [outputDir]
+
+   Packs and compresses the OpenFOAM directory for release
+EOF
+}
+
 timeStamp=$(date +%Y-%m-%d)
 packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 packFile=${packDir}.General_${timeStamp}.tgz
+LZMOPT=""
 
-if [ ! -d $packDir ]
-then
-   echo "Error: directory $packDir does not exist"
-   exit 1
+#
+# OPTIONS
+#
+OPTS=`getopt hl $*`
+if [ $? -ne 0 ] ; then
+    echo "Error: Aborting due to invalid option"
+    printUsage;
+    exit 1
 fi
 
+eval set -- '$OPTS'
+while [ "$1" != "--" ]; do
+    case $1 in
+        -l) LZMOPT="-l"; packFile=${packDir}.General_${timeStamp}.lzm;;
+        -h) printUsage; exit 1;;
+    esac
+    shift
+done
+shift
+
 # add optional output directory
-if [ -d "$1" ]
-then
+if [ -d "$1" ]; then
    packFile="$1/$packFile"
 fi
 
-if [ -f $packFile ]
-then
+if [ -f $packFile ]; then
    echo "Error: $packFile already exists"
    exit 1
 fi
@@ -65,6 +89,6 @@ echo
 echo "Packing $packDir into $packFile"
 echo
 
-foamPackSource $packDir $packFile
+foamPackSource $LZMOPT $packDir $packFile
 
 #------------------------------------------------------------------------------

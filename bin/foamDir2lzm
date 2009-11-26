@@ -24,71 +24,14 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPackThirdPartyGeneral [outputDir]
+#     mksquashfs dir file
 #
 # Description
-#     Packs and compresses the OpenFOAM ThirdParty directory for release
+#     Creates an lzm module for SLAX
 #
 #------------------------------------------------------------------------------
 
-#
-# FUNCTIONS
-#
-printUsage () {
-cat <<EOF
-   Usage : ${0##*/} " [-l] [outputDir]
-
-   Packs and compresses the OpenFOAM directory for release
-EOF
-}
-
-timeStamp=$(date +%Y-%m-%d)
-packDir=ThirdParty
-packFile=${packDir}.General_${timeStamp}.tgz
-LZMOPT=""
-
-#
-# OPTIONS
-#
-OPTS=`getopt hl $*`
-if [ $? -ne 0 ] ; then
-    echo "Error: Aborting due to invalid option"
-    printUsage;
-    exit 1
-fi
-
-eval set -- '$OPTS'
-while [ "$1" != "--" ]; do
-    case $1 in
-        -l) LZMOPT="-l"; packFile=${packDir}.General_${timeStamp}.lzm;;
-        -h) printUsage; exit 1;;
-    esac
-    shift
-done
-shift
-
-# add optional output directory
-if [ -d "$1" ]; then
-   packFile="$1/$packFile"
-fi
-
-if [ -f $packFile ]; then
-   echo "Error: $packFile already exists"
-   exit 1
-fi
-
-# Create time stamp file
-# ~~~~~~~~~~~~~~~~~~~~~~
-
-echo $timeStamp 2>/dev/null > $packDir/.timeStamp
-
-# Pack and compress the packFile
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-echo
-echo "Packing $packDir into $packFile"
-echo
-
-foamPackSource $LZMOPT $packDir $packFile
-
-#------------------------------------------------------------------------------
+rm -f $2
+mksquashfs $1 $2 -b 256K -lzmadic 256K
+# -force-uid 0 -force-gid 0
+# -root-owned

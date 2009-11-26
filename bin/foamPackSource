@@ -32,13 +32,41 @@
 #
 #------------------------------------------------------------------------------
 tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
+tmpDir=${TMPDIR:-/tmp}/foamPackDir.$$
+
+#
+# FUNCTIONS
+#
+printUsage () {
+cat <<EOF
+   Usage : ${0##*/} directory tarFile
+
+   Packs all .C and .H files and Make/options and Make/files into <tarFile>
+EOF
+}
+
+#
+# OPTIONS
+#
+OPTS=`getopt hl $*`
+if [ $? -ne 0 ] ; then
+    echo "Error: Aborting due to invalid option"
+    printUsage;
+    exit 1
+fi
+
+eval set -- '$OPTS'
+while [ "$1" != "--" ]; do
+    case $1 in
+        -l) LZM=1;;
+        -h) printUsage; exit 1;;
+    esac
+    shift
+done
+shift
 
 if [ $# -ne 2 ]; then
-   echo "Usage : ${0##*/} directory tarFile"
-   echo ""
-   echo "Packs all .C and .H files and Make/options and Make/files into"
-   echo "<tarFile>"
-   echo ""
+   printUsage;
    exit 1
 fi
 
@@ -83,12 +111,28 @@ find -H $packDir               \
  -e '\@/t/@d'                  \
  -e '\@/Make[.A-Za-z]*/[^/]*/@d'\
  -e '\@/platforms/@d'          \
+ -e '\@/.svn/@d'               \
  > $tmpFile
 
-tar czpf $packFile --files-from $tmpFile
+if [ $LZM ]; then
 
-if [ $? = 0 ]
-then
+   # Clean up on termination and on Ctrl-C
+   trap 'rm -f $tmpFile 2>/dev/null; rm -rf $tmpDir 2>/dev/null; exit 0' EXIT TERM INT
+
+   mkdir $tmpDir $tmpDir/OpenFOAM
+   xargs -i -a $tmpFile cp -al --parents {} $tmpDir/OpenFOAM
+
+   chmod -R a+rX $tmpDir/OpenFOAM
+   foamDir2lzm $tmpDir $packFile
+   echo; echo
+
+else
+
+   tar czpf $packFile --files-from $tmpFile
+
+fi
+
+if [ $? = 0 ]; then
    echo "Finished packing and compressing $packDir into file $packFile"
 else
    echo "Error: failure packing $packDir into file $packFile"

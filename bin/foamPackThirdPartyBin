@@ -30,13 +30,43 @@
 #     Packs and compresses binary version of OpenFOAM ThirdParty for release
 #
 #------------------------------------------------------------------------------
+tmpDir=${TMPDIR:-/tmp}/foamPackDir.$$
 
-if [ $# = 0 ]
-then
-   echo "Error: archOptionsitecture type expected, exiting"
-   echo
-   echo "Usage : ${0##*/} <archOptions> [outputDir]"
-   echo
+#
+# FUNCTIONS
+#
+printUsage () {
+cat <<EOF
+   Usage : ${0##*/} [-l] <archOptions> [outputDir]"
+EOF
+}
+
+timeStamp=$(date +%Y-%m-%d)
+packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+packFile=${packDir}.${arch}_${timeStamp}.tgz
+
+#
+# OPTIONS
+#
+OPTS=`getopt hl $*`
+if [ $? -ne 0 ] ; then
+    echo "Aborting due to invalid option"
+    printUsage
+    exit 1
+fi
+
+eval set -- '$OPTS'
+while [ "$1" != "--" ]; do
+    case $1 in
+        -l) LZM=1;;
+        -h) printUsage; exit 1;;
+    esac
+    shift
+done
+shift
+
+if [ $# = 0 ]; then
+   printUsage;
    exit 1
 fi
 archOptions=$1
@@ -49,7 +79,12 @@ echo "arch3264=$arch3264"
 
 timeStamp=$(date +%Y-%m-%d)
 packDir=ThirdParty
-packFile=${packDir}.${archOptions}_${timeStamp}.tgz
+
+if [ $LZM ]; then
+   packFile=${packDir}.${arch}_${timeStamp}.lzm
+else
+   packFile=${packDir}.${arch}_${timeStamp}.tgz
+fi
 
 # add optional output directory
 if [ -d "$2" ]
@@ -69,7 +104,21 @@ echo
 echo "Packing $archOptions port of $packDir into $packFile"
 echo
 
-tar czpf $packFile $dirList
+if [ $LZM ]; then
+
+   # Clean up on termination and on Ctrl-C
+   trap 'rm -rf $tmpDir 2>/dev/null; exit 0' EXIT TERM INT
+
+   mkdir $tmpDir $tmpDir/OpenFOAM
+   cp -arl --parents $dirList $tmpDir/OpenFOAM
+   foamDir2lzm $tmpDir $packFile
+   echo; echo
+
+else
+
+   tar czpf $packFile $dirList
+
+fi
 
 if [ $? = 0 ]
 then
