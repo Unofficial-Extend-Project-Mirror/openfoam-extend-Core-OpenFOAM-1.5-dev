@@ -124,6 +124,32 @@ Foam::coordinateRotation::coordinateRotation
 
 Foam::coordinateRotation::coordinateRotation
 (
+    const vector& v,
+    const scalar angle
+)
+:
+    tensor(sphericalTensor::I)
+{
+    scalar c = cos(angle);
+    scalar m = mag(v);
+    scalar sm = sin(angle)/m;
+
+    tensor Rtr =
+        (1-c)*v*v/m/m
+      + tensor
+        (
+            c,         -v.z()*sm, v.y()*sm,
+            v.z()*sm,  c,         -v.x()*sm,
+            -v.y()*sm, v.x()*sm,  c
+        );
+
+    // the local -> global transformation
+    tensor::operator=( Rtr.T() );
+}
+
+
+Foam::coordinateRotation::coordinateRotation
+(
     const dictionary& dict
 )
 :

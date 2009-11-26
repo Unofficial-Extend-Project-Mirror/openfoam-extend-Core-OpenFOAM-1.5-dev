@@ -129,6 +129,13 @@ public:
             const vector& dir
         );
 
+        //- Construct from 1 vector and angle
+        coordinateRotation
+        (
+            const vector& v,
+            const scalar angle
+        );
+
         //- Construct from dictionary
         coordinateRotation(const dictionary&);
 
