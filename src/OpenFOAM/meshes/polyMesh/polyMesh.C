@@ -677,7 +677,24 @@ void Foam::polyMesh::resetPrimitives
     {
         const face& curFace = allFaces_[faceI];
 
-        if (min(curFace) < 0 || max(curFace) > allPoints_.size())
+        if (curFace.size() == 0)
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh::resetPrimitives\n"
+                "(\n"
+                "    const label nUsedFaces,\n"
+                "    const pointField& points,\n"
+                "    const faceList& faces,\n"
+                "    const labelList& owner,\n"
+                "    const labelList& neighbour,\n"
+                "    const labelList& patchSizes,\n"
+                "    const labelList& patchStarts\n"
+                ")\n"
+            )   << "Face " << faceI << " contains no vertex labels"
+                << abort(FatalError);
+        }
+        else if (min(curFace) < 0 || max(curFace) > allPoints_.size())
         {
             FatalErrorIn
             (

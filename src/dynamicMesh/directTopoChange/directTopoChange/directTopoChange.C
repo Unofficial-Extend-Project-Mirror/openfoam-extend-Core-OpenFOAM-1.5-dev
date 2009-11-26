@@ -1715,41 +1715,44 @@ void Foam::directTopoChange::calcFaceZonePointMap
 
         const labelList& newZoneMeshPoints = newZone().meshPoints();
 
-        const Map<label>& oldZoneMeshPointMap =
-            (
-                zoneI < oldFaceZoneMeshPointMaps.size() ?
-                oldFaceZoneMeshPointMaps[zoneI] :
-                oldFaceZoneMeshPointMaps[0]
-            );
-
         labelList& curFzPointRnb = faceZonePointMap[zoneI];
 
         curFzPointRnb.setSize(newZoneMeshPoints.size());
 
-        forAll (newZoneMeshPoints, pointI)
+	if( zoneI < oldFaceZoneMeshPointMaps.size() )
         {
-            if
-            (
-                newZoneMeshPoints[pointI] < pointMap_.size()
-             && zoneI < oldFaceZoneMeshPointMaps.size()
-            )
-            {
-                Map<label>::const_iterator ozmpmIter =
-                    oldZoneMeshPointMap.find
-                    (
-                        pointMap_[newZoneMeshPoints[pointI]]
-                    );
+     	    //HR 22.11.09: cannot take reference to zero element of 
+            //  oldFaceZoneMeshPointMaps. It may be empty. Hence this
+            //  if-statement needs to move out of the loop
+	    const Map<label>& oldZoneMeshPointMap =
+	        oldFaceZoneMeshPointMaps[zoneI];
 
-                if (ozmpmIter != oldZoneMeshPointMap.end())
+            forAll (newZoneMeshPoints, pointI)
+            {
+
+                if ( newZoneMeshPoints[pointI] < pointMap_.size() )
                 {
-                    curFzPointRnb[pointI] = ozmpmIter();
-                }
-                else
-                {
-                    curFzPointRnb[pointI] = -1;
+
+                    Map<label>::const_iterator ozmpmIter =
+                        oldZoneMeshPointMap.find
+                        (
+                            pointMap_[newZoneMeshPoints[pointI]]
+                        );
+
+                    if (ozmpmIter != oldZoneMeshPointMap.end())
+                    {
+                        curFzPointRnb[pointI] = ozmpmIter();
+                    }
+                    else
+                    {
+                        curFzPointRnb[pointI] = -1;
+                    }
                 }
             }
-            else
+        }
+        else
+        {
+            forAll (newZoneMeshPoints, pointI)
             {
                 curFzPointRnb[pointI] = -1;
             }
@@ -2029,7 +2032,12 @@ void Foam::directTopoChange::compactAndReorder
 
     forAll (mesh.faceZones(), zoneI)
     {
-        label maxFaceIndex = max(mesh.faceZones()[zoneI]);
+        //HR 22.11.09: Fixes error when faceZone is empty
+        label maxFaceIndex = -1;
+	if ( mesh.faceZones()[zoneI].size() > 0 )
+        {
+            maxFaceIndex = max(mesh.faceZones()[zoneI]);
+        }
 
         // This should always be true for old faceZones faces
         if (maxFaceIndex < mesh.allFaces().size())
