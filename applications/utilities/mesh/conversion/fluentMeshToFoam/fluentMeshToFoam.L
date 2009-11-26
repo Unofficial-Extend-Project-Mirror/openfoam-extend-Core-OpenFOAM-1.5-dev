@@ -896,6 +896,11 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    //HR 22.11.09: These global variables do not get initialised.
+    // Debug-version fails!
+    patchTypeIDs.setSize(maxZoneID);
+    patchNameIDs.setSize(maxZoneID);
+
     yyFlexLexer lexer(&fluentStream);
     while(lexer.yylex() != 0)
     {}
