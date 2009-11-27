@@ -378,7 +378,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
                 }
             }
         }
-    }            
+    }
 
 
 
@@ -412,7 +412,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::unrefine
     const labelList& splitPoints
 )
 {
-    directTopoChange meshMod(*this);  
+    directTopoChange meshMod(*this);
 
     // Play refinement commands into mesh changer.
     meshCutter_.setUnrefinement(splitPoints, meshMod);
