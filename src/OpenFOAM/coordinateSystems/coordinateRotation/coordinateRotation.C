@@ -124,6 +124,17 @@ Foam::coordinateRotation::coordinateRotation
 
 Foam::coordinateRotation::coordinateRotation
 (
+    const dictionary& dict
+)
+:
+    tensor(sphericalTensor::I)
+{
+    operator=(dict);
+}
+
+
+Foam::coordinateRotation::coordinateRotation
+(
     const vector& v,
     const scalar angle
 )
@@ -135,7 +146,7 @@ Foam::coordinateRotation::coordinateRotation
     scalar sm = sin(angle)/m;
 
     tensor Rtr =
-        (1-c)*v*v/m/m
+        (1 - c)*v*v/m/m
       + tensor
         (
             c,         -v.z()*sm, v.y()*sm,
@@ -144,19 +155,9 @@ Foam::coordinateRotation::coordinateRotation
         );
 
     // the local -> global transformation
-    tensor::operator=( Rtr.T() );
+    tensor::operator=(Rtr.T());
 }
 
-
-Foam::coordinateRotation::coordinateRotation
-(
-    const dictionary& dict
-)
-:
-    tensor(sphericalTensor::I)
-{
-    operator=(dict);
-}
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
