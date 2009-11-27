@@ -66,7 +66,6 @@ void Foam::layerAR::makeLayersLive()
 
 void Foam::layerAR::checkAndCalculate()
 {
-    
     label pistonIndex = -1;
     bool foundPiston = false;
 
@@ -75,8 +74,7 @@ void Foam::layerAR::checkAndCalculate()
 
     label cylinderHeadIndex = -1;
     bool foundCylinderHead = false;
-    
-    
+
     forAll(boundary(), i)
     {
         Info << boundary()[i].name() << endl;
@@ -96,7 +94,7 @@ void Foam::layerAR::checkAndCalculate()
             foundCylinderHead = true;
         }
     }
-    
+
     reduce(foundPiston, orOp<bool>());
     reduce(foundLiner, orOp<bool>());
     reduce(foundCylinderHead, orOp<bool>());
@@ -109,7 +107,7 @@ void Foam::layerAR::checkAndCalculate()
     }
 
     if (!foundLiner)
-    { 
+    {
         FatalErrorIn("Foam::layerAR::checkAndCalculate()")
             << " : cannot find liner patch"
             << abort(FatalError);
@@ -142,43 +140,40 @@ void Foam::layerAR::checkAndCalculate()
         Info<< "deckHeight: " << deckHeight() << nl
             << "piston position: " << pistonPosition() << endl;
     }
-    
-
 }
 
 void Foam::layerAR::setVirtualPistonPosition()
 {
 
     label pistonFaceIndex = faceZones().findZoneID("pistonLayerFaces");
-         
+
     bool foundPistonFace = (pistonFaceIndex != -1);
-    
-    Info << "piston face index = " << pistonFaceIndex << endl; 
-    
-    if(!foundPistonFace)
+
+    Info << "piston face index = " << pistonFaceIndex << endl;
+
+    if (!foundPistonFace)
     {
         FatalErrorIn("Foam::layerAR::setVirtualPistonPosition()")
             << " : cannot find the pistonLayerFaces"
             << exit(FatalError);
-    
     }
-        
+
     const labelList& pistonFaces = faceZones()[pistonFaceIndex];
     forAll(pistonFaces, i)
     {
         const face& f = faces()[pistonFaces[i]];
-        
+
         // should loop over facepoints...
         forAll(f, j)
         {
-            virtualPistonPosition() = max(virtualPistonPosition(), points()[f[j]].z());
+            virtualPistonPosition() =
+                Foam::max(virtualPistonPosition(), points()[f[j]].z());
         }
     }
-    
-    reduce(virtualPistonPosition(), maxOp<scalar>());
 
+    reduce(virtualPistonPosition(), maxOp<scalar>());
 }
-    
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -219,10 +214,10 @@ bool Foam::layerAR::update()
 
     // Find piston mesh modifier
     const label pistonLayerID =
-        topoChanger_.findModifierID("pistonLayer");    
+        topoChanger_.findModifierID("pistonLayer");
 
     Info << "pistonLayerID: " << pistonLayerID << endl;
-    
+
     const layerAdditionRemoval& pistonLayers =
         dynamicCast<const layerAdditionRemoval>
         (
@@ -231,12 +226,15 @@ bool Foam::layerAR::update()
 
     bool realDeformation = deformation();
 
-    if (virtualPistonPosition()+deltaZ > deckHeight()-engTime().clearance().value()-SMALL)
+    if
+    (
+        virtualPistonPosition()+ deltaZ
+      > deckHeight() - engTime().clearance().value() - SMALL
+    )
     {
         realDeformation = true;
     }
-    
-    
+
     if (realDeformation)
     {
         // Disable layer addition
@@ -250,15 +248,14 @@ bool Foam::layerAR::update()
         topoChanger_[pistonLayerID].enable();
     }
 
-    scalar minLayerThickness = pistonLayers.minLayerThickness();    
-    
+    scalar minLayerThickness = pistonLayers.minLayerThickness();
+
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
-//    pointField newPoints = points();
+    bool meshChanged = topoChangeMap->morphing();
+
     pointField newPoints = allPoints();
 
-    bool meshChanged = topoChangeMap.valid();
-    
     if (meshChanged)
     {
         if (topoChangeMap().hasMotionPoints())
@@ -269,7 +266,6 @@ bool Foam::layerAR::update()
         setV0();
         resetMotion();
     }
-    
 
     Info << "virtualPistonPosition = " << virtualPistonPosition()
     << ", deckHeight = " << deckHeight() << endl;
@@ -277,7 +273,7 @@ bool Foam::layerAR::update()
     // Mesh in three parts:
     // - pistonPoints - move with deltaZ
     // - headPoints - do not move
-    
+
     const pointZoneMesh& pZones = pointZones();
     label headPtsIndex = pZones.findZoneID("headPoints");
     label pistonPtsIndex = pZones.findZoneID("pistonPoints");
@@ -296,14 +292,13 @@ bool Foam::layerAR::update()
         label pointI = pistonPoints[i];
         pistonPoint[pointI] = true;
         point& p = newPoints[pointI];
-                
+
         if (p.z() < pistonPosition() - 1.0e-6)
         {
             scaleDisp[pointI] = false;
             nScaled--;
         }
     }
-    
 
     forAll(headPoints, i)
     {
@@ -311,7 +306,7 @@ bool Foam::layerAR::update()
         scaleDisp[headPoints[i]] = false;
         nScaled--;
     }
-    
+
     if (realDeformation)
     {
 
@@ -320,10 +315,9 @@ bool Foam::layerAR::update()
             point& p = newPoints[pointI];
 
             if (scaleDisp[pointI])
-            {                
-                p.z() += 
-                    deltaZ
-                  * (deckHeight() - p.z())/(deckHeight() - pistonPosition());
+            {
+                p.z() += deltaZ*
+                    (deckHeight() - p.z())/(deckHeight() - pistonPosition());
             }
             else
             {
@@ -336,7 +330,6 @@ bool Foam::layerAR::update()
     }
     else
     {
-
         // Always move piston
         scalar pistonTopZ = -GREAT;
         forAll(pistonPoints, i)
@@ -365,39 +358,37 @@ bool Foam::layerAR::update()
     }
 
     movePoints(newPoints);
-            
+
     pistonPosition() += deltaZ;
     scalar pistonSpeed = deltaZ/engTime().deltaT().value();
 
     Info<< "clearance: " << deckHeight() - pistonPosition() << nl
         << "Piston speed = " << pistonSpeed << " m/s" << endl;
-        
-    Info << "Total cylinder volume at CA " << engTime().timeName() << " = " <<
-    sum(V()) << 
-    endl;
-    
+
+    Info<< "Total cylinder volume at CA " << engTime().timeName() << " = "
+        << sum(V()) << endl;
+
     return meshChanged;
 
 }
 
 void Foam::layerAR::setBoundaryVelocity(volVectorField& U)
 {
-// Does nothing, using the movingWallVelocity boundary condition for U in the piston patch...
+    // Does nothing, using the movingWallVelocity boundary condition
+    // for U in the piston patch...
 
-
-    
 //    vector pistonVel = piston().cs().axis()*engTime().pistonSpeed().value();
-    
+
     //mean piston velocityy
-/*
-    vector pistonVel = 0.5 * piston().cs().axis()*
-                            dimensionedScalar
-                            (
-                                "meanPistonSpeed",
-                                dimLength/dimTime,
-                                2.0*engTime().stroke().value()*engTime().rpm().value()/60.0
-                            ).value();
-*/
+
+//     vector pistonVel = 0.5*piston().cs().axis()*
+//         dimensionedScalar
+//         (
+//             "meanPistonSpeed",
+//             dimLength/dimTime,
+//             2.0*engTime().stroke().value()*engTime().rpm().value()/60.0
+//         ).value();
+
 
 //    U.boundaryField()[piston().patchID().index()] = pistonVel;
 

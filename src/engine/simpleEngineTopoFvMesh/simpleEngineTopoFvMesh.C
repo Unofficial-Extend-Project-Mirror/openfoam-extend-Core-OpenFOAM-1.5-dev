@@ -494,9 +494,7 @@ bool Foam::simpleEngineTopoFvMesh::update()
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
 
-        bool meshChanged1 = topoChangeMap1.valid();
-
-        if (meshChanged1)
+        if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
         }
@@ -553,9 +551,7 @@ bool Foam::simpleEngineTopoFvMesh::update()
     {
         autoPtr<mapPolyMesh> topoChangeMap2 = topoChanger_.changeMesh();
 
-        bool meshChanged2 = topoChangeMap2.valid();
-
-        if (meshChanged2)
+        if (topoChangeMap2->morphing())
         {
             mSolver.updateMesh(topoChangeMap2());
 
@@ -646,9 +642,7 @@ bool Foam::simpleEngineTopoFvMesh::update()
             Info << "Moving points post slider attach" << endl;
         }
 
-        bool meshChanged3 = topoChangeMap3.valid();
-
-        if (meshChanged3)
+        if (topoChangeMap3->morphing())
         {
             mSolver.updateMesh(topoChangeMap3());
 

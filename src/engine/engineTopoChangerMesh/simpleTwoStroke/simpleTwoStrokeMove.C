@@ -35,7 +35,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 void Foam::simpleTwoStroke::makeLayersLive()
-{ 
+{
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable layering
@@ -61,13 +61,11 @@ void Foam::simpleTwoStroke::makeLayersLive()
 
 void Foam::simpleTwoStroke::makeSlidersLive()
 {
- 
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable sliding interface
     forAll (morphs, modI)
     {
-    
         if (typeid(morphs[modI]) == typeid(layerAdditionRemoval))
         {
             morphs[modI].disable();
@@ -110,7 +108,7 @@ bool Foam::simpleTwoStroke::attached() const
         {
             if
             (
-                result 
+                result
              != refCast<const slidingInterface>(morphs[modI]).attached()
             )
             {
@@ -128,16 +126,13 @@ bool Foam::simpleTwoStroke::attached() const
 
 bool Foam::simpleTwoStroke::update()
 {
-    
-
     // Detaching the interface
     if (attached())
     {
-    
         Info << "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
         topoChanger_.changeMesh();
-        
+
         Info << "sliding interfaces successfully decoupled!!!" << endl;
     }
     else
@@ -146,13 +141,11 @@ bool Foam::simpleTwoStroke::update()
     }
 
     Info << "Executing layer action" << endl;
-    
 
-    // Piston Layering    
-    
+    // Piston Layering
+
     makeLayersLive();
 
-    
     // Find piston mesh modifier
     const label pistonLayerID =
         topoChanger_.findModifierID("pistonLayer");
@@ -163,13 +156,13 @@ bool Foam::simpleTwoStroke::update()
             << "Piston modifier not found."
             << abort(FatalError);
     }
-    
+
     scalar minLayerThickness = piston().minLayer();
     scalar deltaZ = engTime().pistonDisplacement().value();
     virtualPistonPosition() += deltaZ;
-    
+
     Info << "virtualPistonPosition = " << virtualPistonPosition()
-    << ", deckHeight = " << deckHeight()  
+    << ", deckHeight = " << deckHeight()
     << ", pistonPosition = " << pistonPosition() << endl;
 
     if (realDeformation())
@@ -188,24 +181,22 @@ bool Foam::simpleTwoStroke::update()
 
     // Changing topology by hand
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-    bool meshChanged = topoChangeMap.valid();
 
     // Work array for new points position.
     pointField newPoints = points();
 
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
 
         if (topoChangeMap->hasMotionPoints())
         {
             Info << "Topology change; executing pre-motion" << endl;
             movePoints(topoChangeMap->preMotionPoints());
-            newPoints = topoChangeMap->preMotionPoints();    
+            newPoints = topoChangeMap->preMotionPoints();
         }
         setV0();
         resetMotion();
     }
-        
 
     // Reset the position of layered interfaces
 
@@ -220,39 +211,37 @@ bool Foam::simpleTwoStroke::update()
 
     label headPtsIndex = pointZones().findZoneID("headPoints");
     const labelList& headPoints = pointZones()[headPtsIndex];
-    
+
     const scalarField& movingPointsM = movingPointsMask();
-    
+
     forAll(pistonPoints, i)
     {
         label pointI = pistonPoints[i];
         pistonPoint[pointI] = true;
         point& p = newPoints[pointI];
-            
+
         if (p.z() < pistonPosition() - 1.0e-6)
         {
             scaleDisp[pointI] = false;
             nScaled--;
         }
     }
-    
+
     forAll(headPoints, i)
     {
         headPoint[headPoints[i]] = true;
         scaleDisp[headPoints[i]] = false;
         nScaled--;
     }
-    
 
     if (realDeformation())
     {
-    
         forAll(scaleDisp, pointI)
         {
             point& p = newPoints[pointI];
 
             if (scaleDisp[pointI])
-            {                
+            {
                 p.z() += movingPointsM[pointI]*
                     deltaZ
                   * (deckHeight() - p.z())/(deckHeight() - pistonPosition());
@@ -265,7 +254,6 @@ bool Foam::simpleTwoStroke::update()
                 }
             }
         }
-        
     }
     else
     {
@@ -289,28 +277,24 @@ bool Foam::simpleTwoStroke::update()
                 {
                     if (virtualPistonPosition() > newPoints[i].z())
                     {
-                        newPoints[i].z() 
-                        = 
-                        (1.0 - movingPointsM[i])*newPoints[i].z() 
-                        +
-                        movingPointsM[i] *
-                        (pistonTopZ + 0.9*minLayerThickness);
+                        newPoints[i].z() =
+                            (1.0 - movingPointsM[i])*newPoints[i].z()
+                          + movingPointsM[i]*
+                            (pistonTopZ + 0.9*minLayerThickness);
                     }
                 }
             }
         }
-        
     }
 
 
     movePoints(newPoints);
-    
+
     deleteDemandDrivenData(movingPointsMaskPtr_);
-    
+
     pistonPosition() += deltaZ;
 
     {
-    
         // Attach the interface
         Info << "Coupling sliding interfaces" << endl;
         makeSlidersLive();
@@ -319,10 +303,8 @@ bool Foam::simpleTwoStroke::update()
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
 
         Info << "Sliding interfaces coupled: " << attached() << endl;
-    
     }
 
     return true;
-    
 }
 

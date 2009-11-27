@@ -61,7 +61,7 @@ Class
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::thoboisSliding::makeLayersLive()
-{ 
+{
     // Enable layering
     forAll (topoChanger_, modI)
     {
@@ -89,7 +89,6 @@ void Foam::thoboisSliding::makeLayersLive()
 
 void Foam::thoboisSliding::makeSlidersLive()
 {
- 
     // Enable sliding interface
     forAll (topoChanger_, modI)
     {
@@ -201,7 +200,6 @@ void Foam::thoboisSliding::valveDetach()
             }
 
             ad.setDetach();
-            
         }
     }
 }
@@ -324,21 +322,17 @@ bool Foam::thoboisSliding::update()
     // Detaching the interfacethobois2DSlidingDeform
     if (attached())
     {
-    
         Info << "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
         valveDetach();
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
-        
-        Info << "sliding interfaces successfully decoupled!!!" << endl;
-        
-        bool meshChanged1 = topoChangeMap1.valid();
 
-        if (meshChanged1)
+        Info << "sliding interfaces successfully decoupled!!!" << endl;
+
+        if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
         }
-        
     }
     else
     {
@@ -347,10 +341,10 @@ bool Foam::thoboisSliding::update()
     }
 
     Info << "Executing layer action" << endl;
-    
+
     scalar deltaZ = engTime().pistonDisplacement().value();
 
-    // Piston Layering    
+    // Piston Layering
     makeLayersLive();
 
 
@@ -358,100 +352,107 @@ bool Foam::thoboisSliding::update()
         // Activate bottom layer
         Info << "Valve layering mode" << endl;
         forAll(valves_, valveI)
-        {           
+        {
             if(valves_[valveI].bottomPatchID().active())
             {
                 // Find piston mesh modifier
                 const label valveLayerID2 =
-                    topoChanger_.findModifierID("valveBottomLayer" + Foam::name(valveI + 1));
+                    topoChanger_.findModifierID
+                    (
+                        "valveBottomLayer"
+                      + Foam::name(valveI + 1)
+                    );
+
                 topoChanger_[valveLayerID2].enable();
             }
         }
     }
-    
+
     virtualPistonPosition() += deltaZ;
-    
+
     {
-    
         forAll(valves_, valveI)
         {
             if(!realDeformation())
             {
                 scalar valveDisplacement =
-                valves_[valveI].curVelocity()*valves_[valveI].cs().axis().z()*engTime().deltaT().value() ;
-                Info << "valveDisplacement = " << valveDisplacement << endl;
-	            Info << "valve velocity =" << valves_[valveI].curVelocity() << endl;
-	            valveTopPosition_[valveI] += valveDisplacement;
+                    valves_[valveI].curVelocity()*
+                    valves_[valveI].cs().axis().z()*engTime().deltaT().value();
+
+                Info<< "valveDisplacement = " << valveDisplacement << nl
+                    << "valve velocity =" << valves_[valveI].curVelocity()
+                    << endl;
+
+                valveTopPosition_[valveI] += valveDisplacement;
                 valveBottomPosition_[valveI] += valveDisplacement;
                 valvePistonPosition_[valveI] += deltaZ;
             }
         }
-
     }
-    
+
+    forAll(valves_,valveI)
     {
-    
-  	forAll(valves_,valveI)
-    {
-        if(valves_[valveI].curLift() > valves_[valveI].deformationLift())    
+        if(valves_[valveI].curLift() > valves_[valveI].deformationLift())
         {
-        	if(valves_[valveI].poppetPatchID().active())
-        	{
+            if(valves_[valveI].poppetPatchID().active())
+            {
                 // Find valve layer mesh modifier
-            	const label valveLayerID =
-            	topoChanger_.findModifierID("valvePoppetLayer" + Foam::name(valveI + 1));
+                const label valveLayerID =
+                    topoChanger_.findModifierID
+                    (
+                        "valvePoppetLayer"
+                      + Foam::name(valveI + 1)
+                    );
 
-            	if (valveLayerID < 0)
-            	{
-               		 FatalErrorIn("void engineFvMesh::moveAndMorph()")
-                   		<< "valve modifier not found."
-                   		<< abort(FatalError);
-            	}
+                if (valveLayerID < 0)
+                {
+                        FatalErrorIn("void engineFvMesh::moveAndMorph()")
+                           << "valve modifier not found."
+                           << abort(FatalError);
+                }
 
-                topoChanger_[valveLayerID].enable();            
-        	}
+                topoChanger_[valveLayerID].enable();
+            }
         }
         else
         {
-        	if(valves_[valveI].poppetPatchID().active())
-        	{
+            if(valves_[valveI].poppetPatchID().active())
+            {
                 // Find valve layer mesh modifier
-            	const label valveLayerID =
-            	topoChanger_.findModifierID("valvePoppetLayer" + Foam::name(valveI + 1));
+                const label valveLayerID =
+                    topoChanger_.findModifierID
+                    (
+                        "valvePoppetLayer"
+                      + Foam::name(valveI + 1)
+                    );
 
-            	if (valveLayerID < 0)
-            	{
-               		 FatalErrorIn("void engineFvMesh::moveAndMorph()")
-                   		<< "valve modifier not found."
-                   		<< abort(FatalError);
-            	}
+                if (valveLayerID < 0)
+                {
+                        FatalErrorIn("void engineFvMesh::moveAndMorph()")
+                           << "valve modifier not found."
+                           << abort(FatalError);
+                }
 
-                topoChanger_[valveLayerID].disable();            
-        	}
+                topoChanger_[valveLayerID].disable();
+            }
         }
     }
-    
-    }
-    
+
     pointField newPoints = points();
 
 //    pointField newPoints = allPoints();
 
     autoPtr<mapPolyMesh> topoChangeMap2 = topoChanger_.changeMesh();
-        
-    // Changing topology by hand
-    bool meshChanged2 = topoChangeMap2.valid();
 
-    
-    if (meshChanged2)
+    // Changing topology by hand
+    if (topoChangeMap2->morphing())
     {
-    
         mSolver.updateMesh(topoChangeMap2());
-    
+
         if (topoChangeMap2->hasMotionPoints())
         {
             movePoints(topoChangeMap2->preMotionPoints());
-            newPoints = topoChangeMap2->preMotionPoints();    
+            newPoints = topoChangeMap2->preMotionPoints();
         }
         setV0();
         resetMotion();
@@ -466,29 +467,34 @@ bool Foam::thoboisSliding::update()
     {
 
 
-#	    include "setValveMotionBoundaryConditionThoboisSliding.H"
+#        include "setValveMotionBoundaryConditionThoboisSliding.H"
 
         DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
-        DynamicList<vector> constrainedVelocity(mSolver.curPoints()().size()/100);
-        
+        DynamicList<vector> constrainedVelocity
+        (
+            mSolver.curPoints()().size()/100
+        );
 #       include "setThoboisSlidingConstraint.H"
 
-	    forAll (constrainedPoints, i)
-	    {
-   		    mSolver.setConstraint(constrainedPoints[i], constrainedVelocity[i]);
-	    }
+        forAll (constrainedPoints, i)
+        {
+            mSolver.setConstraint
+            (
+                constrainedPoints[i],
+                constrainedVelocity[i]
+            );
+        }
 
-	    mSolver.solve();
+        mSolver.solve();
 
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
-        
 
         Info << "max mesh phi, 1 = " << max(phi()) << endl;
         Info << "min mesh phi, 1 = " << min(phi()) << endl;
-        
+
         setVirtualPositions();
-	    mSolver.clearConstraints();
+        mSolver.clearConstraints();
 
 
 
@@ -504,7 +510,7 @@ bool Foam::thoboisSliding::update()
         Info << "min mesh phi, 2 = " << min(phi()) << endl;
 
     }
-   
+
     forAll(valves(), valveI)
     {
         Info << "Valve Top Position for valve n. " << valveI + 1 << " = " <<
@@ -512,13 +518,12 @@ bool Foam::thoboisSliding::update()
         Info << "Valve Bottom Position for valve n. " << valveI + 1 << " = " <<
         valveBottomPosition_[valveI] << endl;
     }
-    
+
     Info << "virtualPistonPosition = " << virtualPistonPosition()
-    << ", deckHeight = " << deckHeight()  
-    << ", pistonPosition = " << pistonPosition() 
+    << ", deckHeight = " << deckHeight()
+    << ", pistonPosition = " << pistonPosition()
     << endl;
-    
-    
+
     pistonPosition() += deltaZ;
 
     scalarField Vold = V();
@@ -547,79 +552,71 @@ bool Foam::thoboisSliding::update()
     {
 
         pointField newPointsNew = allPoints();
-//    
 
         // Attach the interface
         Info << "Coupling sliding interfaces" << endl;
         makeSlidersLive();
-	    valveAttach();
-	    prepareValveDetach();
+        valveAttach();
+        prepareValveDetach();
 
         pointField oldPointsNew = oldAllPoints();
 
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
-        bool meshChanged3 = topoChangeMap3.valid();
-        
+
         Info << "Sliding interfaces coupled: " << attached() << endl;
-
-        if (meshChanged3)
+        if (topoChangeMap3->morphing())
         {
-            
             Info << "mesh changed 3" << endl;
-            
-            mSolver.updateMesh(topoChangeMap3());
 
+            mSolver.updateMesh(topoChangeMap3());
 
             if (topoChangeMap3->hasMotionPoints())
             {
-		        movePoints(topoChangeMap3->preMotionPoints());
-		        resetMotion();
-		        setV0();
+                movePoints(topoChangeMap3->preMotionPoints());
+                resetMotion();
+                setV0();
             }
 
             {
                 // correct the motion after attaching the sliding interface
+                Info<< "oldPointsNew.size = " << oldPointsNew.size() << nl
+                    << "allPointsNew.size = " << allPoints().size() << nl
+                    << "pointsNew.size = " << points().size() << endl;
 
-                
-                Info << "oldPointsNew.size = " << oldPointsNew.size() << endl;
-                Info << "allPointsNew.size = " << allPoints().size() << endl;
-                Info << "pointsNew.size = " << points().size() << endl;
-            
                 pointField mappedOldPointsNew(allPoints().size());
 
-            
                 pointField newPoints = allPoints();
 //                pointField newPoints = points();
 
-                mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
+                mappedOldPointsNew.map
+                (
+                    oldPointsNew,
+                    topoChangeMap3->pointMap()
+                );
+
                 movePoints(mappedOldPointsNew);
-            
+
                 resetMotion();
                 setV0();
-                
+
                 movePoints(mappedOldPointsNew);
-                Info << "max mesh phi, 3 = " << max(phi()) << endl;
-                Info << "min mesh phi, 3 = " << min(phi()) << endl;
-                
-                Info << "mappedOldPointsNew.size() = " << mappedOldPointsNew.size() << endl;
-                Info << "newPoints.size() = " << newPoints.size() << endl;
-                Info << "topoChangeMap3->pointMap().size() = " <<  topoChangeMap3->pointMap().size() << endl;
-                
-//                Info << mag(newPoints - mappedOldPointsNew)/time().deltaT().value() << endl;
-                
+                Info<< "max mesh phi, 3 = " << max(phi()) << nl
+                    << "min mesh phi, 3 = " << min(phi()) << nl
+                    << "mappedOldPointsNew.size() = "
+                    << mappedOldPointsNew.size() << nl
+                    << "newPoints.size() = " << newPoints.size() << nl
+                    << "topoChangeMap3->pointMap().size() = "
+                    << topoChangeMap3->pointMap().size() << endl;
+
                 movePoints(newPoints);
             }
-                    
-
-                     
         }
-    
     }
-    
+
     Info << "max mesh phi, 4 = " << max(phi()) << endl;
     Info << "min mesh phi, 4 = " << min(phi()) << endl;
-    
+
     if(moving())
     {
         Info << "Mesh moving, OK" << endl;
@@ -629,10 +626,7 @@ bool Foam::thoboisSliding::update()
         Info << "Mesh NOT moving, WARNINGGGG" << endl;
     }
 
-           
     return true;
-
-    
 }
 
 

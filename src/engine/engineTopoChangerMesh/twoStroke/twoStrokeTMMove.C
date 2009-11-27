@@ -35,7 +35,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 void Foam::twoStrokeTM::makeLayersLive()
-{ 
+{
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable layering
@@ -182,12 +182,11 @@ bool Foam::twoStrokeTM::update()
 
     // Changing topology by hand
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-    bool meshChanged = topoChangeMap.valid();
 
     // Work array for new points position.
     pointField newPoints = points();
 
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
 
         if (topoChangeMap->hasMotionPoints())

@@ -50,7 +50,7 @@ AUTHOR
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 void Foam::dieselEngineMesh::makeLayersLive()
-{ 
+{
     // Enable layering
     forAll (topoChanger_, modI)
     {
@@ -78,8 +78,7 @@ void Foam::dieselEngineMesh::makeLayersLive()
 
 void Foam::dieselEngineMesh::makeSlidersLive()
 {
- 
-    // Enable sliding interface
+     // Enable sliding interface
     forAll (topoChanger_, modI)
     {
         if (isA<layerAdditionRemoval>(topoChanger_[modI]))
@@ -128,7 +127,7 @@ bool Foam::dieselEngineMesh::attached() const
         {
             if
             (
-                result 
+                result
              != refCast<const slidingInterface>(morphs[modI]).attached()
             )
             {
@@ -189,7 +188,6 @@ void Foam::dieselEngineMesh::valveDetach()
             }
 
             ad.setDetach();
-            
         }
     }
 }
@@ -240,11 +238,10 @@ void Foam::dieselEngineMesh::valveAttach()
             }
 
             ad.setAttach();
-            
         }
     }
- 
 }
+
 
 void Foam::dieselEngineMesh::prepareValveDetach()
 {
@@ -308,7 +305,7 @@ bool Foam::dieselEngineMesh::update()
 {
 
     Info << "bool Foam::dieselEngineMesh::update()" << endl;
-    
+
     tetDecompositionMotionSolver& mSolver =
         refCast<tetDecompositionMotionSolver>(msPtr_());
 
@@ -316,34 +313,29 @@ bool Foam::dieselEngineMesh::update()
     // Detaching the interface
     if (attached())
     {
-    
         Info << "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
 //        valveDetach();
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
-        
-        Info << "sliding interfaces successfully decoupled!!!" << endl;
-        
-        bool meshChanged1 = topoChangeMap1.valid();
 
-        if (meshChanged1)
+        Info << "sliding interfaces successfully decoupled!!!" << endl;
+
+        if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
         }
-        
     }
     else
     {
         Info << "Sliding interfaces decoupled" << endl;
 //        valveDetach();
     }
-    
+
     makeLayersLive();
-    
 
     // Find piston mesh modifier
     const label pistonLayerID =
-        topoChanger_.findModifierID("pistonLayer");    
+        topoChanger_.findModifierID("pistonLayer");
 
     scalar deltaZ = engTime().pistonDisplacement().value();
     Info<< "deltaZ = " << deltaZ << " Piston at:" << pistonPosition()
@@ -351,10 +343,17 @@ bool Foam::dieselEngineMesh::update()
 
     scalar oldVirtualPistonPosition = virtualPistonPosition();
 
-    pistonPosition_ = max(boundaryMesh()[boundaryMesh().findPatchID(piston().patchID().name())].localPoints()).z();    
-    
+    pistonPosition_ =
+        Foam::max
+        (
+            boundaryMesh()
+            [
+                boundaryMesh().findPatchID(piston().patchID().name())
+            ].localPoints()
+        ).z();
+
     Info << "pistonLayerID: " << pistonLayerID << endl;
-    
+
     const layerAdditionRemoval& pistonLayers =
         dynamicCast<const layerAdditionRemoval>
         (
@@ -363,12 +362,15 @@ bool Foam::dieselEngineMesh::update()
 
     bool realDeformation = deformation();
 
-    if (virtualPistonPosition()+deltaZ > deckHeight()-engTime().clearance().value()-SMALL)
+    if
+    (
+        virtualPistonPosition() + deltaZ
+      > deckHeight() - engTime().clearance().value() - SMALL
+    )
     {
         realDeformation = true;
     }
-    
-    
+
     if (realDeformation)
     {
         // Disable layer addition
@@ -381,20 +383,17 @@ bool Foam::dieselEngineMesh::update()
         Info << "**Piston layering mode" << endl;
         topoChanger_[pistonLayerID].enable();
     }
-    
 
     scalar minLayerThickness = pistonLayers.minLayerThickness();
-    
+
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
     pointField newPoints = points();
 
-    bool meshChanged = topoChangeMap.valid();
-    
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
         mSolver.updateMesh(topoChangeMap());
-        
+
         if (topoChangeMap().hasMotionPoints())
         {
             movePoints(topoChangeMap().preMotionPoints());
@@ -403,15 +402,14 @@ bool Foam::dieselEngineMesh::update()
         setV0();
         resetMotion();
     }
-    
-    
+
     if(!deformation())
     {
         tetPointVectorField& motionU = mSolver.motionU();
 
 #       include "movePistonPointsLayeringDieselEngineMesh.H"
         Info << "movePoints" << endl;
-	    movePoints(newPoints);
+        movePoints(newPoints);
         Info << "setBoundaryMotion" << endl;
 #       include "setValveMotionBoundaryConditionDieselEngineMesh.H"
 
@@ -426,23 +424,22 @@ bool Foam::dieselEngineMesh::update()
                 );
 
             pp.refValue() = vector::zero;
-        
         }
-    
+
         motionU.correctBoundaryConditions();
 
         Info << "mSolver" << endl;
-//        mSolver.solve();       
+//        mSolver.solve();
 
         DynamicList<label> pistonBowlPoints(mSolver.curPoints()().size()/100);
 
-#       include "setDieselEngineMeshConstraintsNoDeformation.H"        
-        
-        mSolver.solve(labelList(pistonBowlPoints.shrink()),pointsVelocity);       
+#       include "setDieselEngineMeshConstraintsNoDeformation.H"
 
-        Info << "newPoints" << endl;	
+        mSolver.solve(labelList(pistonBowlPoints.shrink()),pointsVelocity);
+
+        Info << "newPoints" << endl;
         newPoints = mSolver.curPoints();
-        Info << "movePoints 2" << endl;	
+        Info << "movePoints 2" << endl;
         movePoints(newPoints);
         setVirtualPositions();
     }
@@ -453,10 +450,10 @@ bool Foam::dieselEngineMesh::update()
 #       include "setPistonMotionBoundaryConditionDieselEngineMesh.H"
 
         DynamicList<label> pistonBowlPoints(mSolver.curPoints()().size()/100);
-        
-#       include "setDieselEngineMeshConstraints.H"        
-        
-        mSolver.solve(labelList(pistonBowlPoints.shrink()),pointsVelocity);       
+
+#       include "setDieselEngineMeshConstraints.H"
+
+        mSolver.solve(labelList(pistonBowlPoints.shrink()),pointsVelocity);
 
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
@@ -466,9 +463,7 @@ bool Foam::dieselEngineMesh::update()
 
 
     {
-    
         pointField oldPointsNew = oldAllPoints();
-    
 
         // Attach the interface
         Info << "Coupling sliding interfaces" << endl;
@@ -477,13 +472,10 @@ bool Foam::dieselEngineMesh::update()
 
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
-        Info << "changeMesh" << endl;
-        bool meshChanged3 = topoChangeMap3.valid();
-        Info << "mesh3" << endl;
-        
+
         Info << "Sliding interfaces coupled: " << attached() << endl;
 
-        if (meshChanged3)
+        if (topoChangeMap3->morphing())
         {
             mSolver.updateMesh(topoChangeMap3());
 
@@ -493,30 +485,29 @@ bool Foam::dieselEngineMesh::update()
 //                resetMotion();
 //                setV0();
             }
-                    
-            
+
 //            if(correctPointsMotion_)
             {
-            
                 // correct the motion after attaching the sliding interface
-            
+
                 pointField mappedOldPointsNew(allPoints().size());
 
-                mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
-            
+                mappedOldPointsNew.map
+                (
+                    oldPointsNew,
+                    topoChangeMap3->pointMap()
+                );
+
                 pointField newPoints = allPoints();
 
                 movePoints(mappedOldPointsNew);
-            
+
                 resetMotion();
                 setV0();
                 movePoints(newPoints);
             }
-            
         }
-    
     }
-        
+
     return true;
-    
 }

@@ -248,19 +248,16 @@ void Foam::thoboisMesh::prepareValveDetach()
 
 bool Foam::thoboisMesh::update()
 {
-
-
     Info << "bool Foam::layerSmooth::update()" << endl;
-    
     tetDecompositionMotionSolver& mSolver =
         refCast<tetDecompositionMotionSolver>(msPtr_());
 
     tetPointVectorField& motionU = mSolver.motionU();
-    
+
     // Find piston mesh modifier
 
     const label pistonLayerID =
-        topoChanger_.findModifierID("pistonLayer");    
+        topoChanger_.findModifierID("pistonLayer");
 
     {
         valveDetach();
@@ -269,9 +266,7 @@ bool Foam::thoboisMesh::update()
 
         autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
-        bool meshChanged = topoChangeMap.valid();
-    
-        if (meshChanged)
+        if (topoChangeMap->morphing())
         {
             mSolver.updateMesh(topoChangeMap());
             Info << "mSolver.updateMesh(topoChangeMap())" << endl;
@@ -283,20 +278,24 @@ bool Foam::thoboisMesh::update()
 
     // deltaZ set to zero, FIXED PISTON POSITION
     deltaZ = 0.0;
-    
+
     Info<< "deltaZ = " << deltaZ << " Piston at:" << pistonPosition()
         << endl;
     virtualPistonPosition() += deltaZ;
 
     Info << "pistonLayerID: " << pistonLayerID << endl;
-    
+
     bool realDeformation = deformation();
 
-    if (virtualPistonPosition()+deltaZ > deckHeight()-engTime().clearance().value()-SMALL)
+    if
+    (
+        virtualPistonPosition() + deltaZ
+      > deckHeight() - engTime().clearance().value() - SMALL
+    )
     {
         realDeformation = true;
     }
-    
+
     if (realDeformation)
     {
         // Disable layer addition
@@ -309,18 +308,17 @@ bool Foam::thoboisMesh::update()
         Info << "**Piston layering mode" << endl;
         topoChanger_[pistonLayerID].enable();
     }
-    
 
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
-    pointField newPoints = points();
+    bool meshChanged = topoChangeMap->morphing();
 
-    bool meshChanged = topoChangeMap.valid();
-    
+    pointField newPoints = allPoints();
+
     if (meshChanged)
     {
         mSolver.updateMesh(topoChangeMap());
-        
+
         if (topoChangeMap().hasMotionPoints())
         {
             movePoints(topoChangeMap().preMotionPoints());
@@ -329,12 +327,11 @@ bool Foam::thoboisMesh::update()
         setV0();
         resetMotion();
     }
-    
-    
-    if(!deformation())
+
+    if (!deformation())
     {
 //#       include "movePistonPointsLayering.H"
-	    movePoints(newPoints);
+        movePoints(newPoints);
 
 #       include "setValveMotionBoundaryConditionThobois.H"
 
@@ -349,22 +346,23 @@ bool Foam::thoboisMesh::update()
                 );
 
             pp.refValue() = vector::zero;
-        
         }
-    
+
         motionU.correctBoundaryConditions();
 
-        
-        DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
-        DynamicList<vector> constrainedVelocity(mSolver.curPoints()().size()/100);
 
-#       include "setThoboisMeshConstraintsNoDeformation.H"        
-        
+        DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
+        DynamicList<vector> constrainedVelocity
+        (
+            mSolver.curPoints()().size()/100
+        );
+
+#       include "setThoboisMeshConstraintsNoDeformation.H"
+
 
         // Set piston velocity
         if (piston().patchID().active())
         {
-
             componentMixedTetPolyPatchVectorField& pp =
                 refCast<componentMixedTetPolyPatchVectorField>
                 (
@@ -372,23 +370,31 @@ bool Foam::thoboisMesh::update()
                 );
 
             pp.refValue() = vector::zero;
-                    
         }
 
         motionU.correctBoundaryConditions();
 
         labelList constrainedPointsList(constrainedPoints.shrink());
         vectorField constrainedVelocityField(constrainedVelocity.shrink());
-        
+
         forAll (constrainedPointsList, i)
         {
-            mSolver.setConstraint(constrainedPointsList[i], constrainedVelocityField[i]);
+            mSolver.setConstraint
+            (
+                constrainedPointsList[i],
+                constrainedVelocityField[i]
+            );
         }
-        
-//        mSolver.solve(labelList(constrainedPoints.shrink()),constrainedVelocity.shrink());       
-        mSolver.solve();       
 
-        //set to zero the motion U along the x and y directions 
+//         mSolver.solve
+//         (
+//             labelList(constrainedPoints.shrink()),
+//             constrainedVelocity.shrink()
+//         );
+
+        mSolver.solve();
+
+        //set to zero the motion U along the x and y directions
 
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
@@ -396,13 +402,16 @@ bool Foam::thoboisMesh::update()
         mSolver.clearConstraints();
     }
     else
-    {        
+    {
 #       include "setValveMotionBoundaryConditionThobois.H"
 #       include "setPistonMotionBoundaryConditionThobois.H"
         DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
-        DynamicList<vector> constrainedVelocity(mSolver.curPoints()().size()/100);
+        DynamicList<vector> constrainedVelocity
+        (
+            mSolver.curPoints()().size()/100
+        );
 
-#       include "setThoboisMeshConstraints.H"        
+#       include "setThoboisMeshConstraints.H"
 
         // Set piston velocity
         if (piston().patchID().active())
@@ -415,27 +424,31 @@ bool Foam::thoboisMesh::update()
                 );
 
             pp.refValue() = vector::zero;
-        
         }
 
-                
 //        motionU.correctBoundaryConditions();
 
-       
         labelList constrainedPointsList(constrainedPoints.shrink());
         vectorField constrainedVelocityField(constrainedVelocity.shrink());
-        
+
         forAll (constrainedPointsList, i)
         {
-            mSolver.setConstraint(constrainedPointsList[i], constrainedVelocityField[i]);
+            mSolver.setConstraint
+            (
+                constrainedPointsList[i],
+                constrainedVelocityField[i]
+            );
         }
-        
-//        mSolver.solve(labelList(constrainedPoints.shrink()),constrainedVelocity.shrink());       
-        mSolver.solve();       
-       
-        
-        
-        //set to zero the motion U along the x and y directions 
+
+//        mSolver.solve
+//        (
+//            labelList(constrainedPoints.shrink()),
+//            constrainedVelocity.shrink()
+//        );
+
+        mSolver.solve();
+
+        //set to zero the motion U along the x and y directions
 
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
@@ -444,20 +457,16 @@ bool Foam::thoboisMesh::update()
     }
 
     {
-       
         pointField oldPointsNew = oldPoints();
         pointField newPointsNew = points();
-	
+
         prepareValveDetach();
         topoChanger_[pistonLayerID].disable();
         autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-	
-        bool meshChanged = topoChangeMap.valid();
-    	
- 
+
 //        Info << motionU << endl;
 
-        if (meshChanged)
+        if (topoChangeMap->morphing())
         {
             mSolver.updateMesh(topoChangeMap());
 
@@ -473,18 +482,11 @@ bool Foam::thoboisMesh::update()
                resetMotion();
                setV0();
                movePoints(newPoints);
-               
            }
         }
     }
-    
-    Info << "CHANGED LAST" << endl;
-    
-//    Info << motionU << endl;
 
-#   ifdef CheckMesh
-    checkMesh(true);
-#   endif
+    Info << "CHANGED LAST" << endl;
 
 /*
     if(moving() && meshChanged)
@@ -497,13 +499,9 @@ bool Foam::thoboisMesh::update()
     Info << "max phi() post-motion = " << max(phi()) << endl;
     Info << "min phi() post-motion = " << min(phi()) << endl;
 */
-    
-    Info << "Total cylinder volume at CA " << engTime().timeName() << " = " <<
-    sum(V()) << 
-    endl;
-    
+
+    Info<< "Total cylinder volume at CA " << engTime().timeName() << " = "
+        << sum(V()) << endl;
+
     return meshChanged;
-
-
-    
 }

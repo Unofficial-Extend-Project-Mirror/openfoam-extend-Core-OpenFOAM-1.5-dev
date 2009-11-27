@@ -328,10 +328,7 @@ bool Foam::engineValveSliding::update()
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
 
         Info << "sliding interfaces successfully decoupled!!!" << endl;
-
-        bool meshChanged1 = topoChangeMap1.valid();
-
-        if (meshChanged1)
+        if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
         }
@@ -417,9 +414,7 @@ bool Foam::engineValveSliding::update()
     autoPtr<mapPolyMesh> topoChangeMap2 = topoChanger_.changeMesh();
 
     // Changing topology by hand
-    bool meshChanged2 = topoChangeMap2.valid();
-
-    if (meshChanged2)
+    if (topoChangeMap2->morphing())
     {
         mSolver.updateMesh(topoChangeMap2());
 
@@ -526,9 +521,7 @@ bool Foam::engineValveSliding::update()
         autoPtr<mapPolyMesh> topoChangeMap4 = topoChanger_.changeMesh();
 
         // Changing topology by hand
-        bool meshChanged4 = topoChangeMap4.valid();
-
-        if(meshChanged4)
+        if(topoChangeMap4->morphing())
         {
             mSolver.updateMesh(topoChangeMap4());
 

@@ -37,7 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 void Foam::doublePistonTwoStroke::makeLayersLive()
-{ 
+{
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable layering
@@ -63,13 +63,11 @@ void Foam::doublePistonTwoStroke::makeLayersLive()
 
 void Foam::doublePistonTwoStroke::makeSlidersLive()
 {
- 
     const polyTopoChanger& morphs = topoChanger_;
 
     // Enable sliding interface
     forAll (morphs, modI)
     {
-    
         if (typeid(morphs[modI]) == typeid(layerAdditionRemoval))
         {
             morphs[modI].disable();
@@ -112,7 +110,7 @@ bool Foam::doublePistonTwoStroke::attached() const
         {
             if
             (
-                result 
+                result
              != refCast<const slidingInterface>(morphs[modI]).attached()
             )
             {
@@ -130,16 +128,14 @@ bool Foam::doublePistonTwoStroke::attached() const
 
 bool Foam::doublePistonTwoStroke::update()
 {
-    
-
     // Detaching the interface
     if (attached())
     {
-    
         Info << "Decoupling sliding interfaces" << endl;
+
         makeSlidersLive();
         topoChanger_.changeMesh();
-        
+
         Info << "sliding interfaces successfully decoupled!!!" << endl;
     }
     else
@@ -148,16 +144,15 @@ bool Foam::doublePistonTwoStroke::update()
     }
 
     Info << "Executing layer action" << endl;
-    
 
-    // Piston Layering    
-    
+    // Piston Layering
+
     makeLayersLive();
 
-    
     // Find piston mesh modifier
     const label pistonLayerID =
         topoChanger_.findModifierID("pistonLayer");
+
     const label piston2LayerID =
         topoChanger_.findModifierID("piston2Layer");
 
@@ -173,13 +168,13 @@ bool Foam::doublePistonTwoStroke::update()
             << "Piston2 modifier not found."
             << abort(FatalError);
     }
-    
+
     scalar minLayerThickness = piston().minLayer();
     scalar deltaZ = engTime().pistonDisplacement().value();
     virtualPistonPosition() += deltaZ;
     scalar deltaZ2 = piston2Displacement().value();
     virtualPiston2Position() += deltaZ2;
-    
+
     Info << "virtualPistonPosition = " << virtualPistonPosition()
     << ", deckHeight = " << deckHeight()
     << ", pistonPosition = " << pistonPosition() << endl;
@@ -204,24 +199,22 @@ bool Foam::doublePistonTwoStroke::update()
 
     // Changing topology by hand
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-    bool meshChanged = topoChangeMap.valid();
 
     // Work array for new points position.
     pointField newPoints = points();
 
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
 
         if (topoChangeMap->hasMotionPoints())
         {
             Info << "Topology change; executing pre-motion" << endl;
             movePoints(topoChangeMap->preMotionPoints());
-            newPoints = topoChangeMap->preMotionPoints();    
+            newPoints = topoChangeMap->preMotionPoints();
         }
         setV0();
         resetMotion();
     }
-        
 
     // Reset the position of layered interfaces
 
@@ -239,15 +232,15 @@ bool Foam::doublePistonTwoStroke::update()
 
     label headPtsIndex = pointZones().findZoneID("headPoints");
     const labelList& headPoints = pointZones()[headPtsIndex];
-    
+
     const scalarField& movingPointsM = movingPointsMask();
-    
+
     forAll(pistonPoints, i)
     {
         label pointI = pistonPoints[i];
         pistonPoint[pointI] = true;
         point& p = newPoints[pointI];
-            
+
         if (p.z() < pistonPosition() - 1.0e-6)
         {
             scaleDisp[pointI] = false;
@@ -260,42 +253,43 @@ bool Foam::doublePistonTwoStroke::update()
         label pointI = piston2Points[i];
         piston2Point[pointI] = true;
         point& p = newPoints[pointI];
-            
+
         if (p.z() > piston2Position() + 1.0e-6)
         {
             scaleDisp[pointI] = false;
             nScaled--;
         }
     }
-    
+
     forAll(headPoints, i)
     {
         headPoint[headPoints[i]] = true;
         scaleDisp[headPoints[i]] = false;
         nScaled--;
     }
-    
+
 
     if (realDeformation())
     {
-    
         forAll(scaleDisp, pointI)
         {
             point& p = newPoints[pointI];
 
             if (scaleDisp[pointI])
-            {                
+            {
                 if (p.z() < deckHeight())
                 {
                     p.z() += movingPointsM[pointI]*
-                        deltaZ
-                      * (deckHeight() - p.z())/(deckHeight() - pistonPosition());
+                        deltaZ*
+                        (deckHeight() - p.z())/
+                        (deckHeight() - pistonPosition());
                 }
                 if (p.z() > deckHeight())
                 {
                     p.z() += movingPointsM[pointI]*
-                        deltaZ2
-                      * (deckHeight() - p.z())/(deckHeight() - piston2Position());
+                        deltaZ2*
+                        (deckHeight() - p.z())/
+                        (deckHeight() - piston2Position());
                 }
             }
             else
@@ -313,7 +307,6 @@ bool Foam::doublePistonTwoStroke::update()
                 }
             }
         }
-        
     }
     else
     {
@@ -337,12 +330,10 @@ bool Foam::doublePistonTwoStroke::update()
                 {
                     if (virtualPistonPosition() > newPoints[i].z())
                     {
-                        newPoints[i].z() 
-                        = 
-                        (1.0 - movingPointsM[i])*newPoints[i].z() 
-                        +
-                        movingPointsM[i] *
-                        (pistonTopZ + 0.9*minLayerThickness);
+                        newPoints[i].z() =
+                            (1.0 - movingPointsM[i])*newPoints[i].z()
+                          + movingPointsM[i]*
+                            (pistonTopZ + 0.9*minLayerThickness);
                     }
                 }
             }
@@ -365,34 +356,31 @@ bool Foam::doublePistonTwoStroke::update()
             // check if piston-points have moved beyond the layer above
             forAll(newPoints, i)
             {
-                if (!piston2Point[i])                                     // 2 weggehaald!!! (piston2Point[i])
+                // 2 weggehaald!!! (piston2Point[i])
+                if (!piston2Point[i])
                 {
                     if (virtualPiston2Position() < newPoints[i].z())
                     {
-                        newPoints[i].z() 
-                        = 
-                        (-1.0 + movingPointsM[i])*newPoints[i].z() 
-                        -
-                        movingPointsM[i] *
-                        (piston2TopZ - 0.9*minLayerThickness);
+                        newPoints[i].z() =
+                            (-1.0 + movingPointsM[i])*newPoints[i].z()
+                          - movingPointsM[i]*
+                            (piston2TopZ - 0.9*minLayerThickness);
                     }
                 }
             }
         }
-*/        
+*/
     }
 
 
     movePoints(newPoints);
-    
+
     deleteDemandDrivenData(movingPointsMaskPtr_);
-    
+
     pistonPosition() += deltaZ;
     piston2Position() += deltaZ2;
 
-
     {
-    
         pointField oldPointsNew = oldPoints();
         pointField newPointsNew = points();
 
@@ -404,28 +392,29 @@ bool Foam::doublePistonTwoStroke::update()
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
 
         Info << "Sliding interfaces coupled: " << attached() << endl;
-    
-            if(attached())
+
+            if (attached())
             {
-            
                 // correct the motion after attaching the sliding interface
-            
+
                 pointField mappedOldPointsNew(allPoints().size());
 
-                mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
-            
+                mappedOldPointsNew.map
+                (
+                    oldPointsNew,
+                    topoChangeMap3->pointMap()
+                );
+
                 pointField newPoints = allPoints();
 
                 movePoints(mappedOldPointsNew);
-            
+
                 resetMotion();
                 setV0();
                 movePoints(newPoints);
             }
-    
     }
 
     return true;
-    
 }
 

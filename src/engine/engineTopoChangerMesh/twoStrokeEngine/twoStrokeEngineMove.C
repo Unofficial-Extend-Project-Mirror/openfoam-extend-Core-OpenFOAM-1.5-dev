@@ -135,7 +135,7 @@ bool Foam::twoStrokeEngine::update()
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap5 = topoChanger_.changeMesh();
 
-        if (topoChangeMap5->hasMotionPoints() && topoChangeMap5.valid())
+        if (topoChangeMap5->hasMotionPoints() && topoChangeMap5->morphing())
         {
             Info << "Topology change; executing pre-motion after "
                 << "sliding detach" << endl;
@@ -194,14 +194,12 @@ bool Foam::twoStrokeEngine::update()
 
     // Changing topology by hand
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-    bool meshChanged = topoChangeMap.valid();
 
     // Work array for new points position.
     pointField newPoints = allPoints();
 
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
-
         if (topoChangeMap->hasMotionPoints())
         {
             Info<< "Topology change; executing pre-motion after "
@@ -209,6 +207,7 @@ bool Foam::twoStrokeEngine::update()
             movePoints(topoChangeMap->preMotionPoints());
             newPoints = topoChangeMap->preMotionPoints();
         }
+
         setV0();
         resetMotion();
     }
@@ -321,9 +320,7 @@ bool Foam::twoStrokeEngine::update()
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap4 = topoChanger_.changeMesh();
 
-        bool meshChanged = topoChangeMap4.valid();
-
-        if (meshChanged)
+        if (topoChangeMap4->morphing())
         {
             if (topoChangeMap4->hasMotionPoints())
             {

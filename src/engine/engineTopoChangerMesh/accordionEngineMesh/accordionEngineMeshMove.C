@@ -57,7 +57,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 void Foam::accordionEngineMesh::makeLayersLive()
-{ 
+{
     // Enable layering
     forAll (topoChanger_, modI)
     {
@@ -149,7 +149,6 @@ void Foam::accordionEngineMesh::valveDetach()
             }
 
             ad.setDetach();
-            
         }
     }
 }
@@ -200,11 +199,10 @@ void Foam::accordionEngineMesh::valveAttach()
             }
 
             ad.setAttach();
-            
         }
     }
- 
 }
+
 
 void Foam::accordionEngineMesh::prepareValveDetach()
 {
@@ -266,78 +264,77 @@ void Foam::accordionEngineMesh::prepareValveDetach()
 
 bool Foam::accordionEngineMesh::update()
 {
-    
     tetDecompositionMotionSolver& mSolver =
         refCast<tetDecompositionMotionSolver>(msPtr_());
 
     tetPointVectorField& motionU = mSolver.motionU();
 
     Info << "motioU.size() = " << motionU.internalField().size() << endl;
-    
+
     scalar deltaZ = engTime().pistonDisplacement().value();
 
     // deltaZ set to zero, FIXED PISTON POSITION
     deltaZ = 0.0;
-    
+
     virtualPistonPosition() += deltaZ;
 
     makeDetachLive();
-    
+
 //    valveDetach();
 
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
-    Info << "changeMesh()" << endl;
-
-    bool meshChanged = topoChangeMap.valid();
-    
-    Info << "valid()" << endl;
-
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
-    	mSolver.updateMesh(topoChangeMap());
-    	Info << "mSolver.updateMesh(topoChangeMap())" << endl;
+        mSolver.updateMesh(topoChangeMap());
+        Info << "mSolver.updateMesh(topoChangeMap())" << endl;
 
-    	if (topoChangeMap->hasMotionPoints())
-    	{
-     	    movePoints(topoChangeMap->preMotionPoints());
-	        resetMotion();
-	        setV0();
-    	}
-    }   	
-        
+        if (topoChangeMap->hasMotionPoints())
+        {
+            movePoints(topoChangeMap->preMotionPoints());
+            resetMotion();
+            setV0();
+        }
+    }
+
     pointField newPoints = points();
-    
-    {    
-        
+
+    {
 #       include "setValveMotionBoundaryConditionAccordionEngineMesh.H"
 #       include "setPistonMotionBoundaryConditionAccordionEngineMesh.H"
 
 
         DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
-        DynamicList<vector> constrainedVelocity(mSolver.curPoints()().size()/100);
+        DynamicList<vector> constrainedVelocity
+        (
+            mSolver.curPoints()().size()/100
+        );
 
-#       include "setAccordionEngineMeshConstraints.H"        
+#       include "setAccordionEngineMeshConstraints.H"
 
 
         labelList constrainedPointsList(constrainedPoints.shrink());
         vectorField constrainedVelocityField(constrainedVelocity.shrink());
-        
+
         forAll (constrainedPointsList, i)
         {
-            mSolver.setConstraint(constrainedPointsList[i], constrainedVelocityField[i]);
+            mSolver.setConstraint
+            (
+                constrainedPointsList[i],
+                constrainedVelocityField[i]
+            );
         }
 
-        mSolver.solve();       
-        
-        //set to zero the motion U along the x and y directions 
+        mSolver.solve();
+
+        //set to zero the motion U along the x and y directions
 
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
         setVirtualPositions();
         mSolver.clearConstraints();
     }
-    
+
 //    pointField oldPointsNew = oldPoints();
     pointField oldPointsNew = oldAllPoints();
     newPoints = points();
@@ -350,80 +347,70 @@ bool Foam::accordionEngineMesh::update()
 
     autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
 
-    Info << "changeMesh" << endl; 
-    
-    bool meshChanged1 = topoChangeMap1.valid();
-        
-    if (meshChanged1)
+    if (topoChangeMap1->morphing())
     {
-    	mSolver.updateMesh(topoChangeMap1());
+        mSolver.updateMesh(topoChangeMap1());
 
-    	if (topoChangeMap1->hasMotionPoints())
-    	{
-//     	     movePoints(topoChangeMap1->preMotionPoints());
-//     	     resetMotion();
-//     	     setV0();
+        if (topoChangeMap1->hasMotionPoints())
+        {
+//              movePoints(topoChangeMap1->preMotionPoints());
+//              resetMotion();
+//              setV0();
 
-    	    // correct the motion after attaching the sliding interface
-    	    pointField mappedOldPointsNew(allPoints().size());
+            // correct the motion after attaching the sliding interface
+            pointField mappedOldPointsNew(allPoints().size());
 
-    	    mappedOldPointsNew.map(oldPointsNew, topoChangeMap1->pointMap());
-    	    pointField newPoints = allPoints();
+            mappedOldPointsNew.map(oldPointsNew, topoChangeMap1->pointMap());
+            pointField newPoints = allPoints();
 
-    	    movePoints(mappedOldPointsNew);
-    	    resetMotion();
-    	    setV0();
-    	    movePoints(newPoints);
+            movePoints(mappedOldPointsNew);
+            resetMotion();
+            setV0();
+            movePoints(newPoints);
 
-    	}
-    }   	
+        }
+    }
 
     Info << "max mesh phi after = " << max((phi())) << endl;
     Info << "min mesh phi after = " << min((phi())) << endl;
 
-/*     	if(correctPointsMotion_)
-    	{
-    	    // correct the motion after attaching the sliding interface
-    	    pointField mappedOldPointsNew(allPoints().size());
+/*         if(correctPointsMotion_)
+        {
+            // correct the motion after attaching the sliding interface
+            pointField mappedOldPointsNew(allPoints().size());
 
-    	    mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
-    	    pointField newPoints = allPoints();
+            mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
+            pointField newPoints = allPoints();
 
-    	    movePoints(mappedOldPointsNew);
-    	    resetMotion();
-    	    setV0();
-    	    movePoints(newPoints);
-    	}
-    
- 
+            movePoints(mappedOldPointsNew);
+            resetMotion();
+            setV0();
+            movePoints(newPoints);
+        }
+
 //    Info << motionU << endl;
 
     if (meshChanged1)
     {
-    	    Info << "meshChanged1" << endl;
+            Info << "meshChanged1" << endl;
 
-    	mSolver.updateMesh(topoChangeMap1());
+        mSolver.updateMesh(topoChangeMap1());
 
        {
-    	   pointField mappedOldPointsNew(allPoints().size());
+           pointField mappedOldPointsNew(allPoints().size());
 
-    	   mappedOldPointsNew.map(oldPointsNew, topoChangeMap1->pointMap());
-    	   pointField newPoints = allPoints();
+           mappedOldPointsNew.map(oldPointsNew, topoChangeMap1->pointMap());
+           pointField newPoints = allPoints();
 
-    	   movePoints(mappedOldPointsNew);
-    	   resetMotion();
-    	   setV0();
-    	   movePoints(newPoints);
-    	   
+           movePoints(mappedOldPointsNew);
+           resetMotion();
+           setV0();
+           movePoints(newPoints);
        }
     }
 */
-    Info << "Total cylinder volume at CA " << engTime().timeName() << " = " <<
-    sum(V()) << 
-    endl;
-    
+    Info<< "Total cylinder volume at CA " << engTime().timeName() << " = "
+        << sum(V()) << endl;
+
     return false;
-
-
-    
 }

@@ -319,25 +319,20 @@ bool Foam::verticalValvesGambit::update()
 
     tetDecompositionMotionSolver& mSolver =
         refCast<tetDecompositionMotionSolver>(msPtr_());
-    
+
     // Detaching the interface
     if (attached())
     {
-    
         Info << "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
         valveDetach();
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
-        
-        Info << "sliding interfaces successfully decoupled!!!" << endl;
-        
-        bool meshChanged1 = topoChangeMap1.valid();
 
-        if (meshChanged1)
+        Info << "sliding interfaces successfully decoupled!!!" << endl;
+        if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
         }
-        
     }
     else
     {
@@ -346,14 +341,12 @@ bool Foam::verticalValvesGambit::update()
     }
 
     Info << "Executing layer action" << endl;
-    
 
-    // Piston Layering    
-    
+    // Piston Layering
+
     makeLayersLive();
     scalar deltaZ = engTime().pistonDisplacement().value();
 
-    
     // Find piston mesh modifier
     const label pistonLayerID =
         topoChanger_.findModifierID("pistonLayer");
@@ -364,23 +357,29 @@ bool Foam::verticalValvesGambit::update()
         topoChanger_[pistonLayerID].disable();
         forAll(valves_, valveI)
         {
-            
-            
             // Find piston mesh modifier
             const label valveLayerID1 =
-                topoChanger_.findModifierID("valvePistonLayer" + Foam::name(valveI + 1));
+                topoChanger_.findModifierID
+                (
+                    "valvePistonLayer"
+                  + Foam::name(valveI + 1)
+                );
+
             topoChanger_[valveLayerID1].disable();
 
             if(valves_[valveI].bottomPatchID().active())
             {
                 // Find piston mesh modifier
                 const label valveLayerID2 =
-                topoChanger_.findModifierID("valveBottomLayer" + Foam::name(valveI + 1));
+                    topoChanger_.findModifierID
+                    (
+                        "valveBottomLayer"
+                      + Foam::name(valveI + 1)
+                    );
+
                 topoChanger_[valveLayerID2].disable();
             }
-
         }
-        
     }
     else
     {
@@ -391,44 +390,57 @@ bool Foam::verticalValvesGambit::update()
         {
             // Find piston mesh modifier
             const label valveLayerID1 =
-                topoChanger_.findModifierID("valvePistonLayer" + Foam::name(valveI + 1));
+                topoChanger_.findModifierID
+                (
+                    "valvePistonLayer"
+                  + Foam::name(valveI + 1)
+                );
             topoChanger_[valveLayerID1].enable();
-            
+
             if(valves_[valveI].bottomPatchID().active())
             {
                 // Find piston mesh modifier
                 const label valveLayerID2 =
-                    topoChanger_.findModifierID("valveBottomLayer" + Foam::name(valveI + 1));
+                    topoChanger_.findModifierID
+                    (
+                        "valveBottomLayer"
+                      + Foam::name(valveI + 1)
+                    );
+
                 topoChanger_[valveLayerID2].enable();
             }
         }
     }
-    
+
     scalar minLayerThickness = piston().minLayer();
     virtualPistonPosition() += deltaZ;
-            
+
     forAll(valves_,valveI)
     {
         if(!realDeformation())
         {
             scalar valveDisplacement =
-            valves_[valveI].curVelocity()*valves_[valveI].cs().axis().z()*engTime().deltaT().value() ;
+                valves_[valveI].curVelocity()*
+                valves_[valveI].cs().axis().z()*engTime().deltaT().value();
+
             valveTopPosition_[valveI] += valveDisplacement;
             valveBottomPosition_[valveI] += valveDisplacement;
             valvePistonPosition_[valveI] += deltaZ;
         }
     }
-    
-    
+
     forAll(valves_,valveI)
     {
-                                   
         if(valves_[valveI].poppetPatchID().active())
         {
- 
+
             // Find valve layer mesh modifier
             const label valveLayerID =
-            topoChanger_.findModifierID("valvePoppetLayer" + Foam::name(valveI + 1));
+                topoChanger_.findModifierID
+                (
+                    "valvePoppetLayer"
+                  + Foam::name(valveI + 1)
+                );
 
             if (valveLayerID < 0)
             {
@@ -443,10 +455,10 @@ bool Foam::verticalValvesGambit::update()
             }
             else
             {
-                topoChanger_[valveLayerID].enable();            
+                topoChanger_[valveLayerID].enable();
             }
         }
-        
+
         if(valves_[valveI].isOpen())
         {
             isReallyClosed_[valveI] = false;
@@ -463,22 +475,19 @@ bool Foam::verticalValvesGambit::update()
             << "Piston modifier not found."
             << abort(FatalError);
     }
-    
+
     // Work array for new points position.
     pointField newPoints = points();
 
     // Changing topology by hand
-    bool meshChanged2 = topoChangeMap2.valid();
-    
-    if (meshChanged2)
+    if (topoChangeMap2->morphing())
     {
-    
         mSolver.updateMesh(topoChangeMap2());
-    
+
         if (topoChangeMap2->hasMotionPoints())
         {
             movePoints(topoChangeMap2->preMotionPoints());
-            newPoints = topoChangeMap2->preMotionPoints();    
+            newPoints = topoChangeMap2->preMotionPoints();
         }
         setV0();
         resetMotion();
@@ -490,44 +499,39 @@ bool Foam::verticalValvesGambit::update()
 
     // Reset the position of layered interfaces
 
-    
 /*
     Move the mesh points
-    
     1) Move all the piston points
-    
 */
 
     bool poppetDeformation = false;
 
     if(!realDeformation())
     {
-        
         Info << "verticalValves::update()::Layering mode" << endl;
-        
+
 #       include "movePistonPointsGambit.H"
 #       include "moveValvePointsGambit.H"
         movePoints(newPoints);
-#       include "poppetDeformationGambit.H"        
+#       include "poppetDeformationGambit.H"
         newPoints = points();
         setVirtualPositions();
     }
     else
     {
-        
         Info << "verticalValves::update()::Deformation mode" << endl;
-        
+
 #       include "moveAllTogetherGambit.H"
         movePoints(mSolver.curPoints());
         setVirtualPositions();
         newPoints = points();
 #       include "moveTopOfTheValvesGambit.H"
         movePoints(newPoints);
-#       include "poppetDeformationGambit.H"        
+#       include "poppetDeformationGambit.H"
         newPoints = points();
         setVirtualPositions();
     }
-    
+
     forAll(valves(), valveI)
     {
         Info << "Valve Top Position for valve n. " << valveI + 1 << " = " <<
@@ -537,13 +541,12 @@ bool Foam::verticalValvesGambit::update()
         Info << "Valve Piston Position for valve n. " << valveI + 1 << " = " <<
         valvePistonPosition_[valveI] << endl;
     }
-    
+
     Info << "virtualPistonPosition = " << virtualPistonPosition()
-    << ", deckHeight = " << deckHeight()  
-    << ", pistonPosition = " << pistonPosition() 
+    << ", deckHeight = " << deckHeight()
+    << ", pistonPosition = " << pistonPosition()
     << endl;
-    
-    
+
     pistonPosition() += deltaZ;
 
     scalarField Vold = V();
@@ -582,11 +585,9 @@ bool Foam::verticalValvesGambit::update()
 
         // Changing topology by hand
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
-        bool meshChanged3 = topoChangeMap3.valid();
-        
-        Info << "Sliding interfaces coupled: " << attached() << endl;
 
-        if (meshChanged3)
+        Info << "Sliding interfaces coupled: " << attached() << endl;
+        if (topoChangeMap3->morphing())
         {
             mSolver.updateMesh(topoChangeMap3());
 
@@ -596,32 +597,28 @@ bool Foam::verticalValvesGambit::update()
 //                resetMotion();
 //                setV0();
             }
-                    
-            
+
             if(correctPointsMotion_)
             {
                 // correct the motion after attaching the sliding interface
-            
                 pointField mappedOldPointsNew(allPoints().size());
 
-                mappedOldPointsNew.map(oldPointsNew, topoChangeMap3->pointMap());
-            
+                mappedOldPointsNew.map
+                (
+                    oldPointsNew,
+                    topoChangeMap3->pointMap()
+                );
                 pointField newPoints = allPoints();
 
                 movePoints(mappedOldPointsNew);
-            
+
                 resetMotion();
                 setV0();
                 movePoints(newPoints);
             }
-            
         }
-    
     }
 
-           
     return true;
-
-    
 }
 

@@ -266,11 +266,7 @@ bool Foam::layerSmooth::update()
 
         Info << "changeMesh()" << endl;
 
-        bool meshChanged = topoChangeMap.valid();
-    
-        Info << "valid()" << endl;
-
-        if (meshChanged)
+        if (topoChangeMap->morphing())
         {
             mSolver.updateMesh(topoChangeMap());
             Info << "mSolver.updateMesh(topoChangeMap())" << endl;
@@ -284,7 +280,7 @@ bool Foam::layerSmooth::update()
     virtualPistonPosition() += deltaZ;
 
     Info << "pistonLayerID: " << pistonLayerID << endl;
-    
+
     const layerAdditionRemoval& pistonLayers =
         dynamicCast<const layerAdditionRemoval>
         (
@@ -293,11 +289,15 @@ bool Foam::layerSmooth::update()
 
     bool realDeformation = deformation();
 
-    if (virtualPistonPosition()+deltaZ > deckHeight()-engTime().clearance().value()-SMALL)
+    if
+    (
+        virtualPistonPosition() + deltaZ
+      > deckHeight() - engTime().clearance().value() - SMALL
+    )
     {
         realDeformation = true;
     }
-    
+
     if (realDeformation)
     {
         // Disable layer addition
@@ -310,20 +310,17 @@ bool Foam::layerSmooth::update()
         Info << "**Piston layering mode" << endl;
         topoChanger_[pistonLayerID].enable();
     }
-    
 
     scalar minLayerThickness = pistonLayers.minLayerThickness();
-    
+
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
     pointField newPoints = points();
 
-    bool meshChanged = topoChangeMap.valid();
-    
-    if (meshChanged)
+    if (topoChangeMap->morphing())
     {
         mSolver.updateMesh(topoChangeMap());
-        
+
         if (topoChangeMap().hasMotionPoints())
         {
             movePoints(topoChangeMap().preMotionPoints());
@@ -332,13 +329,12 @@ bool Foam::layerSmooth::update()
         setV0();
         resetMotion();
     }
-    
-    
+
     if(!deformation())
     {
 #       include "movePistonPointsLayeringLayerSmooth.H"
         Info << "movePoints" << endl;
-	    movePoints(newPoints);
+        movePoints(newPoints);
         Info << "setBoundaryMotion" << endl;
 
 //#       include "setBoundaryMotion.H"
@@ -356,18 +352,17 @@ bool Foam::layerSmooth::update()
                 );
 
             pp.refValue() = vector::zero;
-        
     }
-    
+
     motionU.correctBoundaryConditions();
 
 
 //#       include "setPistonMotionBoundaryCondition.H"
         Info << "mSolver" << endl;
-        mSolver.solve();       
-        Info << "newPoints" << endl;	
+        mSolver.solve();
+        Info << "newPoints" << endl;
         newPoints = mSolver.curPoints();
-        Info << "movePoints 2" << endl;	
+        Info << "movePoints 2" << endl;
         movePoints(newPoints);
     }
     else
@@ -380,27 +375,22 @@ bool Foam::layerSmooth::update()
     }
 
     {
-       
         pointField oldPointsNew = oldPoints();
         pointField newPointsNew = points();
-	
+
         prepareValveDetach();
         topoChanger_[pistonLayerID].disable();
         autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-	
-        Info << "changeMesh" << endl; 
-	
-        bool meshChanged = topoChangeMap.valid();
-    	
- 
-//        Info << motionU << endl;
 
-        if (meshChanged)
+        Info << "changeMesh" << endl;
+
+
+        if (topoChangeMap->morphing())
         {
-	        Info << "meshChanged" << endl;
-	
+            Info << "meshChanged" << endl;
+
             mSolver.updateMesh(topoChangeMap());
-	        Info << "updateMesh" << endl;
+            Info << "updateMesh" << endl;
 
            {
                // correct the motion after attaching the sliding interface
@@ -414,13 +404,12 @@ bool Foam::layerSmooth::update()
                resetMotion();
                setV0();
                movePoints(newPoints);
-               
            }
         }
     }
-    
+
     Info << "CHANGED LAST" << endl;
-    
+
 //    Info << motionU << endl;
 
 #   ifdef CheckMesh
@@ -438,11 +427,10 @@ bool Foam::layerSmooth::update()
     Info << "max phi() post-motion = " << max(phi()) << endl;
     Info << "min phi() post-motion = " << min(phi()) << endl;
 */
-    
+
     Info << "Total cylinder volume at CA " << engTime().timeName() << " = " <<
-    sum(V()) << 
-    endl;
-    
+        sum(V()) << endl;
+
     return meshChanged;
 }
 /*
@@ -451,7 +439,7 @@ bool Foam::layerSmooth::update()
 
        pointField oldPointsNew = oldPoints();
        pointField newPointsNew = points();
- 
+
        // Attach the interface
        Info << "Coupling sliding interfaces" << endl;
        makeSlidersLive();
@@ -462,10 +450,9 @@ bool Foam::layerSmooth::update()
 
        // Changing topology by hand
        autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
-       bool meshChanged3 = topoChangeMap3.valid();
-             Info << "Sliding interfaces coupled: " << attached() << endl;
+       Info << "Sliding interfaces coupled: " << attached() << endl;
 
-       if (meshChanged3)
+       if (topoChangeMap3->morphing())
        {
            mSolver.updateMesh(topoChangeMap3());
 
