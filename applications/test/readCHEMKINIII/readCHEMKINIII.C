@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
                 chemkinReader::reaction::New
                 (
                     ck.species(),
-                    ck.specieThermo(),
+                    ck.sThermo(),
                     reactionStream
                 )
             );
