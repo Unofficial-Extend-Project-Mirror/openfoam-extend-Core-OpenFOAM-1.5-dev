@@ -51,7 +51,7 @@ void Foam::lduMatrix::Amul
         coupleBouCoeffs,
         interfaces,
         x,
-        Ax, 
+        Ax,
         cmpt
     );
 
