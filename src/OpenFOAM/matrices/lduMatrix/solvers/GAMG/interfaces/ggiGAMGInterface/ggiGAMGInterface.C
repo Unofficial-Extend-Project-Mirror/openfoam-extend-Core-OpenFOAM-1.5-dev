@@ -105,7 +105,8 @@ Foam::ggiGAMGInterface::ggiGAMGInterface
         forAll (addr, i)
         {
             neighbourExpandAddressing[addr[i]] =
-                neighbourRestrictAddressing[i] + procOffset*Pstream::myProcNo();
+                neighbourRestrictAddressing[i]
+              + procOffset*Pstream::myProcNo();
         }
 
          reduce(neighbourExpandAddressing, sumOp<labelField>());
