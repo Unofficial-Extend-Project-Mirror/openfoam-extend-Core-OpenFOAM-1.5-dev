@@ -190,7 +190,11 @@ public:
             template<class T>
             const typename List<T>::subList patchSlice(const List<T>& l) const
             {
-                return typename List<T>::subList(l, size(), polyPatch_.start());
+                return typename List<T>::subList
+                (
+                    l, size(),
+                    polyPatch_.start()
+                );
             }
 
             //- Return faceCells
@@ -246,7 +250,7 @@ public:
 
             //- Lookup and return the patchField of the named field from the
             //  local objectRegistry.
-            //  N.B.  The dummy pointer arguments are used if this function is 
+            //  N.B.  The dummy pointer arguments are used if this function is
             //  instantiated within a templated function to avoid a bug in gcc.
             //  See inletOutletFvPatchField.C and outletInletFvPatchField.C
             template<class GeometricField, class Type>

@@ -334,9 +334,9 @@ bool Foam::movingConeTopoFvMesh::update()
 
     vector curMotionVel_ =
         motionVelAmplitude_*
-        Foam::sin(time().value()*M_PI/motionVelPeriod_); 
+        Foam::sin(time().value()*M_PI/motionVelPeriod_);
 
-    bool meshChanged = topoChangeMap.valid();
+    bool meshChanged = topoChangeMap->morphing();
 
     if (meshChanged)
     {

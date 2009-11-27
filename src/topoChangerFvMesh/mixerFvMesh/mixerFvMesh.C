@@ -412,11 +412,10 @@ bool Foam::mixerFvMesh::update()
     );
 
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
-    bool morphing = topoChangeMap.valid();
 
-    if (morphing)
+    if (topoChangeMap->morphing())
     {
-        Info << "Attaching rotors" << endl;
+        Info << "Attaching rotolrs" << endl;
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
 
@@ -432,7 +431,7 @@ bool Foam::mixerFvMesh::update()
         movePoints(topoChangeMap->preMotionPoints());
     }
 
-    return morphing;
+    return topoChangeMap->morphing();
 }
 
 

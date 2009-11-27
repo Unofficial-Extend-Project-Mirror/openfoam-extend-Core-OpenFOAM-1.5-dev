@@ -508,7 +508,7 @@ Foam::ggiGAMGInterface::ggiGAMGInterface
 
                     for
                     (
-                        ;        
+                        ;
                         facesIter != faceFacesIter().end(),
                         weightsIter != faceFaceWeightsIter().end();
                         ++facesIter, ++weightsIter

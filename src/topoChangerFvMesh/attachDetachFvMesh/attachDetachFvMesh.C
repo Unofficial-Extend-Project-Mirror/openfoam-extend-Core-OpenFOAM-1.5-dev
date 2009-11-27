@@ -121,9 +121,7 @@ bool Foam::attachDetachFvMesh::update()
 {
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh();
 
-    bool morphing = topoChangeMap.valid();
-
-    return morphing;
+    return topoChangeMap->morphing();
 }
 
 

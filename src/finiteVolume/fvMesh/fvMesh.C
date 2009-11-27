@@ -318,7 +318,6 @@ polyMesh::readUpdateState fvMesh::readUpdate()
         boundary_.readUpdate(boundaryMesh());
 
         clearOut();
-        
     }
     else if (state == polyMesh::TOPO_CHANGE)
     {
@@ -477,6 +476,26 @@ void fvMesh::updateMesh(const mapPolyMesh& mpm)
 
     // Map old-volumes
     mapOldVolumes(mpm);
+
+    clearAddressing();
+
+    // handleMorph() should also clear out the surfaceInterpolation.
+    // This is a temporary solution
+    surfaceInterpolation::movePoints();
+
+    meshObjectBase::allUpdateTopology<fvMesh>(*this);
+}
+
+
+void fvMesh::syncUpdateMesh()
+{
+    // Update polyMesh. This needs to keep volume existent!
+    polyMesh::syncUpdateMesh();
+
+    // Not sure how much clean-up is needed here.  HJ, 27/Nov/2009
+
+    surfaceInterpolation::clearOut();
+    clearGeomNotOldVol();
 
     clearAddressing();
 

@@ -410,9 +410,7 @@ bool Foam::linearValveLayersFvMesh::update()
     {
         autoPtr<mapPolyMesh> topoChangeMap2 = topoChanger_.changeMesh();
 
-        bool meshChanged = topoChangeMap2.valid();
-
-        if (meshChanged)
+        if (topoChangeMap2->morphing())
         {
             if (topoChangeMap2->hasMotionPoints())
             {
@@ -436,9 +434,7 @@ bool Foam::linearValveLayersFvMesh::update()
 
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
 
-        bool meshChanged3 = topoChangeMap3.valid();
-
-        if (meshChanged3)
+        if (topoChangeMap3->morphing())
         {
             if (debug)
             {
