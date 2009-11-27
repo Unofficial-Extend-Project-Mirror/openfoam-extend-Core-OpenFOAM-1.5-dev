@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "molConfig.H"
 
@@ -111,6 +111,7 @@ void Foam::molConfig::createMolecules()
 
                 label totalZoneMols = 0;
 
+                // Garbage: uninitialised data.  HJ, 27/Nov/2009
                 label molsPlacedThisIteration;
 
 #               include "readZoneSubDict.H"
@@ -128,7 +129,6 @@ void Foam::molConfig::createMolecules()
 
                 if (latticeStructure != "empty")
                 {
-
                     while
                     (
                         molsPlacedThisIteration != 0
