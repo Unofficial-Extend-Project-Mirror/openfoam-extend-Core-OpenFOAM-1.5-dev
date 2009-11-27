@@ -134,7 +134,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const unallocLabelList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd = 
+        vectorField pd =
             mesh_.Sf().boundaryField()[patchi]
            /(
                mesh_.magSf().boundaryField()[patchi]
@@ -171,7 +171,9 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
 
     // Invert the dd tensor
-    symmTensorField invDd = inv(dd);
+//     symmTensorField invDd = inv(dd);
+    // Fix: householder inverse.  HJ, 3/Nov/2009
+    symmTensorField invDd = hinv(dd);
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
@@ -237,90 +239,6 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
             }
         }
     }
-
-
-    // For 3D meshes check the determinant of the dd tensor and switch to
-    // Gauss if it is less than 3
-    if (mesh_.nGeometricD() == 3)
-    {
-        label nBadCells = 0;
-
-        const cellList& cells = mesh_.cells();
-        const scalarField& V = mesh_.V();
-        const surfaceVectorField& Sf = mesh_.Sf();
-        const surfaceScalarField& w = mesh_.weights();
-
-        forAll (dd, celli)
-        {
-            if (det(dd[celli]) < 3)
-            {
-                nBadCells++;
-
-                const cell& c = cells[celli];
-
-                forAll(c, cellFacei)
-                {
-                    label facei = c[cellFacei];
-
-                    if (mesh_.isInternalFace(facei))
-                    {
-                        scalar wf = max(min(w[facei], 0.8), 0.2);
-
-                        if (celli == owner[facei])
-                        {
-                            lsP[facei] = (1 - wf)*Sf[facei]/V[celli];
-                        }
-                        else
-                        {
-                            lsN[facei] = -wf*Sf[facei]/V[celli];
-                        }
-                    }
-                    else
-                    {
-                        label patchi = mesh_.boundaryMesh().whichPatch(facei);
-
-                        if (mesh_.boundary()[patchi].size())
-                        {
-                            label patchFacei = 
-                                facei - mesh_.boundaryMesh()[patchi].start();
-
-                            if (mesh_.boundary()[patchi].coupled())
-                            {
-                                scalar wf = max
-                                (
-                                    min
-                                    (
-                                        w.boundaryField()[patchi][patchFacei],
-                                        0.8
-                                    ),
-                                    0.2
-                                );
-
-                                lsP.boundaryField()[patchi][patchFacei] = 
-                                    (1 - wf)
-                                   *Sf.boundaryField()[patchi][patchFacei]
-                                   /V[celli];
-                            }
-                            else
-                            {
-                                lsP.boundaryField()[patchi][patchFacei] = 
-                                    Sf.boundaryField()[patchi][patchFacei]
-                                   /V[celli];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (debug)
-        {
-            InfoIn("leastSquaresVectors::makeLeastSquaresVectors()")
-                << "number of bad cells switched to Gauss = " << nBadCells
-                << endl;
-        }
-    }
-
 
     if (debug)
     {
