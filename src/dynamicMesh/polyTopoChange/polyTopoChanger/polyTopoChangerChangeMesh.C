@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -90,7 +90,7 @@ bool Foam::polyTopoChanger::reorderCoupledPatches
     // convenience (could be just the external faces)
 
     // faceMap = identity(faces.size());
-    // faceMap for boundary faces will be forwarded to polyPatch::order(...) 
+    // faceMap for boundary faces will be forwarded to polyPatch::order(...)
     for(label i=0; i<patchStarts[0]; i++)
     {
         faceMap[i] = i;
@@ -132,7 +132,7 @@ bool Foam::polyTopoChanger::reorderCoupledPatches
         label start = patchStarts[patchI];
         forAll (patchFaceMap, patchFaceI)
         {
-            patchFaceMap[patchFaceI] = 
+            patchFaceMap[patchFaceI] =
                 faceMap[patchFaceI + start];
 
             faceMap[patchFaceI + start] = patchFaceI + start;
@@ -183,9 +183,28 @@ bool Foam::polyTopoChanger::reorderCoupledPatches
         }
     }
 
-    reduce(anyChanged, orOp<bool>());
-
     return anyChanged;
+}
+
+
+void Foam::polyTopoChanger::syncCoupledPatches()
+{
+    // Sync communications required for couple patch reordering when
+    // there is no local topological change
+
+    // Send ordering
+    const polyPatchList& boundary = mesh_.boundaryMesh();
+
+    forAll (boundary, patchI)
+    {
+        boundary[patchI].initOrder(boundary[patchI]);
+    }
+
+    // Receive ordering
+    forAll (boundary, patchI)
+    {
+        boundary[patchI].syncOrder();
+    }
 }
 
 
@@ -245,7 +264,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     pointField newPointsZeroVol(points.size() + ref.pointBalance());
     pointField newPointsMotion(points.size() + ref.pointBalance());
 
-    // renumberPoints contains the new point label for every old and added point
+    // renumberPoints contains the new point label for every old
+    // and added point
     labelList renumberPoints(points.size() + ref.addedPoints().size(), -1);
 
     // pointMap contains the old point label or the master point label
@@ -584,7 +604,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
                 {
                     bool found = false;
 
-                    DynamicList<label, primitiveMesh::facesPerPoint_>& 
+                    DynamicList<label, primitiveMesh::facesPerPoint_>&
                         curPointCells = PointCells[curFacePoints[pointI]];
 
                     forAll (curPointCells, i)
@@ -643,7 +663,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     // Insertion cannot be done in one go as the faces need to be
     // added into the list in the increasing order of neighbour
     // cells.  Therefore, all neighbours will be detected first
-    // and then added in the correct order.  
+    // and then added in the correct order.
     // Watch out.  Subtly different from createPolyMesh!
 
     forAll (cf, cellI)
@@ -1041,7 +1061,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
         boundary,
         patchStarts,
         patchSizes,
-        newFaces,           // new faces 
+        newFaces,           // new faces
         newPointsMotion,    // points after inflation
 
         localFaceMap,       // for every face the new position
@@ -1438,7 +1458,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
 
     // cellMap holds the old cell label for every preserved cell
     labelList cellMap(cells.size() + ref.cellBalance(), -1);
-    
+
     label nNewCells = 0;
 
     forAll (newCellFaces, cellI)
@@ -1970,7 +1990,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
         // (the new zone needs to be set on the updated list of faces to
         // be able to create the mapping).  Therefore, the old meshPoint maps
         // will be copied here and will be used later to re-create the
-        // addressing.  
+        // addressing.
 
         // Copy old face zone mesh point maps
         oldFaceZoneMeshPointMaps[fzI] = faceZones[fzI]().meshPointMap();
@@ -2214,7 +2234,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
             allOwn,
             allNei,
             patchSizes,
-            patchStarts
+            patchStarts,
+            false         // The mesh is not complete: no parallel comms
+                          // HJ, 27/Nov/2009
         );
     }
 
@@ -2394,7 +2416,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
 
 Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh()
 {
-    if (changeTopology())
+    bool localUpdate = changeTopology();
+
+    bool globalUpdate = returnReduce(localUpdate, orOp<bool>());
+
+    if (debug)
+    {
+        Pout<< "Local mesh update: " << localUpdate
+            << " global update: " << globalUpdate << endl;
+    }
+
+    if (localUpdate)
     {
         autoPtr<mapPolyMesh> topoChangeMap = changeMesh
         (
@@ -2403,6 +2435,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh()
         );
 
         update(topoChangeMap());
+
         mesh_.updateMesh(topoChangeMap());
 
         // Increment the morph index
@@ -2412,7 +2445,18 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh()
     }
     else
     {
-        return autoPtr<mapPolyMesh>(NULL);
+        // If other processors perform topology change, communications
+        // between domains need to be executed.  HJ, 27/Nov/2009
+        if (globalUpdate)
+        {
+            // Sync couple patch update
+            syncCoupledPatches();
+
+            // Sync mesh update
+            mesh_.syncUpdateMesh();
+        }
+
+        return autoPtr<mapPolyMesh>(new mapPolyMesh(mesh_));
     }
 }
 

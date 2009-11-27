@@ -173,16 +173,16 @@ bool Foam::polyTopoChanger::changeTopology() const
 
             if (debug)
             {
-                Info<< "Modifier " << morphI << " named "
+                Pout<< "Modifier " << morphI << " named "
                     << topoChanges[morphI].name();
-                
+
                 if (curTriggerChange)
                 {
-                    Info << " morphing" << endl;
+                    Pout << " morphing" << endl;
                 }
                 else
                 {
-                    Info << " unchanged" << endl;
+                    Pout << " unchanged" << endl;
                 }
             }
 
@@ -192,11 +192,10 @@ bool Foam::polyTopoChanger::changeTopology() const
         {
             if (debug)
             {
-                Info<< "Modifier " << morphI  << " named "
+                Pout<< "Modifier " << morphI  << " named "
                     << topoChanges[morphI].name() << " inactive" << endl;
             }
         }
-            
     }
 
     return triggerChange;
@@ -230,7 +229,8 @@ void Foam::polyTopoChanger::modifyMotionPoints(pointField& p) const
 {
     if (debug)
     {
-        InfoIn("void polyTopoChanger::modifyMotionPoints(pointField& p) const")
+        Pout<< "void polyTopoChanger::modifyMotionPoints("
+            << "pointField& p) const : "
             << "Updating motion points by mesh modifiers" << endl;
     }
 
@@ -251,7 +251,7 @@ void Foam::polyTopoChanger::update(const mapPolyMesh& m)
 {
     if (debug)
     {
-        InfoIn("void polyTopoChanger::update(const mapPolyMesh& m)")
+        Pout<< "void polyTopoChanger::update(const mapPolyMesh& m) : "
             << "Updating mesh modifiers" << endl;
     }
 
@@ -316,7 +316,7 @@ Foam::label Foam::polyTopoChanger::findModifierID
     // Modifier not found
     if (debug)
     {
-        Info<< "label polyTopoChanger::::findModifierID(const word& "
+        Pout<< "label polyTopoChanger::::findModifierID(const word& "
             << "modName) const"
             << "Modifier named " << modName << " not found.  "
             << "List of available modifier names: " << names() << endl;

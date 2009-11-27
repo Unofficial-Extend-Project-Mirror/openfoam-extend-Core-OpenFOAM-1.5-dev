@@ -105,6 +105,10 @@ protected:
                 labelList& rotation
             );
 
+            //- Sync communications required for couple patch reordering when
+            //  there is no local topological change
+            void syncCoupledPatches();
+
 
 public:
 
