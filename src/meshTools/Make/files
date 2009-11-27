@@ -9,19 +9,6 @@ cellDist/wallPoint/wallPoint.C
 
 cellFeatures/cellFeatures.C
 
-coordinateSystems/coordinateSystem.C
-coordinateSystems/coordinateSystems.C
-coordinateSystems/parabolicCylindricalCS.C
-coordinateSystems/ellipticCylindricalCS.C
-coordinateSystems/toroidalCS.C
-coordinateSystems/cartesianCS.C
-coordinateSystems/newCoordinateSystem.C
-coordinateSystems/cylindricalCS.C
-coordinateSystems/sphericalCS.C
-coordinateSystems/coordinateRotation/coordinateRotation.C
-coordinateSystems/coordinateRotation/EulerCoordinateRotation.C
-coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C
-
 edgeFaceCirculator/edgeFaceCirculator.C
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
