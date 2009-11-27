@@ -107,9 +107,10 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::CofrDeltaT() const
 {
     const dimensionedScalar& deltaT = mesh().time().deltaT();
 
+    const objectRegistry& registry = this->mesh();
+
     const surfaceScalarField& phi =
-        static_cast<const objectRegistry&>(mesh())
-        .lookupObject<surfaceScalarField>(phiName_);
+        registry.lookupObject<surfaceScalarField>(phiName_);
 
     if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
     {
@@ -125,8 +126,7 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::CofrDeltaT() const
     else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
     {
         const volScalarField& rho =
-            static_cast<const objectRegistry&>(mesh())
-           .lookupObject<volScalarField>(rhoName_).oldTime();
+            registry.lookupObject<volScalarField>(rhoName_);
 
         surfaceScalarField Co
         (

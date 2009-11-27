@@ -423,7 +423,7 @@ SLTSDdtScheme<Type>::fvmDdt
     scalarField rDeltaT = SLrDeltaT()().internalField();
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
-    
+
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
