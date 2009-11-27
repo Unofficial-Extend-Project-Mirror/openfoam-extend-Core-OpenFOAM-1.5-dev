@@ -99,7 +99,7 @@ void Foam::globalMeshData::initProcAddr()
         forAll(processorPatches_, i)
         {
             label patchi = processorPatches_[i];
-            
+
             IPstream fromNeighbour
             (
                 Pstream::blocking,
@@ -108,7 +108,7 @@ void Foam::globalMeshData::initProcAddr()
                     mesh_.boundaryMesh()[patchi]
                 ).neighbProcNo()
             );
-            
+
             fromNeighbour >> processorPatchNeighbours_[patchi];
         }
     }
@@ -139,7 +139,7 @@ void Foam::globalMeshData::countSharedEdges
 
         if (globalFnd == globalShared.end())
         {
-            // First time occurrence of this edge. Check how many we are adding.
+            // First time occurrence of this edge. Check how many we are adding
             if (iter().size() == 1)
             {
                 // Only one edge. Mark with special value.
@@ -213,8 +213,8 @@ void Foam::globalMeshData::calcSharedEdges() const
             {
                 // Found edge which uses shared points. Probably shared.
 
-                // Construct the edge in shared points (or rather global indices
-                // of the shared points)
+                // Construct the edge in shared points (or rather
+                // global indices of the shared points)
                 edge sharedEdge
                 (
                     sharedPtAddr[e0Fnd()],
@@ -634,7 +634,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             toMaster
-                << sharedPointAddr_ 
+                << sharedPointAddr_
                 << IndirectList<point>(mesh_.points(), sharedPointLabels_)();
         }
 
@@ -743,7 +743,6 @@ void Foam::globalMeshData::updateMesh()
     }
 
 
-
     // Option 1. Topological
     {
         // Calculate all shared points. This does all the hard work.
@@ -844,22 +843,32 @@ void Foam::globalMeshData::updateMesh()
             label patchI = processorPatches_[i];
 
             const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+                refCast<const processorPolyPatch>
+                (
+                    mesh_.boundaryMesh()[patchI]
+                );
 
             OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
 
             toNeighbour << procPatch.localPoints();
         }
 
-        // Receive patch local points and uncount if coincident (and not shared)
+        // Receive patch local points and uncount if coincident
+        // (and not shared)
         forAll(processorPatches_, i)
         {
             label patchI = processorPatches_[i];
 
             const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+                refCast<const processorPolyPatch>
+                (
+                    mesh_.boundaryMesh()[patchI]
+                );
 
-            IPstream fromNeighbour(Pstream::blocking, procPatch.neighbProcNo());
+            IPstream fromNeighbour
+            (
+                Pstream::blocking, procPatch.neighbProcNo()
+            );
 
             pointField nbrPoints(fromNeighbour);
 
@@ -883,8 +892,8 @@ void Foam::globalMeshData::updateMesh()
 
                     if (stat == UNSET)
                     {
-                        // Mark point as visited so if point is on multiple proc
-                        // patches it only gets uncounted once.
+                        // Mark point as visited so if point is on multiple
+                        // proc patches it only gets uncounted once.
                         pointStatus.set(meshPointI, VISITED);
 
                         if (pMap[patchPointI] != -1)

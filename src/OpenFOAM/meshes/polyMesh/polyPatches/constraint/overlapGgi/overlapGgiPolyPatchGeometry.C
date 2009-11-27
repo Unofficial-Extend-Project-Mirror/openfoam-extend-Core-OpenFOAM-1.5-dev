@@ -79,7 +79,7 @@ void Foam::overlapGgiPolyPatch::calcExpandedSlave() const
         }
 
         // Transform faces
-        
+
         const faceList& slaveLocalFaces = slave.localFaces();
         faceList expandedFaces(ncp*slaveLocalFaces.size());
 
@@ -273,7 +273,8 @@ void Foam::overlapGgiPolyPatch::clearOut()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::vectorField& Foam::overlapGgiPolyPatch::reconFaceCellCentres() const
+const Foam::vectorField&
+Foam::overlapGgiPolyPatch::reconFaceCellCentres() const
 {
     if (!reconFaceCellCentresPtr_)
     {
@@ -356,6 +357,10 @@ bool Foam::overlapGgiPolyPatch::order
     // Nothing changes
     return false;
 }
+
+
+void Foam::overlapGgiPolyPatch::syncOrder() const
+{}
 
 
 // ************************************************************************* //

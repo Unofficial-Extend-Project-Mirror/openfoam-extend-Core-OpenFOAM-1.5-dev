@@ -89,7 +89,7 @@ public:
         //- Construct as copy, resetting the boundary mesh
         cohesivePolyPatch
         (
-            const cohesivePolyPatch&, 
+            const cohesivePolyPatch&,
             const polyBoundaryMesh&
         );
 
@@ -148,6 +148,11 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const;
+
+        //- Synchronise communications of ordering for primitivePatch
+        //  Used in cases when no topological change happens locally,
+        //  but is happening on other processors
+        virtual void syncOrder() const;
 };
 
 

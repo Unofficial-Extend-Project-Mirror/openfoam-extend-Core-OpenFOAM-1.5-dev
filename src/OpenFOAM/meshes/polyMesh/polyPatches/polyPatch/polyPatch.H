@@ -151,7 +151,12 @@ protected:
             static void writeOBJ(Ostream& os, const point& pt);
 
             //- Write selected points in OBJ format
-            static void writeOBJ(Ostream&, const pointField&, const labelList&);
+            static void writeOBJ
+            (
+                Ostream&,
+                const pointField&,
+                const labelList&
+            );
 
             //- Write patch
             static void writeOBJ
@@ -434,6 +439,11 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const;
+
+        //- Synchronise communications of ordering for primitivePatch
+        //  Used in cases when no topological change happens locally,
+        //  but is happening on other processors
+        virtual void syncOrder() const;
 
 
     // Member operators

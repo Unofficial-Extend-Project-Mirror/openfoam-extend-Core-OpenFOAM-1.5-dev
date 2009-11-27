@@ -391,15 +391,10 @@ void Foam::regionCouplePolyPatch::calcTransformTensors
 }
 
 
-//- Initialize ordering (on new mesh)
 void Foam::regionCouplePolyPatch::initOrder(const primitivePatch& pp) const
 {}
 
 
-//- Return new ordering. Ordering is -faceMap: for every face index
-//  the new face -rotation:for every new face the clockwise shift
-//  of the original face. Return false if nothing changes (faceMap
-//  is identity, rotation is 0)
 bool Foam::regionCouplePolyPatch::order
 (
     const primitivePatch& pp,
@@ -418,15 +413,19 @@ bool Foam::regionCouplePolyPatch::order
 }
 
 
+void Foam::regionCouplePolyPatch::syncOrder() const
+{}
+
+
 // Write
 void Foam::regionCouplePolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
-    os.writeKeyword("shadowRegion") 
+    os.writeKeyword("shadowRegion")
         << shadowRegionName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("shadowPatch") 
+    os.writeKeyword("shadowPatch")
         << shadowPatchName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("attached") 
+    os.writeKeyword("attached")
         << attached_ << token::END_STATEMENT << nl;
 }
 

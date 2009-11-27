@@ -292,7 +292,7 @@ void Foam::processorPolyPatch::initUpdateMesh()
             Pstream::blocking,
             neighbProcNo(),
             8*sizeof(label)             // four headers of labelList
-          + 2*nPoints()*sizeof(label)   // two point-based labellists
+          + 2*nPoints()*sizeof(label)   // two point-based labelLists
           + 2*nEdges()*sizeof(label)    // two edge-based labelLists
         );
 
@@ -437,35 +437,6 @@ void Foam::processorPolyPatch::initOrder(const primitivePatch& pp) const
         return;
     }
 
-    if (debug)
-    {
-        fileName nm
-        (
-            boundaryMesh().mesh().time().path()
-           /name()+"_faces.obj"
-        );
-        Pout<< "processorPolyPatch::order : Writing my " << pp.size()
-            << " faces to OBJ file " << nm << endl;
-        writeOBJ(nm, pp, pp.points());
-
-        // Calculate my face centres
-        pointField ctrs(calcFaceCentres(pp, pp.points()));
-
-        OFstream localStr
-        (
-            boundaryMesh().mesh().time().path()
-           /name() + "_localFaceCentres.obj"
-        );
-        Pout<< "processorPolyPatch::order : "
-            << "Dumping " << ctrs.size()
-            << " local faceCentres to " << localStr.name() << endl;
-
-        forAll(ctrs, faceI)
-        {
-            writeOBJ(localStr, ctrs[faceI]);
-        }
-    }
-
     const bool isMaster = Pstream::myProcNo() < neighbProcNo();
 
     if (isMaster)
@@ -495,6 +466,37 @@ bool Foam::processorPolyPatch::order
     if (!Pstream::parRun())
     {
         return false;
+    }
+
+    // Moved from initOrder to simplify communications
+    // HJ, 27/Nov/2009
+    if (debug)
+    {
+        fileName nm
+        (
+            boundaryMesh().mesh().time().path()
+           /name()+"_faces.obj"
+        );
+        Pout<< "processorPolyPatch::order : Writing my " << pp.size()
+            << " faces to OBJ file " << nm << endl;
+        writeOBJ(nm, pp, pp.points());
+
+        // Calculate my face centres
+        pointField ctrs(calcFaceCentres(pp, pp.points()));
+
+        OFstream localStr
+        (
+            boundaryMesh().mesh().time().path()
+           /name() + "_localFaceCentres.obj"
+        );
+        Pout<< "processorPolyPatch::order : "
+            << "Dumping " << ctrs.size()
+            << " local faceCentres to " << localStr.name() << endl;
+
+        forAll(ctrs, faceI)
+        {
+            writeOBJ(localStr, ctrs[faceI]);
+        }
     }
 
     faceMap.setSize(pp.size());
@@ -586,7 +588,7 @@ bool Foam::processorPolyPatch::order
                 transformedCtrs = masterCtrs-v[0];
             }
             else
-            {                    
+            {
                 transformedCtrs = masterCtrs-v;
             }
             matchedAll = matchPoints
@@ -609,7 +611,7 @@ bool Foam::processorPolyPatch::order
                     masterAnchors -= v[0];
                 }
                 else
-                {                    
+                {
                     masterAnchors -= v;
                 }
             }
@@ -737,7 +739,8 @@ bool Foam::processorPolyPatch::order
                     << " with vertices "
                     << IndirectList<point>(pp.points(), pp[oldFaceI])()
                     << " that matches point " << wantedAnchor
-                    << " when matching the halves of processor patch " << name()
+                    << " when matching the halves of processor patch "
+                    << name()
                     << "Continuing with incorrect face ordering from now on!"
                     << endl;
 
@@ -757,6 +760,29 @@ bool Foam::processorPolyPatch::order
     }
 }
 
+
+void Foam::processorPolyPatch::syncOrder() const
+{
+    if (!Pstream::parRun())
+    {
+        return;
+    }
+
+    // Read and discard info from master side
+    const bool isMaster = Pstream::myProcNo() < neighbProcNo();
+
+    if (!isMaster)
+    {
+        vectorField masterCtrs;
+        vectorField masterAnchors;
+
+        // Receive data from neighbour
+        {
+            IPstream fromNeighbour(Pstream::blocking, neighbProcNo());
+            fromNeighbour >> masterCtrs >> masterAnchors;
+        }
+    }
+}
 
 void Foam::processorPolyPatch::write(Ostream& os) const
 {

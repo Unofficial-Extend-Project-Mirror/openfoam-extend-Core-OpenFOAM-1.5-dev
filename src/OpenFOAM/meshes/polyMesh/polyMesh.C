@@ -719,7 +719,7 @@ void Foam::polyMesh::resetPrimitives
     // out from patch end where the active faces stop.
     initMesh();
 
-    // Recalculate bounds with live points.  HJ, 17/Oct/2008
+    // Recalculate bounds with all points.  HJ, 17/Oct/2008
     bounds_ = boundBox(allPoints_, validBoundary);
 
     if (validBoundary)
@@ -735,7 +735,11 @@ void Foam::polyMesh::resetPrimitives
         boundary_.calcGeometry();
 
         // Warn if global empty mesh (constructs globalData!)
-        if (globalData().nTotalPoints() == 0 || globalData().nTotalCells() == 0)
+        if
+        (
+            globalData().nTotalPoints() == 0
+         || globalData().nTotalCells() == 0
+        )
         {
             FatalErrorIn
             (

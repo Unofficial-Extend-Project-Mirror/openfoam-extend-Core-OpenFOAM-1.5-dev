@@ -270,11 +270,13 @@ public:
     // Member Functions
 
         //- Return connected points (in patch local point indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        //  driven calculation. Does primitivePatch::clearOut
+        //  after calculation!
         const edgeList& coupledPoints() const;
 
         //- Return connected edges (in patch local edge indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        //  driven calculation. Does primitivePatch::clearOut
+        //  after calculation!
         const edgeList& coupledEdges() const;
 
 
@@ -355,6 +357,11 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const;
+
+        //- Synchronise communications of ordering for primitivePatch
+        //  Used in cases when no topological change happens locally,
+        //  but is happening on other processors
+        virtual void syncOrder() const;
 
 
         //- Write the polyPatch data as a dictionary

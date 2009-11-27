@@ -556,6 +556,10 @@ bool Foam::polyPatch::order
 }
 
 
+void Foam::polyPatch::syncOrder() const
+{}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 void Foam::polyPatch::operator=(const polyPatch& p)

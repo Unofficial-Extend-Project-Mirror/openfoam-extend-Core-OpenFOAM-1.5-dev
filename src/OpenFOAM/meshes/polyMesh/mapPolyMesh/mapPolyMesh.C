@@ -31,6 +31,18 @@ Description
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+// Construct from mesh.  No morphing data: the mesh has not changed
+// HJ, 27/Nov/2009
+Foam::mapPolyMesh::mapPolyMesh(const polyMesh& mesh)
+:
+    mesh_(mesh),
+    morphing_(false),
+    nOldPoints_(mesh.nPoints()),
+    nOldFaces_(mesh.nFaces()),
+    nOldCells_(mesh.nCells())
+{}
+
+
 // Construct from components
 Foam::mapPolyMesh::mapPolyMesh
 (
@@ -64,6 +76,7 @@ Foam::mapPolyMesh::mapPolyMesh
 )
 :
     mesh_(mesh),
+    morphing_(true),  // The mesh is morphing
     nOldPoints_(nOldPoints),
     nOldFaces_(nOldFaces),
     nOldCells_(nOldCells),
@@ -150,6 +163,7 @@ Foam::mapPolyMesh::mapPolyMesh
 )
 :
     mesh_(mesh),
+    morphing_(true),  // The mesh is morphing
     nOldPoints_(nOldPoints),
     nOldFaces_(nOldFaces),
     nOldCells_(nOldCells),

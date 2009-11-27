@@ -504,7 +504,7 @@ void Foam::ggiPolyPatch::calcTransforms()
 }
 
 
-void Foam::ggiPolyPatch::initOrder(const primitivePatch& pp) const
+void Foam::ggiPolyPatch::initOrder(const primitivePatch&) const
 {}
 
 
@@ -521,6 +521,10 @@ bool Foam::ggiPolyPatch::order
     // Nothing changes
     return false;
 }
+
+
+void Foam::ggiPolyPatch::syncOrder() const
+{}
 
 
 void Foam::ggiPolyPatch::write(Ostream& os) const

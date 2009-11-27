@@ -205,6 +205,11 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const = 0;
+
+        //- Synchronise communications of ordering for primitivePatch
+        //  Used in cases when no topological change happens locally,
+        //  but is happening on other processors
+        virtual void syncOrder() const = 0;
 };
 
 

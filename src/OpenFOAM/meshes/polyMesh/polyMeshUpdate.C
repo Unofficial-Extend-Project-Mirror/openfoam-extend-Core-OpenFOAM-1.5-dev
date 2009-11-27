@@ -44,11 +44,8 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     faceZones_.updateMesh();
     cellZones_.updateMesh();
 
-    // Update parallel data
-    if (globalMeshDataPtr_)
-    {
-        globalMeshDataPtr_->updateMesh();
-    }
+    // Clear out parallel data.  HJ, 27/Nov/2009
+    deleteDemandDrivenData(globalMeshDataPtr_);
 
     setInstance(time().timeName());
 
@@ -72,6 +69,24 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
             oldPointsPtr_->reset(*oldAllPointsPtr_, nPoints());
         }
     }
+}
+
+
+// Sync mesh update with changes on other processors
+void Foam::polyMesh::syncUpdateMesh()
+{
+    // Update boundaryMesh (note that patches themselves already ok)
+    boundary_.updateMesh();
+
+    // Update zones
+    pointZones_.updateMesh();
+    faceZones_.updateMesh();
+    cellZones_.updateMesh();
+
+    // Clear out parallel data.  HJ, 27/Nov/2009
+    deleteDemandDrivenData(globalMeshDataPtr_);
+
+    setInstance(time().timeName());
 }
 
 

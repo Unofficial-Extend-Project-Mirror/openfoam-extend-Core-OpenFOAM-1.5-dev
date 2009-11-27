@@ -166,6 +166,10 @@ class mapPolyMesh
         //- Reference to polyMesh
         const polyMesh& mesh_;
 
+        //- Is the mesh morphing?
+        //  Changed signalling.  HJ, 27/Nov/2009
+        const bool morphing_;
+
         //- Number of old live points
         const label nOldPoints_;
 
@@ -283,6 +287,9 @@ public:
 
     // Constructors
 
+        //- Construcy empty: no update
+        mapPolyMesh(const polyMesh& mesh);
+
         //- Construct from components
         mapPolyMesh
         (
@@ -356,6 +363,12 @@ public:
             const polyMesh& mesh() const
             {
                 return mesh_;
+            }
+
+            //- Is the mesh morphing?
+            bool morphing() const
+            {
+                return morphing_;
             }
 
             //- Number of old points

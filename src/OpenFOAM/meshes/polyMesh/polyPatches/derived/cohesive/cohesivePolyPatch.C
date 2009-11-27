@@ -149,9 +149,9 @@ bool cohesivePolyPatch::order
     if(oldFacesStartIndex != -1)
     {
         oldFacesSize = oldFacesSize + 2;
-        for (label i=oldFacesStartIndex+2; i<topoFaceMap.size(); i=i+2)
+        for (label i = oldFacesStartIndex+2; i < topoFaceMap.size(); i += 2)
         {
-            oldFacesSize += 2*(topoFaceMap[i+1]-topoFaceMap[i]);
+            oldFacesSize += 2*(topoFaceMap[i + 1]-topoFaceMap[i]);
         }
     }
 
@@ -180,22 +180,22 @@ bool cohesivePolyPatch::order
         {
             for
             (
-                label i=oldFacesStartIndex; 
-                i<oldFacesStartIndex+sizeByTwo;
+                label i = oldFacesStartIndex;
+                i < oldFacesStartIndex+sizeByTwo;
                 i++
             )
             {
                 half0ToPatch[n0Faces++] = i;
-                half1ToPatch[n1Faces++] = i+sizeByTwo;
+                half1ToPatch[n1Faces++] = i + sizeByTwo;
             }
 
-            for (label i=0; i<oldFacesStartIndex; i=i+2)
+            for (label i=0; i<oldFacesStartIndex; i += 2)
             {
                 half0ToPatch[n0Faces++] = i;
-                half1ToPatch[n1Faces++] = i+1;                
+                half1ToPatch[n1Faces++] = i + 1;
             }
 
-            for 
+            for
             (
                 label i=oldFacesStartIndex+oldFacesSize;
                 i<topoFaceMap.size();
@@ -203,12 +203,12 @@ bool cohesivePolyPatch::order
             )
             {
                 half0ToPatch[n0Faces++] = i;
-                half1ToPatch[n1Faces++] = i+1;                
+                half1ToPatch[n1Faces++] = i + 1;
             }
         }
         else
         {
-            for 
+            for
             (
                 label i=0;
                 i<topoFaceMap.size();
@@ -216,13 +216,13 @@ bool cohesivePolyPatch::order
             )
             {
                 half0ToPatch[n0Faces++] = i;
-                half1ToPatch[n1Faces++] = i+1;                
+                half1ToPatch[n1Faces++] = i + 1;
             }
         }
 
         half0ToPatch.setSize(n0Faces);
         half1ToPatch.setSize(n1Faces);
-        
+
         Pout<< "cohesivePolyPatch::order : "
             << "Number of faces per zone:("
             << n0Faces << ' ' << n1Faces << ')' << endl;
@@ -269,6 +269,10 @@ bool cohesivePolyPatch::order
 
     return false;
 }
+
+
+void cohesivePolyPatch::syncOrder() const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

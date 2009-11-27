@@ -1106,7 +1106,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 }
 
 
-void Foam::cyclicPolyPatch::initOrder(const primitivePatch& pp) const
+void Foam::cyclicPolyPatch::initOrder(const primitivePatch&) const
 {}
 
 
@@ -1448,6 +1448,10 @@ bool Foam::cyclicPolyPatch::order
 
     return false;
 }
+
+
+void Foam::cyclicPolyPatch::syncOrder() const
+{}
 
 
 void Foam::cyclicPolyPatch::write(Ostream& os) const
