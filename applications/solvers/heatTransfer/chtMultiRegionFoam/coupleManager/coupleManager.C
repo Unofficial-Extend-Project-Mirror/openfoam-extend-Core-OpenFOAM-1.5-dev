@@ -146,9 +146,9 @@ void Foam::coupleManager::coupleToObj() const
     const fvPatch& nPatch = neighbourPatch();
 
     OFstream obj
-        (
-             patch_.name() + "_to_" + nPatch.name() + "_couple.obj"
-        );
+    (
+         patch_.name() + "_to_" + nPatch.name() + "_couple.obj"
+    );
     const vectorField& c1 = patch_.Cf();
     const vectorField& c2 = neighbourPatch().Cf();
 
