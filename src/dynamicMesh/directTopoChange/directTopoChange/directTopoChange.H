@@ -562,9 +562,10 @@ public:
             //  inflate = true : keep old mesh points. Put new points into the
             //  returned map (preMotionPoints) so we can use inflation. Any
             //  points out of nothing (appended points) are vector::zero.
-            //  inflate = false: set mesh points directly. Empty preMotionPoints
-            //  in the map.
-            //  orderCells :  whether to order the cells (see bandCompression.H)
+            //  inflate = false: set mesh points directly.
+            //  Empty preMotionPoints in the map.
+            //  orderCells :  whether to order the cells
+            // (see bandCompression.H)
             //  orderPoints : whether to order the points into internal first
             //  followed by boundary points. This is not fully consistent
             //  with upper-triangular ordering of points and edges so

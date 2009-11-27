@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "fvMeshDistribute.H"
 #include "ProcessorTopology.H"
@@ -626,7 +626,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
 
     if (!returnReduce(merged, orOp<bool>()))
     {
-        return autoPtr<mapPolyMesh>(NULL);
+        return autoPtr<mapPolyMesh>(new mapPolyMesh(mesh_));
     }
 
     directTopoChange meshMod(mesh_);
@@ -981,12 +981,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
 }
 
 
-// Delete and add processor patches. Changes mesh and returns per neighbour proc
-// the processor patchID.
+// Delete and add processor patches. Changes mesh and returns per
+//  neighbour proc the processor patchID.
 void Foam::fvMeshDistribute::addProcPatches
 (
     const labelList& neighbourNewProc,   // processor that neighbour is on
-    labelList& procPatchID              
+    labelList& procPatchID
 )
 {
     // Now use the neighbourFace/Proc to repatch the mesh. These two lists

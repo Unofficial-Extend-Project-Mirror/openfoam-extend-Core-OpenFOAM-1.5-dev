@@ -147,7 +147,7 @@ Foam::Map<Foam::label> Foam::refinementIterator::setRefinement
 
             break;
         }
-            
+
         if (debug)
         {
             fileName cutsFile("cuts_" + runTime.timeName() + ".obj");

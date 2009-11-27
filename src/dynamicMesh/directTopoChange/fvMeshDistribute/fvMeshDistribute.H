@@ -288,7 +288,7 @@ class fvMeshDistribute
             void addProcPatches
             (
                 const labelList&, // processor that neighbour is on
-                labelList& procPatchID              
+                labelList& procPatchID
             );
 
             //- Get boundary faces to be repatched. Is -1 or new patchID
