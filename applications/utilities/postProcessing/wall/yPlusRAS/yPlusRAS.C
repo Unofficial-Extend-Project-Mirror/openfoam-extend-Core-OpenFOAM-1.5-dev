@@ -27,25 +27,109 @@ Application
 
 Description
     Calculates and reports yPlus for all wall patches, for the specified times.
+    Extended version for being able to handle two phase flows using the
+    -twoPhase option.
+
+    Frank Albina, 16/Nov/2009
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "twoPhaseMixture.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 #include "incompressible/RASModel/RASModel.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Calculate single phase Y+
+void calcSinglePhaseYPlus
+(
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    volScalarField& yPlus
+)
+{
+    singlePhaseTransportModel laminarTransport(U, phi);
+
+    autoPtr<incompressible::RASModel> RASModel
+    (
+       incompressible::RASModel::New(U, phi, laminarTransport)
+    );
+
+    const fvPatchList& patches = U.mesh().boundary();
+
+    forAll(patches, patchi)
+    {
+        const fvPatch& currPatch = patches[patchi];
+
+        if (isA<wallFvPatch>(currPatch))
+        {
+            yPlus.boundaryField()[patchi] = RASModel->yPlus(patchi);
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
+
+            Info<< "Patch " << patchi
+                << " named " << currPatch.name()
+                << " y+ : min: " << gMin(Yp) << " max: " << gMax(Yp)
+                << " average: " << gAverage(Yp) << nl << endl;
+        }
+    }
+}
+
+// Calculate two phase Y+
+void calcTwoPhaseYPlus
+(
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    volScalarField& yPlus
+)
+{
+    Info<< "Reading transportProperties\n" << endl;
+    twoPhaseMixture twoPhaseProperties(U, phi, "gamma");
+
+    autoPtr<incompressible::RASModel> RASModel
+    (
+        incompressible::RASModel::New(U, phi, twoPhaseProperties)
+    );
+
+    const fvPatchList& patches = U.mesh().boundary();
+
+    forAll(patches, patchi)
+    {
+        const fvPatch& currPatch = patches[patchi];
+
+        if (isA<wallFvPatch>(currPatch))
+        {
+            yPlus.boundaryField()[patchi] = RASModel->yPlus(patchi);
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
+
+            Info<< "Patch " << patchi
+                << " named " << currPatch.name()
+                << " y+ : min: " << gMin(Yp) << " max: " << gMax(Yp)
+                << " average: " << gAverage(Yp) << nl << endl;
+        }
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-    #include "setRootCase.H"
+
+    //Additional option for twoPhase transport model
+    argList::validOptions.insert("twoPhase","");
+
+#   include "setRootCase.H"
 #   include "createTime.H"
+
     instantList timeDirs = timeSelector::select0(runTime, args);
+
 #   include "createMesh.H"
 
-    forAll(timeDirs, timeI)
+    // Check if two phase model was selected
+    bool twoPhase = args.options().found("twoPhase");
+
+    forAll (timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
@@ -66,46 +150,54 @@ int main(int argc, char *argv[])
         );
 
         Info << "Reading field U\n" << endl;
-        volVectorField U
+        IOobject UHeader
         (
-            IOobject
-            (
-                "U",
-                runTime.timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh
+            "U",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
         );
 
-#       include "createPhi.H"
-
-        singlePhaseTransportModel laminarTransport(U, phi);
-
-        autoPtr<incompressible::RASModel> RASModel
-        (
-            incompressible::RASModel::New(U, phi, laminarTransport)
-        );
-
-        const fvPatchList& patches = mesh.boundary();
-
-        forAll(patches, patchi)
+        if (UHeader.headerOk())
         {
-            const fvPatch& currPatch = patches[patchi];
+            Info << "Reading field U\n" << endl;
+            volVectorField U(UHeader, mesh);
 
-            if (typeid(currPatch) == typeid(wallFvPatch))
+#           include "createPhi.H"
+
+            if (twoPhase)
             {
-                yPlus.boundaryField()[patchi] = RASModel->yPlus(patchi);
-                const scalarField& Yp = yPlus.boundaryField()[patchi];
+                Info<< "Reading field gamma\n" << endl;
+                IOobject gammaHeader
+                (
+                    "gamma",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                );
 
-                Info<< "Patch " << patchi
-                    << " named " << currPatch.name()
-                    << " y+ : min: " << min(Yp) << " max: " << max(Yp)
-                    << " average: " << average(Yp) << nl << endl;
+                if (gammaHeader.headerOk())
+                {
+                    calcTwoPhaseYPlus(U, phi, yPlus);
+                }
+                else
+                {
+                    Info << "    no gamma field!" << endl;
+                }
+            }
+            else
+            {
+                calcSinglePhaseYPlus(U, phi, yPlus);
             }
         }
+        else
+        {
+            Info  << "    no U field" << endl;
+        }
 
+        Info<< "Writing yPlus to field " << yPlus.name() << nl << endl;
         yPlus.write();
     }
 
