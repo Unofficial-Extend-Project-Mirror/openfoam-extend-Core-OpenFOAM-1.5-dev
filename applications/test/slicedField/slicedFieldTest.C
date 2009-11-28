@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    volField
+    slicedFieldTest
 
 Description
 
@@ -32,12 +32,12 @@ Description
 #include "fvCFD.H"
 #include "SlicedGeometricField.H"
 #include "slicedFvPatchFields.H"
+#include "slicedSurfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
 #   include "setRootCase.H"
 
 #   include "createTime.H"
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     Info<< C << endl;
     Info<< (C & U) << endl;
 
-    SlicedGeometricField<vector, fvPatchField, slicedFvPatchField, surfaceMesh>
+    SlicedGeometricField<vector, fvsPatchField, slicedFvsPatchField, surfaceMesh>
     Sf
     (
         IOobject
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
         mesh.faceAreas()
     );
 
-    Info<< Sf << endl;
+    //Info<< Sf << endl;
 
     return(0);
 }
