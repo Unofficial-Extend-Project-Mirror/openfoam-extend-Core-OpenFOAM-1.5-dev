@@ -72,10 +72,7 @@ int main(int argc, char *argv[])
 
 #   include "createPhi.H"
 
-    //Info<< transform(dimensionedTensor("I", dimless, 0.1*I), U) << endl;
-
-
-    GeometricField<sphericalTensor, fvPatchField, volMesh> st
+    GeometricField<symmTensor, fvPatchField, volMesh> st
     (
         IOobject
         (
@@ -86,8 +83,8 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensioned<sphericalTensor>("st", dimless, sphericalTensor::I),
-        zeroGradientFvPatchSphericalTensorField::typeName
+        dimensioned<symmTensor>("st", dimless, symmTensor::one),
+        zeroGradientFvPatchSymmTensorField::typeName
     );
 
     //Info<< fvc::div(st) << endl;
