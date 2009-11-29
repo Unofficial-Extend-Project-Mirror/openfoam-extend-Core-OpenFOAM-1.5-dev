@@ -539,7 +539,7 @@ interpolations = interpolations
 interpolation = $(interpolations)/interpolation
 $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 $(interpolations)/GGIInterpolation/GGIInterpolationName.C
-$(interpolations)/CircumferentialAveragingInterpolation/CircumferentialAveragingInterpolationName.C
+/*$(interpolations)/CircumferentialAveragingInterpolation/CircumferentialAveragingInterpolationName.C*/
 $(interpolations)/RBFInterpolation/RBFInterpolation.C
 $(interpolations)/RBFInterpolation/RBFFunctions/RBFFunction/RBFFunction.C
 $(interpolations)/RBFInterpolation/RBFFunctions/RBFFunction/newRBFFunction.C
