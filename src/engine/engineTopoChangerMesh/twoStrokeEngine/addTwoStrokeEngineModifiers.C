@@ -40,17 +40,13 @@ License
 void Foam::twoStrokeEngine::addZonesAndModifiers()
 {
     // Add the zones and mesh modifiers to operate piston motion
-
-    if
-    (
-      faceZones().size() > 0
-    ) 
+    if (faceZones().size() > 0)
     {
         Info<< "Time = " << engTime().theta() << endl;
         Info<< "void twoStrokeEngine::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
         if (topoChanger_.size() == 0)
         {
             FatalErrorIn
@@ -62,21 +58,18 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
         setVirtualPistonPosition();
         checkAndCalculate();
-        
+
         return;
-
-
     }
 
     Info << "checkAndCalculate()" << endl;
     checkAndCalculate();
-    
 
     Info<< "Time = " << engTime().theta() << endl
         << "Adding zones to the engine mesh" << endl;
 
 
-    //fz = 4: virtual piston, outSidePort, insidePort, cutFaceZone 
+    //fz = 4: virtual piston, outSidePort, insidePort, cutFaceZone
     //pz = 2: piston points, cutPointZone
     //cz = 1: moving mask
 
@@ -93,7 +86,7 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
     Info << "Adding piston layer faces" << endl;
 
-#   include "addPistonLayerFaces.H" 
+#   include "addPistonLayerFaces.H"
     
 //  adding head points (does not move)
     
@@ -119,15 +112,15 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
     
     if(nPorts > 0)
-    {    
-        
+    {
         forAll(scavInCylPatches_, patchi)
         {
-        
             // Inner slider
-        
             const polyPatch& innerScav =
-                boundaryMesh()[boundaryMesh().findPatchID(scavInCylPatches_[patchi])];
+                boundaryMesh()
+                [
+                    boundaryMesh().findPatchID(scavInCylPatches_[patchi])
+                ];
 
             labelList isf(innerScav.size());
 
@@ -147,11 +140,14 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
             nFaceZones++;
 
-            // Outer slider        
+            // Outer slider
 
             const polyPatch& outerScav =
-                boundaryMesh()[boundaryMesh().findPatchID(scavInPortPatches_[patchi])];
-                
+                boundaryMesh()
+                [
+                    boundaryMesh().findPatchID(scavInPortPatches_[patchi])
+                ];
+
             labelList osf(outerScav.size());
 
             forAll (osf, i)
@@ -169,7 +165,7 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
             );
 
             nFaceZones++;
-        
+
             fz[nFaceZones] = new faceZone
             (
                 "cutFaceZone" + Foam::name(patchi + 1),
@@ -178,11 +174,11 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
                 nFaceZones,
                 faceZones()
             );
-        
+
             nFaceZones++;
 
             Info << "cut p" << endl;
-        
+
             pz[nPointZones] = new pointZone
             (
                 "cutPointZone" + Foam::name(patchi + 1),
@@ -190,18 +186,16 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
                 nPointZones,
                 pointZones()
             );
-        
+
             nPointZones++;
         }
-                
     }
-    
+
     Info << "moving cells" << endl;
 
     {
-
         cellSet movingCells(*this, movingCellSetName_);
-        
+
         cz[nCellZones] = new cellZone
         (
             "movingCells",
@@ -209,14 +203,15 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
             nCellZones,
             cellZones()
         );
-        
+
         nCellZones++;
     }
-    
+
     Info << "moving cells added" << endl;
-    
+
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;
+        << nFaceZones << " face zones and " << nCellZones
+        << " cell zones" << endl;
 
     pz.setSize(nPointZones);
     fz.setSize(nFaceZones);
@@ -234,9 +229,8 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
     {
         forAll(scavInPortPatches_, i)
         {
-    
             topoChanger_.setSize(topoChanger_.size() + 1);
-        
+
             topoChanger_.set
             (
                 nMods,
@@ -256,11 +250,11 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
                     intersection::VISIBLE         // Projection algorithm
                 )
             );
-    
+
             nMods++;
         }
     }
-        
+
     Info << "Adding " << nMods << " topology modifiers" << endl;
 
     // Calculating the virtual piston position
@@ -274,10 +268,9 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
     write();
-        
+
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

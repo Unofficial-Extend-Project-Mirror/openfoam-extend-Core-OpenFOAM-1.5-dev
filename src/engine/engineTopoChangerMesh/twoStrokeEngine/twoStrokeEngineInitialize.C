@@ -35,7 +35,6 @@ License
 
 void Foam::twoStrokeEngine::checkAndCalculate()
 {
-    
     label pistonIndex = -1;
     bool foundPiston = false;
 
@@ -44,8 +43,7 @@ void Foam::twoStrokeEngine::checkAndCalculate()
 
     label cylinderHeadIndex = -1;
     bool foundCylinderHead = false;
-    
-    
+
     forAll(boundary(), i)
     {
         Info << boundary()[i].name() << endl;
@@ -65,7 +63,7 @@ void Foam::twoStrokeEngine::checkAndCalculate()
             foundCylinderHead = true;
         }
     }
-    
+
     reduce(foundPiston, orOp<bool>());
     reduce(foundLiner, orOp<bool>());
     reduce(foundCylinderHead, orOp<bool>());
@@ -78,14 +76,14 @@ void Foam::twoStrokeEngine::checkAndCalculate()
     }
 
     if (!foundLiner)
-    { 
+    {
         FatalErrorIn("Foam::twoStrokeEngine::checkAndCalculate()")
             << " : cannot find liner patch"
             << abort(FatalError);
     }
 
     if (!foundCylinderHead)
-    { 
+    {
         FatalErrorIn("Foam::twoStrokeEngine::checkAndCalculate()")
             << " : cannot find cylinderHead patch"
             << exit(FatalError);
@@ -111,39 +109,36 @@ void Foam::twoStrokeEngine::checkAndCalculate()
         Info<< "deckHeight: " << deckHeight() << nl
             << "piston position: " << pistonPosition() << endl;
     }
-        
-
-} 
+}
 
 void Foam::twoStrokeEngine::setVirtualPistonPosition()
 {
 
     label pistonFaceIndex = faceZones().findZoneID("pistonLayerFaces");
-         
+
     bool foundPistonFace = (pistonFaceIndex != -1);
-    
-    Info << "piston face index = " << pistonFaceIndex << endl; 
-    
+
+    Info << "piston face index = " << pistonFaceIndex << endl;
+
     if(!foundPistonFace)
     {
         FatalErrorIn("Foam::twoStrokeEngine::setVirtualPistonPosition()")
             << " : cannot find the pistonLayerFaces"
             << exit(FatalError);
-    
     }
-        
+
     const labelList& pistonFaces = faceZones()[pistonFaceIndex];
     forAll(pistonFaces, i)
     {
         const face& f = faces()[pistonFaces[i]];
-        
+
         // should loop over facepoints...
         forAll(f, j)
         {
-            virtualPistonPosition() = max(virtualPistonPosition(), points()[f[j]].z());
+            virtualPistonPosition() =
+                Foam::max(virtualPistonPosition(), points()[f[j]].z());
         }
     }
-    
-    reduce(virtualPistonPosition(), maxOp<scalar>());
 
+    reduce(virtualPistonPosition(), maxOp<scalar>());
 }
