@@ -139,7 +139,7 @@ void Foam::enrichedPatch::calcCutFaces() const
         // The seed edges include all the edges of the original face + all edges
         // of other faces that have been used in the construction of the
         // facet.  Edges from other faces can be considered as
-        // internal to the current face if used only once.  
+        // internal to the current face if used only once.
 
         // Track the edge usage to avoid duplicate faces and reset it to unused
         boolList usedFaceEdges(curLocalFace.size(), false);
@@ -282,9 +282,11 @@ void Foam::enrichedPatch::calcCutFaces() const
                         << IndirectList<label>(mp, nextPoints)()
                         << abort(FatalError);
                 }
-//                 Pout<< "   bestAtanPoint: " << bestAtanPoint << " or " << mp[bestAtanPoint] << endl;
+//                 Pout<< "   bestAtanPoint: " << bestAtanPoint << " or "
+//                     << mp[bestAtanPoint] << endl;
                 // Selected next best point.
-//                 Pout << "cutFaceGlobalPoints: " << cutFaceGlobalPoints << endl;
+//                 Pout<< "cutFaceGlobalPoints: " << cutFaceGlobalPoints
+//                     << endl;
                 // Check if the edge about to be added has been used
                 // in the current face or twice in other faces.  If
                 // so, the face is bad.
@@ -299,7 +301,8 @@ void Foam::enrichedPatch::calcCutFaces() const
                 {
                     // This edge is already used in current face
                     // face cannot be good; start on a new one
-//                     Pout << "Double usage in current face, cannot be good" << endl;
+//                     Pout<< "Double usage in current face, cannot be good"
+//                         << endl;
                     completedCutFace = true;
                 }
 
@@ -309,7 +312,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                     // This edge is already used -
                     // face cannot be good; start on a new one
                     completedCutFace = true;
-//                     Pout << "Double usage elsewhere, cannot be good" << endl;
+//                     Pout<< "Double usage elsewhere, cannot be good" << endl;
                 }
 
                 if (completedCutFace) continue;
@@ -337,7 +340,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             << " one side: " << faceI;
                     }
 
-//                     Pout << "\ncutFaceLocal: " << cutFaceLocal.points(lp) << endl;
+//                     Pout<< "\ncutFaceLocal: " << cutFaceLocal.points(lp) << endl;
                     // Go through all edges of the cut faces.
                     // If the edge corresponds to a starting face edge,
                     // mark the starting face edge as true
@@ -356,36 +359,45 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                         if (euoIter == edgesUsedOnce.end())
                         {
-//                             Pout << "Found edge not used before: "<< curCutFaceEdge << endl;
+//                             Pout<< "Found edge not used before: "
+//                                 << curCutFaceEdge << endl;
                             edgesUsedOnce.insert(curCutFaceEdge);
                         }
                         else
                         {
-//                             Pout << "Found edge used once: " << curCutFaceEdge << endl;
+//                             Pout<< "Found edge used once: "
+//                                 << curCutFaceEdge << endl;
                             edgesUsedOnce.erase(euoIter);
                             edgesUsedTwice.insert(curCutFaceEdge);
                         }
 
-                        const label curCutFaceEdgeWhich = curLocalFace.which(curCutFaceEdge.start());
+                        const label curCutFaceEdgeWhich =
+                            curLocalFace.which(curCutFaceEdge.start());
 
                         if
                         (
                             curCutFaceEdgeWhich > -1
-                         && curLocalFace.nextLabel(curCutFaceEdgeWhich) == curCutFaceEdge.end()
+                         && (
+                                curLocalFace.nextLabel(curCutFaceEdgeWhich)
+                             == curCutFaceEdge.end()
+                            )
                         )
                         {
                             // Found edge in original face
-//                             Pout << "Found edge in orig face: " << curCutFaceEdge << ": " << curCutFaceEdgeWhich << endl;
+//                             Pout<< "Found edge in orig face: "
+//                                 << curCutFaceEdge << ": "
+//                                 << curCutFaceEdgeWhich << endl;
                             usedFaceEdges[curCutFaceEdgeWhich] = true;
                         }
                         else
                         {
                             // Edge not in original face.  Add it to seeds
-//                             Pout << "Found new edge seed: " << curCutFaceEdge << endl;
+//                             Pout<< "Found new edge seed: "
+//                                 << curCutFaceEdge << endl;
                             edgeSeeds.append(curCutFaceEdge.reverseEdge());
                         }
                     }
-                            
+
 
                     // Find out what the other side is
 

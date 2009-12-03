@@ -148,6 +148,12 @@ bool Foam::slidingInterface::projectPoints() const
     const primitiveFacePatch& slavePatch =
         mesh.faceZones()[slaveFaceZoneID_.index()]();
 
+    if (debug)
+    {
+        Pout<< "Master patch size = " << masterPatch.size()
+            << " Slave patch size = " << slavePatch.size() << endl;
+    }
+
     // Get references to local points, local edges and local faces
     // for master and slave patch
 //     const labelList& masterMeshPoints = masterPatch.meshPoints();
@@ -161,7 +167,7 @@ bool Foam::slidingInterface::projectPoints() const
 //         << "Master patch.  Mesh points: " << masterPatch.meshPoints() << nl
 //         << "Local faces: " << masterLocalFaces << nl
 //         << "local edges: " << masterEdges
-//     << endl;
+//         << endl;
 
 //     const labelList& slaveMeshPoints = slavePatch.meshPoints();
     const pointField& slaveLocalPoints = slavePatch.localPoints();
@@ -232,14 +238,14 @@ bool Foam::slidingInterface::projectPoints() const
             slaveEdges[edgeI].mag(slaveLocalPoints);
 
         // Do points
-        minSlavePointLength[curEdge.start()] = 
+        minSlavePointLength[curEdge.start()] =
             min
             (
                 minSlavePointLength[curEdge.start()],
                 curLength
             );
 
-        minSlavePointLength[curEdge.end()] = 
+        minSlavePointLength[curEdge.end()] =
             min
             (
                 minSlavePointLength[curEdge.end()],
@@ -368,6 +374,8 @@ bool Foam::slidingInterface::projectPoints() const
 //                             << " near point: " << nearPoint
 //                             << " mergeTol: " << mergeTol
 //                             << " dist: " << mag(nearPoint - missPoint)
+//                             << " global point index: "
+//                             << slavePatch.meshPoints()[pointI]
 //                             << endl;
 
                         projectedSlavePoints[pointI] = nearPoint;
@@ -479,7 +487,7 @@ bool Foam::slidingInterface::projectPoints() const
 //     scalarField magDiffs(mag(slaveLocalPoints - projectedSlavePoints));
 //     Pout<< "Slave point face hits: " << slavePointFaceHits << nl
 //         << "slave points: " << slaveLocalPoints << nl
-//         << "Projected slave points: " << projectedSlavePoints 
+//         << "Projected slave points: " << projectedSlavePoints
 //         << "diffs: " << magDiffs << endl;
 
     // Merge projected points against master points
@@ -497,6 +505,34 @@ bool Foam::slidingInterface::projectPoints() const
 
         standAlonePatch::writeVTK
         (
+            fvPath/fileName(masterFaceZoneID_.name() + "Master"),
+            masterPatch.localFaces(),
+            masterLocalPoints
+        );
+
+        standAlonePatch::writeVTKNormals
+        (
+            fvPath/fileName(masterFaceZoneID_.name() + "MasterNormals"),
+            masterPatch.localFaces(),
+            masterLocalPoints
+        );
+
+        standAlonePatch::writeVTK
+        (
+            fvPath/fileName(slaveFaceZoneID_.name() + "Slave"),
+            slavePatch.localFaces(),
+            slaveLocalPoints
+        );
+
+        standAlonePatch::writeVTKNormals
+        (
+            fvPath/fileName(slaveFaceZoneID_.name() + "SlaveNormals"),
+            slavePatch.localFaces(),
+            slaveLocalPoints
+        );
+
+        standAlonePatch::writeVTK
+        (
             fvPath/fileName(slaveFaceZoneID_.name() + "RawProjectedSlave"),
             slavePatch.localFaces(),
             projectedSlavePoints
@@ -507,9 +543,9 @@ bool Foam::slidingInterface::projectPoints() const
     labelList masterPointPointHits(masterLocalPoints.size(), -1);
 
     // Go through all the slave points and compare them against all the points
-    // in the master face they hit.  If the distance between the projected point
-    // and any of the master face points is smaller than both tolerances,
-    // merge the projected point by:
+    // in the master face they hit.  If the distance between the projected
+    // point and any of the master face points is smaller than
+    // both tolerances, merge the projected point by:
     // 1) adjusting the projected point to coincide with the
     //    master point it merges with
     // 2) remembering the hit master point index in slavePointPointHits
@@ -533,7 +569,7 @@ bool Foam::slidingInterface::projectPoints() const
             label mergePoint = -1;
             scalar mergeDist = GREAT;
 
-            // Try all point before deciding on best fit.  
+            // Try all point before deciding on best fit.
             forAll (hitFace, hitPointI)
             {
                 scalar dist =
@@ -622,7 +658,11 @@ bool Foam::slidingInterface::projectPoints() const
     forAll (projectedSlavePoints, pointI)
     {
         // Eliminate the points merged into points
-        if (slavePointPointHits[pointI] < 0 && slavePointFaceHits[pointI].hit())
+        if
+        (
+            slavePointPointHits[pointI] < 0
+         && slavePointFaceHits[pointI].hit()
+        )
         {
             // Get current point position
             point& curPoint = projectedSlavePoints[pointI];
@@ -632,7 +672,7 @@ bool Foam::slidingInterface::projectPoints() const
                 masterFaceEdges[slavePointFaceHits[pointI].hitObject()];
 
             // Calculate the tolerance
-            const scalar mergeLength = 
+            const scalar mergeLength =
                 min
                 (
                     minSlavePointLength[pointI],
@@ -667,13 +707,14 @@ bool Foam::slidingInterface::projectPoints() const
 
 //                         Pout<< "Moving slave point "
 //                             << slavePatch.meshPoints()[pointI]
-//                             << " (" << pointI 
+//                             << " (" << pointI
 //                             << ") at " << slaveLocalPoints[pointI]
 //                             << " onto master edge " << hitFaceEdges[edgeI]
+//                             << " " << curEdge
 //                             << " or ("
-//                             << masterLocalPoints[curEdge.start()]
+//                             << masterLocalPoints[curEdge.start()] << " "
 //                             << masterLocalPoints[curEdge.end()]
-//                             << ") hit: " << edgeHit.hitPoint()
+//                             << " ) hit: " << edgeHit.hitPoint()
 //                             << ". dist: " << dist
 //                             << " mergeTol: " << mergeTol << endl;
                     }
@@ -822,7 +863,6 @@ bool Foam::slidingInterface::projectPoints() const
     // sliding intergace coupling in order to allow the point
     // projection to be done separately from the actual cutting.
     // Please change consistently with coupleSlidingInterface.C
-    // 
 
     if (debug)
     {
@@ -865,7 +905,13 @@ bool Foam::slidingInterface::projectPoints() const
                     slavePointFaceHits[curEdge.end()].hitObject()
                 );
 
-//             Pout << "Doing edge " << edgeI << " or " << curEdge << " start: " << slavePointFaceHits[curEdge.start()].hitObject() << " end " << slavePointFaceHits[curEdge.end()].hitObject() << endl;
+//             Pout<< "Doing edge " << edgeI << " or " << curEdge
+//                 << " start: "
+//                 << slavePointFaceHits[curEdge.start()].hitObject()
+//                 << " end "
+//                 << slavePointFaceHits[curEdge.end()].hitObject()
+//                 << endl;
+
             // If the end face is on the list, the face collection is finished
             label nSweeps = 0;
             bool completed = false;
@@ -1066,7 +1112,7 @@ bool Foam::slidingInterface::projectPoints() const
                     // inserted into the edge
 
                     // Strict checking of slave cut to avoid capturing
-                    // end points.  
+                    // end points.
                     scalar cutOnSlave =
                         ((edgeLineHit.hitPoint() - edgeLine.start()) & edgeVec)
                         /sqr(edgeMag);
@@ -1160,6 +1206,15 @@ bool Foam::slidingInterface::projectPoints() const
 
     if (debug)
     {
+        fileName fvPath(mesh.time().path()/"VTK");
+
+        standAlonePatch::writeVTK
+        (
+            fvPath/fileName(slaveFaceZoneID_.name() + "ProjectedAdjustedSlave"),
+            slavePatch.localFaces(),
+            projectedSlavePoints
+        );
+
         Pout<< "bool slidingInterface::projectPoints() for object "
             << name() << " : "
             << "Finished projecting  points. Topology = ";
