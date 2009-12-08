@@ -34,7 +34,7 @@ Description
     {
         type            timeVaryingUniformFixedValue;
         fileName        "time-series";
-        boundAction      clamp;           // (error|warn|clamp|repeat)
+        outOfBounds      clamp;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 
