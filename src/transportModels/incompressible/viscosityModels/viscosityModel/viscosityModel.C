@@ -59,7 +59,7 @@ Foam::viscosityModel::viscosityModel
 Foam::tmp<Foam::volScalarField> Foam::viscosityModel::strainRate() const
 {
     // Bug fix: sqrt(2) inconsistency.  HJ, 8/Dec/2009
-    return mag(0.5*symm(fvc::grad(U_)));
+    return sqrt(2.0)*mag(symm(fvc::grad(U_)));
 }
 
 
