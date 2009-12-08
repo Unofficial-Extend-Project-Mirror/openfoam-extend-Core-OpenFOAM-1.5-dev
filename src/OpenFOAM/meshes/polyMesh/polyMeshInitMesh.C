@@ -102,7 +102,7 @@ void Foam::polyMesh::initMesh()
         {
             Info<< "void polyMesh::initMesh() : "
                 << "unused faces detected.  "
-                << "Number of used faces: " << nUsedFaces 
+                << "Number of used faces: " << nUsedFaces
                 << ".  Total number of faces: " << allFaces_.size() << endl;
         }
 
@@ -145,9 +145,11 @@ void Foam::polyMesh::initMesh()
                     FatalErrorIn("void polyMesh::initMesh()")
                         << "Error in point ordering: mixed used and unused "
                         << "points at the end of point list." << nl
-                        << "Last used points: " << nUsedPoints
-                        << " " << allPoints_[nUsedPoints]
-                        << "  and point " << i << " " << allPoints_[i]
+                        << "Last used point: " << nUsedPoints
+                        << " " << allPoints_[nUsedPoints] << nl
+                        << "First unused point: " << nUsedPoints + 1
+                        << " " << allPoints_[nUsedPoints + 1] << nl
+                        << "and point " << i << " " << allPoints_[i]
                         << " is used by a live face." << endl;
 
                     // Find out which face uses this point
@@ -162,6 +164,8 @@ void Foam::polyMesh::initMesh()
                             {
                                 FatalError
                                     << "Face " << faceI << " " << curFace
+                                    << " with points "
+                                    << curFace.points(allPoints_)
                                     << endl;
                                 break;
                             }
