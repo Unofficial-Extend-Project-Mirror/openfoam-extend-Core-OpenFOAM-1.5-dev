@@ -153,8 +153,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
             {
                 const vector& d = pd[patchFacei];
 
-                dd[faceCells[patchFacei]] +=
-                    (1.0/magSqr(d))*sqr(d);
+                dd[faceCells[patchFacei]] += (1.0/magSqr(d))*sqr(d);
             }
         }
         else
@@ -163,8 +162,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
             {
                 const vector& d = pd[patchFacei];
 
-                dd[faceCells[patchFacei]] +=
-                    (1.0/magSqr(d))*sqr(d);
+                dd[faceCells[patchFacei]] += (1.0/magSqr(d))*sqr(d);
             }
         }
     }
