@@ -40,7 +40,7 @@ defineTypeNameAndDebug(primitiveMesh, 0);
 
 primitiveMesh::primitiveMesh()
 :
-    nInternalPoints_(0),    // note: points are considered ordered on empty mesh
+    nInternalPoints_(0),   // note: points are considered ordered on empty mesh
     nPoints_(0),
     nInternal0Edges_(-1),
     nInternal1Edges_(-1),
