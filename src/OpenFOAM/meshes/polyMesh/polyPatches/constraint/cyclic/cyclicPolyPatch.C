@@ -289,16 +289,40 @@ void Foam::cyclicPolyPatch::calcTransforms()
 
             forAll (half0Ctrs, faceI)
             {
-                maxDistance =
-                    Foam::max
-                    (
-                        maxDistance,
-                        mag
+                if (reverseT_.size())
+                {
+                    maxDistance =
+                        Foam::max
                         (
-                            Foam::transform(reverseT_[0], half0Ctrs[faceI])
-                          - half1Ctrs[faceI]
-                        )/(mag(half1Ctrs[faceI] - half0Ctrs[faceI]) + SMALL)
-                    );
+                            maxDistance,
+                            mag
+                            (
+                                Foam::transform(reverseT_[0], half0Ctrs[faceI])
+                              - half1Ctrs[faceI]
+                            )
+                           /(
+                               mag(half1Ctrs[faceI] - half0Ctrs[faceI]) 
+                             + SMALL
+                            )
+                        );
+                }
+                else
+                {
+                    maxDistance =
+                        Foam::max
+                        (
+                            maxDistance,
+                            mag
+                            (
+                                half0Ctrs[faceI]
+                              - half1Ctrs[faceI]
+                            )
+                           /(
+                               mag(half1Ctrs[faceI] - half0Ctrs[faceI]) 
+                             + SMALL
+                            )
+                        );
+                }
             }
 
             // Check max distance between face centre and
