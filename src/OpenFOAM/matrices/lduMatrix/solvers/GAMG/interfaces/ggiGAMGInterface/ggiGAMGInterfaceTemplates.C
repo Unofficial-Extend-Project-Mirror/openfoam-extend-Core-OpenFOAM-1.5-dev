@@ -50,8 +50,11 @@ tmp<Field<Type> > ggiGAMGInterface::expand(const UList<Type>& pd) const
         ed[za[i]] = pd[i];
     }
 
-    // Reduce zone data
-    reduce(ed, sumOp<Field<Type> >());
+    // Reduce zone data if the patch is distributed
+    if (!localParallel())
+    {
+        reduce(ed, sumOp<Field<Type> >());
+    }
 
     return ted;
 }

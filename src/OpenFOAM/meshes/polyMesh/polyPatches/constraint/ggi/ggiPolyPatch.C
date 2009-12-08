@@ -144,6 +144,43 @@ void Foam::ggiPolyPatch::calcPatchToPatch() const
 }
 
 
+void Foam::ggiPolyPatch::calcLocalParallel() const
+{
+    // Calculate patch-to-zone addressing
+    if (localParallelPtr_)
+    {
+        FatalErrorIn("void ggiPolyPatch::calcLocalParallel() const")
+            << "Local parallel switch already calculated"
+            << abort(FatalError);
+    }
+
+    localParallelPtr_ = new bool(false);
+    bool& emptyOrComplete = *localParallelPtr_;
+
+    // Calculate localisation on master and shadow
+    emptyOrComplete =
+        (zone().size() == size() && shadow().zone().size() == shadow().size())
+     || (size() == 0 && shadow().size() == 0);
+
+    reduce(emptyOrComplete, andOp<bool>());
+
+    if (debug && Pstream::parRun())
+    {
+        Info<< "GGI patch Master: " << name()
+            << " Slave: " << shadowName() << " is ";
+
+        if (emptyOrComplete)
+        {
+           Info<< "local parallel" << endl;
+        }
+        else
+        {
+            Info<< "split between multiple processors" << endl;
+        }
+    }
+}
+
+
 void Foam::ggiPolyPatch::calcReconFaceCellCentres() const
 {
     // Create neighbouring face centres using interpolation
@@ -172,12 +209,20 @@ void Foam::ggiPolyPatch::calcReconFaceCellCentres() const
 }
 
 
-void Foam::ggiPolyPatch::clearOut()
+void Foam::ggiPolyPatch::clearGeom()
 {
     deleteDemandDrivenData(patchToPatchPtr_);
     deleteDemandDrivenData(zoneAddressingPtr_);
 
     deleteDemandDrivenData(reconFaceCellCentresPtr_);
+}
+
+
+void Foam::ggiPolyPatch::clearOut()
+{
+    clearGeom();
+
+    deleteDemandDrivenData(localParallelPtr_);
 }
 
 
@@ -200,6 +245,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
     zoneIndex_(-1),
     patchToPatchPtr_(NULL),
     zoneAddressingPtr_(NULL),
+    localParallelPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -224,6 +270,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
     zoneIndex_(-1),
     patchToPatchPtr_(NULL),
     zoneAddressingPtr_(NULL),
+    localParallelPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -244,6 +291,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
     zoneIndex_(-1),
     patchToPatchPtr_(NULL),
     zoneAddressingPtr_(NULL),
+    localParallelPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -262,6 +310,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
     zoneIndex_(-1),
     patchToPatchPtr_(NULL),
     zoneAddressingPtr_(NULL),
+    localParallelPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -284,6 +333,7 @@ Foam::ggiPolyPatch::ggiPolyPatch
     zoneIndex_(-1),
     patchToPatchPtr_(NULL),
     zoneAddressingPtr_(NULL),
+    localParallelPtr_(NULL),
     reconFaceCellCentresPtr_(NULL)
 {}
 
@@ -335,6 +385,9 @@ Foam::label Foam::ggiPolyPatch::shadowIndex() const
         }
     }
 
+    // Force local parallel
+    localParallel();
+
     return shadowIndex_;
 }
 
@@ -384,6 +437,18 @@ const Foam::labelList& Foam::ggiPolyPatch::zoneAddressing() const
 }
 
 
+bool Foam::ggiPolyPatch::localParallel() const
+{
+    // Calculate patch-to-zone addressing
+    if (!localParallelPtr_)
+    {
+        calcLocalParallel();
+    }
+
+    return *localParallelPtr_;
+}
+
+
 const Foam::ggiZoneInterpolation& Foam::ggiPolyPatch::patchToPatch() const
 {
     if (master())
@@ -429,8 +494,8 @@ void Foam::ggiPolyPatch::calcGeometry()
     polyPatch::calcGeometry();
 
     // Note: Calculation of transforms must be forced before the
-    //       reconFaceCellCentres in order to correctly set the transformation
-    //       in the interpolation routines
+    // reconFaceCellCentres in order to correctly set the transformation
+    // in the interpolation routines.
     // HJ, 3/Jul/2009
     calcTransforms();
 
@@ -439,7 +504,6 @@ void Foam::ggiPolyPatch::calcGeometry()
     {
         reconFaceCellCentres();
     }
-
 }
 
 
@@ -452,7 +516,7 @@ void Foam::ggiPolyPatch::initMovePoints(const pointField& p)
 void Foam::ggiPolyPatch::movePoints(const pointField& p)
 {
     polyPatch::movePoints(p);
-    clearOut();
+    clearGeom();
 }
 
 

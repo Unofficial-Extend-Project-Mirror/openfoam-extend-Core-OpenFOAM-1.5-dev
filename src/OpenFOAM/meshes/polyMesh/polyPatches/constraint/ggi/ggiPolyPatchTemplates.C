@@ -67,7 +67,13 @@ Foam::tmp<Foam::Field<Type> > Foam::ggiPolyPatch::expand
     }
 
     // Parallel data exchange: update surface field on all processors
-    reduce(expandField, sumOp<Field<Type> >());
+    // Operation is performed if the patch is not localised
+    // HJ, 8/Dec/2009
+
+    if (!localParallel())
+    {
+        reduce(expandField, sumOp<Field<Type> >());
+    }
 
     return texpandField;
 }

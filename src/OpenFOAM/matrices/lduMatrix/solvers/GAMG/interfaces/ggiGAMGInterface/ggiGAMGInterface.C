@@ -88,7 +88,10 @@ Foam::ggiGAMGInterface::ggiGAMGInterface
                 localRestrictAddressing[i] + procOffset*Pstream::myProcNo();
         }
 
-         reduce(localExpandAddressing, sumOp<labelField>());
+        if (!localParallel())
+        {
+            reduce(localExpandAddressing, sumOp<labelField>());
+        }
     }
 
     labelField neighbourExpandAddressing
@@ -109,7 +112,10 @@ Foam::ggiGAMGInterface::ggiGAMGInterface
               + procOffset*Pstream::myProcNo();
         }
 
-         reduce(neighbourExpandAddressing, sumOp<labelField>());
+        if (!localParallel())
+        {
+            reduce(neighbourExpandAddressing, sumOp<labelField>());
+        }
     }
 
     // Make a lookup table of entries for owner/neighbour.
@@ -559,7 +565,10 @@ Foam::tmp<Foam::scalarField> Foam::ggiGAMGInterface::agglomerateCoeffs
     }
 
     // Reduce zone data
-    reduce(zoneFineCoeffs, sumOp<scalarField>());
+    if (!localParallel())
+    {
+        reduce(zoneFineCoeffs, sumOp<scalarField>());
+    }
 
     scalarField zoneCoarseCoeffs(zoneSize(), 0);
 
@@ -627,6 +636,12 @@ const Foam::labelListList& Foam::ggiGAMGInterface::addressing() const
         << "Requested fine addressing at coarse level"
         << abort(FatalError);
     return labelListList::null();
+}
+
+
+bool Foam::ggiGAMGInterface::localParallel() const
+{
+    return fineGgiInterface_.localParallel();
 }
 
 

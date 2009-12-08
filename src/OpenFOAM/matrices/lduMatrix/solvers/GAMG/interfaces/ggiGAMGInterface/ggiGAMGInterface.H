@@ -190,6 +190,9 @@ public:
             //- Return addressing
             virtual const labelListList& addressing() const;
 
+            //- Is the patch localised on a single processor
+            virtual bool localParallel() const;
+
             //- Return weights
             virtual const scalarListList& weights() const;
 

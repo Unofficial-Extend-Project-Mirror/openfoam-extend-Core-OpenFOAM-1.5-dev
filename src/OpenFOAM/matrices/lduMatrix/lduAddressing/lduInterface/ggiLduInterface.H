@@ -107,6 +107,9 @@ public:
         //- Return fine level addressing
         virtual const labelListList& addressing() const = 0;
 
+        //- Is the patch localised on a single processor
+        virtual bool localParallel() const = 0;
+
         //- Return weights
         virtual const scalarListList& weights() const = 0;
 

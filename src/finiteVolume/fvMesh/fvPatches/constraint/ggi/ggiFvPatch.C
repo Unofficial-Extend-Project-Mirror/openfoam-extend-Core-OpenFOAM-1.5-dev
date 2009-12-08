@@ -231,6 +231,12 @@ const Foam::labelListList& Foam::ggiFvPatch::addressing() const
 }
 
 
+bool Foam::ggiFvPatch::localParallel() const
+{
+    return ggiPolyPatch_.localParallel();
+}
+
+
 const Foam::scalarListList& Foam::ggiFvPatch::weights() const
 {
     if (ggiPolyPatch_.master())

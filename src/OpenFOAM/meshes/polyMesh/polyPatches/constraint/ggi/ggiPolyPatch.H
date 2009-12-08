@@ -85,6 +85,11 @@ class ggiPolyPatch
         //- Patch-to-zone addressing
         mutable labelList* zoneAddressingPtr_;
 
+        //- Is the patch localised on a single processor
+        // (single processor in a parallel run)?
+        //  Used for parallel optimisation
+        mutable bool* localParallelPtr_;
+
         //- Reconstructed patch neighbour cell centres
         mutable vectorField* reconFaceCellCentresPtr_;
 
@@ -97,11 +102,17 @@ class ggiPolyPatch
         //- Calculate interpolation
         virtual void calcPatchToPatch() const;
 
+        //- Calculate local parallel switch
+        void calcLocalParallel() const;
+
         //- Calculate reconstructed cell centres
         void calcReconFaceCellCentres() const;
 
         //- Force calculation of transformation tensors
         virtual void calcTransforms();
+
+        //- Clear geometry
+        void clearGeom();
 
         //- Clear out
         void clearOut();
@@ -269,6 +280,9 @@ public:
 
         //- Return patch-to-zone addressing
         const labelList& zoneAddressing() const;
+
+        //- Is the patch localised on a single processor
+        bool localParallel() const;
 
         //- Return reference to patch-to-patch interpolation
         //  Used only for addressing
