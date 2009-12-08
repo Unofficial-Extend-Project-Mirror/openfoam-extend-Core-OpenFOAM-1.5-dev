@@ -42,7 +42,7 @@ const labelListList& primitiveMesh::cellPoints() const
         cpPtr_ = new labelListList(nCells());
         invertManyToMany(nCells(), pointCells(), *cpPtr_);
     }
-    
+
     return *cpPtr_;
 }
 
