@@ -133,7 +133,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
                   + projectionDirection[pointI]*ph.distance()
                   - ph.missPoint()
                 );
-                
+
             // Calculate the local tolerance
             scalar minEdgeLength = GREAT;
 
