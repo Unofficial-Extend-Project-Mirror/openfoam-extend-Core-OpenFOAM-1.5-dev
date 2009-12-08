@@ -107,8 +107,8 @@ projectPoints
     // Loop through all points of the slave side. For every point find the
     // radius for the current contact face. If the contact point falls inside
     // the face and the radius is smaller than for all neighbouring faces,
-    // the contact is found. If not, visit the neighbour closest to the 
-    // calculated contact point. If a single master face is visited more than 
+    // the contact is found. If not, visit the neighbour closest to the
+    // calculated contact point. If a single master face is visited more than
     // twice, initiate n-squared search.
 
     if (debug)
@@ -376,8 +376,8 @@ projectFaceCentres
     // Loop through all points of the slave side. For every point find the
     // radius for the current contact face. If the contact point falls inside
     // the face and the radius is smaller than for all neighbouring faces,
-    // the contact is found. If not, visit the neighbour closest to the 
-    // calculated contact point. If a single master face is visited more than 
+    // the contact is found. If not, visit the neighbour closest to the
+    // calculated contact point. If a single master face is visited more than
     // twice, initiate n-squared search.
 
     label curFace = 0;
