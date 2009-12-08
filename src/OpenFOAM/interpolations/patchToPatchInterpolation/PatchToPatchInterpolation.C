@@ -78,7 +78,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::setWeights
 )
 {
     clearOut();
-    
+
     pointAddressingPtr_ = paPtr;
     pointWeightsPtr_ = pwPtr;
     pointDistancePtr_ = pdPtr;
