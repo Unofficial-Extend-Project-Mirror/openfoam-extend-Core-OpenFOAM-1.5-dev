@@ -54,7 +54,7 @@ void calcSinglePhaseYPlus
 
     autoPtr<incompressible::RASModel> RASModel
     (
-       incompressible::RASModel::New(U, phi, laminarTransport)
+        incompressible::RASModel::New(U, phi, laminarTransport)
     );
 
     const fvPatchList& patches = U.mesh().boundary();
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
 
                 if (gammaHeader.headerOk())
                 {
+                    volScalarField gamma(gammaHeader, mesh);
                     calcTwoPhaseYPlus(U, phi, yPlus);
                 }
                 else
