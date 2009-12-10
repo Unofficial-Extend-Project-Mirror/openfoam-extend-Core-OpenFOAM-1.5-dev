@@ -225,7 +225,7 @@ GGIInterpolation<MasterPatch, SlavePatch>::slaveToMaster
             this->masterWeights()
         );
     }
-    
+
     return tresult;
 }
 
