@@ -352,9 +352,6 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                 label faceMaster = faceMi;
                 label faceSlave  = curCMN[neighbI];
 
-                masterNeighbors[faceMaster].append(faceSlave);
-                slaveNeighbors [faceSlave].append(faceMaster);
-
                 // Compute the surface area of the neighbour polygon;
                 // We need this for computing the weighting factors
                 scalar surfaceAreaNeighbPointsInUV = area2D(neighbPointsInUV);
@@ -393,6 +390,9 @@ void GGIInterpolation<MasterPatch, SlavePatch>::calcAddressing() const
                     // the weights using the surface area from the
                     // faces projection as well. That way, we make
                     // sure all our factors will sum up to 1.0.
+
+                    masterNeighbors[faceMaster].append(faceSlave);
+                    slaveNeighbors[faceSlave].append(faceMaster);
 
                     masterNeighborsWeights[faceMaster].append
                     (
