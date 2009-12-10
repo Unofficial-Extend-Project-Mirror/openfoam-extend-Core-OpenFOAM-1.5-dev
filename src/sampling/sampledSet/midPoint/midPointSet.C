@@ -45,6 +45,12 @@ namespace Foam
 void Foam::midPointSet::genSamples()
 {
     // Generate midpoints.
+    if(size() == 0)
+    {
+        // Nothing to do
+
+        return;
+    }
 
     List<point> midPoints(2*size());
     labelList midCells(2*size());
@@ -57,7 +63,8 @@ void Foam::midPointSet::genSamples()
 
     while(true)
     {
-        // calculate midpoint between sampleI and sampleI+1 (if in same segment)
+        // calculate midpoint between sampleI and sampleI+1
+        // (if in same segment)
         while
         (
             (sampleI < size() - 1)
