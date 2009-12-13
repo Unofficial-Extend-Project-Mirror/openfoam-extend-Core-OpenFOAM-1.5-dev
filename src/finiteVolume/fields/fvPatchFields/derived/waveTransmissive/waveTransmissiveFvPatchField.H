@@ -55,8 +55,11 @@ class waveTransmissiveFvPatchField
 
     // Private data
 
-        //- Name of the compressibility field used to calculate the wave speed
+        //- Name of compressibility field used to calculate the wave speed
         word psiName_;
+
+        //- Name of velocity field used to calculate supercritical condition
+        word UName_;
 
         //- Heat capacity ratio
         scalar gamma_;

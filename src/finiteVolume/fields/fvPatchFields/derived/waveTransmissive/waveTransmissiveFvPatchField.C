@@ -45,7 +45,23 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 :
     advectiveFvPatchField<Type>(p, iF),
     psiName_("Undefined"),
+    UName_("Undefined"),
     gamma_(0.0)
+{}
+
+
+template<class Type>
+waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    advectiveFvPatchField<Type>(p, iF, dict),
+    psiName_(dict.lookup("psi")),
+    UName_(dict.lookup("U")),
+    gamma_(readScalar(dict.lookup("gamma")))
 {}
 
 
@@ -60,21 +76,8 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 :
     advectiveFvPatchField<Type>(ptf, p, iF, mapper),
     psiName_(ptf.psiName_),
+    UName_(ptf.UName_),
     gamma_(ptf.gamma_)
-{}
-
-
-template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    advectiveFvPatchField<Type>(p, iF, dict),
-    psiName_(dict.lookup("psi")),
-    gamma_(readScalar(dict.lookup("gamma")))
 {}
 
 
@@ -86,6 +89,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 :
     advectiveFvPatchField<Type>(ptpsf),
     psiName_(ptpsf.psiName_),
+    UName_(ptpsf.psiName_),
     gamma_(ptpsf.gamma_)
 {}
 
@@ -99,6 +103,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 :
     advectiveFvPatchField<Type>(ptpsf, iF),
     psiName_(ptpsf.psiName_),
+    UName_(ptpsf.UName_),
     gamma_(ptpsf.gamma_)
 {}
 
@@ -160,7 +165,7 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::supercritical() const
     const fvPatchVectorField& U =
         this->patch().lookupPatchField
         (
-            "U",
+            UName_,
             reinterpret_cast<const volVectorField*>(NULL),
             reinterpret_cast<const vector*>(NULL)
         );
@@ -182,6 +187,7 @@ void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
     advectiveFvPatchField<Type>::write(os);
 
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << endl;
 }
 
