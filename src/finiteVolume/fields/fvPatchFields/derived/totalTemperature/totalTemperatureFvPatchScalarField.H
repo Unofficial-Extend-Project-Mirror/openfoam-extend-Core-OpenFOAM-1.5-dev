@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class totalTemperatureFvPatch Declaration
+                   Class totalTemperatureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class totalTemperatureFvPatchScalarField
@@ -92,7 +92,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given totalTemperatureFvPatchScalarField 
+        //- Construct by mapping given totalTemperatureFvPatchScalarField
         //  onto a new patch
         totalTemperatureFvPatchScalarField
         (
