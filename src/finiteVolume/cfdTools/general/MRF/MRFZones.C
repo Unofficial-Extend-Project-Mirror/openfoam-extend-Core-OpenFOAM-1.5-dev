@@ -74,6 +74,32 @@ void Foam::MRFZones::relativeFlux(surfaceScalarField& phi) const
 }
 
 
+void Foam::MRFZones::addCoriolis
+(
+    const volScalarField& rho,
+    fvVectorMatrix& UEqn
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addCoriolis(rho, UEqn);
+    }
+}
+
+
+void Foam::MRFZones::relativeFlux
+(
+    const surfaceScalarField& rhof,
+    surfaceScalarField& phi
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).relativeFlux(rhof, phi);
+    }
+}
+
+
 void Foam::MRFZones::correctBoundaryVelocity(volVectorField& U) const
 {
     forAll(*this, i)

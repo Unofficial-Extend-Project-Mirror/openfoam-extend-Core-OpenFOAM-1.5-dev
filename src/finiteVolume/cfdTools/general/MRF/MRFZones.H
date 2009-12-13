@@ -73,11 +73,37 @@ public:
 
     // Member Functions
 
-        //- Add the Coriolis force contribution to the momentum equation
-        void addCoriolis(fvVectorMatrix& UEqn) const;
+        // Incompressible MRF
 
-        //- Make the given absolute flux relative within the MRF region
-        void relativeFlux(surfaceScalarField& phi) const;
+            //- Add the Coriolis force contribution to the momentum equation
+            void addCoriolis(fvVectorMatrix& UEqn) const;
+
+            //- Make the given absolute flux relative within the MRF region
+            void relativeFlux(surfaceScalarField& phi) const;
+
+
+        // Compressible MRF
+
+            //- Add the Coriolis force contribution to the momentum equation
+            //  Use for equations with prefactor fields, eg. density.
+            //  This is typically visible in the ddt term
+            //  HJ, 12/Dec/2009
+            void addCoriolis
+            (
+                const volScalarField& rho,
+                fvVectorMatrix& UEqn
+            ) const;
+
+            //- Make the given absolute flux relative within the MRF region
+            //  Use for fluxes with prefactor fields, eg. density.
+            //  For consistency, requires face-interpolated prefactor
+            //  HJ. 12/Dec/2009
+            void relativeFlux
+            (
+                const surfaceScalarField& rhof,
+                surfaceScalarField& phi
+            ) const;
+
 
         //- Correct the boundary velocity for the roation of the MRF region
         void correctBoundaryVelocity(volVectorField& U) const;

@@ -356,10 +356,22 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
         return;
     }
 
+    if (UEqn.dimensions() != UEqn.psi().dimensions()*dimVolume/dimTime)
+    {
+        FatalErrorIn
+        (
+            "void MRFZone::addCoriolis(fvVectorMatrix& UEqn) const"
+        )   << "Equation for " << UEqn.psi().name()
+            << " is not defined in terms of velocity. UEqn: "
+            << UEqn.dimensions() << " expected "
+            << UEqn.psi().dimensions()*dimVolume/dimTime
+            << abort(FatalError);
+    }
+
     const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const scalarField& V = mesh_.V();
     vectorField& Usource = UEqn.source();
-    const vectorField& U = UEqn.psi();
+    const vectorField& U = UEqn.psi().internalField();
     const vector& Omega = Omega_.value();
 
     forAll(cells, i)
@@ -371,17 +383,32 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 
 void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
 {
+    if (phi.dimensions() != dimVelocity*dimArea)
+    {
+        FatalErrorIn
+        (
+            "void MRFZone::relativeFlux(surfaceScalarField& phi) const"
+        )   << phi.name() << " is not a volumetric flux field"
+            << abort(FatalError);
+    }
+
     const surfaceVectorField& Cf = mesh_.Cf();
     const surfaceVectorField& Sf = mesh_.Sf();
 
     const vector& origin = origin_.value();
     const vector& Omega = Omega_.value();
 
+    // Access to flux field.  Optimisation.  HJ, 12/Dec/2009
+    scalarField& phiIn = phi.internalField();
+
+    surfaceScalarField::GeometricBoundaryField& phiBoundary =
+        phi.boundaryField();
+
     // Internal faces
     forAll(internalFaces_, i)
     {
         label facei = internalFaces_[i];
-        phi[facei] -= (Omega ^ (Cf[facei] - origin)) & Sf[facei];
+        phiIn[facei] -= (Omega ^ (Cf[facei] - origin)) & Sf[facei];
     }
 
     // Included patches
@@ -391,7 +418,7 @@ void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
         {
             label patchFacei = includedFaces_[patchi][i];
 
-            phi.boundaryField()[patchi][patchFacei] = 0.0;
+            phiBoundary[patchi][patchFacei] = 0.0;
         }
     }
 
@@ -402,9 +429,125 @@ void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
         {
             label patchFacei = excludedFaces_[patchi][i];
 
-            phi.boundaryField()[patchi][patchFacei] -=
+            phiBoundary[patchi][patchFacei] -=
                 (Omega ^ (Cf.boundaryField()[patchi][patchFacei] - origin))
               & Sf.boundaryField()[patchi][patchFacei];
+        }
+    }
+}
+
+
+void Foam::MRFZone::addCoriolis
+(
+    const volScalarField& rho,
+    fvVectorMatrix& UEqn
+) const
+{
+    if (cellZoneID_ == -1)
+    {
+        return;
+    }
+
+    if
+    (
+        UEqn.dimensions()
+     != rho.dimensions()*UEqn.psi().dimensions()*dimVolume/dimTime
+    )
+    {
+        FatalErrorIn
+        (
+            "void Foam::MRFZone::addCoriolis\n"
+            "(\n"
+            "    const volScalarField& rho,\n"
+            "    fvVectorMatrix& UEqn\n"
+            ") const"
+        )   << "Equation for " << UEqn.psi().name()
+            << " is not defined in terms of momentum.  UEqn: "
+            << UEqn.dimensions() << " expected "
+            << rho.dimensions()*UEqn.psi().dimensions()*dimVolume/dimTime
+            << abort(FatalError);
+    }
+
+    const labelList& cells = mesh_.cellZones()[cellZoneID_];
+    const scalarField& V = mesh_.V();
+    vectorField& Usource = UEqn.source();
+    const vectorField& U = UEqn.psi().internalField();
+    const scalarField& rhoIn = rho.internalField();
+    const vector& Omega = Omega_.value();
+
+    forAll(cells, i)
+    {
+        Usource[cells[i]] -= rhoIn[cells[i]]*V[cells[i]]*(Omega ^ U[cells[i]]);
+    }
+}
+
+
+void Foam::MRFZone::relativeFlux
+(
+    const surfaceScalarField& rhof,
+    surfaceScalarField& phi
+) const
+{
+    if (phi.dimensions() != dimVelocity*dimArea*rhof.dimensions())
+    {
+        FatalErrorIn
+        (
+            "void MRFZone::relativeFlux(surfaceScalarField& phi) const"
+        )   << "Dimensions of flux field" << phi.name()
+            << " are not consistent with a flux field"
+            << abort(FatalError);
+    }
+
+    const surfaceVectorField& Cf = mesh_.Cf();
+    const surfaceVectorField& Sf = mesh_.Sf();
+
+    const vector& origin = origin_.value();
+    const vector& Omega = Omega_.value();
+
+    // Prefactor field
+    const scalarField& rhofIn = rhof.internalField();
+
+    const surfaceScalarField::GeometricBoundaryField& rhofBoundary =
+        rhof.boundaryField();
+
+    // Access to flux field.  Optimisation.  HJ, 12/Dec/2009
+    scalarField& phiIn = phi.internalField();
+
+    surfaceScalarField::GeometricBoundaryField& phiBoundary =
+        phi.boundaryField();
+
+    // Internal faces
+    forAll(internalFaces_, i)
+    {
+        label facei = internalFaces_[i];
+        phiIn[facei] -=
+            rhofIn[facei]*(Omega ^ (Cf[facei] - origin)) & Sf[facei];
+    }
+
+    // Included patches
+    forAll(includedFaces_, patchi)
+    {
+        forAll(includedFaces_[patchi], i)
+        {
+            label patchFacei = includedFaces_[patchi][i];
+
+            phiBoundary[patchi][patchFacei] = 0.0;
+        }
+    }
+
+    // Excluded patches
+    forAll(excludedFaces_, patchi)
+    {
+        forAll(excludedFaces_[patchi], i)
+        {
+            label patchFacei = excludedFaces_[patchi][i];
+
+            phiBoundary[patchi][patchFacei] -=
+                rhofBoundary[patchi][patchFacei]*
+                (
+                    (Omega ^ (Cf.boundaryField()[patchi][patchFacei] - origin))
+                  & Sf.boundaryField()[patchi][patchFacei]
+                );
         }
     }
 }
