@@ -98,7 +98,8 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 {}
 
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const pressureInletVelocityFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
