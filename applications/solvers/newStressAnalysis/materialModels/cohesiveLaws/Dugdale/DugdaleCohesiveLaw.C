@@ -73,6 +73,15 @@ Foam::DugdaleCohesiveLaw::~DugdaleCohesiveLaw()
 //- Return current holding traction
 Foam::scalar Foam::DugdaleCohesiveLaw::traction(scalar delta) const
 {
+    if (delta > deltaC().value())
+    {
+        return 0.0;
+    }
+    else if (delta < 0)
+    {
+        return sigmaMax().value();
+    }
+
     return sigmaMax().value();
 }
 
