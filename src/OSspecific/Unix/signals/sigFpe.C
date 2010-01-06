@@ -24,6 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <stdint.h>
+
 #include "error.H"
 #include "sigFpe.H"
 
