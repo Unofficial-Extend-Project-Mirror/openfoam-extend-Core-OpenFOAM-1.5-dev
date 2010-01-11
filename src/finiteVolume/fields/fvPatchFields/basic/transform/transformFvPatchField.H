@@ -151,7 +151,8 @@ public:
 // * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * * * //
 
 template<>
-tmp<scalarField > transformFvPatchField<scalar>::gradientInternalCoeffs() const;
+tmp<scalarField >
+transformFvPatchField<scalar>::gradientInternalCoeffs() const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
