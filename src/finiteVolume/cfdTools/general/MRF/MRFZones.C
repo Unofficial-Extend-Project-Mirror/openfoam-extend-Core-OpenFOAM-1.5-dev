@@ -50,7 +50,8 @@ Foam::MRFZones::MRFZones(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         MRFZone::iNew(mesh)
-    )
+    ),
+    mesh_(mesh)
 {}
 
 
@@ -97,6 +98,35 @@ void Foam::MRFZones::relativeFlux
     {
         operator[](i).relativeFlux(rhof, phi);
     }
+}
+
+
+Foam::tmp<Foam::surfaceScalarField> Foam::MRFZones::fluxCorrection() const
+{
+    tmp<surfaceScalarField> tMRFZonesPhiCorr
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "MRFZonesPhiCorr",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimVelocity*dimArea, 0)
+        )
+    );
+    surfaceScalarField& MRFZonesPhiCorr = tMRFZonesPhiCorr();
+
+    forAll(*this, i)
+    {
+        operator[](i).relativeFlux(MRFZonesPhiCorr);
+    }
+
+    return tMRFZonesPhiCorr;
 }
 
 

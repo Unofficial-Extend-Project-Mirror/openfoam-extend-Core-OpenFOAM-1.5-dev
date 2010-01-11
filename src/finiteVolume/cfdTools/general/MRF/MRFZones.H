@@ -53,6 +53,11 @@ class MRFZones
 :
     public IOPtrList<MRFZone>
 {
+    // Private data
+
+        //- Mesh reference
+        const fvMesh& mesh_;
+
 
     // Private Member Functions
 
@@ -72,6 +77,9 @@ public:
 
 
     // Member Functions
+
+        //- Return raw correction flux
+        tmp<surfaceScalarField> fluxCorrection() const;
 
         // Incompressible MRF
 
