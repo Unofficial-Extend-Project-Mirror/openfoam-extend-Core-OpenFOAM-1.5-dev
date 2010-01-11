@@ -207,7 +207,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
     {
         FatalErrorIn("bool layerAdditionRemoval::changeTopology() const")
             << "negative cell volume. Error in mesh motion before "
-            << "topological change.\n V: " << V
+            << "topological change."
             << abort(FatalError);
     }
 
