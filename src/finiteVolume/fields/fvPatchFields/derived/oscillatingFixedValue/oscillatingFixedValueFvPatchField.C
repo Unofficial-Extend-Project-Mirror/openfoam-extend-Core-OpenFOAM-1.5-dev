@@ -64,23 +64,6 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 template<class Type>
 oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 (
-    const oscillatingFixedValueFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    refValue_(ptf.refValue_, mapper),
-    amplitude_(ptf.amplitude_),
-    frequency_(ptf.frequency_),
-    curTimeIndex_(-1)
-{}
-
-
-template<class Type>
-oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
-(
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
@@ -104,6 +87,23 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
         fixedValueFvPatchField<Type>::operator==(refValue_*currentScale());
     }
 }
+
+
+template<class Type>
+oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
+(
+    const oscillatingFixedValueFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    refValue_(ptf.refValue_, mapper),
+    amplitude_(ptf.amplitude_),
+    frequency_(ptf.frequency_),
+    curTimeIndex_(-1)
+{}
 
 
 template<class Type>
