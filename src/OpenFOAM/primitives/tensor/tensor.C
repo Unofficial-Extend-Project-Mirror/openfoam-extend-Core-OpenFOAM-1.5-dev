@@ -97,8 +97,7 @@ vector eigenValues(const tensor& t)
             + t.xy()*t.yx()*t.zz() + t.xx()*t.yz()*t.zy();
 
         // If there is a zero root
-        // HJ, bug fix.  Experimental (1.0e-100). 11/Dec/2009
-        if (mag(c) < SMALL)
+        if (mag(c) < 1.0e-100)
         {
             scalar disc = sqr(a) - 4*b;
 
@@ -314,7 +313,8 @@ vector eigenValues(const symmTensor& t)
             + t.xy()*t.xy()*t.zz() + t.xx()*t.yz()*t.yz();
 
         // If there is a zero root
-        if (mag(c) < 1.0e-100)
+        if (mag(c) < SMALL)
+//         if (mag(c) < 1.0e-100)
         {
             scalar disc = sqr(a) - 4*b;
 
