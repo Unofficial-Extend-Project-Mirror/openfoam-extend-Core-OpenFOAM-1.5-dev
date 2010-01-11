@@ -57,7 +57,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::meshToMesh
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.  HJ, date deleted
         if (patchMap[patchI] == -1)
         {
             patchFields.set
@@ -165,7 +165,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.  HJ, date deleted
         if (pm[patchI] == -1)
         {
             patchFields.set
@@ -211,7 +211,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
 
         forAll(lastPatchField, faceI)
         {
-            lastPatchField[faceI] = 
+            lastPatchField[faceI] =
                 w[fm[lastPatchStart + faceI]]*
                 vfI[own[fm[lastPatchStart + faceI]]]
               + (1.0 - w[fm[lastPatchStart + faceI]])*
@@ -273,7 +273,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.  HJ, date deleted
         if (pm[patchI] == -1)
         {
             patchFields.set
@@ -371,7 +371,7 @@ fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.  HJ, date deleted
         if (pm[patchI] == -1)
         {
             patchFields.set
