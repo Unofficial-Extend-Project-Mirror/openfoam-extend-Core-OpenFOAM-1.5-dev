@@ -31,7 +31,7 @@ Description
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "coarseAmgLevel.H"
 #include "SubField.H"
@@ -255,7 +255,9 @@ void Foam::coarseAmgLevel::scaleX
     // Scale x
     if
     (
-        scalingVector[0]*scalingVector[1] <= 0
+        mag(scalingVector[0]) > GREAT
+     || mag(scalingVector[1]) > GREAT
+     || scalingVector[0]*scalingVector[1] <= 0
      || mag(scalingVector[0]) < mag(scalingVector[1])
     )
     {
