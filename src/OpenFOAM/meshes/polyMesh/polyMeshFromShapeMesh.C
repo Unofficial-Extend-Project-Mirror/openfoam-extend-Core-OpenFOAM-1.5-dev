@@ -265,6 +265,7 @@ Foam::polyMesh::polyMesh
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
+    changing_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldAllPointsPtr_(NULL),
     oldPointsPtr_(NULL)
