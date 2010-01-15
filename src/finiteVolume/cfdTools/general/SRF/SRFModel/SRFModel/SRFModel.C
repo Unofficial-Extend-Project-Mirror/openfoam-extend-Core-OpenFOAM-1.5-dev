@@ -69,6 +69,19 @@ Foam::SRF::SRFModel::SRFModel
     omega_(dimensionedVector("omega", dimless/dimTime, vector::zero))
 {
     // Normalise the axis
+    if (mag(axis_) < SMALL)
+    {
+        FatalErrorIn
+        (
+            "SRF::SRFModel::SRFModel\n"
+            "(\n"
+            "    const word& type,\n"
+            "    const volVectorField& Urel\n"
+            ")"
+        )   << "Zero length axis: " << axis_ << ".  This is not allowed."
+            << abort(FatalError);
+    }
+
     axis_ /= mag(axis_);
 }
 
@@ -87,6 +100,14 @@ bool Foam::SRF::SRFModel::read()
     {
         // Re-read axis
         SRFModelCoeffs_.lookup("axis") >> axis_;
+
+        if (mag(axis_) < SMALL)
+        {
+            FatalErrorIn("SRF::SRFModel::read()")
+                << "Zero length axis: " << axis_ << ".  This is not allowed."
+                << abort(FatalError);
+        }
+
         axis_ /= mag(axis_);
 
         // Re-read sub-model coeffs
@@ -159,6 +180,27 @@ Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
 Foam::SRF::SRFModel::Su() const
 {
     return Fcoriolis() + Fcentrifugal();
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::SRF::SRFModel::centrifugalWork() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "centrifugalWork",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (omega_ ^ (omega_ ^ mesh_.C())) & Urel_
+        )
+    );
 }
 
 
