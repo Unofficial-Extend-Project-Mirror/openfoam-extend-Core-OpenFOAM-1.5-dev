@@ -27,12 +27,18 @@ License
 #include "LimitedScheme.H"
 #include "SuperBee.H"
 
+#include "DeferredCorrectionLimitedScheme.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     makeLimitedSurfaceInterpolationScheme(SuperBee, SuperBeeLimiter)
     makeLimitedVSurfaceInterpolationScheme(SuperBeeV, SuperBeeLimiter)
+
+    // Deferred correction schemes
+    makeDeferredSurfaceInterpolationScheme(SuperBeeDC, SuperBeeLimiter)
+    makeDeferredVSurfaceInterpolationScheme(SuperBeeVDC, SuperBeeLimiter)
 }
 
 // ************************************************************************* //
