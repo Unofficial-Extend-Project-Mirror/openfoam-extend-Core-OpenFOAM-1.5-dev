@@ -374,7 +374,7 @@ void Foam::fvMeshSubset::makeFvDictionaries()
     {
         Info << "Cannot read " << fvSchemes.path()
             << ".  Copy from base" << endl;
-        
+
         IOdictionary fvSchemesBase
         (
             IOobject
@@ -407,7 +407,7 @@ void Foam::fvMeshSubset::makeFvDictionaries()
     {
         Info << "Cannot read " << fvSolution.path()
             << ".  Copy from base" << endl;
-        
+
         IOdictionary fvSolutionBase
         (
             IOobject
