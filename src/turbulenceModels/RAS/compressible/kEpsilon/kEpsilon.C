@@ -239,6 +239,11 @@ bool kEpsilon::read()
 
 void kEpsilon::correct()
 {
+    // Bound in case of topological change.  Signalling currently not available
+    // HJ, 22/Aug/2007
+    bound(k_, k0_);
+    bound(epsilon_, epsilon0_);
+
     if (!turbulence_)
     {
         // Re-calculate viscosity
