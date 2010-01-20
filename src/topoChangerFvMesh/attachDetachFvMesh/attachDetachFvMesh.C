@@ -79,8 +79,10 @@ void Foam::attachDetachFvMesh::addZonesAndModifiers()
         );
     }
 
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
+    write();
 }
 
 

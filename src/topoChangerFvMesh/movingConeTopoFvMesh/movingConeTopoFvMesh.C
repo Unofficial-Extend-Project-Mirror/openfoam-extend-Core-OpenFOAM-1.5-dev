@@ -140,7 +140,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
                 << flipZone1[nZoneFaces1] << endl;
             nZoneFaces1++;
         }
-        else if 
+        else if
         (
             fc[faceI].x() > -0.00701
          && fc[faceI].x() < -0.00699
@@ -251,8 +251,9 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
 
     Info << "Adding " << nMods << " mesh modifiers" << endl;
 
-    // Write mesh modifiers
+    // Write mesh and modifiers
     topoChanger_.write();
+    write();
 }
 
 

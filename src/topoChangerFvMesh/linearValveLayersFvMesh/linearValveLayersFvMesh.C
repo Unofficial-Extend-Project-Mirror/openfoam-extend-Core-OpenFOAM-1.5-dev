@@ -122,7 +122,11 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     );
 
     // Outer slider
-    const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
+    const word outerSliderName
+    (
+        motionDict_.subDict("slider").lookup("outside")
+    );
+
     const polyPatch& outerSlider =
         boundaryMesh()[boundaryMesh().findPatchID(outerSliderName)];
 
@@ -223,8 +227,10 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
         )
     );
 
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
+    write();
 }
 
 
