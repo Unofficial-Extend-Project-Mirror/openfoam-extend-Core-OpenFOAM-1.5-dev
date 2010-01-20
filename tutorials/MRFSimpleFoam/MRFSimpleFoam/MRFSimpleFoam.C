@@ -26,7 +26,7 @@ Application
     MRFSimpleFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow of non-Newtonian 
+    Steady-state solver for incompressible, turbulent flow of non-Newtonian
     fluids with MRF regions.
 
 \*---------------------------------------------------------------------------*/
