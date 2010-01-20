@@ -322,8 +322,8 @@ int main(int argc, char *argv[])
         );
 
 
-        // Note: make sure to add the zones BEFORE constructing polyMeshModifier
-        // (since looks up various zones at construction time)
+        // Note: make sure to add the zones BEFORE constructing
+        // polyMeshModifier (since looks up various zones at construction time)
         Info << "Adding point and face zones" << endl;
         mesh.addZones(pz.shrink(), fz.shrink(), cz.shrink());
 
