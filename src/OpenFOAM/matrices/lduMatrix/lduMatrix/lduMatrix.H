@@ -778,7 +778,7 @@ public:
                 const lduInterfaceFieldPtrsList&,
                 const direction cmpt
             ) const;
-    
+
             //- Matrix multiplication without interfaces
             //  Result will be added to Ax
             void AmulCore

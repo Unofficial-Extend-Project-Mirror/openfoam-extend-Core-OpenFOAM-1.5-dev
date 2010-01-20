@@ -80,7 +80,7 @@ Foam::lduPreconditioner::New
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::lduPreconditioner::preconditioner
+Foam::lduMatrix::preconditioner::preconditioner
 (
     const lduMatrix& matrix,
     const FieldField<Field, scalar>& coupleBouCoeffs,
