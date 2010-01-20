@@ -33,7 +33,7 @@ hierarchicalCoeffs
 
 metisCoeffs
 {
-    processorWeights 
+    processorWeights
     (
         1
         1
