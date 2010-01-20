@@ -269,7 +269,7 @@ tmp<volSymmTensorField> kOmegaSST_LowRe::R() const
 
 tmp<volSymmTensorField> kOmegaSST_LowRe::devReff() const
 {
-	return tmp<volSymmTensorField>
+    return tmp<volSymmTensorField>
     (
         new volSymmTensorField
         (
@@ -284,7 +284,6 @@ tmp<volSymmTensorField> kOmegaSST_LowRe::devReff() const
            -nuEff()*dev(twoSymm(fvc::grad(U_)))
         )
     );
-
 }
 
 
