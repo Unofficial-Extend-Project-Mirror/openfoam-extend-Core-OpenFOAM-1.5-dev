@@ -417,6 +417,7 @@ int main(int argc, char *argv[])
 
     Info << nl << "Writing polyMesh" << endl;
     mesh.removeFiles(mesh.instance());
+
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
