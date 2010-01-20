@@ -38,7 +38,7 @@ Description
     fluentMeshWithInternalFaces).
 
     A use of the cell zone information, is for field initialization with the
-    "setFields" utility. see the classes:  topoSetSource, zoneToCell.  
+    "setFields" utility. see the classes:  topoSetSource, zoneToCell.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
