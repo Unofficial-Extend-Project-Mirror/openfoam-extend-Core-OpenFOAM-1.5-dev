@@ -269,7 +269,7 @@ void ComponentMixedPointPatchVectorField
 <PatchField, Mesh, PointPatch, MatrixType>::
 setBoundaryCondition
 (
-    Map<typename MatrixType<vector>::ConstraintType> & fix
+    Map<typename MatrixType<vector>::ConstraintType>& fix
 ) const
 {
     // get addressing

@@ -33,7 +33,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template
 <
@@ -149,7 +149,8 @@ template
     template<class> class MatrixType,
     class Type
 >
-void FixedValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
+void
+FixedValuePointPatchField<PatchField, Mesh, PointPatch, MatrixType, Type>::
 setBoundaryCondition
 (
     Map<typename MatrixType<Type>::ConstraintType>& fix

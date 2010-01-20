@@ -140,7 +140,7 @@ public:
         //- Set boundary condition to matrix
         virtual void setBoundaryCondition
         (
-            Map<typename MatrixType<Type>::ConstraintType> &
+            Map<typename MatrixType<Type>::ConstraintType>&
         ) const;
 
 

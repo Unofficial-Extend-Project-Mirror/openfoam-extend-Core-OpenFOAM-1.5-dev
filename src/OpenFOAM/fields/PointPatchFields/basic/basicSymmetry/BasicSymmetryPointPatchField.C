@@ -223,7 +223,7 @@ void BasicSymmetryPointPatchField
 <PatchField, Mesh, PointPatch, MatrixType, Type>::
 setBoundaryCondition
 (
-    Map<typename MatrixType<Type>::ConstraintType> & fix
+    Map<typename MatrixType<Type>::ConstraintType>& fix
 ) const
 {
     const Field<Type>& values = *this;
