@@ -48,6 +48,10 @@ namespace Foam
 
 Foam::word Foam::faMesh::meshSubDir = "faMesh";
 
+const bool Foam::faMesh::quadricsFit_
+(
+    debug::optimisationSwitch("quadricsFit", 0) > 0
+);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1003,6 +1007,11 @@ const Foam::vectorField& Foam::faMesh::pointAreaNormals() const
     if (!pointAreaNormalsPtr_)
     {
         calcPointAreaNormals();
+
+        if (quadricsFit_)
+        {
+            calcPointAreaNormalsByQuadricsFit();
+        }
     }
 
     return *pointAreaNormalsPtr_;
