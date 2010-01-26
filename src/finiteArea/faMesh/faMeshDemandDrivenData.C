@@ -36,6 +36,8 @@ Description
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "PstreamCombineReduceOps.H"
+#include "cartesianCS.H"
+#include "scalarMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1184,6 +1186,606 @@ void faMesh::calcPointAreaNormals() const
         forAll (spNormals, pointI)
         {
             result[spLabels[pointI]] = spNormals[pointI];
+        }
+    }
+
+    result /= mag(result);
+}
+
+
+void faMesh::calcPointAreaNormalsByQuadricsFit() const
+{
+    vectorField& result = *pointAreaNormalsPtr_;
+
+
+    labelList intPoints = internalPoints();
+    labelList bndPoints = boundaryPoints();
+
+    const pointField& points = patch().localPoints();
+    const faceList& faces = patch().localFaces();
+    const labelListList& pointFaces = patch().pointFaces();
+
+    forAll(intPoints, pointI)
+    {
+        label curPoint = intPoints[pointI];
+
+        labelHashSet faceSet;
+        forAll(pointFaces[curPoint], faceI)
+        {
+            faceSet.insert(pointFaces[curPoint][faceI]);
+        }
+        labelList curFaces = faceSet.toc();
+
+        labelHashSet pointSet;
+
+        pointSet.insert(curPoint);
+        for(label i=0; i<curFaces.size(); i++)
+        {
+            const labelList& facePoints = faces[curFaces[i]];
+            for(label j=0; j<facePoints.size(); j++)
+            {
+                if(!pointSet.found(facePoints[j]))
+                {
+                    pointSet.insert(facePoints[j]);
+                }
+            }
+        }
+        pointSet.erase(curPoint);
+        labelList curPoints = pointSet.toc();
+
+        if (curPoints.size() < 5)
+        {
+            if (debug)
+            {
+                Info << "WARNING: Extending point set for fitting." << endl;
+            }
+
+            labelHashSet faceSet;
+            forAll(pointFaces[curPoint], faceI)
+            {
+                faceSet.insert(pointFaces[curPoint][faceI]);
+            }
+            labelList curFaces = faceSet.toc();
+            forAll(curFaces, faceI)
+            {
+                const labelList& curFaceFaces =
+                    patch().faceFaces()[curFaces[faceI]];
+                
+                forAll(curFaceFaces, fI)
+                {
+                    label curFaceFace = curFaceFaces[fI];
+                        
+                    if(!faceSet.found(curFaceFace))
+                    {
+                        faceSet.insert(curFaceFace);
+                    }
+                }
+            }
+            curFaces = faceSet.toc();
+
+            labelHashSet pointSet;
+
+            pointSet.insert(curPoint);
+            for(label i=0; i<curFaces.size(); i++)
+            {
+                const labelList& facePoints = faces[curFaces[i]];
+                for(label j=0; j<facePoints.size(); j++)
+                {
+                    if(!pointSet.found(facePoints[j]))
+                    {
+                        pointSet.insert(facePoints[j]);
+                    }
+                }
+            }
+
+            curPoints = pointSet.toc();
+        }
+
+        vectorField allPoints(curPoints.size());
+        scalarField W(curPoints.size(), 1.0);
+        for(label i=0; i<curPoints.size(); i++)
+        {
+            allPoints[i] = points[curPoints[i]];
+            W[i] = 1.0/magSqr(allPoints[i] - points[curPoint]);
+        }
+
+        // Transforme points
+        vector origin = points[curPoint];
+        vector axis = result[curPoint]/mag(result[curPoint]);
+        vector dir = (allPoints[0] - points[curPoint]);
+        dir -= axis*(axis&dir);
+        dir /= mag(dir);
+        cartesianCS cs("cs", origin, axis, dir);
+
+        forAll(allPoints, pointI)
+        {
+            allPoints[pointI] = cs.localPosition(allPoints[pointI]);
+        }
+
+        Matrix<scalar> M
+        (
+            allPoints.size(), 
+            5,
+            0.0
+        );
+
+        for(label i=0; i<allPoints.size(); i++)
+        {
+            M[i][0] = sqr(allPoints[i].x());
+            M[i][1] = sqr(allPoints[i].y());
+            M[i][2] = allPoints[i].x()*allPoints[i].y();
+            M[i][3] = allPoints[i].x();
+            M[i][4] = allPoints[i].y();
+        }
+
+        Matrix<scalar> MtM(5, 5, 0.0);
+        for (label i=0; i<MtM.n(); i++)
+        {
+            for (label j=0; j<MtM.m(); j++)
+            {
+                for (label k=0; k<M.n(); k++)
+                {
+                    MtM[i][j] += M[k][i]*M[k][j]*W[k];
+                }
+            }
+        }
+
+        scalarField MtR(5, 0);
+        for (label i=0; i<MtR.size(); i++)
+        {
+            for (label j=0; j<M.n(); j++)
+            {
+                MtR[i] += M[j][i]*allPoints[j].z()*W[j];
+            }
+        }
+
+        scalarMatrix::LUsolve(MtM, MtR);
+
+        vector curNormal = vector(MtR[3], MtR[4], -1);
+        
+        curNormal = cs.globalVector(curNormal);
+        
+        curNormal *= sign(curNormal&result[curPoint]);
+        
+        result[curPoint] = curNormal;
+    }
+
+    forAll (boundary(), patchI)
+    {
+        if(boundary()[patchI].type() == processorFaPatch::typeName)
+        {
+            const processorFaPatch& procPatch =
+                refCast<const processorFaPatch>(boundary()[patchI]);
+
+            labelList patchPointLabels = procPatch.pointLabels();
+
+            labelList toNgbProcLsPointStarts(patchPointLabels.size(), 0);
+            vectorField toNgbProcLsPoints
+            (
+                10*patchPointLabels.size(), 
+                vector::zero
+            );
+            label nPoints = 0;
+
+            for (label pointI=0; pointI<patchPointLabels.size(); pointI++)
+            {
+                label curPoint = patchPointLabels[pointI];
+
+                toNgbProcLsPointStarts[pointI] = nPoints;
+
+                labelHashSet faceSet;
+                forAll(pointFaces[curPoint], faceI)
+                {
+                    faceSet.insert(pointFaces[curPoint][faceI]);
+                }
+                labelList curFaces = faceSet.toc();
+
+                labelHashSet pointSet;
+
+                pointSet.insert(curPoint);
+                for (label i=0; i<curFaces.size(); i++)
+                {
+                    const labelList& facePoints = faces[curFaces[i]];
+                    for (label j=0; j<facePoints.size(); j++)
+                    {
+                        if(!pointSet.found(facePoints[j]))
+                        {
+                            pointSet.insert(facePoints[j]);
+                        }
+                    }
+                }
+                pointSet.erase(curPoint);
+                labelList curPoints = pointSet.toc();
+
+                for (label i=0; i<curPoints.size(); i++)
+                {
+                    if (findIndex(patchPointLabels, curPoints[i]) == -1)
+                    {
+                        toNgbProcLsPoints[nPoints++] = 
+                            points[curPoints[i]];
+                    }
+                }   
+            }
+
+            toNgbProcLsPoints.setSize(nPoints);
+            
+            {
+                OPstream toNeighbProc
+                (
+                    Pstream::blocking,
+                    procPatch.neighbProcNo(),
+                    toNgbProcLsPoints.byteSize()
+                  + toNgbProcLsPointStarts.byteSize()
+                  + 10*sizeof(label)
+                );
+
+                toNeighbProc << toNgbProcLsPoints
+                    << toNgbProcLsPointStarts;
+            }
+        }
+    }
+
+    forAll (boundary(), patchI)
+    {
+        if(boundary()[patchI].type() == processorFaPatch::typeName)
+        {
+            const processorFaPatch& procPatch =
+                refCast<const processorFaPatch>(boundary()[patchI]);
+
+            labelList patchPointLabels = procPatch.pointLabels();
+
+            labelList fromNgbProcLsPointStarts(patchPointLabels.size(), 0);
+            vectorField fromNgbProcLsPoints;
+                
+            {
+                IPstream fromNeighbProc
+                (
+                    Pstream::blocking,
+                    procPatch.neighbProcNo(),
+                    10*patchPointLabels.size()*sizeof(vector)
+                  + fromNgbProcLsPointStarts.byteSize()
+                  + 10*sizeof(label)
+                );
+
+                fromNeighbProc >> fromNgbProcLsPoints
+                    >> fromNgbProcLsPointStarts;
+            }
+
+            const labelList& nonGlobalPatchPoints =
+                procPatch.nonGlobalPatchPoints();
+
+            forAll(nonGlobalPatchPoints, pointI)
+            {
+                label curPoint = 
+                    patchPointLabels[nonGlobalPatchPoints[pointI]];
+                label curNgbPoint = 
+                    procPatch.neighbPoints()[nonGlobalPatchPoints[pointI]];
+                
+                labelHashSet faceSet;
+                forAll(pointFaces[curPoint], faceI)
+                {
+                    faceSet.insert(pointFaces[curPoint][faceI]);
+                }
+                labelList curFaces = faceSet.toc();
+
+                labelHashSet pointSet;
+
+                pointSet.insert(curPoint);
+                for(label i=0; i<curFaces.size(); i++)
+                {
+                    const labelList& facePoints = faces[curFaces[i]];
+                    for(label j=0; j<facePoints.size(); j++)
+                    {
+                        if(!pointSet.found(facePoints[j]))
+                        {
+                            pointSet.insert(facePoints[j]);
+                        }
+                    }
+                }
+                pointSet.erase(curPoint);
+                labelList curPoints = pointSet.toc();
+
+                label nAllPoints = curPoints.size();
+
+                if (curNgbPoint == fromNgbProcLsPointStarts.size() - 1)
+                {
+                    nAllPoints +=
+                        fromNgbProcLsPoints.size()
+                      - fromNgbProcLsPointStarts[curNgbPoint];
+                }
+                else
+                {
+                    nAllPoints +=
+                        fromNgbProcLsPointStarts[curNgbPoint + 1]
+                      - fromNgbProcLsPointStarts[curNgbPoint];
+                }
+
+                if (nAllPoints < 5)
+                {
+                    FatalErrorIn
+                    (
+                        "void faMesh::calcPointAreaNormals() const"
+                    )   << "There are no enough points for quadrics "
+                        << "fitting for a point at processor patch"
+                        << abort(FatalError);
+                }
+
+                vectorField allPoints(nAllPoints);
+                label counter = 0;
+                for (label i=0; i<curPoints.size(); i++)
+                {
+                    allPoints[counter++] = points[curPoints[i]];
+                }
+
+                if (curNgbPoint == fromNgbProcLsPointStarts.size() - 1)
+                {
+                    for
+                    (
+                        label i=fromNgbProcLsPointStarts[curNgbPoint]; 
+                        i<fromNgbProcLsPoints.size(); 
+                        i++
+                    )
+                    {
+                        allPoints[counter++] = fromNgbProcLsPoints[i];
+                    }
+                }
+                else
+                {
+                    for
+                    (
+                        label i=fromNgbProcLsPointStarts[curNgbPoint]; 
+                        i<fromNgbProcLsPointStarts[curNgbPoint+1]; 
+                        i++
+                    )
+                    {
+                        allPoints[counter++] = fromNgbProcLsPoints[i];
+                    }
+                }
+
+                // Transforme points
+                vector origin = points[curPoint];
+                vector axis = result[curPoint]/mag(result[curPoint]);
+                vector dir = (allPoints[0] - points[curPoint]);
+                dir -= axis*(axis&dir);
+                dir /= mag(dir);
+                cartesianCS cs("cs", origin, axis, dir);
+
+                scalarField W(allPoints.size(), 1.0);
+
+                forAll(allPoints, pointI)
+                {
+                    W[pointI] = 
+                        1.0/magSqr(allPoints[pointI] - points[curPoint]);
+
+                    allPoints[pointI] = 
+                        cs.localPosition(allPoints[pointI]);
+                }
+
+                Matrix<scalar> M
+                (
+                    allPoints.size(), 
+                    5,
+                    0.0
+                );
+
+                for(label i=0; i<allPoints.size(); i++)
+                {
+                    M[i][0] = sqr(allPoints[i].x());
+                    M[i][1] = sqr(allPoints[i].y());
+                    M[i][2] = allPoints[i].x()*allPoints[i].y();
+                    M[i][3] = allPoints[i].x();
+                    M[i][4] = allPoints[i].y();
+                }
+
+                Matrix<scalar> MtM(5, 5, 0.0);
+                for (label i=0; i<MtM.n(); i++)
+                {
+                    for (label j=0; j<MtM.m(); j++)
+                    {
+                        for (label k=0; k<M.n(); k++)
+                        {
+                            MtM[i][j] += M[k][i]*M[k][j]*W[k];
+                        }
+                    }
+                }
+
+                scalarField MtR(5, 0);
+                for (label i=0; i<MtR.size(); i++)
+                {
+                    for (label j=0; j<M.n(); j++)
+                    {
+                        MtR[i] += M[j][i]*allPoints[j].z()*W[j];
+                    }
+                }
+                    
+                scalarMatrix::LUsolve(MtM, MtR);
+
+                vector curNormal = vector(MtR[3], MtR[4], -1);
+
+                curNormal = cs.globalVector(curNormal);
+
+                curNormal *= sign(curNormal&result[curPoint]);
+                    
+                result[curPoint] = curNormal;
+            }                
+        }
+    }
+
+    // Correct global points
+    if (globalData().nGlobalPoints() > 0)
+    {
+        const labelList& spLabels =
+            globalData().sharedPointLabels();
+
+        const labelList& addr = globalData().sharedPointAddr();
+
+        for (label k=0; k<globalData().nGlobalPoints(); k++)
+        {
+            List<List<vector> > procLsPoints(Pstream::nProcs());
+
+            label curSharedPointIndex = findIndex(addr, k);
+
+            scalar tol = 0.0;
+
+            if (curSharedPointIndex != -1)
+            {
+                label curPoint = spLabels[curSharedPointIndex];
+
+                labelHashSet faceSet;
+                forAll(pointFaces[curPoint], faceI)
+                {
+                    faceSet.insert(pointFaces[curPoint][faceI]);
+                }
+                labelList curFaces = faceSet.toc();
+
+                labelHashSet pointSet;
+                pointSet.insert(curPoint);
+                for (label i=0; i<curFaces.size(); i++)
+                {
+                    const labelList& facePoints = faces[curFaces[i]];
+                    for (label j=0; j<facePoints.size(); j++)
+                    {
+                        if (!pointSet.found(facePoints[j]))
+                        {
+                            pointSet.insert(facePoints[j]);
+                        }
+                    }
+                }
+                pointSet.erase(curPoint);
+                labelList curPoints = pointSet.toc();
+
+                vectorField locPoints(points, curPoints);
+
+                procLsPoints[Pstream::myProcNo()] = locPoints;
+
+                boundBox bb(locPoints, false);
+                tol = 0.001*mag(bb.max() - bb.min());
+            }
+
+            Pstream::gatherList(procLsPoints);
+            Pstream::scatterList(procLsPoints);
+                
+            if (curSharedPointIndex != -1)
+            {
+                label curPoint = spLabels[curSharedPointIndex];
+                
+                label nAllPoints = 0;
+                forAll(procLsPoints, procI)
+                {
+                    nAllPoints += procLsPoints[procI].size();
+                }
+
+                vectorField allPoints(nAllPoints, vector::zero);
+
+                nAllPoints = 0;
+                forAll(procLsPoints, procI)
+                {
+                    forAll(procLsPoints[procI], pointI)
+                    {
+                        bool duplicate = false;
+                        for (label i=0; i<nAllPoints; i++)
+                        {
+                            if
+                            (
+                                mag
+                                (
+                                    allPoints[i] 
+                                  - procLsPoints[procI][pointI]
+                                )
+                              < tol
+                            )
+                            {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+
+                        if (!duplicate)
+                        {
+                            allPoints[nAllPoints++] = 
+                                procLsPoints[procI][pointI];
+                        }
+                    }
+                }
+
+                allPoints.setSize(nAllPoints);
+
+                if (nAllPoints < 5)
+                {
+                    FatalErrorIn
+                    (
+                        "void faMesh::calcPointAreaNormals() const"
+                    )   << "There are no enough points for quadrics "
+                        << "fitting for a global processor point "
+                        << abort(FatalError);
+                }
+
+                // Transforme points
+                vector origin = points[curPoint];
+                vector axis = result[curPoint]/mag(result[curPoint]);
+                vector dir = (allPoints[0] - points[curPoint]);
+                dir -= axis*(axis&dir);
+                dir /= mag(dir);
+                cartesianCS cs("cs", origin, axis, dir);
+
+                scalarField W(allPoints.size(), 1.0);
+
+                forAll(allPoints, pointI)
+                {
+                    W[pointI]=
+                        1.0/magSqr(allPoints[pointI] - points[curPoint]);
+
+                    allPoints[pointI] = 
+                        cs.localPosition(allPoints[pointI]);
+                }
+
+                Matrix<scalar> M
+                (
+                    allPoints.size(), 
+                    5,
+                    0.0
+                );
+
+                for (label i=0; i<allPoints.size(); i++)
+                {
+                    M[i][0] = sqr(allPoints[i].x());
+                    M[i][1] = sqr(allPoints[i].y());
+                    M[i][2] = allPoints[i].x()*allPoints[i].y();
+                    M[i][3] = allPoints[i].x();
+                    M[i][4] = allPoints[i].y();
+                }
+
+                Matrix<scalar> MtM(5, 5, 0.0);
+                for (label i=0; i<MtM.n(); i++)
+                {
+                    for (label j=0; j<MtM.m(); j++)
+                    {
+                        for (label k=0; k<M.n(); k++)
+                        {
+                            MtM[i][j] += M[k][i]*M[k][j]*W[k];
+                        }
+                    }
+                }
+                    
+                scalarField MtR(5, 0);
+                for (label i=0; i<MtR.size(); i++)
+                {
+                    for (label j=0; j<M.n(); j++)
+                    {
+                        MtR[i] += M[j][i]*allPoints[j].z()*W[j];
+                    }
+                }
+                    
+                scalarMatrix::LUsolve(MtM, MtR);
+
+                vector curNormal = vector(MtR[3], MtR[4], -1);
+
+                curNormal = cs.globalVector(curNormal);
+                
+                curNormal *= sign(curNormal&result[curPoint]);
+                    
+                result[curPoint] = curNormal;
+            }
         }
     }
 
