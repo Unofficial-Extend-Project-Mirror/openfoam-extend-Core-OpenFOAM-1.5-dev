@@ -172,6 +172,11 @@ class faMesh
                 mutable label curMotionTimeIndex_;
 
 
+    // Static Private Data
+
+        static const bool quadricsFit_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -215,6 +220,9 @@ class faMesh
 
             //- Calculate point area normals
             void calcPointAreaNormals() const;
+
+            //- Calculate point area normals by quadrics fit
+            void calcPointAreaNormalsByQuadricsFit() const;
 
             //- Calculate face curvatures
             void calcFaceCurvatures() const;
