@@ -1278,6 +1278,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 }
             }
 
+            pointSet.erase(curPoint);
             curPoints = pointSet.toc();
         }
 
