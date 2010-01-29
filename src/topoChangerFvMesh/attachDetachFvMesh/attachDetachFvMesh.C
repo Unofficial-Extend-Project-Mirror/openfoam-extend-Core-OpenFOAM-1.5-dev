@@ -65,7 +65,7 @@ void Foam::attachDetachFvMesh::addZonesAndModifiers()
     {
         topoChanger_.set
         (
-            0,
+            i,
             new attachDetach
             (
                 entries[i].keyword(),
