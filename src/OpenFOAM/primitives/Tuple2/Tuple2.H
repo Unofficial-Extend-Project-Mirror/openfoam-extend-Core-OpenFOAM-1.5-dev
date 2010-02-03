@@ -224,7 +224,7 @@ inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2)
     os  << token::BEGIN_LIST
         << t2.f_ << token::SPACE << t2.s_
         << token::END_LIST;
-    
+
     return os;
 }
 
