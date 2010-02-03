@@ -1351,6 +1351,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
         result[curPoint] = curNormal;
     }
 
+
     forAll (boundary(), patchI)
     {
         if(boundary()[patchI].type() == processorFaPatch::typeName)
@@ -1400,11 +1401,8 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 for (label i=0; i<curPoints.size(); i++)
                 {
-                    if (findIndex(patchPointLabels, curPoints[i]) == -1)
-                    {
-                        toNgbProcLsPoints[nPoints++] = 
-                            points[curPoints[i]];
-                    }
+                    toNgbProcLsPoints[nPoints++] = 
+                        points[curPoints[i]];
                 }   
             }
 
@@ -1501,21 +1499,11 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                       - fromNgbProcLsPointStarts[curNgbPoint];
                 }
 
-                if (nAllPoints < 5)
-                {
-                    FatalErrorIn
-                    (
-                        "void faMesh::calcPointAreaNormals() const"
-                    )   << "There are no enough points for quadrics "
-                        << "fitting for a point at processor patch"
-                        << abort(FatalError);
-                }
-
-                vectorField allPoints(nAllPoints);
+                vectorField allPointsExt(nAllPoints);
                 label counter = 0;
                 for (label i=0; i<curPoints.size(); i++)
                 {
-                    allPoints[counter++] = points[curPoints[i]];
+                    allPointsExt[counter++] = points[curPoints[i]];
                 }
 
                 if (curNgbPoint == fromNgbProcLsPointStarts.size() - 1)
@@ -1527,7 +1515,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                         i++
                     )
                     {
-                        allPoints[counter++] = fromNgbProcLsPoints[i];
+                        allPointsExt[counter++] = fromNgbProcLsPoints[i];
                     }
                 }
                 else
@@ -1539,10 +1527,55 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                         i++
                     )
                     {
-                        allPoints[counter++] = fromNgbProcLsPoints[i];
+                        allPointsExt[counter++] = fromNgbProcLsPoints[i];
                     }
                 }
 
+                // Remove duplicate points
+                vectorField allPoints(nAllPoints, vector::zero);
+                boundBox bb(allPointsExt, false);
+                scalar tol = 0.001*mag(bb.max() - bb.min());
+
+                nAllPoints = 0;
+                forAll(allPointsExt, pointI)
+                {
+                    bool duplicate = false;
+                    for (label i=0; i<nAllPoints; i++)
+                    {
+                        if
+                        (
+                            mag
+                            (
+                                allPoints[i] 
+                              - allPointsExt[pointI]
+                            )
+                          < tol
+                        )
+                        {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (!duplicate)
+                    {
+                        allPoints[nAllPoints++] = 
+                            allPointsExt[pointI];
+                    }
+                }
+
+                allPoints.setSize(nAllPoints);
+
+                if (nAllPoints < 5)
+                {
+                    FatalErrorIn
+                    (
+                        "void faMesh::calcPointAreaNormals() const"
+                    )   << "There are no enough points for quadrics "
+                        << "fitting for a point at processor patch"
+                        << abort(FatalError);
+                }
+                
                 // Transforme points
                 vector origin = points[curPoint];
                 vector axis = result[curPoint]/mag(result[curPoint]);
