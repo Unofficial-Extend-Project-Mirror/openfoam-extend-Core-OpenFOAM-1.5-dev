@@ -87,6 +87,7 @@ class porousZones
         //- Reference to constant coordinate systems
         coordinateSystems csList_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -99,6 +100,7 @@ class porousZones
         //- modify time derivative elements
         template<class Type>
         void modifyDdt(fvMatrix<Type>&) const;
+
 
 public:
 
