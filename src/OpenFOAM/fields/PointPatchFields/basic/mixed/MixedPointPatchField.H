@@ -25,7 +25,7 @@ License
 Class
     MixedPointPatchField. The boundary condition is a mix of a FixedValue and
     a ZeroGradient boundary condition.  I am still not sure how to do the
-    FixedValue-fixedGradient combination. 
+    FixedValue-fixedGradient combination.
 
 Description
 
