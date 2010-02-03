@@ -53,6 +53,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::clearGeom()
     }
 
     deleteDemandDrivenData(localPointsPtr_);
+    deleteDemandDrivenData(faceCentresPtr_);
     deleteDemandDrivenData(faceNormalsPtr_);
     deleteDemandDrivenData(pointNormalsPtr_);
 }

@@ -27,6 +27,7 @@ License
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
 #include "ListOps.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,8 +38,6 @@ defineTypeNameAndDebug(searchableSurfaces, 0);
 
 }
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -176,12 +175,7 @@ Foam::searchableSurfaces::searchableSurfaces
         const dictionary& dict = topDict.subDict(key);
 
         names_[surfI] = key;
-
-        if (dict.found("name"))
-        {
-            dict.lookup("name") >> names_[surfI];
-        }
-
+        dict.readIfPresent("name", names_[surfI]);
 
         // Make IOobject with correct name
         autoPtr<IOobject> namedIO(io.clone());

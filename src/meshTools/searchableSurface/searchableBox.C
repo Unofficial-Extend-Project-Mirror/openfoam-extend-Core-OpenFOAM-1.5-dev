@@ -32,10 +32,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableBox, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
-
+    defineTypeNameAndDebug(searchableBox, 0);
+    addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
 }
 
 
@@ -172,7 +170,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(bb)
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 Foam::searchableBox::searchableBox
@@ -183,7 +194,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(dict.lookup("min"), dict.lookup("max"))
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -196,12 +220,27 @@ Foam::searchableBox::~searchableBox()
 
 const Foam::wordList& Foam::searchableBox::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";
     }
     return regions_;
+}
+
+
+Foam::pointField Foam::searchableBox::coordinates() const
+{
+    pointField ctrs(6);
+
+    const pointField pts = treeBoundBox::points();
+    const faceList& fcs = treeBoundBox::faces;
+
+    forAll(fcs, i)
+    {
+        ctrs[i] = fcs[i].centre(pts);
+    }
+    return ctrs;
 }
 
 
@@ -211,7 +250,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     const scalar nearestDistSqr
 ) const
 {
-    return findNearest(mid(), sample, nearestDistSqr);
+    return findNearest(midpoint(), sample, nearestDistSqr);
 }
 
 
@@ -221,7 +260,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     const scalar nearestDistSqr
 ) const
 {
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     // Outside point projected onto cube. Assume faces 0..5.
     pointIndexHit info(true, sample, -1);
@@ -383,7 +422,7 @@ void Foam::searchableBox::findNearest
 {
     info.setSize(samples.size());
 
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     forAll(samples, i)
     {

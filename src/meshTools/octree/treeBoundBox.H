@@ -263,6 +263,12 @@ public:
                  FixedList<direction, 8>& octantOrder
             ) const;
 
+            //- Overlaps other boundingbox?
+            inline bool overlaps(const treeBoundBox&) const;
+
+            //- Overlaps boundingSphere (centre + sqr(radius))?
+            bool overlaps(const point&, const scalar radiusSqr) const;
+
             //- Intersects other boundingbox?
             inline bool intersects(const treeBoundBox&) const;
 

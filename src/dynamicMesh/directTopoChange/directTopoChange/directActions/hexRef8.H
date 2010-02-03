@@ -182,8 +182,6 @@ class hexRef8
             const bool searchForward,
             const label wantedLevel
         ) const;
-        //- Gets level such that the face has four points <= level.
-        label getAnchorLevel(const label faceI) const;
 
         ////- Print levels of list of points.
         //void printLevels(Ostream&, const labelList&) const;
@@ -366,6 +364,14 @@ public:
             }
 
         // Refinement
+            //- Gets level such that the face has four points <= level.
+            label getAnchorLevel(const label faceI) const;
+
+            //- Given valid mesh and current cell level and proposed
+            //  cells to refine calculate any clashes (due to 2:1) and return
+            //  ok list of cells to refine.
+            //  Either adds cells to refine to set (maxSet = true) or
+            //  removes cells to refine (maxSet = false)
 
             //- Helper:get points of a cell without using cellPoints addressing
             labelList cellPoints(const label cellI) const;

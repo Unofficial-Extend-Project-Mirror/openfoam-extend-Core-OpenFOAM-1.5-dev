@@ -79,10 +79,46 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::PrimitivePatch
     edgeLoopsPtr_(NULL),
     localPointsPtr_(NULL),
     localPointOrderPtr_(NULL),
+    faceCentresPtr_(NULL),
     faceNormalsPtr_(NULL),
     pointNormalsPtr_(NULL)
 {}
 
+// Construct from components
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+> 
+PrimitivePatch<Face, FaceList, PointField, PointType>::PrimitivePatch
+(
+    FaceList<Face>& faces,
+    Field<PointType>& points,
+    const bool reUse
+)
+:
+    FaceList<Face>(faces, reUse),
+    points_(points, reUse),
+    edgesPtr_(NULL),
+    nInternalEdges_(-1),
+    boundaryPointsPtr_(NULL),
+    faceFacesPtr_(NULL),
+    edgeFacesPtr_(NULL),
+    faceEdgesPtr_(NULL),
+    pointEdgesPtr_(NULL),
+    pointFacesPtr_(NULL),
+    localFacesPtr_(NULL),
+    meshPointsPtr_(NULL),
+    meshPointMapPtr_(NULL),
+    edgeLoopsPtr_(NULL),
+    localPointsPtr_(NULL),
+    localPointOrderPtr_(NULL),
+    faceCentresPtr_(NULL),
+    faceNormalsPtr_(NULL),
+    pointNormalsPtr_(NULL)
+{}
 
 // Construct as copy
 template
@@ -114,6 +150,7 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::PrimitivePatch
     edgeLoopsPtr_(NULL),
     localPointsPtr_(NULL),
     localPointOrderPtr_(NULL),
+    faceCentresPtr_(NULL),
     faceNormalsPtr_(NULL),
     pointNormalsPtr_(NULL)
 {}
@@ -431,6 +468,25 @@ label PrimitivePatch<Face, FaceList, PointField, PointType>::whichPoint
         // Not found
         return -1;
     }
+}
+
+
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+const Field<PointType>&
+PrimitivePatch<Face, FaceList, PointField, PointType>::faceCentres() const
+{
+    if (!faceCentresPtr_)
+    {
+        calcFaceCentres();
+    }
+
+    return *faceCentresPtr_;
 }
 
 

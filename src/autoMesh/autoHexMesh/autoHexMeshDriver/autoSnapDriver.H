@@ -97,7 +97,11 @@ class autoSnapDriver
 
             //- Calculate displacement per patch point to smooth out patch.
             //  Quite complicated in determining which points to move where.
-            pointField smoothPatchDisplacement(const motionSmoother&) const;
+            pointField smoothPatchDisplacement
+            (
+                const motionSmoother&,
+                const List<labelPair>&
+            ) const;
 
             //- Check that face zones are synced
             void checkCoupledFaceZones() const;
@@ -166,9 +170,6 @@ public:
                 const indirectPrimitivePatch&
             ) const;
 
-            ////- Get patches generated for surfaces.
-            //labelList getSurfacePatches() const;
-
             //- Smooth the mesh (patch and internal) to increase visibility
             //  of surface points (on castellated mesh) w.r.t. surface.
             void preSmoothPatch
@@ -211,6 +212,14 @@ public:
                 const List<labelPair>& baffles,
                 motionSmoother&
             );
+
+            //- Repatch faces according to surface nearest the face centre
+            autoPtr<mapPolyMesh> repatchToSurface
+            (
+                const snapParameters& snapParams,
+                const labelList& adaptPatchIDs
+            );
+
 
             void doSnap
             (

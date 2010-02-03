@@ -101,9 +101,6 @@ class autoLayerDriver
         //- Mesh+surface
         meshRefinement& meshRefiner_;
 
-        //- From surface region to patch
-        const labelList globalToPatch_;
-
 
 
     // Private Member Functions
@@ -255,9 +252,12 @@ class autoLayerDriver
                 (
                     const indirectPrimitivePatch& pp,
                     const labelList& patchIDs,
+
                     const scalarField& patchExpansionRatio,
-                    const scalarField& patchFinalLayerRatio,
-                    const scalarField& patchRelMinThickness,
+                    const bool relativeSizes,
+                    const scalarField& patchFinalLayerThickness,
+                    const scalarField& patchMinThickness,
+
                     const labelList& cellLevel,
                     const labelList& patchNLayers,
                     const scalar edge0Len,
@@ -470,6 +470,7 @@ class autoLayerDriver
                 void shrinkMeshMedialDistance
                 (
                     motionSmoother& meshMover,
+                    const dictionary& meshQualityDict,
                     const label nSmoothThickness,
                     const scalar maxThicknessToMedialRatio,
                     const label nAllowableErrors,
@@ -505,11 +506,7 @@ public:
     // Constructors
 
         //- Construct from components
-        autoLayerDriver
-        (
-            meshRefinement& meshRefiner,
-            const labelList& globalToPatch
-        );
+        autoLayerDriver(meshRefinement& meshRefiner);
 
 
     // Member Functions

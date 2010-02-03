@@ -31,6 +31,22 @@ License
 
 namespace Foam
 {
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::scalar Foam::boundBox::great(VGREAT);
+
+const Foam::boundBox Foam::boundBox::greatBox
+(
+    point(-VGREAT, -VGREAT, -VGREAT),
+    point(VGREAT, VGREAT, VGREAT)
+);
+
+
+const Foam::boundBox Foam::boundBox::invertedBox
+(
+    point(VGREAT, VGREAT, VGREAT),
+    point(-VGREAT, -VGREAT, -VGREAT)
+);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

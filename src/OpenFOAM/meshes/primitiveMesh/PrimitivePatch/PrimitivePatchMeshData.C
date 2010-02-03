@@ -295,6 +295,52 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointNormals() const
     }
 }
 
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void
+PrimitivePatch<Face, FaceList, PointField, PointType>::calcFaceCentres() const
+{
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcFaceCentres() : "
+               "calculating faceCentres in PrimitivePatch"
+            << endl;
+    }
+
+    // It is considered an error to attempt to recalculate faceCentres
+    // if they have already been calculated.
+    if (faceCentresPtr_)
+    {
+        FatalErrorIn
+        (
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcFaceCentres()"
+        )   << "faceCentresPtr_already allocated"
+            << abort(FatalError);
+    }
+
+    faceCentresPtr_ = new Field<PointType>(this->size());
+    Field<PointType>& c = *faceCentresPtr_;
+
+    forAll(c, facei)
+    {
+        c[facei] = this->operator[](facei).centre(points_);
+    }
+
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcFaceCentres() : "
+               "finished calculating faceCentres in PrimitivePatch"
+            << endl;
+    }
+}
 
 template
 <

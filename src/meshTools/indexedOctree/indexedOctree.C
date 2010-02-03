@@ -35,6 +35,11 @@ License
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class Type>
+Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Does bb intersect a sphere around sample? Or is any corner point of bb
@@ -1438,6 +1443,12 @@ indexedOctree<Type>::indexedOctree
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class Type>
+scalar& Foam::indexedOctree<Type>::perturbTol()
+{
+    return perturbTol_;
+}
 
 template <class Type>
 pointIndexHit indexedOctree<Type>::findNearest

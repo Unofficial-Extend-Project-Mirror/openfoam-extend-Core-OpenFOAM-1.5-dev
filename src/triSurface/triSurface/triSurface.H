@@ -215,6 +215,15 @@ public:
             const pointField&
         );
 
+        //- Construct from triangles, patches, points. Reuse storage.
+        triSurface
+        (
+            List<labelledTri>&,
+            const geometricSurfacePatchList&,
+            pointField&,
+            const bool reUse
+        );
+
         //- Construct from triangles, points. Set patchnames to default.
         triSurface(const List<labelledTri>&, const pointField&);
 
@@ -277,6 +286,9 @@ public:
 
             //- Move points
             virtual void movePoints(const pointField&);
+
+            //- Scale points. A non-positive factor is ignored
+            virtual void scalePoints(const scalar&);
 
             //- Check/fix duplicate/degenerate triangles
             void checkTriangles(const bool verbose);

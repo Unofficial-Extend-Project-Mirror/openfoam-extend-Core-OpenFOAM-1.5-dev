@@ -60,6 +60,16 @@ class boundBox
 
 
 public:
+    // Static data members
+
+        //- The great value used for greatBox and invertedBox
+        static const scalar great;
+
+        //- A very large boundBox: min/max == -/+ VGREAT
+        static const boundBox greatBox;
+
+        //- A very large inverted boundBox: min/max == +/- VGREAT
+        static const boundBox invertedBox;
 
     // Constructors
 
@@ -109,6 +119,18 @@ public:
                 return max_;
             }
 
+            //- The midpoint of the bounding box
+            point midpoint() const
+            {
+                return 0.5 * (max_ + min_);
+            }
+
+            //- The bounding box span (from minimum to maximum)
+            vector span() const
+            {
+                return (max_ - min_);
+            }
+
             scalar mag() const
             {
                 return ::Foam::mag(max_ - min_);
@@ -116,6 +138,17 @@ public:
 
 
         // Query
+             //- Overlaps/touches boundingBox?
+            bool overlaps(const boundBox& bb) const
+            {
+                return
+                (
+                    bb.max_.x() >= min_.x() && bb.min_.x() <= max_.x()
+                 && bb.max_.y() >= min_.y() && bb.min_.y() <= max_.y()
+                 && bb.max_.z() >= min_.z() && bb.min_.z() <= max_.z()
+                );
+            }
+
 
             //- Intersects other boundingbox?
             bool intersects(const boundBox& bb) const

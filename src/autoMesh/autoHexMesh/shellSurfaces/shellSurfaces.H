@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    shellSurfaces
+    Foam::shellSurfaces
 
 Description
     Encapsulates queries for volume refinement ('refine all cells within
@@ -97,7 +97,7 @@ private:
         //- Helper function for initialisation.
         void setAndCheckLevels
         (
-            const scalar shellI,
+            const label shellI,
             const List<Tuple2<scalar, label> >&
         );
 

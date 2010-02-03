@@ -56,6 +56,7 @@ namespace Foam
 
 // Forward declaration of classes
 class objectRegistry;
+class mapDistribute;
 class treeBoundBox;
 
 /*---------------------------------------------------------------------------*\
@@ -180,6 +181,19 @@ public:
         //- Whether supports volume type below.
         virtual bool hasVolumeType() const = 0;
 
+        //- Range of local indices that can be returned.
+        virtual label size() const = 0;
+
+        //- Range of global indices that can be returned.
+        virtual label globalSize() const
+        {
+            return size();
+        }
+
+        //- Get representative set of element coordinates
+        //  Usually the element centres (should be of length size()).
+        virtual pointField coordinates() const = 0;
+
 
         // Single point queries.
 
@@ -296,17 +310,31 @@ public:
 
         // Other
 
-            ////- Get bounding box.
-            //const boundBox& bounds() const = 0;
+            //- Set bounds of surface. Bounds currently set as list of
+            //  bounding boxes. The bounds are hints to the surface as for
+            //  the range of queries it can expect. faceMap/pointMap can be
+            //  set if the surface has done any redistribution.
+            virtual void distribute
+            (
+                const List<treeBoundBox>&,
+                const bool keepNonLocal,
+                autoPtr<mapDistribute>& faceMap,
+                autoPtr<mapDistribute>& pointMap
+            )
+            {}
 
-            ////- Set bounding box.
-            //void setBounds
-            //(
-            //    const boundBox&,
-            //    autoPtr<mapDistribute>& faceMap,
-            //    autoPtr<mapDistribute>& pointMap
-            //) = 0;
+            //- WIP. Store element-wise field.
+            virtual void setField(const labelList& values)
+            {}
 
+            //- WIP. From a set of hits (points and
+            //  indices) get the specified field. Misses do not get set. Return
+            //  empty field if not supported.
+            virtual void getField(const List<pointIndexHit>&, labelList& values)
+            const
+            {
+                values.clear();
+            }
 
 };
 

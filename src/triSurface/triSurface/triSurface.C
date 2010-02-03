@@ -710,6 +710,19 @@ triSurface::triSurface
     edgeOwnerPtr_(NULL)
 {}
 
+triSurface::triSurface
+(
+    List<labelledTri>& triangles,
+    const geometricSurfacePatchList& patches,
+    pointField& points,
+    const bool reUse
+)
+:
+    PrimitivePatch<labelledTri, ::Foam::List ,pointField>(triangles, points, reUse),
+    patches_(patches),
+    sortedEdgeFacesPtr_(NULL),
+    edgeOwnerPtr_(NULL)
+{}
 
 triSurface::triSurface
 (
@@ -881,6 +894,21 @@ void triSurface::movePoints(const pointField& newPoints)
     const_cast<pointField&>(points()) = newPoints;
 }
 
+// scale points
+void triSurface::scalePoints(const scalar& scaleFactor)
+{
+    // avoid bad scaling
+    if (scaleFactor > 0 && scaleFactor != 1.0)
+    {
+        // Remove all geometry dependent data
+        clearTopology();
+
+        // Adapt for new point position
+        PrimitivePatch<labelledTri, ::Foam::List, pointField>::movePoints(pointField());
+
+        const_cast<pointField&>(points()) *= scaleFactor;
+    }
+}
 
 // Remove non-triangles, double triangles.
 void triSurface::cleanup(const bool verbose)
