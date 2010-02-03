@@ -228,6 +228,9 @@ public:
 
             //- Get per edge whether is it master (of a coupled set of edge)
             static PackedList<1> getMasterEdges(const polyMesh&);
+ 
+            //- Get per face whether is it master (of a coupled set of faces)
+            static PackedList<1> getMasterFaces(const polyMesh&);
 
 };
 

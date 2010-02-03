@@ -33,6 +33,7 @@ License
 #include "IndirectList.H"
 #include "BiIndirectList.H"
 #include "contiguous.H"
+#include "UIndirectList.H"
 
 #include <algorithm>
 
@@ -292,6 +293,22 @@ List<T>::List(const IndirectList<T>& idl)
     }
 }
 
+// Construct as copy of UIndirectList<T>
+template<class T>
+List<T>::List(const UIndirectList<T>& lst)
+:
+    UList<T>(NULL, lst.size())
+{
+    if (this->size_)
+    {
+        this->v_ = new T[this->size_];
+
+        forAll(*this, i)
+        {
+            this->operator[](i) = lst[i];
+        }
+    }
+}
 
 // Construct as copy of BiIndirectList<T>
 template<class T>
@@ -562,6 +579,23 @@ void List<T>::operator=(const IndirectList<T>& idl)
     }
 }
 
+// Assignment operator. Takes linear time.
+template<class T>
+void List<T>::operator=(const UIndirectList<T>& lst)
+{
+    if (lst.size() != this->size_)
+    {
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
+        this->size_ = lst.size();
+        if (this->size_) this->v_ = new T[this->size_];
+    }
+
+    forAll(*this, i)
+    {
+        this->operator[](i) = lst[i];
+    }
+}
 
 // Assignment operator. Takes linear time.
 template<class T>

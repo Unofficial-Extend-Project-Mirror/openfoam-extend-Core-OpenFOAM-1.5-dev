@@ -191,6 +191,12 @@ public:
             {
                 return rootPath_;
             }
+           
+            //- Return true if the named option is found
+            bool optionFound(const word& opt) const
+            {
+                return options_.found(opt);
+            }
 
             //- Return case name
             const fileName& globalCaseName() const
