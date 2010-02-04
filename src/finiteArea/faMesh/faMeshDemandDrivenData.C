@@ -1298,9 +1298,9 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
         dir /= mag(dir);
         cartesianCS cs("cs", origin, axis, dir);
 
-        forAll(allPoints, pointI)
+        forAll(allPoints, pI)
         {
-            allPoints[pointI] = cs.localPosition(allPoints[pointI]);
+            allPoints[pI] = cs.localPosition(allPoints[pI]);
         }
 
         Matrix<scalar> M
@@ -1403,7 +1403,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 {
                     toNgbProcLsPoints[nPoints++] = 
                         points[curPoints[i]];
-                }   
+                }
             }
 
             toNgbProcLsPoints.setSize(nPoints);
@@ -1537,7 +1537,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 scalar tol = 0.001*mag(bb.max() - bb.min());
 
                 nAllPoints = 0;
-                forAll(allPointsExt, pointI)
+                forAll(allPointsExt, pI)
                 {
                     bool duplicate = false;
                     for (label i=0; i<nAllPoints; i++)
@@ -1547,7 +1547,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                             mag
                             (
                                 allPoints[i] 
-                              - allPointsExt[pointI]
+                              - allPointsExt[pI]
                             )
                           < tol
                         )
@@ -1560,7 +1560,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     if (!duplicate)
                     {
                         allPoints[nAllPoints++] = 
-                            allPointsExt[pointI];
+                            allPointsExt[pI];
                     }
                 }
 
@@ -1586,13 +1586,12 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 scalarField W(allPoints.size(), 1.0);
 
-                forAll(allPoints, pointI)
+                forAll(allPoints, pI)
                 {
-                    W[pointI] = 
-                        1.0/magSqr(allPoints[pointI] - points[curPoint]);
+                    W[pI] = 1.0/magSqr(allPoints[pI] - points[curPoint]);
 
-                    allPoints[pointI] = 
-                        cs.localPosition(allPoints[pointI]);
+                    allPoints[pI] = 
+                        cs.localPosition(allPoints[pI]);
                 }
 
                 Matrix<scalar> M
