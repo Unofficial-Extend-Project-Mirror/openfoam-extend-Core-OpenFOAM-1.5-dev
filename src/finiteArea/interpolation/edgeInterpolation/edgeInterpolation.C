@@ -633,7 +633,8 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
     const pointField& points = mesh().points();
     const edgeList& edges = mesh().edges();
 
-    forAll(owner, edgeI)
+
+    forAll(neighbour, edgeI)
     {
         vector P = C[owner[edgeI]];
         vector N = C[neighbour[edgeI]];
@@ -654,7 +655,37 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
         faePatchVectorField& patchSkewCorrVecs =
             SkewCorrVecs.boundaryField()[patchI];
 
-        patchSkewCorrVecs = vector::zero;
+        if (patchSkewCorrVecs.coupled())
+        {
+            const unallocLabelList& edgeFaces = 
+                mesh().boundary()[patchI].edgeFaces();
+
+            const edgeList::subList patchEdges =
+                mesh().boundary()[patchI].patchSlice(edges);
+
+            vectorField ngbC = 
+                C.boundaryField()[patchI].patchNeighbourField();
+
+            forAll (patchSkewCorrVecs, edgeI)
+            {
+                vector P = C[edgeFaces[edgeI]];
+                vector N = ngbC[edgeI];
+                vector S = points[patchEdges[edgeI].start()];
+                vector e = patchEdges[edgeI].vec(points);
+
+                scalar alpha = - ( ( (N - P)^(S - P) )&( (N - P)^e ) )/
+                    ( ( (N - P)^e )&( (N - P)^e ) );
+
+                vector E = S + alpha*e;
+
+                patchSkewCorrVecs[edgeI] = 
+                    Ce.boundaryField()[patchI][edgeI] - E;
+            }
+        }
+        else
+        {
+            patchSkewCorrVecs = vector::zero;
+        }
     }
 
 
