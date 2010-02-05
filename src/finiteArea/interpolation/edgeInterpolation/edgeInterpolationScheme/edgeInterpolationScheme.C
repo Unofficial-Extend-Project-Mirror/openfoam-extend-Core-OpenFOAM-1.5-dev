@@ -233,9 +233,35 @@ edgeInterpolationScheme<Type>::interpolate
 
         if (vf.boundaryField()[pi].coupled())
         {
-            sf.boundaryField()[pi] =
-                pLambda*vf.boundaryField()[pi].patchInternalField()
-              + pY*vf.boundaryField()[pi].patchNeighbourField();
+            label size = vf.boundaryField()[pi].patch().size();
+            label start = vf.boundaryField()[pi].patch().start();
+
+            Field<Type> pOwnVf = vf.boundaryField()[pi].patchInternalField();
+            Field<Type> pNgbVf = vf.boundaryField()[pi].patchNeighbourField();
+
+            Field<Type>& pSf = sf.boundaryField()[pi];
+
+            for (label i=0; i<size; i++)
+            {
+                const tensorField& curT = 
+                    mesh.edgeTransformTensors()[start + i];
+
+                const tensor& Te = curT[0];
+                const tensor& TP = curT[1];
+                const tensor& TN = curT[2];
+
+                pSf[i] =
+                    transform
+                    (
+                        Te.T(),
+                        pLambda[i]*transform(TP, pOwnVf[i])
+                      + pY[i]*transform(TN, pNgbVf[i])
+                    );
+            }
+
+//             sf.boundaryField()[pi] =
+//                 pLambda*vf.boundaryField()[pi].patchInternalField()
+//               + pY*vf.boundaryField()[pi].patchNeighbourField();
         }
         else
         {
@@ -324,9 +350,35 @@ edgeInterpolationScheme<Type>::interpolate
 
         if (vf.boundaryField()[pi].coupled())
         {
-            tsf().boundaryField()[pi] =
-                pLambda*vf.boundaryField()[pi].patchInternalField()
-             + (1.0 - pLambda)*vf.boundaryField()[pi].patchNeighbourField();
+            label size = vf.boundaryField()[pi].patch().size();
+            label start = vf.boundaryField()[pi].patch().start();
+
+            Field<Type> pOwnVf = vf.boundaryField()[pi].patchInternalField();
+            Field<Type> pNgbVf = vf.boundaryField()[pi].patchNeighbourField();
+
+            Field<Type>& pSf = sf.boundaryField()[pi];
+
+            for (label i=0; i<size; i++)
+            {
+                const tensorField& curT = 
+                    mesh.edgeTransformTensors()[start + i];
+
+                const tensor& Te = curT[0];
+                const tensor& TP = curT[1];
+                const tensor& TN = curT[2];
+
+                pSf[i] =
+                    transform
+                    (
+                        Te.T(),
+                        pLambda[i]*transform(TP, pOwnVf[i])
+                      + (1.0 - pLambda[i])*transform(TN, pNgbVf[i])
+                    );
+            }
+
+//             tsf().boundaryField()[pi] =
+//                 pLambda*vf.boundaryField()[pi].patchInternalField()
+//              + (1.0 - pLambda)*vf.boundaryField()[pi].patchNeighbourField();
         }
         else
         {
