@@ -304,15 +304,20 @@ void faMesh::calcAreaCentres() const
 
     forAll (boundary(), patchI)
     {
-        const edgeList::subList patchEdges =
-            boundary()[patchI].patchSlice(edges());
-
-        forAll (patchEdges, edgeI)
+        if (!boundary()[patchI].coupled())
         {
-            centres.boundaryField()[patchI][edgeI] =
-                patchEdges[edgeI].centre(localPoints);
+            const edgeList::subList patchEdges =
+                boundary()[patchI].patchSlice(edges());
+
+            forAll (patchEdges, edgeI)
+            {
+                centres.boundaryField()[patchI][edgeI] =
+                    patchEdges[edgeI].centre(localPoints);
+            }
         }
     }
+
+    centres.correctBoundaryConditions();
 }
 
 
@@ -464,9 +469,14 @@ void faMesh::calcFaceAreaNormals() const
 
     forAll (boundary(), patchI)
     {
-        faceAreaNormals.boundaryField()[patchI] =
-            edgeAreaNormals().boundaryField()[patchI];
+        if (!boundary()[patchI].coupled())
+        {
+            faceAreaNormals.boundaryField()[patchI] =
+                edgeAreaNormals().boundaryField()[patchI];
+        }
     }
+
+    faceAreaNormals.correctBoundaryConditions();
 }
 
 
@@ -676,9 +686,10 @@ void faMesh::calcEdgeTransformTensors() const
     FieldField<Field, tensor>& edgeTransformTensors =
         *edgeTransformTensorsPtr_;
 
-    const edgeVectorField& Ne = edgeAreaNormals();
     const areaVectorField& Nf = faceAreaNormals();
     const areaVectorField& Cf = areaCentres();
+
+    const edgeVectorField& Ne = edgeAreaNormals();
     const edgeVectorField& Ce = edgeCentres();
 
     // Internal edges transformation tensors
@@ -751,64 +762,152 @@ void faMesh::calcEdgeTransformTensors() const
             );
     }
 
-
     // Boundary edges transformation tensors
     forAll (boundary(), patchI)
     {
-        const unallocLabelList& edgeFaces = boundary()[patchI].edgeFaces();
-
-        forAll (edgeFaces, edgeI)
+        if (boundary()[patchI].coupled())
         {
-            edgeTransformTensors.set
-            (
-                boundary()[patchI].start() + edgeI,
-                new Field<tensor>(2, I)
-            );
+            const unallocLabelList& edgeFaces = 
+                boundary()[patchI].edgeFaces();
 
-            vector E = Ce.boundaryField()[patchI][edgeI];
+            vectorField ngbCf = 
+                Cf.boundaryField()[patchI].patchNeighbourField();
 
-            if (skew())
+            vectorField ngbNf = 
+                Nf.boundaryField()[patchI].patchNeighbourField();
+
+            forAll(edgeFaces, edgeI)
             {
-                E -= skewCorrectionVectors().boundaryField()[patchI][edgeI];
+                edgeTransformTensors.set
+                (
+                    boundary()[patchI].start() + edgeI,
+                    new Field<tensor>(3, I)
+                );
+
+                vector E = Ce.boundaryField()[patchI][edgeI];
+
+                if (skew())
+                {
+                    E -= skewCorrectionVectors()
+                        .boundaryField()[patchI][edgeI];
+                }
+
+                // Edge transformation tensor
+                vector il = E - Cf.internalField()[edgeFaces[edgeI]];
+
+                il -= Ne.boundaryField()[patchI][edgeI]
+                   *(Ne.boundaryField()[patchI][edgeI]&il);
+
+                il /= mag(il);
+
+                vector kl = Ne.boundaryField()[patchI][edgeI];
+                vector jl = kl^il;
+
+                edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
+                    tensor
+                    (
+                        il.x(), il.y(), il.z(),
+                        jl.x(), jl.y(), jl.z(),
+                        kl.x(), kl.y(), kl.z()
+                    );
+
+                // Owner transformation tensor
+                il = E - Cf.internalField()[edgeFaces[edgeI]];
+
+                il -= Nf.internalField()[edgeFaces[edgeI]]
+                   *(Nf.internalField()[edgeFaces[edgeI]]&il);
+
+                il /= mag(il);
+
+                kl = Nf.internalField()[edgeFaces[edgeI]];
+                jl = kl^il;
+
+                edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
+                    tensor
+                    (
+                        il.x(), il.y(), il.z(),
+                        jl.x(), jl.y(), jl.z(),
+                        kl.x(), kl.y(), kl.z()
+                    );
+
+                // Neighbour transformation tensor
+                il = ngbCf[edgeI] - E;
+
+                il -= ngbNf[edgeI]*(ngbNf[edgeI]&il);
+
+                il /= mag(il);
+
+                kl = ngbNf[edgeI];
+
+                jl = kl^il;
+
+                edgeTransformTensors[boundary()[patchI].start() + edgeI][2] =
+                    tensor
+                    (
+                        il.x(), il.y(), il.z(),
+                        jl.x(), jl.y(), jl.z(),
+                        kl.x(), kl.y(), kl.z()
+                    );
             }
+        }
+        else
+        {
+            const unallocLabelList& edgeFaces = boundary()[patchI].edgeFaces();
 
-            // Edge transformation tensor
-            vector il = E - Cf.internalField()[edgeFaces[edgeI]];
-
-            il -= Ne.boundaryField()[patchI][edgeI]
-                *(Ne.boundaryField()[patchI][edgeI]&il);
-
-            il /= mag(il);
-
-            vector kl = Ne.boundaryField()[patchI][edgeI];
-            vector jl = kl^il;
-
-            edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
-                tensor
+            forAll(edgeFaces, edgeI)
+            {
+                edgeTransformTensors.set
                 (
-                    il.x(), il.y(), il.z(),
-                    jl.x(), jl.y(), jl.z(),
-                    kl.x(), kl.y(), kl.z()
+                    boundary()[patchI].start() + edgeI,
+                    new Field<tensor>(3, I)
                 );
 
-            // Owner transformation tensor
-            il = E - Cf.internalField()[edgeFaces[edgeI]];
+                vector E = Ce.boundaryField()[patchI][edgeI];
 
-            il -= Nf.internalField()[edgeFaces[edgeI]]
-                *(Nf.internalField()[edgeFaces[edgeI]]&il);
+                if (skew())
+                {
+                    E -= skewCorrectionVectors()
+                        .boundaryField()[patchI][edgeI];
+                }
 
-            il /= mag(il);
+                // Edge transformation tensor
+                vector il = E - Cf.internalField()[edgeFaces[edgeI]];
 
-            kl = Nf.internalField()[edgeFaces[edgeI]];
-            jl = kl^il;
+                il -= Ne.boundaryField()[patchI][edgeI]
+                   *(Ne.boundaryField()[patchI][edgeI]&il);
 
-            edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
-                tensor
-                (
-                    il.x(), il.y(), il.z(),
-                    jl.x(), jl.y(), jl.z(),
-                    kl.x(), kl.y(), kl.z()
-                );
+                il /= mag(il);
+
+                vector kl = Ne.boundaryField()[patchI][edgeI];
+                vector jl = kl^il;
+
+                edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
+                    tensor
+                    (
+                        il.x(), il.y(), il.z(),
+                        jl.x(), jl.y(), jl.z(),
+                        kl.x(), kl.y(), kl.z()
+                    );
+
+                // Owner transformation tensor
+                il = E - Cf.internalField()[edgeFaces[edgeI]];
+
+                il -= Nf.internalField()[edgeFaces[edgeI]]
+                   *(Nf.internalField()[edgeFaces[edgeI]]&il);
+
+                il /= mag(il);
+
+                kl = Nf.internalField()[edgeFaces[edgeI]];
+                jl = kl^il;
+
+                edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
+                    tensor
+                    (
+                        il.x(), il.y(), il.z(),
+                        jl.x(), jl.y(), jl.z(),
+                        kl.x(), kl.y(), kl.z()
+                    );
+            }
         }
     }
 }
