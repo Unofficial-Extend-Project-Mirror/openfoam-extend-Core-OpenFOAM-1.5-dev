@@ -183,9 +183,6 @@ private:
 
     // Private Member Functions
 
-        //- Calculate edges of the patch
-        void calcIntBdryEdges() const;
-
         //- Calculated boundary points on a patch
         void calcBdryPoints() const;
 

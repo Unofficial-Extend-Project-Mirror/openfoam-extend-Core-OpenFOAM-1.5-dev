@@ -62,7 +62,7 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops() const
         FatalErrorIn
         (
             "PrimitivePatch<Face, FaceList, PointField, PointType>::"
-            "calcIntBdryEdges()"
+            "calcEdgeLoops()"
         )   << "edge loops already calculated"
             << abort(FatalError);
     }
