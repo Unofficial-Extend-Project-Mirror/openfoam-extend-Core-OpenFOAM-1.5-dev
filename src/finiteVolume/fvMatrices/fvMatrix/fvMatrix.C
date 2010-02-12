@@ -482,8 +482,33 @@ void Foam::fvMatrix<Type>::setReference
 {
     if (celli >= 0 && (psi_.needReference() || forceReference))
     {
-        source()[celli] += diag()[celli]*value;
-        diag()[celli] += diag()[celli];
+        // Bug fix: force reference only on master for parallel runs
+        // HJ, 12/Feb/2010
+        if (Pstream::parRun())
+        {
+            // Parallel run:
+            // - only set reference on master processor: one place is enough
+            // - make sure that cellI is not out of range
+            if (Pstream::master())
+            {
+                label parCelli = celli;
+
+                if (parCelli >= diag().size())
+                {
+                    // Out of range, pick a local cell
+                    parCelli /= Pstream::nProcs();
+                }
+
+                source()[parCelli] += diag()[parCelli]*value;
+                diag()[parCelli] += diag()[parCelli];
+            }
+        }
+        else
+        {
+            // Serial run, standard practice
+            source()[celli] += diag()[celli]*value;
+            diag()[celli] += diag()[celli];
+        }
     }
 }
 

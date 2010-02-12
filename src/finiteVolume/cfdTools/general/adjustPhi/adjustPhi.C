@@ -60,7 +60,9 @@ bool Foam::adjustPhi
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             const fvsPatchScalarField& phip = phi.boundaryField()[patchi];
 
-            if (!isType<processorFvsPatchScalarField>(phip))
+            // Bug fix: All coupled patches should also be unaffected
+            // HJ, 12/Feb/2010
+            if (!phip.coupled())
             {
                 if
                 (
@@ -140,7 +142,7 @@ bool Foam::adjustPhi
         {
             Info<< "bool Foam::adjustPhi(...) massIn: " << massIn
                 << " fixedMassOut: " << fixedMassOut
-                << " adjustableMassOut: " << adjustableMassOut 
+                << " adjustableMassOut: " << adjustableMassOut
                 << " mass corr: " << massCorr
                 << endl;
         }
@@ -150,7 +152,9 @@ bool Foam::adjustPhi
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             fvsPatchScalarField& phip = phi.boundaryField()[patchi];
 
-            if (!isType<processorFvsPatchScalarField>(phip))
+            // Bug fix: All coupled patches should also be unaffected
+            // HJ, 12/Feb/2010
+            if (!phip.coupled())
             {
                 if
                 (
