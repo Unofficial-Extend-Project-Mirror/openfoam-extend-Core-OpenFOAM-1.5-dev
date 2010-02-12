@@ -951,12 +951,12 @@ int main(int argc, char *argv[])
                 {
                     zoneName = iter();
                 }
-    
+
                 Info<< "Writing zone " << zoneI << " to cellZone "
                     << zoneName << " and cellSet"
                     << endl;
 
-                cellSet cset(mesh, zoneName, zoneCells[zoneI]);
+                cellSet cset(mesh, zoneName, labelHashSet(zoneCells[zoneI]));
                 cset.write();
 
                 cz[nValidCellZones] = new cellZone
@@ -995,7 +995,7 @@ int main(int argc, char *argv[])
                     << zoneName << " and faceSet"
                     << endl;
 
-                faceSet fset(mesh, zoneName, zoneFaces[zoneI]);
+                faceSet fset(mesh, zoneName, labelHashSet(zoneFaces[zoneI]));
                 fset.write();
 
                 fz[nValidFaceZones] = new faceZone

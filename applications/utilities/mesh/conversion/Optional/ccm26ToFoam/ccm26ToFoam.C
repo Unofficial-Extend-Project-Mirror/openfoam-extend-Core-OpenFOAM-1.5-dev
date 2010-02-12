@@ -1039,7 +1039,7 @@ int main(int argc, char *argv[])
                 << zoneName << " and cellSet " << zoneName
                 << endl;
 
-            cellSet cset(mesh, zoneName, zoneCells[zoneI]);
+            cellSet cset(mesh, zoneName, labelHashSet(zoneCells[zoneI]));
             cset.write();
 
             mesh.cellZones().set
