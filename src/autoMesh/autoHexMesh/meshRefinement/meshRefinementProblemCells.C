@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "meshRefinement.H"
 #include "fvMesh.H"
@@ -201,7 +201,12 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
 
     if (debug)
     {
-        faceSet fSet(mesh_, "edgeConnectedFaces", candidateFaces);
+        faceSet fSet
+        (
+            mesh_,
+            "edgeConnectedFaces",
+            labelHashSet(candidateFaces)
+        );
         Pout<< "Writing " << fSet.size()
             << " with problematic topology to faceSet "
             << fSet.objectPath() << endl;
@@ -483,7 +488,12 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
         if (debug)
         {
-            cellSet problemCellSet(mesh_, "problemCells", problemCells.toc());
+            cellSet problemCellSet
+            (
+                mesh_,
+                "problemCells",
+                labelHashSet(problemCells.toc())
+            );
             Pout<< "Writing " << problemCellSet.size()
                 << " cells that are edge connected to coarser cell to set "
                 << problemCellSet.objectPath() << endl;

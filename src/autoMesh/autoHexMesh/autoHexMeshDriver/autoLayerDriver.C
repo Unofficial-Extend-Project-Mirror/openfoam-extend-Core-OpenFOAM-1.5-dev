@@ -25,7 +25,7 @@ License
 Description
     All to do with adding cell layers
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "autoLayerDriver.H"
 #include "fvMesh.H"
@@ -265,7 +265,13 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
 
             if (debug)
             {
-                faceSet restoreSet(mesh, "mastersToRestore", mastersToRestore);
+                faceSet restoreSet
+                (
+                    mesh,
+                    "mastersToRestore",
+                    labelHashSet(mastersToRestore)
+                );
+
                 Pout<< "Writing all " << mastersToRestore.size()
                     << " masterfaces to be restored to set "
                     << restoreSet.objectPath() << endl;
@@ -3077,7 +3083,7 @@ void Foam::autoLayerDriver::addLayers
             (
                 newMesh,
                 "addedCells",
-                findIndices(flaggedCells, true)
+                labelHashSet(findIndices(flaggedCells, true))
             );
             Info<< "Writing "
                 << returnReduce(addedCellSet.size(), sumOp<label>())
@@ -3089,7 +3095,7 @@ void Foam::autoLayerDriver::addLayers
             (
                 newMesh,
                 "layerFaces",
-                findIndices(flaggedCells, true)
+                labelHashSet(findIndices(flaggedCells, true))
             );
             Info<< "Writing "
                 << returnReduce(layerFacesSet.size(), sumOp<label>())
@@ -3191,14 +3197,24 @@ void Foam::autoLayerDriver::addLayers
     // Write mesh
     // ~~~~~~~~~~
 
-    cellSet addedCellSet(mesh, "addedCells", findIndices(flaggedCells, true));
+    cellSet addedCellSet
+    (
+        mesh,
+        "addedCells",
+        labelHashSet(findIndices(flaggedCells, true))
+    );
     Info<< "Writing "
         << returnReduce(addedCellSet.size(), sumOp<label>())
         << " added cells to cellSet "
         << addedCellSet.name() << endl;
     addedCellSet.write();
 
-    faceSet layerFacesSet(mesh, "layerFaces", findIndices(flaggedFaces, true));
+    faceSet layerFacesSet
+    (
+        mesh,
+        "layerFaces",
+        labelHashSet(findIndices(flaggedFaces, true))
+    );
     Info<< "Writing "
         << returnReduce(layerFacesSet.size(), sumOp<label>())
         << " faces inside added layer to faceSet "

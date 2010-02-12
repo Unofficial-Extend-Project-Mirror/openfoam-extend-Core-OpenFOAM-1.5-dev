@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "meshRefinement.H"
 #include "trackedParticle.H"
@@ -217,7 +217,12 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
             << " changed faces out of " << mesh.globalData().nTotalFaces()
             << endl;
 
-        faceSet changedFacesSet(mesh, "changedFaces", changedFaces);
+        faceSet changedFacesSet
+        (
+            mesh,
+            "changedFaces",
+            labelHashSet(changedFaces)
+        );
         Pout<< "getChangedFaces : Writing " << changedFaces.size()
             << " changed faces to faceSet " << changedFacesSet.name()
             << endl;

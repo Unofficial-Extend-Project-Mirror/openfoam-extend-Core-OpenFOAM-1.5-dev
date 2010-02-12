@@ -62,19 +62,19 @@ public:
     // Constructors
 
         //- Construct given initial map size
-        HashSet(label size = 100)
+        explicit HashSet(label size = 100)
         :
             HashTable<empty, Key, Hash>(size)
         {}
 
         //- Construct from Istream
-        HashSet(Istream& is)
+        explicit HashSet(Istream& is)
         :
             HashTable<empty, Key, Hash>(is)
         {}
 
         //- Construct from UList of Key
-        HashSet(const UList<Key>& ul)
+        explicit HashSet(const UList<Key>& ul)
         :
             HashTable<empty, Key, Hash>(2*ul.size())
         {
