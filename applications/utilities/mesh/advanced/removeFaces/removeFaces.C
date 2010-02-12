@@ -85,7 +85,12 @@ int main(int argc, char *argv[])
     );
 
     {
-        faceSet compatibleRemoves(mesh, "compatibleRemoves", facesToRemove);
+        faceSet compatibleRemoves
+        (
+            mesh,
+            "compatibleRemoves",
+            labelHashSet(facesToRemove)
+        );
 
         Pout<< "Original faces to be removed:" << candidateSet.size() << nl
             << "New faces to be removed:" << compatibleRemoves.size() << nl
