@@ -59,7 +59,9 @@ template<class Type>
 template<class GeoField>
 scalar backwardDdtScheme<Type>::deltaT0_(const GeoField& vf) const
 {
-    if (vf.nOldTimes() < 2)
+    // Bug fix, Zeljko Tukovic: solver with outer iterations over a time-step
+    // HJ, 12/Feb/2010
+    if (vf.oldTime().timeIndex() == vf.oldTime().oldTime().timeIndex())
     {
         return GREAT;
     }
