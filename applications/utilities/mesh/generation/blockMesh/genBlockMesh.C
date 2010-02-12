@@ -402,7 +402,12 @@ int main(int argc, char *argv[])
             );
 
             // Write as cellSet for ease of processing
-            cellSet cset(mesh, iter.key(), zoneCells[zoneI].shrink());
+            cellSet cset
+            (
+                mesh,
+                iter.key(),
+                labelHashSet(zoneCells[zoneI].shrink())
+            );
             cset.write();
         }
 
