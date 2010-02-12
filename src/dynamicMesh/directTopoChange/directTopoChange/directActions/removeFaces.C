@@ -773,7 +773,12 @@ void Foam::removeFaces::setRefinement
 {
     if (debug)
     {
-        faceSet facesToRemove(mesh_, "facesToRemove", faceLabels);
+        faceSet facesToRemove
+        (
+            mesh_,
+            "facesToRemove",
+            labelHashSet(faceLabels)
+        );
         Pout<< "Writing faces to remove to faceSet " << facesToRemove.name()
             << endl;
         facesToRemove.write();

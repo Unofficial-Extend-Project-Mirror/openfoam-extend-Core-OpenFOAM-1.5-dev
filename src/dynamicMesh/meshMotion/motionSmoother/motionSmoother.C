@@ -339,11 +339,16 @@ void Foam::motionSmoother::getAffectedFacesAndPoints
 
     for (label i = 0; i < nPointIter; i++)
     {
-        pointSet nbrPoints(mesh_, "grownPoints", getPoints(nbrFaces.toc()));
+        pointSet nbrPoints
+        (
+            mesh_,
+            "grownPoints",
+            labelHashSet(getPoints(labelHashSet(nbrFaces.toc())))
+        );
 
         forAllConstIter(pointSet, nbrPoints, iter)
         {
-            const labelList& pCells = mesh_.pointCells()[iter.key()];  
+            const labelList& pCells = mesh_.pointCells()[iter.key()];
 
             forAll(pCells, pCellI)
             {
@@ -971,7 +976,12 @@ bool Foam::motionSmoother::scaleMesh
         // Find out points used by wrong faces and scale displacement.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        pointSet usedPoints(mesh_, "usedPoints", getPoints(wrongFaces));
+        pointSet usedPoints
+        (
+            mesh_,
+            "usedPoints",
+            labelHashSet(getPoints(labelHashSet(wrongFaces)))
+        );
         usedPoints.sync(mesh_);
 
 

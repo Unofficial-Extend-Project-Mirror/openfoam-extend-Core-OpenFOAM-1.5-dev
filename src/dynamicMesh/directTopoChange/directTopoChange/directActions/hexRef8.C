@@ -2884,14 +2884,24 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         // Check that newCellsToRefine obeys at least 2:1.
 
         {
-            cellSet cellsIn(mesh_, "cellsToRefineIn", cellsToRefine);
+            cellSet cellsIn
+            (
+                mesh_,
+                "cellsToRefineIn",
+                labelHashSet(cellsToRefine)
+            );
             Pout<< "hexRef8::consistentSlowRefinement2 : writing "
                 << cellsIn.size() << " to cellSet "
                 << cellsIn.objectPath() << endl;
             cellsIn.write();
         }
         {
-            cellSet cellsOut(mesh_, "cellsToRefineOut", newCellsToRefine);
+            cellSet cellsOut
+            (
+                mesh_,
+                "cellsToRefineOut",
+                labelHashSet(newCellsToRefine)
+            );
             Pout<< "hexRef8::consistentSlowRefinement2 : writing "
                 << cellsOut.size() << " to cellSet "
                 << cellsOut.objectPath() << endl;
@@ -5182,7 +5192,8 @@ void Foam::hexRef8::setUnrefinement
             {
                 FatalErrorIn
                 (
-                    "hexRef8::setUnrefinement(const labelList&, polyTopoChange&)"
+                    "hexRef8::setUnrefinement(const labelList&, "
+                    "polyTopoChange&)"
                 )   << "Illegal cell level " << cellLevel_[cellI]
                     << " for cell " << cellI
                     << abort(FatalError);
@@ -5191,10 +5202,15 @@ void Foam::hexRef8::setUnrefinement
 
 
         // Write to sets.
-        pointSet pSet(mesh_, "splitPoints", splitPointLabels);
+        pointSet pSet(mesh_, "splitPoints", labelHashSet(splitPointLabels));
         pSet.write();
 
-        cellSet cSet(mesh_, "splitPointCells", splitPointLabels.size());
+        cellSet cSet
+        (
+            mesh_,
+            "splitPointCells",
+            splitPointLabels.size()
+        );
 
         forAll(splitPointLabels, i)
         {

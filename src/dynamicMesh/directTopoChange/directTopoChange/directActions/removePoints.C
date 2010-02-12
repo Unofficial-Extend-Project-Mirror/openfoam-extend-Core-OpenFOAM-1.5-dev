@@ -511,7 +511,12 @@ void Foam::removePoints::getUnrefimentSet
     if (debug)
     {
         // Check if synced.
-        faceSet undoFacesSet(mesh_, "undoFacesSet", undoFaces);
+        faceSet undoFacesSet
+        (
+            mesh_,
+            "undoFacesSet",
+            labelHashSet(undoFaces)
+        );
         label sz = undoFacesSet.size();
 
         undoFacesSet.sync(mesh_);
