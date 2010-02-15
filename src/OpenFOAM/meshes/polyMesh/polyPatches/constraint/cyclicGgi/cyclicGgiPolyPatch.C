@@ -193,7 +193,7 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
 {}
 
 
-//- Construct as copy, resetting the boundary mesh
+// Construct as copy, resetting the boundary mesh
 Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
 (
     const cyclicGgiPolyPatch& pp,
@@ -207,7 +207,7 @@ Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
 {}
 
 
-//- Construct as copy, resetting the face list and boundary mesh data
+// Construct as copy, resetting the face list and boundary mesh data
 Foam::cyclicGgiPolyPatch::cyclicGgiPolyPatch
 (
     const cyclicGgiPolyPatch& pp,
