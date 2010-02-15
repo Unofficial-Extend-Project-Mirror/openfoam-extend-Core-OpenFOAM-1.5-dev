@@ -54,7 +54,8 @@ class surfaceNormalFixedValueFvPatchVectorField
     public fixedValueFvPatchVectorField
 {
     // Private data
-    
+
+        //- Surface-normal velocity value
         scalarField refValue_;
 
 
