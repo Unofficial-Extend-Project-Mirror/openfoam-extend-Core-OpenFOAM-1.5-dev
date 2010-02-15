@@ -166,9 +166,6 @@ public:
             //- Source term component for momentum equation
             tmp<DimensionedField<vector, volMesh> > Su() const;
 
-            //- Return the centrifugal work
-            tmp<DimensionedField<scalar, volMesh> > centrifugalWork() const;
-
             //- Return velocity vector from positions
             vectorField velocity(const vectorField& positions) const;
 

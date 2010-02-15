@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -180,27 +180,6 @@ Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
 Foam::SRF::SRFModel::Su() const
 {
     return Fcoriolis() + Fcentrifugal();
-}
-
-
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::SRF::SRFModel::centrifugalWork() const
-{
-    return tmp<DimensionedField<scalar, volMesh> >
-    (
-        new DimensionedField<scalar, volMesh>
-        (
-            IOobject
-            (
-                "centrifugalWork",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            (omega_ ^ (omega_ ^ mesh_.C())) & Urel_
-        )
-    );
 }
 
 
