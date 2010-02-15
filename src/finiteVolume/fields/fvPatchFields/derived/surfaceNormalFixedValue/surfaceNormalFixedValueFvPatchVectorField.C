@@ -44,7 +44,7 @@ surfaceNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    refValue_(p.size())
+    refValue_(p.size(), 0)
 {}
 
 
@@ -133,6 +133,7 @@ void surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     refValue_.writeEntry("refValue", os);
+    writeEntry("value", os);
 }
 
 
