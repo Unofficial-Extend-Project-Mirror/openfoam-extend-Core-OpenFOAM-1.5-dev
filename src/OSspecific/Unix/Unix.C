@@ -429,6 +429,7 @@ bool Foam::chmod(const fileName& name, const mode_t m)
 mode_t Foam::mode(const fileName& name)
 {
     fileStat fileStatus(name);
+
     if (fileStatus.isValid())
     {
         return fileStatus.status().st_mode;
