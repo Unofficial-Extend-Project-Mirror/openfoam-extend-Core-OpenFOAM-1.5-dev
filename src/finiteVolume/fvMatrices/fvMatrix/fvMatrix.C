@@ -493,7 +493,7 @@ void Foam::fvMatrix<Type>::setReference
             {
                 label parCelli = celli;
 
-                if (parCelli >= diag().size())
+                while (parCelli >= diag().size())
                 {
                     // Out of range, pick a local cell
                     parCelli /= Pstream::nProcs();
