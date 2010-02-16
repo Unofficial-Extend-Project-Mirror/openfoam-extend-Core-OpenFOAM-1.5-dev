@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("rotateAlongVector", "(vector angleInDegree)");
     argList::validOptions.insert("rotateFields", "");
     argList::validOptions.insert("scale", "vector");
- 
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 
