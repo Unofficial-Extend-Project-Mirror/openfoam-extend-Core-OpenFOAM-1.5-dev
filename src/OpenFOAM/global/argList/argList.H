@@ -191,7 +191,7 @@ public:
             {
                 return rootPath_;
             }
-           
+
             //- Return true if the named option is found
             bool optionFound(const word& opt) const
             {
