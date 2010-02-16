@@ -1108,7 +1108,7 @@ Foam::faMesh::movePoints(const vectorField& newPoints)
     edgeInterpolation::movePoints();
 
     tmp<scalarField> tresult(new scalarField(nEdges(), 0.0));
-    
+
     return tresult;
 }
 

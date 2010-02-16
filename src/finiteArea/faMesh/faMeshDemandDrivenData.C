@@ -193,7 +193,7 @@ void faMesh::calcLe() const
                     )
                 );
 
-            patchLe[edgeI] *= 
+            patchLe[edgeI] *=
                 magLe().boundaryField()[patchI][edgeI]
                 /mag(patchLe[edgeI]);
         }
@@ -767,13 +767,13 @@ void faMesh::calcEdgeTransformTensors() const
     {
         if (boundary()[patchI].coupled())
         {
-            const unallocLabelList& edgeFaces = 
+            const unallocLabelList& edgeFaces =
                 boundary()[patchI].edgeFaces();
 
-            vectorField ngbCf = 
+            vectorField ngbCf =
                 Cf.boundaryField()[patchI].patchNeighbourField();
 
-            vectorField ngbNf = 
+            vectorField ngbNf =
                 Nf.boundaryField()[patchI].patchNeighbourField();
 
             forAll(edgeFaces, edgeI)

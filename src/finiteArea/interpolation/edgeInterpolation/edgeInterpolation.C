@@ -245,7 +245,7 @@ void edgeInterpolation::makeLPN() const
     forAll(owner, edgeI)
     {
         vector curSkewCorrVec = vector::zero;
-        
+
         if (skew())
         {
             curSkewCorrVec = skewCorrectionVectors()[edgeI];
@@ -327,7 +327,7 @@ void edgeInterpolation::makeWeights() const
     forAll(owner, edgeI)
     {
         vector curSkewCorrVec = vector::zero;
-        
+
         if (skew())
         {
             curSkewCorrVec = skewCorrectionVectors()[edgeI];
