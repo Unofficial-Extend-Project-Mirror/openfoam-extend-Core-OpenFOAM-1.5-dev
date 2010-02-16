@@ -267,7 +267,7 @@ void Foam::vtkPV3Foam::convertMeshCellZones
                 mesh
             );
 
-            subsetter.setLargeCellSubset(czMesh[zoneI]);
+            subsetter.setLargeCellSubset(labelHashSet(czMesh[zoneI]));
 
             const label datasetId = GetNumberOfDataSets(output, selector);
 
