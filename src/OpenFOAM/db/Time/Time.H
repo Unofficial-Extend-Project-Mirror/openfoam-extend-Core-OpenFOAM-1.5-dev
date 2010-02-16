@@ -236,6 +236,12 @@ public:
                 return rootPath()/caseName();
             }
 
+            //- Return access to controlDict for editing
+            IOdictionary& controlDict()
+            {
+                return controlDict_;
+            }
+
             const dictionary& controlDict() const
             {
                 return controlDict_;

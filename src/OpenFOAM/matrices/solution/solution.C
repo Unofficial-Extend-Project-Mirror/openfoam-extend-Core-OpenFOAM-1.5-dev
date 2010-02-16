@@ -167,6 +167,10 @@ bool Foam::solution::writeData(Ostream& os) const
     os << nl << "relaxationFactors";
     relaxationFactors_.write(os, true);
 
+    // Write direct entries of the solution dictionary
+    // HJ, 16/Feb/2010
+    dictionary::write(os, false);
+
     return true;
 }
 
