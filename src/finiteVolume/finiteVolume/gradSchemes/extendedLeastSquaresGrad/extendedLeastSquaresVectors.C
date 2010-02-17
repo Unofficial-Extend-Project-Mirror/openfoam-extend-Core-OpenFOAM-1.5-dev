@@ -27,6 +27,7 @@ License
 #include "extendedLeastSquaresVectors.H"
 #include "surfaceFields.H"
 #include "volFields.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -340,5 +341,15 @@ bool Foam::extendedLeastSquaresVectors::movePoints() const
     return true;
 }
 
+bool Foam::extendedLeastSquaresVectors::updateMesh(const mapPolyMesh&) const
+{
+    deleteDemandDrivenData(pVectorsPtr_);
+    deleteDemandDrivenData(nVectorsPtr_);
+
+    deleteDemandDrivenData(additionalCellsPtr_);
+    deleteDemandDrivenData(additionalVectorsPtr_);
+
+    return true;
+}
 
 // ************************************************************************* //

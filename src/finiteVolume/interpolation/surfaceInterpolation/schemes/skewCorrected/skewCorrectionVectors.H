@@ -46,6 +46,7 @@ namespace Foam
 {
 
 class fvMesh;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                     Class skewCorrectionVectors Declaration
@@ -92,6 +93,9 @@ public:
 
         //- Delete the correction vectors when the mesh moves
         virtual bool movePoints() const;
+
+        //- Delete the correction vectors when the mesh is updated
+        virtual bool updateMesh(const mapPolyMesh&) const;
 };
 
 

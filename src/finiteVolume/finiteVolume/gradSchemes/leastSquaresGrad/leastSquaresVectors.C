@@ -27,6 +27,7 @@ License
 #include "leastSquaresVectors.H"
 #include "surfaceFields.H"
 #include "volFields.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -283,5 +284,18 @@ bool Foam::leastSquaresVectors::movePoints() const
     return true;
 }
 
+bool Foam::leastSquaresVectors::updateMesh(const mapPolyMesh& mpm) const
+{
+    if (debug)
+    {
+        InfoIn("bool leastSquaresVectors::updateMesh(const mapPolyMesh&) const")
+            << "Clearing least square data" << endl;
+    }
+
+    deleteDemandDrivenData(pVectorsPtr_);
+    deleteDemandDrivenData(nVectorsPtr_);
+
+    return true;
+}
 
 // ************************************************************************* //

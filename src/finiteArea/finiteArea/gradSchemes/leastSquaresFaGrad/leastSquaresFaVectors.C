@@ -27,6 +27,7 @@ License
 #include "leastSquaresFaVectors.H"
 #include "edgeFields.H"
 #include "areaFields.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -282,5 +283,18 @@ bool Foam::leastSquaresFaVectors::movePoints() const
     return true;
 }
 
+bool Foam::leastSquaresFaVectors::updateMesh(const mapPolyMesh&) const
+{
+    if (debug)
+    {
+        InfoIn("bool leastSquaresFaVectors::updateMesh() const")
+            << "Clearing least square data" << endl;
+    }
+
+    deleteDemandDrivenData(pVectorsPtr_);
+    deleteDemandDrivenData(nVectorsPtr_);
+
+    return true;
+}
 
 // ************************************************************************* //

@@ -46,6 +46,8 @@ SourceFiles
 namespace Foam
 {
 
+class mapPolyMesh;
+
 /*---------------------------------------------------------------------------*\
                      Class extendedLeastSquaresVectors Declaration
 \*---------------------------------------------------------------------------*/
@@ -112,6 +114,9 @@ public:
 
         //- Delete the least square vectors when the mesh moves
         virtual bool movePoints() const;
+
+        //- Delete the least square vectors when mesh updates
+        virtual bool updateMesh(const mapPolyMesh&) const;
 };
 
 

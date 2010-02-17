@@ -27,6 +27,7 @@ License
 #include "skewCorrectionVectors.H"
 #include "surfaceFields.H"
 #include "volFields.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -200,5 +201,13 @@ bool Foam::skewCorrectionVectors::movePoints() const
     return true;
 }
 
+// Do what is necessary if the mesh is updated
+bool Foam::skewCorrectionVectors::updateMesh(const mapPolyMesh& mpm) const
+{
+    skew_ = true;
+    deleteDemandDrivenData(skewCorrectionVectors_);
+
+    return true;
+}
 
 // ************************************************************************* //
