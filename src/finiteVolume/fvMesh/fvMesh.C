@@ -483,7 +483,7 @@ void fvMesh::updateMesh(const mapPolyMesh& mpm)
     // This is a temporary solution
     surfaceInterpolation::movePoints();
 
-    meshObjectBase::allUpdateTopology<fvMesh>(*this);
+    meshObjectBase::allUpdateTopology<fvMesh>(*this, mpm);
 }
 
 
@@ -503,7 +503,10 @@ void fvMesh::syncUpdateMesh()
     // This is a temporary solution
     surfaceInterpolation::movePoints();
 
-    meshObjectBase::allUpdateTopology<fvMesh>(*this);
+    // Instantiate a dummy mapPolyMesh
+    autoPtr<mapPolyMesh> mapPtr(new mapPolyMesh(*this));
+
+    meshObjectBase::allUpdateTopology<fvMesh>(*this, mapPtr());
 }
 
 

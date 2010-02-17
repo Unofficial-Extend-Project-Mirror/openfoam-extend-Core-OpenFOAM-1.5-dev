@@ -52,6 +52,7 @@ namespace Foam
 
 class lduMesh;
 class lduMatrix;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class GAMGAgglomeration Declaration
@@ -221,6 +222,12 @@ public:
 
             //- Update after mesh motion.  Needed for mesh object
             virtual bool movePoints() const
+            {
+                return true;
+            }
+
+            //- Update after topology change. Needed for mesh object
+            virtual bool updateMesh(const mapPolyMesh& mpm) const
             {
                 return true;
             }

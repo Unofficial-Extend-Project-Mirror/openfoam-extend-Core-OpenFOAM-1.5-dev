@@ -46,6 +46,9 @@ SourceFiles
 namespace Foam
 {
 
+// Class forward declarations
+class mapPolyMesh;
+
 /*---------------------------------------------------------------------------*\
                          Class meshObjectBase Declaration
 \*---------------------------------------------------------------------------*/
@@ -61,7 +64,7 @@ public:
 
         //- Update topology on all mesh objects
         template<class Mesh>
-        static void allUpdateTopology(const Mesh& mesh)
+        static void allUpdateTopology(const Mesh& mesh, const mapPolyMesh& mpm)
         {
             HashTable<const meshObjectBase*> tbl =
                 mesh.objectRegistry::lookupClass<meshObjectBase>();
@@ -81,7 +84,8 @@ public:
                     Info << "Updating object " << obj.type() << endl;
                 }
 
-                obj.movePoints();
+                // obj.movePoints();
+                obj.updateMesh(mpm);
             }
 
             if (Mesh::debug)
@@ -136,6 +140,9 @@ public:
 
         //- Update after mesh motion
         virtual bool movePoints() const = 0;
+
+        //- Update after topology change
+        virtual bool updateMesh(const mapPolyMesh&) const = 0;
 };
 
 
