@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
                 {
                     pEqn.solve(mesh.solver(p.name()));
                 }
-                
+
                 if (nonOrth == nNonOrthCorr)
                 {
                     phi -= pEqn.flux();
