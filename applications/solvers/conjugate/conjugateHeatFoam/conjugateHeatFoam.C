@@ -28,7 +28,7 @@ Application
 Description
     Transient solver for incompressible, laminar flow of Newtonian fluids
     with conjugate heat transfer
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
