@@ -13,9 +13,7 @@
 
     if (pd.needReference())
     {
-        fvc::makeRelative(phi, U);
         adjustPhi(phi, U, pd);
-        fvc::makeAbsolute(phi, U);
     }
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
