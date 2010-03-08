@@ -1,4 +1,4 @@
-{    
+{
 
     fvScalarMatrix hEqn
     (
@@ -8,8 +8,8 @@
      ==
         DpDt
     );
-    
+
     hEqn.solve();
-    
+
     thermo->correct();
 }
