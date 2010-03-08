@@ -65,7 +65,7 @@ class totalTemperatureFvPatchScalarField
         //- Heat capacity ratio
         scalar gamma_;
 
-        //- Total pressure
+        //- Total temperature
         scalarField T0_;
 
 
