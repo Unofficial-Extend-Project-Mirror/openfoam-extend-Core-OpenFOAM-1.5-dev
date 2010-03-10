@@ -168,6 +168,9 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
         // as necessary.  HJ, date deleted
         if (pm[patchI] == -1)
         {
+            // Bug fix. Zeljko Tukovic, 10/Mar/2010
+            internalFacesPatchIndex = patchI;
+
             patchFields.set
             (
                 patchI,
