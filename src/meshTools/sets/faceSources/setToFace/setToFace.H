@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::zoneToPoint
+    Foam::setToFace
 
 Description
-    A topoSetSource to select points based on pointZone.
+    A topoSetSource to select faces based on faceSet.
 
 SourceFiles
-    zoneToPoint.C
+    setToFace.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zoneToPoint_H
-#define zoneToPoint_H
+#ifndef setToFace_H
+#define setToFace_H
 
 #include "topoSetSource.H"
 
@@ -44,10 +44,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class zoneToPoint Declaration
+                        Class setToFace Declaration
 \*---------------------------------------------------------------------------*/
 
-class zoneToPoint
+class setToFace
 :
     public topoSetSource
 {
@@ -57,8 +57,8 @@ class zoneToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of pointZone
-        word zoneName_;
+        //- Name of faceSet
+        word setName_;
 
 
     // Private Member Functions
@@ -69,26 +69,26 @@ class zoneToPoint
 public:
 
     //- Runtime type information
-    TypeName("zoneToPoint");
+    TypeName("setToFace");
 
     // Constructors
 
         //- Construct from components
-        zoneToPoint
+        setToFace
         (
             const polyMesh& mesh,
-            const word& zoneName
+            const word& setName
         );
 
         //- Construct from dictionary
-        zoneToPoint
+        setToFace
         (
             const polyMesh& mesh,
             const dictionary& dict
         );
 
         //- Construct from Istream
-        zoneToPoint
+        setToFace
         (
             const polyMesh& mesh,
             Istream&
@@ -97,7 +97,7 @@ public:
 
     // Destructor
 
-        virtual ~zoneToPoint();
+        virtual ~setToFace();
 
 
     // Member Functions
