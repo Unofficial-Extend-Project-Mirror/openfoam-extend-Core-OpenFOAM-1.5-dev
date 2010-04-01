@@ -187,6 +187,7 @@ $(limitedSchemes)/upwind/upwind.C
 $(limitedSchemes)/blended/blended.C
 $(limitedSchemes)/linearUpwind/linearUpwind.C
 $(limitedSchemes)/linearUpwindV/linearUpwindV.C
+$(limitedSchemes)/reconCentral/reconCentral.C
 $(limitedSchemes)/Gamma/Gamma.C
 $(limitedSchemes)/SFCD/SFCD.C
 $(limitedSchemes)/Minmod/Minmod.C
@@ -266,6 +267,7 @@ convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C
 $(convectionSchemes)/gaussConvectionScheme/gaussConvectionSchemes.C
 $(convectionSchemes)/noConvectionScheme/noConvectionSchemes.C
+$(convectionSchemes)/explicitConvectionScheme/explicitConvectionSchemes.C
 $(convectionSchemes)/multivariateGaussConvectionScheme/multivariateGaussConvectionSchemes.C
 
 laplacianSchemes = finiteVolume/laplacianSchemes
