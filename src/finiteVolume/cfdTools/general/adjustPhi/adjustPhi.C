@@ -99,6 +99,15 @@ bool Foam::adjustPhi
             }
         }
 
+
+        //HR 16.03.10: Bug fix for moving meshes. Changing domain volume needs
+        // to be taken into account.
+        if (phi.mesh().moving())
+        {
+            dimensionedScalar Vdiff = sum(phi.mesh().V()) - sum(phi.mesh().V0());
+            fixedMassOut += Vdiff.value()/phi.time().deltaT().value();
+        }
+
         reduce(massIn, sumOp<scalar>());
         reduce(fixedMassOut, sumOp<scalar>());
         reduce(adjustableMassOut, sumOp<scalar>());
