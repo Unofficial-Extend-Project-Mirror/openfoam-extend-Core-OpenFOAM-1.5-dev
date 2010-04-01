@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvmDiv.H"
@@ -60,6 +57,7 @@ div
         vf.mesh().divScheme(name)
     )().fvmDiv(flux, vf);
 }
+
 
 template<class Type>
 tmp<fvMatrix<Type> >

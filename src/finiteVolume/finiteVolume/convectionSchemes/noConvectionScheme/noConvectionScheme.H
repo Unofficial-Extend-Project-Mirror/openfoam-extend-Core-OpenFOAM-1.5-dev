@@ -26,7 +26,8 @@ Class
     Foam::fv::noConvectionScheme
 
 Description
-    Dummy convection scheme, used to switch off convection without recompilation
+    Dummy convection scheme, used to switch off convection without
+    recompilation
 
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved.
