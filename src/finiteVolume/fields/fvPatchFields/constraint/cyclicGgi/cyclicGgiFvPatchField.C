@@ -153,7 +153,7 @@ tmp<Field<Type> > cyclicGgiFvPatchField<Type>::patchNeighbourField() const
 
     // Transformation is handled in interpolation.  HJ, 7/Jan/2009
     tmp<Field<Type> > tpnf(cyclicGgiPatch_.interpolate(sField));
-    Field<Type>& pnf = tpnf(); 
+    Field<Type>& pnf = tpnf();
 
     if (cyclicGgiPatch_.bridgeOverlap())
     {
