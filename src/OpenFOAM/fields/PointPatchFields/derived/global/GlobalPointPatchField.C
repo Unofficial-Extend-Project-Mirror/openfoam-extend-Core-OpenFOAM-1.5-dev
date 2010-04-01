@@ -201,7 +201,7 @@ void GlobalPointPatchField
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template
 <

@@ -31,7 +31,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
 <
@@ -121,7 +121,7 @@ CoupledPointPatchField
 )
 :
     lduInterfaceField(refCast<const lduInterface>(ptf.patch())),
-    PatchField<Type>(ptf)
+    PatchField<Type>(ptf, iF)
 {}
 
 
