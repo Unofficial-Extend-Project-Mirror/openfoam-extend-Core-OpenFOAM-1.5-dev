@@ -42,7 +42,7 @@ Foam::TimeState::TimeState()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::TimeState::~TimeState()
 {}
