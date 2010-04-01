@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
     {
         const entry& region = regions[regioni];
 
-        autoPtr<topoSetSource> cellSelector = 
+        autoPtr<topoSetSource> cellSelector =
             topoSetSource::New(region.keyword(), mesh, region.dict());
 
         cellSet selectedCellSet
