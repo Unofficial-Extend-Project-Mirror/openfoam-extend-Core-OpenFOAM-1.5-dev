@@ -232,7 +232,6 @@ Foam::RBFMotionSolver::RBFMotionSolver
     motion_(0),
     interpolation_
     (
-        mesh,
         subDict("interpolation"),
         controlPoints_,
         internalPoints_
@@ -282,7 +281,7 @@ Foam::tmp<Foam::pointField> Foam::RBFMotionSolver::curPoints() const
     // 1. Insert prescribed motion of moving points
     forAll (movingIDs_, i)
     {
-		newPoints[movingIDs_[i]] = motion_[i];
+        newPoints[movingIDs_[i]] = motion_[i];
     }
 
     vectorField motionOfControl(controlIDs_.size());
@@ -290,17 +289,17 @@ Foam::tmp<Foam::pointField> Foam::RBFMotionSolver::curPoints() const
     // 2. Capture positions of control points
     forAll (controlIDs_, i)
     {
-		motionOfControl[i] = newPoints[controlIDs_[i]];
+        motionOfControl[i] = newPoints[controlIDs_[i]];
     }
 
     // Call interpolation
     vectorField interpolatedMotion =
         interpolation_.interpolate(motionOfControl);
 
-	// 3. Insert RBF interpolated motion
+    // 3. Insert RBF interpolated motion
     forAll (internalIDs_, i)
     {
-		newPoints[internalIDs_[i]] = interpolatedMotion[i];
+        newPoints[internalIDs_[i]] = interpolatedMotion[i];
     }
 
     // 4. Add old point positions
