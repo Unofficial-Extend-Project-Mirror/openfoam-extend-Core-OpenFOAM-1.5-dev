@@ -240,7 +240,7 @@ public:
                 return *this;
             }
 
-            //- Return reference to name 
+            //- Return reference to name
             //  Note: name() is currently ambiguous due to derivation from
             //  surfaceInterpolation
             const word& name() const
