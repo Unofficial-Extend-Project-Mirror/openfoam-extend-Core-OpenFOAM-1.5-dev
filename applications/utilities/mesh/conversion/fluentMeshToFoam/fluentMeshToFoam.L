@@ -1642,41 +1642,41 @@ int main(int argc, char *argv[])
             boundaryZones[pI].append(bPatches[pI].name());
         }
 
-	    label cnt=0;
-	    SLList<label>::iterator cg = cellGroupZoneID.begin();
-	    SLList<label>::iterator start = cellGroupStartIndex.begin();
-	    SLList<label>::iterator end = cellGroupEndIndex.begin();
+        label cnt=0;
+        SLList<label>::iterator cg = cellGroupZoneID.begin();
+        SLList<label>::iterator start = cellGroupStartIndex.begin();
+        SLList<label>::iterator end = cellGroupEndIndex.begin();
 
-	    for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
-	    {
-	        const word& name = patchNameIDs[cg()];
-	        const word& type = patchTypeIDs[cg()];
+        for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
+        {
+            const word& name = patchNameIDs[cg()];
+            const word& type = patchTypeIDs[cg()];
 
-	        Info<< "Writing cell zone: " << name
+            Info<< "Writing cell zone: " << name
                 << " of type " << type << " starting at " << start() - 1
                 << " ending at " << end() - 1 << " to cellSet." << endl;
 
-	        labelList cls(end() - start() + 1);
+            labelList cls(end() - start() + 1);
 
             // Mark zone cells, used for finding faces
             boolList zoneCell(pShapeMesh.nCells(), false);
 
-	        // shift cell indizes by 1
-	        label nr=0;
-	        for (label celli = (start() - 1); celli < end(); celli++)
+            // shift cell indizes by 1
+            label nr=0;
+            for (label celli = (start() - 1); celli < end(); celli++)
             {
                 cls[nr] = celli;
                 zoneCell[celli] = true;
                 nr++;
-	        }
+            }
 
-	        cz[cnt] = new cellZone
-	        (
+            cz[cnt] = new cellZone
+            (
                 name,
                 cls,
                 cnt,
                 pShapeMesh.cellZones()
-	        );
+            );
 
             DynamicList<label> zoneFaces(pShapeMesh.nFaces());
             forAll(pShapeMesh.faceNeighbour(), faceI)
@@ -1716,8 +1716,8 @@ int main(int argc, char *argv[])
                 }
             }
 
-	        cnt++;
-	    }
+            cnt++;
+        }
 
         pShapeMesh.addZones(pz, fz, cz);
 
