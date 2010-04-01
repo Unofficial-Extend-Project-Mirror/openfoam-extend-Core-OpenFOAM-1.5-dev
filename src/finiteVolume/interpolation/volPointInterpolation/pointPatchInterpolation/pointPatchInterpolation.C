@@ -129,10 +129,10 @@ void pointPatchInterpolation::makePatchPatchAddressing()
     {
         if (patchPatchPointConstraints[i].first() != 0)
         {
-            patchPatchPointConstraintPoints_[nConstraints] = 
+            patchPatchPointConstraintPoints_[nConstraints] =
                 patchPatchPoints_[i];
 
-            patchPatchPointConstraintTensors_[nConstraints] = 
+            patchPatchPointConstraintTensors_[nConstraints] =
                 patchPatchPointConstraints[i].constraintTransformation();
 
             nConstraints++;
