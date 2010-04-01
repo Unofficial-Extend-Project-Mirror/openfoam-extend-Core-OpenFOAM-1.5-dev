@@ -114,7 +114,7 @@ void Foam::lduMatrix::AmulCore
 
         register const label nFaces = upper().size();
         #ifdef ICC_IA64_PREFETCH
-        #pragma swp  
+        #pragma swp
         #endif
         for (register label face=0; face<nFaces; face++)
         {
