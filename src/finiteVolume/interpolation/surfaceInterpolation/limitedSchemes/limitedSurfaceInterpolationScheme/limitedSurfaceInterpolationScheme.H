@@ -119,7 +119,7 @@ public:
         {}
 
 
-        //- Construct from mesh and Istream. 
+        //- Construct from mesh and Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         limitedSurfaceInterpolationScheme
@@ -176,7 +176,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
 
-        //- Return the interpolation weighting factors
+        //- Return the flux consistent with interpolation
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         flux
         (
@@ -193,28 +193,28 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makelimitedSurfaceInterpolationTypeScheme(SS, Type)                    \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                              \
-                                                                               \
-surfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >         \
-    add##SS##Type##MeshConstructorToTable_;                                    \
-                                                                               \
-surfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >     \
-    add##SS##Type##MeshFluxConstructorToTable_;                                \
-                                                                               \
-limitedSurfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >  \
-    add##SS##Type##MeshConstructorToLimitedTable_;                             \
-                                                                               \
+#define makelimitedSurfaceInterpolationTypeScheme(SS, Type)                   \
+                                                                              \
+defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                             \
+                                                                              \
+surfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >        \
+    add##SS##Type##MeshConstructorToTable_;                                   \
+                                                                              \
+surfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >    \
+    add##SS##Type##MeshFluxConstructorToTable_;                               \
+                                                                              \
+limitedSurfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> > \
+    add##SS##Type##MeshConstructorToLimitedTable_;                            \
+                                                                              \
 limitedSurfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >\
     add##SS##Type##MeshFluxConstructorToLimitedTable_;
 
-#define makelimitedSurfaceInterpolationScheme(SS)                              \
-                                                                               \
-makelimitedSurfaceInterpolationTypeScheme(SS, scalar)                          \
-makelimitedSurfaceInterpolationTypeScheme(SS, vector)                          \
-makelimitedSurfaceInterpolationTypeScheme(SS, sphericalTensor)                 \
-makelimitedSurfaceInterpolationTypeScheme(SS, symmTensor)                      \
+#define makelimitedSurfaceInterpolationScheme(SS)                             \
+                                                                              \
+makelimitedSurfaceInterpolationTypeScheme(SS, scalar)                         \
+makelimitedSurfaceInterpolationTypeScheme(SS, vector)                         \
+makelimitedSurfaceInterpolationTypeScheme(SS, sphericalTensor)                \
+makelimitedSurfaceInterpolationTypeScheme(SS, symmTensor)                     \
 makelimitedSurfaceInterpolationTypeScheme(SS, tensor)
 
 

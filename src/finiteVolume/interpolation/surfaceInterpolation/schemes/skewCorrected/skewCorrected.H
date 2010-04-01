@@ -123,7 +123,7 @@ public:
         //- Return true if this scheme uses an explicit correction
         virtual bool corrected() const
         {
-            return 
+            return
                 tScheme_().corrected()
              || skewCorrectionVectors::New(this->mesh()).skew();
         }
@@ -136,7 +136,8 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const skewCorrectionVectors& scv = skewCorrectionVectors::New(mesh);
+            const skewCorrectionVectors& scv =
+                skewCorrectionVectors::New(mesh);
 
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
             (
@@ -207,7 +208,7 @@ public:
             }
             else
             {
-                return 
+                return
                     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >(NULL);
             }
         }
