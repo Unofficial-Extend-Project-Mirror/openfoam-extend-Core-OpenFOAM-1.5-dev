@@ -31,7 +31,7 @@ Description
 Author
     Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "amgCycle.H"
 #include "demandDrivenData.H"
