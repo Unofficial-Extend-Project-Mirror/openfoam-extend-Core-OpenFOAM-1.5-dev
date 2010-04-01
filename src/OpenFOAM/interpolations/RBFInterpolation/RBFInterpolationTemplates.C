@@ -86,7 +86,7 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
         }
     }
 
-    if (polyNomials_)
+    if (polynomials_)
     {
         for
         (
@@ -101,7 +101,7 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
             }
         }
     }
-    
+
     // Evaluation
     scalar t;
 
@@ -115,7 +115,7 @@ Foam::tmp<Foam::Field<Type> > Foam::RBFInterpolation::interpolate
             result[flPoint] += weights[i]*alpha[i];
         }
 
-        if (polyNomials_)
+        if (polynomials_)
         {
             result[flPoint] +=
                 beta[0]

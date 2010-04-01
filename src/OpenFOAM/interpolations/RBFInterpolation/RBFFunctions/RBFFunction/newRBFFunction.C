@@ -42,7 +42,7 @@ autoPtr<RBFFunction> RBFFunction::New
     const dictionary& dict
 )
 {
-    Info<< "Mesh motion with Radial Basis Functions: "
+    Info<< "Radial Basis Function interpolation: "
         << "Selecting RBF function: " << type << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
