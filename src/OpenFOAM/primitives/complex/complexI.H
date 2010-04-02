@@ -302,7 +302,14 @@ inline complex operator/(const complex& c, const scalar s)
 
 inline complex operator/(const scalar s, const complex& c)
 {
-    return complex(s/c.re, s/c.im);
+    scalar sqrC2 = magSqr(c);
+
+    // Bug fix, Hua Shan.  2/Apr/2010
+    return complex
+    (
+        s*c.re/sqrC2,
+       -s*c.im/sqrC2
+    );
 }
 
 
