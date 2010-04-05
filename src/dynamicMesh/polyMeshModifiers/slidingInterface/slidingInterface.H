@@ -334,6 +334,12 @@ public:
         //- Return slave face zone ID
         const faceZoneID& slaveFaceZoneID() const;
 
+        //- Return cut point zone ID
+        const pointZoneID& cutPointZoneID() const;
+
+        //- Return cut face zone ID
+        const faceZoneID& cutFaceZoneID() const;
+
         //- Return true if attached
         bool attached() const
         {

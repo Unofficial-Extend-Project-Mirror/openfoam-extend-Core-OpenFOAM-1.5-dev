@@ -394,6 +394,18 @@ const Foam::faceZoneID& Foam::slidingInterface::slaveFaceZoneID() const
 }
 
 
+const Foam::pointZoneID& Foam::slidingInterface::cutPointZoneID() const
+{
+    return cutPointZoneID_;
+}
+
+
+const Foam::faceZoneID& Foam::slidingInterface::cutFaceZoneID() const
+{
+    return cutFaceZoneID_;
+}
+
+
 bool Foam::slidingInterface::changeTopology() const
 {
     if (coupleDecouple_)
