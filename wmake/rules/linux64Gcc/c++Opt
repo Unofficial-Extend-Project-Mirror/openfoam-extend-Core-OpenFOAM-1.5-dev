@@ -1,2 +1,2 @@
 c++DBUG     = 
-c++OPT      = -march=opteron -O3
+c++OPT      = -O3
