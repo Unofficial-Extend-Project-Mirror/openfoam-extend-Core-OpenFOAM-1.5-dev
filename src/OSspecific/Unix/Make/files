@@ -7,6 +7,7 @@ fileStat.C
 Unix.C
 cpuTime/cpuTime.C
 clockTime/clockTime.C
+multiThreader/multiThreader.C
 
 #ifndef SunOS64
 printStack.C
