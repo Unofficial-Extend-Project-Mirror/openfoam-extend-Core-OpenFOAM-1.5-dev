@@ -508,7 +508,7 @@ pthread_t multiThreader::getID(int index)
         }
     }
 
-    return -1;
+    return 1;
 }
 
 
