@@ -20,4 +20,7 @@ $(solidBodyMotionFunctions)/translation/translation.C
 
 mixerGgiFvMesh/mixerGgiFvMesh.C
 
+tetMetrics/tetMetric.C
+tetMetrics/tetMetrics.C
+
 LIB = $(FOAM_LIBBIN)/libdynamicFvMesh
