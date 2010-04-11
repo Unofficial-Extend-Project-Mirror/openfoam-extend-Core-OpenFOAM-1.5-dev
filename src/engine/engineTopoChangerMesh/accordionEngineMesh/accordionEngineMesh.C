@@ -93,7 +93,6 @@ Foam::accordionEngineMesh::accordionEngineMesh
 {
     // Add zones and modifiers if not already there.
     addZonesAndModifiers();
-   
 }
 
 
@@ -105,16 +104,13 @@ Foam::accordionEngineMesh::accordionEngineMesh
 
 void Foam::accordionEngineMesh::setBoundaryVelocity(volVectorField& U)
 {
-    
-    
     // Set valve velociaty
     forAll (valves(), valveI)
     {
-            
         vector valveVel =
             valves()[valveI].curVelocity()*valves()[valveI].cs().axis();
 
-        
+
         // If valve is present in geometry, set the motion
         if (valves()[valveI].stemPatchID().active())
         {

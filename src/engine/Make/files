@@ -33,31 +33,17 @@ engineTopoChangerMesh/accordionEngineMesh/accordionEngineMeshInitialize.C
 engineTopoChangerMesh/accordionEngineMesh/accordionEngineMeshMove.C
 engineTopoChangerMesh/accordionEngineMesh/addAccordionEngineMeshModifiers.C
 
-
-engineTopoChangerMesh/doublePistonTwoStroke/doublePistonTwoStroke.C
-engineTopoChangerMesh/doublePistonTwoStroke/addDoublePistonTwoStrokeMeshModifiers.C
-engineTopoChangerMesh/doublePistonTwoStroke/doublePistonTwoStrokeCalculate.C
-engineTopoChangerMesh/doublePistonTwoStroke/doublePistonTwoStrokeInitialize.C
-engineTopoChangerMesh/doublePistonTwoStroke/doublePistonTwoStrokeMove.C
-
 engineTopoChangerMesh/engineValveSliding/addEngineValveSlidingMeshModifiers.C
 engineTopoChangerMesh/engineValveSliding/engineValveSliding.C
 engineTopoChangerMesh/engineValveSliding/engineValveSlidingCalculate.C
 engineTopoChangerMesh/engineValveSliding/engineValveSlidingInitialize.C
 engineTopoChangerMesh/engineValveSliding/engineValveSlidingMove.C
 
-
 engineTopoChangerMesh/layerAR/layerAR.C
 engineTopoChangerMesh/layerAR/addLayerARMeshModifiers.C
 
 engineTopoChangerMesh/layerARGambit/layerARGambit.C
 engineTopoChangerMesh/layerARGambit/addLayerARGambitMeshModifiers.C
-
-//engineTopoChangerMesh/layerSmooth/addLayerSmoothMeshModifiers.C
-//engineTopoChangerMesh/layerSmooth/layerSmooth.C
-//engineTopoChangerMesh/layerSmooth/layerSmoothCalculate.C
-//engineTopoChangerMesh/layerSmooth/layerSmoothInitialize.C
-//engineTopoChangerMesh/layerSmooth/layerSmoothMove.C
 
 engineTopoChangerMesh/pistonLayer/pistonLayer.C
 engineTopoChangerMesh/pistonLayer/addPistonLayerMeshModifiers.C
@@ -66,7 +52,6 @@ engineTopoChangerMesh/pistonDeform/pistonDeform.C
 
 engineTopoChangerMesh/thoboisMesh/addThoboisMeshModifiers.C
 engineTopoChangerMesh/thoboisMesh/thoboisMesh.C
-//engineTopoChangerMesh/thoboisMesh/thoboisMeshCalculate.C
 engineTopoChangerMesh/thoboisMesh/thoboisMeshInitialize.C
 engineTopoChangerMesh/thoboisMesh/thoboisMeshMove.C
 
@@ -89,12 +74,6 @@ engineTopoChangerMesh/verticalValves/verticalValvesCalculate.C
 engineTopoChangerMesh/verticalValves/verticalValvesInitialize.C
 engineTopoChangerMesh/verticalValves/verticalValvesMove.C
 
-engineTopoChangerMesh/verticalValvesGambit/verticalValvesGambit.C
-engineTopoChangerMesh/verticalValvesGambit/addVerticalValvesGambitMeshModifiers.C
-engineTopoChangerMesh/verticalValvesGambit/verticalValvesGambitCalculate.C
-engineTopoChangerMesh/verticalValvesGambit/verticalValvesGambitInitialize.C
-engineTopoChangerMesh/verticalValvesGambit/verticalValvesGambitMove.C
-
 engineTopoChangerMesh/thoboisSliding/addThoboisSlidingMeshModifiers.C
 engineTopoChangerMesh/thoboisSliding/thoboisSliding.C
 engineTopoChangerMesh/thoboisSliding/thoboisSlidingCalculate.C
@@ -106,6 +85,8 @@ engineTopoChangerMesh/pistonSliding/pistonSliding.C
 engineTopoChangerMesh/pistonSliding/pistonSlidingCalculate.C
 engineTopoChangerMesh/pistonSliding/pistonSlidingInitialize.C
 engineTopoChangerMesh/pistonSliding/pistonSlidingMove.C
+
+engineTopoChangerMesh/pistonRefine/pistonRefine.C
 
 engineTopoChangerMesh/noEngineMesh/noEngineMesh.C
 

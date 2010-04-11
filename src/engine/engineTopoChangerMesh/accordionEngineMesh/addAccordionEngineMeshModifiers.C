@@ -50,14 +50,14 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
         Info<< "void Foam::accordionEngineMesh::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
      //   setVirtualPositions();
         checkAndCalculate();
 
         Info << "Point zones found = " << pointZones().size() << endl;
         Info << "Face zones found = " << faceZones().size() << endl;
         Info << "Cell zones found = " << cellZones().size() << endl;
-        
+
         return;
 
     }
@@ -69,7 +69,6 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
         topoChanger_.setSize(0);
     }
 
-    
     Info << "checkAndCalculate()" << endl;
     checkAndCalculate();
 
@@ -80,9 +79,9 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
     Point zones
     1) Piston points
 */
-    
+
     DynamicList<pointZone*> pz;
- 
+
 /*
     Face zones
     1) Piston layer faces
@@ -99,7 +98,7 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
     label nFaceZones = 0;
     label nCellZones = 0;
 
-/* 
+/*
 
     Adding the following faces zones:
     1:  pistonLayerFaces
@@ -116,12 +115,13 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
 
 #   include "addPistonFacesPointZonesAccordionEngineMesh.H"
 
-#   include "addAttachDetachFacesAccordionEngineMesh.H"    
-#   include "addValveFaceZonesAccordionEngineMesh.H"    
+#   include "addAttachDetachFacesAccordionEngineMesh.H"
+#   include "addValveFaceZonesAccordionEngineMesh.H"
 
 #   include "addOutputCellsAccordionEngineMesh.H"
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;    
+        << nFaceZones << " face zones and "
+        << nCellZones << " cell zones" << endl;
 
 
     pz.setSize(nPointZones);
@@ -129,8 +129,8 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
     fz.setSize(nFaceZones);
     Info << "setSize fz" << endl;
     cz.setSize(nCellZones);
-    Info << "setSize cz" << endl;    
-    
+    Info << "setSize cz" << endl;
+
     addZones(pz, fz, cz);
 
 #   include "addMeshModifiersAccordionEngineMesh.H"
@@ -139,13 +139,12 @@ void Foam::accordionEngineMesh::addZonesAndModifiers()
 
  //   setVirtualPositions();
 
-    // Write mesh
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     write();
 
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

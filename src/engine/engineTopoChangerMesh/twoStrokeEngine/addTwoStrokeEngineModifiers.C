@@ -78,7 +78,9 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
     DynamicList<pointZone*> pz(2 + nPorts);
     DynamicList<faceZone*> fz(3*nPorts + 1);
-    DynamicList<cellZone*> cz(1);
+
+    // Added piston cells and head cells
+    DynamicList<cellZone*> cz(3);
 
     label nPointZones = 0;
     label nFaceZones = 0;
@@ -86,31 +88,40 @@ void Foam::twoStrokeEngine::addZonesAndModifiers()
 
     Info << "Adding piston layer faces" << endl;
 
-#   include "addPistonLayerFaces.H"
-    
+#   include "addPistonLayerHrv.H"
+
 //  adding head points (does not move)
-    
+
     {
-        
-        pointSet headPointSet(*this, headPointsSetName_);
-    
-        Info << "Number of head points = " << headPointSet.size() << endl;
-        pz[nPointZones] = 
-            new pointZone
+//         pointSet headPointSet(*this, headPointsSetName_);
+
+//         pz[nPointZones] =
+//             new pointZone
+//             (
+//                 "headPoints",
+//                 headPointSet.toc(),
+//                 nPointZones,
+//                 pointZones()
+//             );
+
+//         nPointZones++;
+
+        cellSet headCellSet(*this, headCellsSetName_);
+
+        cz[nCellZones] =
+            new cellZone
             (
-                "headPoints",
-                headPointSet.toc(),
-                nPointZones,
-                pointZones()
+                "headCells",
+                headCellSet.toc(),
+                nCellZones,
+                cellZones()
             );
 
-        nPointZones++;
-        
+        nCellZones++;
     }
-    
+
 //  Sliding interface for scavenging ports
 
-    
     if(nPorts > 0)
     {
         forAll(scavInCylPatches_, patchi)

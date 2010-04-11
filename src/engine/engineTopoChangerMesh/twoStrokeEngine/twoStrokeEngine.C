@@ -57,7 +57,7 @@ bool Foam::twoStrokeEngine::realDeformation() const
     if
     (
         virtualPistonPosition() + engTime().pistonDisplacement().value()
-      > deckHeight()-engTime().clearance().value() - SMALL
+      > deckHeight() - engTime().clearance().value() - SMALL
     )
     {
         return true;
@@ -82,6 +82,7 @@ Foam::twoStrokeEngine::twoStrokeEngine
     scavInPortPatches_(engTime().engineDict().lookup("scavInPortPatches")),
     scavInCylPatches_(engTime().engineDict().lookup("scavInCylPatches")),
     headPointsSetName_(engTime().engineDict().lookup("headPointsSetName")),
+    headCellsSetName_(engTime().engineDict().lookup("headCellsSetName")),
     movingCellSetName_(engTime().engineDict().lookup("movingCellSetName")),
     movingPointsMaskPtr_(NULL),
     deformSwitch_(readScalar(engTime().engineDict().lookup("deformAngle"))),
@@ -151,7 +152,6 @@ void Foam::twoStrokeEngine::setBoundaryVelocity(volVectorField& U)
 
     //  On the piston movingWallVelocity is used.
     // There is no need to update the piston velocity
-
 //    U.boundaryField()[piston().patchID().index()] = pistonVel;
 
     forAll(scavInPortPatches_, patchi)

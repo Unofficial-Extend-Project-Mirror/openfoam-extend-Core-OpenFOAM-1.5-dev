@@ -41,13 +41,13 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
         pointZones().size() > 0
      || faceZones().size() > 0
      || cellZones().size() > 0
-    ) 
+    )
     {
         Info<< "Time = " << engTime().theta() << endl;
         Info<< "void simpleTwoStroke::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
         if (topoChanger_.size() == 0)
         {
             FatalErrorIn
@@ -59,7 +59,7 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
 
         setVirtualPistonPosition();
         checkAndCalculate();
-        
+
         return;
 
 
@@ -67,13 +67,12 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
 
     Info << "checkAndCalculate()" << endl;
     checkAndCalculate();
-    
 
     Info<< "Time = " << engTime().theta() << endl
         << "Adding zones to the engine mesh" << endl;
 
 
-    //fz = 4: virtual piston, outSidePort, insidePort, cutFaceZone 
+    //fz = 4: virtual piston, outSidePort, insidePort, cutFaceZone
     //pz = 2: piston points, cutPointZone
     //cz = 1: moving mask
 
@@ -90,13 +89,14 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
     {
 
         // Piston position
-        
+
         Info << "Adding face zone for piston layer addition/removal" << endl;
-        
+
         label pistonPatchID = piston().patchID().index();
-        
-        scalar zPist = max(boundary()[pistonPatchID].patch().localPoints()).z();
-        
+
+        scalar zPist =
+            max(boundary()[pistonPatchID].patch().localPoints()).z();
+
         scalar zPistV = zPist + offSet();
 
         labelList zone1(faceCentres().size());
@@ -111,20 +111,18 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
 
         forAll (faceCentres(), faceI)
         {
-        
-// The points have to be in the cylinder and not in the ports....
-        
+            // The points have to be in the cylinder and not in the ports....
+
             scalar zc = faceCentres()[faceI].z();
 
             scalar xc = faceCentres()[faceI].x();
             scalar yc = faceCentres()[faceI].y();
-            
+
             vector n = faceAreas()[faceI]/mag(faceAreas()[faceI]);
             scalar dd = n & vector(0,0,1);
-            
+
             if(sqrt(sqr(xc)+sqr(yc)) <  0.5 * engTime().bore().value())
             {
-            
                 if (dd > 0.1)
                 {
                     if (zPistV - zc > 0 && zPistV - zc < dl)
@@ -132,13 +130,13 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                         zLower = zc;
                         dl = zPistV - zc;
                     }
-            
+
                     if (zc - zPistV > 0 && zc - zPistV < dh)
                     {
                         zHigher = zc;
                         dh = zc - zHigher;
                     }
-            
+
                     if
                     (
                         zc > zPistV - delta()
@@ -150,14 +148,12 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                         {
                             flipZone1[nZoneFaces1] = true;
                         }
-                
+
                         zone1[nZoneFaces1] = faceI;
                         nZoneFaces1++;
                     }
                 }
             }
-            
-            
         }
 
         // if no cut was found use the layer above
@@ -168,16 +164,15 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             forAll (faceCentres(), faceI)
             {
                 scalar zc = faceCentres()[faceI].z();
-                
+
                 scalar xc = faceCentres()[faceI].x();
                 scalar yc = faceCentres()[faceI].y();
 
                 vector n = faceAreas()[faceI]/mag(faceAreas()[faceI]);
                 scalar dd = n & vector(0,0,1);
-                
+
                 if(sqrt(sqr(xc)+sqr(yc)) <  0.5 * engTime().bore().value())
                 {
-            
                     if (dd > 0.1)
                     {
 
@@ -191,7 +186,7 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                             {
                                 flipZone1[nZoneFaces1] = true;
                             }
-                    
+
                             zone1[nZoneFaces1] = faceI;
                             nZoneFaces1++;
                         }
@@ -199,13 +194,12 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                 }
 
             }
-        
         }
 
         zone1.setSize(nZoneFaces1);
         flipZone1.setSize(nZoneFaces1);
-    
-        fz[nFaceZones]=
+
+        fz[nFaceZones] =
             new faceZone
             (
                 "pistonLayerFaces",
@@ -214,12 +208,9 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                 nFaceZones,
                 faceZones()
             );
-        
+
         nFaceZones++;
 
-        // Points below the piston which moves with the piston displacement
-        DynamicList<label> pistonPoints(nPoints() / 10);
-    
         // Points which don't move (= cylinder head)
         DynamicList<label> headPoints(nPoints() / 10);
 
@@ -231,17 +222,12 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             if (zCoord > deckHeight() - delta())
             {
                 headPoints.append(pointI);
-                nHeadPoints++; 
-            }
-            else if (zCoord < zPistV + delta())
-            {
-                pistonPoints.append(pointI);
+                nHeadPoints++;
             }
         }
-            
-        
+
         Info << "Number of head points = " << nHeadPoints << endl;
-        pz[nPointZones] = 
+        pz[nPointZones] =
             new pointZone
             (
                 "headPoints",
@@ -251,26 +237,15 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             );
 
         nPointZones++;
-        
-        pz[nPointZones] =
-            new pointZone
-            (
-                "pistonPoints",
-                pistonPoints.shrink(),
-                nPointZones,
-                pointZones()
-            );
 
-        nPointZones++;
     }
 
-//  Sliding interface for scavenging ports
+    //  Sliding interface for scavenging ports
 
-    if(foundScavPorts())
-    {    
-        
+    if (foundScavPorts())
+    {
         // Inner slider
-        
+
         const polyPatch& innerScav =
             boundaryMesh()[boundaryMesh().findPatchID(scavInCylPatchName_)];
 
@@ -292,11 +267,11 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
 
         nFaceZones++;
 
-        // Outer slider        
+        // Outer slider
 
         const polyPatch& outerScav =
             boundaryMesh()[boundaryMesh().findPatchID(scavInPortPatchName_)];
-                
+
         labelList osf(outerScav.size());
 
         forAll (osf, i)
@@ -314,7 +289,7 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
         );
 
         nFaceZones++;
-        
+
         fz[nFaceZones] = new faceZone
         (
             "cutFaceZone",
@@ -323,11 +298,11 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             nFaceZones,
             faceZones()
         );
-        
+
         nFaceZones++;
 
         Info << "cut p" << endl;
-        
+
         pz[nPointZones] = new pointZone
         (
             "cutPointZone",
@@ -335,36 +310,36 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             nPointZones,
             pointZones()
         );
-        
+
         nPointZones++;
-                
     }
-    
 
 
     {
-
         labelList movingCells(nCells());
         label nMovingCells = 0;
 
         scalar pistonX = piston().cs().origin().x();
         scalar pistonY = piston().cs().origin().y();
-        
+
         forAll(cellCentres(),cellI)
         {
             const vector& v = cellCentres()[cellI];
-            
-            
-            if(sqrt(sqr(v.x()-pistonX)+sqr(v.y()-pistonY)) < 0.5*engTime().bore().value())
+
+            if
+            (
+                sqrt(sqr(v.x()-pistonX)+sqr(v.y()-pistonY))
+             < 0.5*engTime().bore().value()
+            )
             {
                 movingCells[nMovingCells] = cellI;
                 nMovingCells++;
             }
-            
         }
-        
+
         movingCells.setSize(nMovingCells);
-        Info << "Number of cells in the moving region: " << nMovingCells << endl;
+        Info<< "Number of cells in the moving region: "
+            << nMovingCells << endl;
 
         cz[nCellZones] = new cellZone
         (
@@ -373,14 +348,14 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
             nCellZones,
             cellZones()
         );
-        
+
         nCellZones++;
     }
 
 
-    
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;
+        << nFaceZones << " face zones and "
+        << nCellZones << " cell zones" << endl;
 
     pz.setSize(nPointZones);
     fz.setSize(nFaceZones);
@@ -395,7 +370,7 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
     {
 
         topoChanger_.setSize(topoChanger_.size() + 1);
-    
+
         topoChanger_.set
         (
             nMods,
@@ -416,7 +391,7 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
     if(foundScavPorts())
     {
         topoChanger_.setSize(topoChanger_.size() + 1);
-        
+
         topoChanger_.set
         (
             nMods,
@@ -437,26 +412,24 @@ void Foam::simpleTwoStroke::addZonesAndModifiers()
                 intersection::VISIBLE         // Projection algorithm
             )
         );
-    
         nMods++;
     }
-        
+
     Info << "Adding " << nMods << " topology modifiers" << endl;
 
     // Calculating the virtual piston position
 
     setVirtualPistonPosition();
 
-
     topoChanger_.setSize(nMods);
 
     // Write mesh modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
+    write();
 
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

@@ -59,10 +59,16 @@ class enginePiston
 {
     // Private data
 
-        word pistonFaceSetName_;
+        //- Name of piston point set
         word pistonPointSetName_;
-        
-        
+
+        //- Name of piston face set
+        word pistonFaceSetName_;
+
+        //- Name of piston cell set
+        word pistonCellSetName_;
+
+
         //- Bowl in piston patch
         polyPatchID bowlInPistonPatchID_;
 
@@ -93,8 +99,9 @@ public:
             const autoPtr<coordinateSystem>& pistonCS,
             const scalar minLayer,
             const scalar maxLayer,
-            const word& pistonFaceSetName,
             const word& pistonPointSetName,
+            const word& pistonFaceSetName,
+            const word& pistonCellSetName,
             const word& bowlInPistonPatchName,
             const word& bowlInCylinderPatchName
         );
@@ -112,14 +119,19 @@ public:
 
     // Member Functions
 
+        const word& pistonPointSetName() const
+        {
+            return pistonPointSetName_;
+        }
+
         const word& pistonFaceSetName() const
         {
             return pistonFaceSetName_;
         }
-        
-        const word& pistonPointSetName() const
+
+        const word& pistonCellSetName() const
         {
-            return pistonPointSetName_;
+            return pistonCellSetName_;
         }
 
 
@@ -127,7 +139,6 @@ public:
         {
                 return bowlInPistonPatchID_;
         }
-        
 
         const polyPatchID& bowlInCylinderPatchID() const
         {

@@ -52,16 +52,19 @@ class twoStrokeEngine
         //- Piston patch
         enginePiston piston_;
 
-        //- scavenging ports patches
+        //- Scavenging ports patches
         wordList scavInPortPatches_;
 
-        //- scavenging cylinder patches
+        //- Scavenging cylinder patches
         wordList scavInCylPatches_;
 
-        //- name of the head pointSet
+        //- Name of the head pointSet
         word headPointsSetName_;
 
-        //- name of the moving cell set
+        //- Name of the head pointSet
+        word headCellsSetName_;
+
+        //- Name of the moving cell set
         word movingCellSetName_;
 
 

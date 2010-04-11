@@ -39,8 +39,9 @@ Foam::enginePiston::enginePiston
     const autoPtr<coordinateSystem>& pistonCS,
     const scalar minLayer,
     const scalar maxLayer,
-    const word& pistonFaceSetName,
     const word& pistonPointSetName,
+    const word& pistonFaceSetName,
+    const word& pistonCellSetName,
     const word& bowlInPistonPatchName,
     const word& bowlInCylinderPatchName
 )
@@ -53,11 +54,11 @@ Foam::enginePiston::enginePiston
         minLayer,
         maxLayer
     ),
+    pistonPointSetName_(pistonPointSetName),
     pistonFaceSetName_(pistonFaceSetName),
-    pistonPointSetName_(pistonPointSetName),       
+    pistonCellSetName_(pistonPointSetName),
     bowlInPistonPatchID_(bowlInPistonPatchName, mesh.boundaryMesh()),
     bowlInCylinderPatchID_(bowlInCylinderPatchName, mesh.boundaryMesh())
-    
 {}
 
 
@@ -69,10 +70,19 @@ Foam::enginePiston::enginePiston
 )
 :
     simpleEnginePiston(mesh, dict),
-    pistonFaceSetName_(dict.lookup("pistonFaceSetName")),
     pistonPointSetName_(dict.lookup("pistonPointSetName")),
-    bowlInPistonPatchID_(dict.lookup("bowlInPistonPatchName"), mesh.boundaryMesh()),
-    bowlInCylinderPatchID_(dict.lookup("bowlInCylinderPatchName"), mesh.boundaryMesh())
+    pistonFaceSetName_(dict.lookup("pistonFaceSetName")),
+    pistonCellSetName_(dict.lookup("pistonCellSetName")),
+    bowlInPistonPatchID_
+    (
+        dict.lookup("bowlInPistonPatchName"),
+        mesh.boundaryMesh()
+    ),
+    bowlInCylinderPatchID_
+    (
+        dict.lookup("bowlInCylinderPatchName"),
+        mesh.boundaryMesh()
+    )
 {}
 
 
@@ -85,8 +95,12 @@ void Foam::enginePiston::writeDict(Ostream& os) const
 {
     simpleEnginePiston::writeDict(os);
     os  << nl << token::BEGIN_BLOCK
-        << "pistonFaceSetName " << pistonFaceSetName_ << token::END_STATEMENT << nl
-        << "pistonPointSetName " << pistonPointSetName_ << token::END_STATEMENT << nl
+        << "pistonPointSetName " << pistonPointSetName_
+        << token::END_STATEMENT << nl
+        << "pistonFaceSetName " << pistonFaceSetName_
+        << token::END_STATEMENT << nl
+        << "pistonCellSetName " << pistonCellSetName_
+        << token::END_STATEMENT << nl
         << token::END_BLOCK << endl;
 }
 

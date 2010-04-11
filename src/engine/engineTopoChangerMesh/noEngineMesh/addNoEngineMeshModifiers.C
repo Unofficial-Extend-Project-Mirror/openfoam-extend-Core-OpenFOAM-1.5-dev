@@ -39,7 +39,7 @@ void Foam::noEngineMesh::addZonesAndModifiers()
         Info<< "void noEngineMesh::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
         if (topoChanger_.size() == 0)
         {
             FatalErrorIn
@@ -56,7 +56,7 @@ void Foam::noEngineMesh::addZonesAndModifiers()
     }
 
     checkAndCalculate();
-    
+
     Info<< "Time = " << engTime().theta() << endl
         << "Adding zones to the engine mesh" << endl;
 
@@ -73,15 +73,14 @@ void Foam::noEngineMesh::addZonesAndModifiers()
     // Add the piston zone
     if (piston().patchID().active() && offSet() > SMALL)
     {
-
         // Piston position
-        
+
         label pistonPatchID = piston().patchID().index();
-        
+
         scalar zPist = max(boundary()[pistonPatchID].patch().localPoints()).z();
-        
+
         scalar zPistV = zPist + offSet();
-        
+
         labelList zone1(faceCentres().size());
         boolList flipZone1(faceCentres().size(), false);
         label nZoneFaces1 = 0;
@@ -105,13 +104,13 @@ void Foam::noEngineMesh::addZonesAndModifiers()
                     zLower = zc;
                     dl = zPistV - zc;
                 }
-            
+
                 if (zc - zPistV > 0 && zc - zPistV < dh)
                 {
                     zHigher = zc;
                     dh = zc - zHigher;
                 }
-            
+
                 if
                 (
                     zc > zPistV - delta()
@@ -123,7 +122,7 @@ void Foam::noEngineMesh::addZonesAndModifiers()
                     {
                         flipZone1[nZoneFaces1] = true;
                     }
-                
+
                     zone1[nZoneFaces1] = faceI;
                     nZoneFaces1++;
                 }
@@ -133,7 +132,6 @@ void Foam::noEngineMesh::addZonesAndModifiers()
         // if no cut was found use the layer above
         if (!foundAtLeastOne)
         {
-                        
             zPistV = zHigher;
 
             forAll (faceCentres(), faceI)
@@ -154,7 +152,7 @@ void Foam::noEngineMesh::addZonesAndModifiers()
                         {
                             flipZone1[nZoneFaces1] = true;
                         }
-                    
+
                         zone1[nZoneFaces1] = faceI;
                         nZoneFaces1++;
                     }
@@ -165,7 +163,7 @@ void Foam::noEngineMesh::addZonesAndModifiers()
 
         zone1.setSize(nZoneFaces1);
         flipZone1.setSize(nZoneFaces1);
-    
+
         fz[nFaceZones]=
             new faceZone
             (
@@ -175,21 +173,21 @@ void Foam::noEngineMesh::addZonesAndModifiers()
                 nFaceZones,
                 faceZones()
             );
-        
+
         nFaceZones++;
 
 
         // Construct point zones
 
-            
+
         // Points which don't move (= cylinder head)
         DynamicList<label> headPoints(nPoints() / 10);
 
         // Points below the piston which moves with the piston displacement
         DynamicList<label> pistonPoints(nPoints() / 10);
-        
+
         label nHeadPoints = 0;
-            
+
         forAll (points(), pointI)
         {
             scalar zCoord = points()[pointI].z();
@@ -197,18 +195,17 @@ void Foam::noEngineMesh::addZonesAndModifiers()
             if (zCoord > deckHeight() - delta())
             {
                 headPoints.append(pointI);
-                nHeadPoints++; 
+                nHeadPoints++;
             }
             else if (zCoord < zPistV + delta())
             {
                 pistonPoints.append(pointI);
             }
         }
-        
+
         Info << "Number of head points = " << nHeadPoints << endl;
-            
-            
-        pz[nPointZones] = 
+
+        pz[nPointZones] =
             new pointZone
             (
                 "headPoints",
@@ -231,10 +228,10 @@ void Foam::noEngineMesh::addZonesAndModifiers()
         nPointZones++;
 
     }
-    else if(piston().patchID().active() && offSet() <= SMALL)
+    else if (piston().patchID().active() && offSet() <= SMALL)
     {
         label pistonPatchID = piston().patchID().index();
-        
+
         const polyPatch& pistonPatch =
             boundaryMesh()[piston().patchID().index()];
 
@@ -257,16 +254,17 @@ void Foam::noEngineMesh::addZonesAndModifiers()
         nFaceZones++;
         // Construct point zones
 
-        scalar zPistV = max(boundary()[pistonPatchID].patch().localPoints()).z();
-            
+        scalar zPistV =
+            max(boundary()[pistonPatchID].patch().localPoints()).z();
+
         // Points which don't move (= cylinder head)
         DynamicList<label> headPoints(nPoints() / 10);
 
         // Points below the piston which moves with the piston displacement
         DynamicList<label> pistonPoints(nPoints() / 10);
-        
+
         label nHeadPoints = 0;
-            
+
         forAll (points(), pointI)
         {
             scalar zCoord = points()[pointI].z();
@@ -274,18 +272,17 @@ void Foam::noEngineMesh::addZonesAndModifiers()
             if (zCoord > deckHeight() - delta())
             {
                 headPoints.append(pointI);
-                nHeadPoints++; 
+                nHeadPoints++;
             }
             else if (zCoord < zPistV + delta())
             {
                 pistonPoints.append(pointI);
             }
         }
-        
+
         Info << "Number of head points = " << nHeadPoints << endl;
-            
-            
-        pz[nPointZones] = 
+
+        pz[nPointZones] =
             new pointZone
             (
                 "headPoints",
@@ -306,10 +303,8 @@ void Foam::noEngineMesh::addZonesAndModifiers()
             );
 
         nPointZones++;
-    
     }
 
-    
     Info<< "Adding " << nPointZones << " point and "
         << nFaceZones << " face zones" << endl;
 
@@ -321,8 +316,8 @@ void Foam::noEngineMesh::addZonesAndModifiers()
     label nMods = 0;
 
     // Add piston layer addition
-    Info << "Adding Layer Addition/Removal Mesh Modifier" << endl; 
- 
+    Info << "Adding Layer Addition/Removal Mesh Modifier" << endl;
+
     if (piston().patchID().active())
     {
         topoChanger_.setSize(1);
@@ -341,15 +336,16 @@ void Foam::noEngineMesh::addZonesAndModifiers()
         );
     }
 
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
+    write();
 
     // Calculating the virtual piston position
     setVirtualPistonPosition();
-        
+
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

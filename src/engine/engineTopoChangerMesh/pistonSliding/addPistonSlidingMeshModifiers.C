@@ -53,14 +53,14 @@ void Foam::pistonSliding::addZonesAndModifiers()
         Info<< "void Foam::verticalValvesGambit::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
         setVirtualPositions();
 //        checkAndCalculate();
 
         Info << "Point zones found = " << pointZones().size() << endl;
         Info << "Face zones found = " << faceZones().size() << endl;
         Info << "Cell zones found = " << cellZones().size() << endl;
-        
+
         return;
 
     }
@@ -72,7 +72,7 @@ void Foam::pistonSliding::addZonesAndModifiers()
     )
     {
         Info << "Assembling the cylinder mesh" << endl;
-        
+
         scalar zOffset
         (
             readScalar(engTime().engineDict().lookup("zOffsetGambit"))
@@ -82,7 +82,7 @@ void Foam::pistonSliding::addZonesAndModifiers()
         (
             readScalar(engTime().engineDict().lookup("zDisplGambit"))
         );
-        
+
         pointField pDispl = points();
 
         forAll(points(), pointI)
@@ -114,13 +114,12 @@ void Foam::pistonSliding::addZonesAndModifiers()
     1) Cut point zone for liner in head
 
     nValves*
-    1) cutPointsV            
+    1) cutPointsV
     2) valveTopPoints
     3) valveBottomPoints
 */
-    
     DynamicList<pointZone*> pz;
- 
+
 /*
     Face zones
     1) Piston layer faces
@@ -149,15 +148,15 @@ void Foam::pistonSliding::addZonesAndModifiers()
     label nFaceZones = 0;
     label nCellZones = 0;
 
-/* 
+/*
     Adding the following faces zones:
     1:  pistonLayerFaces
     nV: pistonLayerFacesV
-    
+
     Adding the following cell zones:
     1:  movingCellsPiston
     nV:  movingCellsPistonV
-    
+
     Adding the following point zones:
     1: pistonPoints
     nV: valvePistonPointsV
@@ -168,17 +167,16 @@ void Foam::pistonSliding::addZonesAndModifiers()
 
 /*
     Adding the following face zones:
-    
+
     nV: curtainCylZoneV
     nV: curtainPortZoneV
     nV: cutFaceZoneV
     nV: poppetZoneV
     nV: bottomZoneV
-    
+
     Adding the following point zones:
 
     nV: cutPointsV
-    
 */
 
 
@@ -187,12 +185,12 @@ void Foam::pistonSliding::addZonesAndModifiers()
 #   include "addBowlZonesPistonSliding.H"
 
 /*
-    
+
     Adding the following point zones:
-    
+
     nV: valveTopPointsV
     nV: valveBottomPointsV
-    
+
     Adding the following cell zones:
 
     nV: movingCellsTopV
@@ -202,19 +200,19 @@ void Foam::pistonSliding::addZonesAndModifiers()
 
 //#   include "addValvePistonCellZonesPistonSliding.H"
 
-//#   include "addAttachDetachFacesPistonSliding.H"    
-    
+//#   include "addAttachDetachFacesPistonSliding.H"
+
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;
-    
+        << nFaceZones << " face zones and "
+        << nCellZones << " cell zones" << endl;
 
     pz.setSize(nPointZones);
     Info << "setSize pz" << endl;
     fz.setSize(nFaceZones);
     Info << "setSize fz" << endl;
     cz.setSize(nCellZones);
-    Info << "setSize cz" << endl;    
-    
+    Info << "setSize cz" << endl;
+
     addZones(pz, fz, cz);
 
 #   include "addMeshModifiersPistonSliding.H"
@@ -224,12 +222,10 @@ void Foam::pistonSliding::addZonesAndModifiers()
     setVirtualPositions();
 
     Info << " Write mesh " << endl;
-    // Write mesh
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     write();
     Info << " Mesh written " << endl;
-
-    
 }
 
 

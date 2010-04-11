@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 #include "twoStrokeEngine.H"
 #include "slidingInterface.H"
 #include "layerAdditionRemoval.H"
@@ -34,6 +33,7 @@ License
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::twoStrokeEngine::makeLayersLive()
 {
     const polyTopoChanger& morphs = topoChanger_;
@@ -197,6 +197,7 @@ bool Foam::twoStrokeEngine::update()
 
     // Work array for new points position.
     pointField newPoints = allPoints();
+    const pointField& refPoints = allPoints();
 
     if (topoChangeMap->morphing())
     {
@@ -215,16 +216,120 @@ bool Foam::twoStrokeEngine::update()
     // Reset the position of layered interfaces
 
     boolList scaleDisp(nPoints(), true);
+
+    boolList pistonPoint(newPoints.size(), false);
+    boolList headPoint(newPoints.size(), false);
+
+    // Make a list of piston and head points. HJ, 2/Dec/2009
+
+    labelList pistonPoints;
+    labelList headPoints;
+    {
+        label pistonCellIndex = cellZones().findZoneID("pistonCells");
+
+        if (pistonCellIndex < 0)
+        {
+            FatalErrorIn("bool twoStrokeEngine::update()")
+                << "Cannot find cell zone pistonCells"
+                << abort(FatalError);
+        }
+
+
+        const labelList& pistonCells = cellZones()[pistonCellIndex];
+
+        label headCellIndex = cellZones().findZoneID("headCells");
+
+        if (headCellIndex < 0)
+        {
+            FatalErrorIn("bool twoStrokeEngine::update()")
+                << "Cannot find cell zone headCells"
+                << abort(FatalError);
+        }
+
+        const labelList& headCells = cellZones()[headCellIndex];
+
+        const labelListList& cp = cellPoints();
+
+        boolList count(newPoints.size(), false);
+
+        forAll (pistonCells, cellI)
+        {
+            const labelList& curCellPoints = cp[pistonCells[cellI]];
+
+            forAll (curCellPoints, i)
+            {
+                count[curCellPoints[i]] = true;
+            }
+        }
+
+        // Count the points
+        label nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                nCounted++;
+            }
+        }
+
+        pistonPoints.setSize(nCounted);
+
+        // Collect the points
+        nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                pistonPoints[nCounted] = pointI;
+                nCounted++;
+            }
+        }
+
+        // Repeat for head points
+        count = false;
+
+        forAll (headCells, cellI)
+        {
+            const labelList& curCellPoints = cp[pistonCells[cellI]];
+
+            forAll (curCellPoints, i)
+            {
+                count[curCellPoints[i]] = true;
+            }
+        }
+
+        // Count the points
+        nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                nCounted++;
+            }
+        }
+
+        headPoints.setSize(nCounted);
+
+        // Collect the points
+        nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                headPoints[nCounted] = pointI;
+                nCounted++;
+            }
+        }
+    }
+
+
     label nScaled = nPoints();
 
-    List<bool> pistonPoint(newPoints.size(), false);
-    List<bool> headPoint(newPoints.size(), false);
+//     label pistonPtsIndex = pointZones().findZoneID("pistonPoints");
+//     const labelList& pistonPoints = pointZones()[pistonPtsIndex];
 
-    label pistonPtsIndex = pointZones().findZoneID("pistonPoints");
-    const labelList& pistonPoints = pointZones()[pistonPtsIndex];
-
-    label headPtsIndex = pointZones().findZoneID("headPoints");
-    const labelList& headPoints = pointZones()[headPtsIndex];
+//     label headPtsIndex = pointZones().findZoneID("headPoints");
+//     const labelList& headPoints = pointZones()[headPtsIndex];
 
     const scalarField& movingPointsM = movingPointsMask();
 
@@ -255,15 +360,15 @@ bool Foam::twoStrokeEngine::update()
             point& p = newPoints[pointI];
 
             if (scaleDisp[pointI])
-            {                p.z() += movingPointsM[pointI]*
-                    deltaZ
-                  * (deckHeight() - p.z())/(deckHeight() - pistonPosition());
+            {
+                p.z() += movingPointsM[pointI]*deltaZ*
+                    (deckHeight() - p.z())/(deckHeight() - pistonPosition());
             }
             else
             {
                 if (!headPoint[pointI])
                 {
-                    p.z() += movingPointsM[pointI] * deltaZ;
+                    p.z() += movingPointsM[pointI]*deltaZ;
                 }
             }
         }
@@ -300,6 +405,7 @@ bool Foam::twoStrokeEngine::update()
             }
         }
     }
+
 
 
     movePoints(newPoints);

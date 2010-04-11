@@ -21,15 +21,70 @@
 
                         List<bool> valveTopPoint(newPoints.size(), false);
 
-                        label valveTopPtsIndex = pointZones().findZoneID("valveTopPointsV"+ Foam::name(valveI+1));
-                        const labelList& valveTopPoints = pointZones()[valveTopPtsIndex];
+                        labelList valveTopPoints;
+                
+                        {   
+                            label valveTopCellsIndex = cellZones().findZoneID("movingCellsTopV"+ Foam::name(valveI+1));
+                
+                            if (valveTopCellsIndex < 0)
+                            {      
+                                FatalErrorIn("bool verticalValves::update()")
+                                    << "movingCellsTopV"+ Foam::name(valveI+1)
+                                    << abort(FatalError);
+                            }
+
+                            const labelList& movingCellsTopV = cellZones()[valveTopCellsIndex];
+    
+                            const labelListList& cp = cellPoints();
+
+                            boolList count(newPoints.size(), false);
+
+                            forAll (movingCellsTopV, cellI)
+                            {
+                                const labelList& curCellPoints = cp[movingCellsTopV[cellI]];
+
+                                forAll (curCellPoints, i)
+                                {
+                                    count[curCellPoints[i]] = true;
+                                }
+                            }
+
+                            // Count the points
+                            label nCounted = 0;
+                            forAll (count, pointI)
+                            {
+                                if (count[pointI] == true)
+                                {
+                                    nCounted++;
+                                }
+                            }
+
+                            valveTopPoints.setSize(nCounted);
+
+                            // Collect the points
+                            nCounted = 0;
+                            forAll (count, pointI)
+                            {
+                                if (count[pointI] == true)
+                                {
+                                    valveTopPoints[nCounted] = pointI;
+                                    nCounted++;
+                                }
+                            }
+                            
+                        }
+
+
+//                        label valveTopPtsIndex = pointZones().findZoneID("valveTopPointsV"+ Foam::name(valveI+1));
+//                        const labelList& valveTopPoints = pointZones()[valveTopPtsIndex];
 
                         forAll(valveTopPoints, i)
                         {
                             label pointI = valveTopPoints[i];
                             valveTopPoint[pointI] = true;
-                        }        
-                                
+                        }
+        
+                
                         forAll(valveTopPoints, i)
                         {
                             point& p = newPoints[valveTopPoints[i]];

@@ -7,28 +7,21 @@
         cylinderHeadFaces[i] = cylinderHead.start() + i;
     }
 
-    forAll(valves(), valveI)    
+    forAll(valves(), valveI)
     {
-
-    
-        if
         (
             valves_[valveI].detachInCylinderPatchID().active()
          && valves_[valveI].detachInPortPatchID().active()
         )
         {
-        
-            
-        
             Info<< "Adding detach boundary for valve "
                 << valveI + 1 << endl;
 
             const vectorField& areas = Sf().internalField();
-            
+
             DynamicList<label> df;
-            
+
             {
-    
                 label ndf = 0;
                 DynamicList<label> headList;
                 label nHead = 0;
@@ -37,11 +30,10 @@
                 boundaryMesh()[valves()[valveI].poppetPatchID().index()];
 
                 pointField detachPoints(detachPatch.faceCentres());
-                detachPoints += valves()[valveI].cs().axis() * valves()[valveI].detachDistance(); 
+                detachPoints += valves()[valveI].cs().axis()*valves()[valveI].detachDistance(); 
 
                 forAll(faceCentres(), faceI)
                 {
-                      
                     if
                     (
                         min(mag(detachPoints - faceCentres()[faceI])) < valves()[valveI].detachTol()
@@ -61,14 +53,14 @@
                             ndf++;
                         }
                     }
-                }        
+                }
 
-                
-                Info << "Found " << ndf << " internal faces and " 
-                << nHead << " head faces for the valve n. " << valveI + 1 <<  endl ;          
-                
+
+                Info<< "Found " << ndf << " internal faces and "
+                    << nHead << " head faces for the valve n. "
+                    << valveI + 1 <<  endl ;
+
                 df.setSize(ndf);
-                            
             }
 
             boolList flip(df.size(), false);
@@ -114,29 +106,22 @@
 /*
 
 
-    
-    forAll(valves(), valveI)    
+    forAll(valves(), valveI)
     {
-
-    
         if
         (
             valves_[valveI].detachInCylinderPatchID().active()
          && valves_[valveI].detachInPortPatchID().active()
         )
         {
-        
-            
-        
             Info<< "Adding detach boundary for valve "
                 << valveI + 1 << endl;
 
             const vectorField& areas = Sf().internalField();
-            
+
             DynamicList<label> df;
-            
+
             {
-    
                 label headFaces = 0;
                 label ndf = 0;
                 DynamicList<label> headList;
@@ -209,10 +194,10 @@
                 }
                 
                 Info << "Found " << ndf << " internal faces and " 
-                << nHead << " head faces for the valve n. " << valveI + 1 <<  endl ;          
-                
+                << nHead << " head faces for the valve n. " << valveI + 1 <<  endl ;
+
                 df.setSize(ndf);
-                            
+
             }
 
             boolList flip(df.size(), false);
@@ -262,6 +247,6 @@
 
 */
     }
-    
+
     Info << "Added attach/detach faces zones for valves" << endl;
-    
+

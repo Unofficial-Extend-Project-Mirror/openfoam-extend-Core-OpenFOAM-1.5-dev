@@ -144,6 +144,7 @@
         
         nCellZones++;
 
+/*
         pointSet movingPointsTop(*this, valves_[valveI].movingPointsTopName());
 
         pz.append
@@ -158,6 +159,7 @@
         );
 	
         nPointZones++;
+*/
 
         cellSet movingCells(*this, valves_[valveI].movingCellsName());
         
@@ -189,7 +191,7 @@
         
         nCellZones++;
         
-
+/*
         pointSet movingPoints(*this, valves_[valveI].movingPointsName());
 
         pz.append
@@ -204,7 +206,9 @@
         );
         
         nPointZones++;        
-        
+*/
+
+/*        
         pointSet staticPoints(*this, valves_[valveI].staticPointsName());
 
         pz.append
@@ -219,6 +223,7 @@
         );
         
         nPointZones++;     
+*/
     
  }   
 

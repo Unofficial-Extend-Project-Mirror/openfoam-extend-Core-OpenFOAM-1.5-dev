@@ -24,12 +24,10 @@
                 << valveI + 1 << endl;
 
             const vectorField& areas = Sf().internalField();
-
+            
             DynamicList<label> df;
             
             {
-
-    
                 label ndf = 0;
                 DynamicList<label> headList;
                 label nHead = 0;
@@ -50,7 +48,7 @@
 
                         scalar dd = n & vector(0,0,1);
 
-                        if ((dd) > 0)
+                        if (mag(dd) > 0.1)
                         {   
                             scalar xFaceMesh = faceCentres()[faceI].x();
                             scalar yFaceMesh = faceCentres()[faceI].y();

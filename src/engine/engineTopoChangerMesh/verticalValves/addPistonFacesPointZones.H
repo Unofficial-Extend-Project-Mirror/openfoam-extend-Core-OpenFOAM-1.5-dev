@@ -46,7 +46,7 @@
                     
                     scalar zPistV = zPistonValvesOffset[valveI];
                     
-                    if (dd > 0.1 || dd < -0.1)
+                    if (mag(dd) > 0.1)
                     {
                         if (zPistV - zc > 0 && zPistV - zc < dl[valveI])
                         {
@@ -88,7 +88,7 @@
             
                 scalar zPistV = zPistonValvesOffset[valveSize];
                     
-                if (dd > 0.1 || dd < -0.1)
+                if (mag(dd) > 0.1)
                 {
                     if (zPistV - zc > 0 && zPistV - zc < dl[valveSize])
                     {
@@ -154,17 +154,17 @@
             forAll(valves(), valveI)
             {
 
-     
                 if(!foundOneFace[valveI])
                 {
-                
+                    
                     scalar zPistV = zPistonValvesOffset[valveI];    
                     
+                        
                     if(inValve(faceCentres()[faceI], valveI))
                     {
                         foundInValve = true;
                         
-                        if (dd > 0.1)
+                        if (mag(dd) > 0.1)
                         {   
 
                             if
@@ -193,7 +193,7 @@
                 label valveSize = valves().size();
                 scalar zPistV = zPistonValvesOffset[valveSize];    
                 
-                if (dd > 0.1)
+                if (mag(dd) > 0.1)
                 {   
 
                     if
@@ -294,54 +294,7 @@
             );
 
             nCellZones++;
-
-            // valve top points (move all with valve displacement)
-            DynamicList<label> valvePistonPoints(nPoints() / 10);
-            List<bool> valvePistonPoint(nPoints(), false);
-            bool foundOne = false;
-            
-            const cellList& c = cells();
-            const faceList& f = allFaces();
-
-            forAll (movingCells, cellI)
-            {
-                const cell& curCell = c[movingCells[cellI]];
-
-                forAll (curCell, faceI)
-                {
-                    // Mark all the points as moving
-                    const face& curFace = f[curCell[faceI]];
-
-                    forAll (curFace, pointI)
-                    {
-                        foundOne = true;  
-                        valvePistonPoint[curFace[pointI]] = true;            
-                    }
         
-                }
-        
-            }
-            
-            forAll(valvePistonPoint, pointI)
-            {
-                if(valvePistonPoint[pointI])
-                {
-                    valvePistonPoints.append(pointI);
-                }
-            }
-                            
-            pz.append
-            (
-                new pointZone
-                (
-                    "valvePistonPointsV"+ Foam::name(valveI + 1),
-                    valvePistonPoints.shrink(),
-                    nPointZones,
-                    pointZones()
-                )
-            );
-            
-            nPointZones++;
         }
         
         
@@ -392,54 +345,7 @@
             );
 
             nCellZones++;
-
-            // valve top points (move all with valve displacement)
-            DynamicList<label> pistonPoints(nPoints() / 10);
-            List<bool> pistonPoint(nPoints(), false);
-            bool foundOne = false;
             
-            const cellList& c = cells();
-            const faceList& f = allFaces();
-
-            forAll (movingCells, cellI)
-            {
-                const cell& curCell = c[movingCells[cellI]];
-
-                forAll (curCell, faceI)
-                {
-                    // Mark all the points as moving
-                    const face& curFace = f[curCell[faceI]];
-
-                    forAll (curFace, pointI)
-                    {                            
-                        foundOne = true;  
-                        pistonPoint[curFace[pointI]] = true;            
-                    }
-        
-                }
-        
-            }
-            
-            forAll(pistonPoint, pointI)
-            {
-                if(pistonPoint[pointI])
-                {
-                    pistonPoints.append(pointI);
-                }
-            }
-                                        
-            pz.append
-            (
-                new pointZone
-                (
-                    "pistonPoints",
-                    pistonPoints.shrink(),
-                    nPointZones,
-                    pointZones()
-                )
-            );
-            
-            nPointZones++;
         }
         
     }

@@ -1,3 +1,4 @@
+    const labelListList& cp = cellPoints();
     // valves
     forAll(valves_,valveI)
     {
@@ -33,6 +34,7 @@
             {
                 List<bool> valveTopPoint(newPoints.size(), false);
 
+/*
                 label layeringVPtsIndex =
                     pointZones().findZoneID
                     (
@@ -48,22 +50,67 @@
 
                     p += valveVel * engTime().deltaT().value();
 
-/*
-
-
-                    p.x() += valveDeltaX*
-                         (valves_[valveI].cs().axis().x()/
-                         mag(valves_[valveI].cs().axis()));
-                    p.y() += valveDeltaY*
-                         (valves_[valveI].cs().axis().y()/
-                         mag(valves_[valveI].cs().axis()));
-                    p.z() += valveDeltaZ*
-                         (valves_[valveI].cs().axis().z()/
-                         mag(valves_[valveI].cs().axis()));
-*/
                     valveTopPoint[layeringVPoints[i]] = true;
                 }
+*/                
 
+                label layeringVCellsIndex =
+                    cellZones().findZoneID
+                    (
+                        "movingCellsTopZoneV" + Foam::name(valveI+1)
+                    );
+
+                const labelList& layeringVCells =
+                    cellZones()[layeringVCellsIndex];
+                
+                labelList layeringVPoints;
+                
+                boolList count(newPoints.size(), false);
+            
+                forAll(layeringVCells, cellI)
+                {
+                    const labelList& curCellPoints = cp[layeringVCells[cellI]];
+
+                    forAll (curCellPoints, i)
+                    {
+                        count[curCellPoints[i]] = true;
+                    }
+                }
+
+                // Count the points
+                label nCounted = 0;
+                forAll (count, pointI)
+                {
+                    if (count[pointI] == true)
+                    {
+                        nCounted++;
+                    }
+                }
+
+                layeringVPoints.setSize(nCounted);
+
+                // Collect the points
+                nCounted = 0;
+                forAll (count, pointI)
+                {
+                    if (count[pointI] == true)
+                    {
+                        layeringVPoints[nCounted] = pointI;
+                        nCounted++;
+                    }
+                }
+                
+
+                forAll(layeringVPoints, i)
+                {
+                    point& p = newPoints[layeringVPoints[i]];
+
+                    p += valveVel * engTime().deltaT().value();
+
+                    valveTopPoint[layeringVPoints[i]] = true;
+                }
+                
+/*
                 label movingTopPtsVIndex =
                     pointZones().findZoneID
                     (
@@ -81,46 +128,73 @@
                         point& p = newPoints[movingTopPointsV[i]];
                         p += valveVel * engTime().deltaT().value();
 
-/*
-                        p.x() += valveDeltaX*
-                            (valves_[valveI].cs().axis().x()/
-                            mag(valves_[valveI].cs().axis()));
-
-                        p.y() += valveDeltaY*
-                            (valves_[valveI].cs().axis().y()/
-                            mag(valves_[valveI].cs().axis()));
-
-                        p.z() += valveDeltaZ*
-                            (valves_[valveI].cs().axis().z()/
-                            mag(valves_[valveI].cs().axis()));
-*/
                     }
                 }
+*/
+
+                label movingTopCellsVIndex =
+                    cellZones().findZoneID
+                    (
+                        "movingCellsZoneV" + Foam::name(valveI+1)
+                    );
+
+                const labelList& movingTopCellsV =
+                    cellZones()[movingTopCellsVIndex];
+
+                labelList movingTopPointsV;
+
+                boolList count2(newPoints.size(), false);
+            
+                forAll(movingTopCellsV, cellI)
+                {
+                    const labelList& curCellPoints = cp[movingTopCellsV[cellI]];
+
+                    forAll (curCellPoints, i)
+                    {
+                        count2[curCellPoints[i]] = true;
+                    }
+                }
+
+                // Count the points
+                nCounted = 0;
+                forAll (count2, pointI)
+                {
+                    if (count2[pointI] == true)
+                    {
+                        nCounted++;
+                    }
+                }
+
+                movingTopPointsV.setSize(nCounted);
+
+                // Collect the points
+                nCounted = 0;
+                forAll (count2, pointI)
+                {
+                    if (count2[pointI] == true)
+                    {
+                        movingTopPointsV[nCounted] = pointI;
+                        nCounted++;
+                    }
+                }
+
+                forAll(movingTopPointsV, i)
+                {
+                    if(!valveTopPoint[movingTopPointsV[i]])
+                    {
+
+                        point& p = newPoints[movingTopPointsV[i]];
+                        p += valveVel * engTime().deltaT().value();
+
+                    }
+                }
+
+                
             }
             else
             {
                 Info << "Valve " << valveI << " is CLOSED!!!" << endl;
             }
 
-/*
-	        {
-                label movingPtsIndex =
-                    pointZones().findZoneID
-                    (
-                        "movingPointsV"+Foam::name(valveI + 1)
-                    );
-
-                const labelList& movingPointsV = pointZones()[movingPtsIndex];
-
-                forAll(movingPointsV, mpI)
-                {
-                    constrainedPoints.append(movingPointsV[mpI]);
-                    constrainedVelocity.append(valveVel);
-
-                    constraintSize++;
-                }
-
-            }
-*/
         }
     }

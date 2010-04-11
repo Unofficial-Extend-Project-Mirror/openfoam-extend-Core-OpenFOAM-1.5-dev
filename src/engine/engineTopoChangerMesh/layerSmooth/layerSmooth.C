@@ -1,5 +1,5 @@
 // The FOAM Project // File: layerSmooth.C
-/* 
+/*
 -------------------------------------------------------------------------------
  =========         | Class Implementation
  \\      /         |
@@ -107,8 +107,8 @@ Foam::layerSmooth::layerSmooth
             scalar bottomArea = 0;
             scalar stemArea = 0;
             
-	    Switch halfGeometry = (engTime().engineDict().lookup("halfGeometry"));
-	    
+        Switch halfGeometry = (engTime().engineDict().lookup("halfGeometry"));
+        
             forAll(stemPatch, i)
             {
                 stemPatchCentre += stemPatch.faceCentres()[i]*mag(stemPatch.faceAreas()[i]);
@@ -121,41 +121,41 @@ Foam::layerSmooth::layerSmooth
                 bottomArea += mag(bottomPatch.faceAreas()[i]);
             }
             
-	    if(halfGeometry)
-	    {
-	    	Info << "half Geometry active" << endl; 
-	    	forAll(stemPatch, i)
-            	{
-			stemPatchCentre += vector(stemPatch.faceCentres()[i].x(), -1.0*stemPatch.faceCentres()[i].y(), stemPatch.faceCentres()[i].z())*mag(stemPatch.faceAreas()[i]);
-// 			stemPatchCentre += vector(0.0, -1.0*stemPatch.faceCentres()[i].y(), 0.0)*mag(stemPatch.faceAreas()[i]);
-               		stemArea += mag(stemPatch.faceAreas()[i]);
-            	}
+        if(halfGeometry)
+        {
+            Info << "half Geometry active" << endl; 
+            forAll(stemPatch, i)
+                {
+            stemPatchCentre += vector(stemPatch.faceCentres()[i].x(), -1.0*stemPatch.faceCentres()[i].y(), stemPatch.faceCentres()[i].z())*mag(stemPatch.faceAreas()[i]);
+//             stemPatchCentre += vector(0.0, -1.0*stemPatch.faceCentres()[i].y(), 0.0)*mag(stemPatch.faceAreas()[i]);
+                       stemArea += mag(stemPatch.faceAreas()[i]);
+                }
 
-            	forAll(bottomPatch, i)
-            	{
-                	
-//			bottomPatchCentre += vector(0.0, -1.0*bottomPatch.faceCentres()[i].y(), 0.0)*mag(stemPatch.faceAreas()[i]);
-			bottomPatchCentre += vector(bottomPatch.faceCentres()[i].x(), -1.0*bottomPatch.faceCentres()[i].y(), bottomPatch.faceCentres()[i].z())*mag(bottomPatch.faceAreas()[i]);
-                	bottomArea += mag(bottomPatch.faceAreas()[i]);
-            	}
+                forAll(bottomPatch, i)
+                {
+                    
+//            bottomPatchCentre += vector(0.0, -1.0*bottomPatch.faceCentres()[i].y(), 0.0)*mag(stemPatch.faceAreas()[i]);
+            bottomPatchCentre += vector(bottomPatch.faceCentres()[i].x(), -1.0*bottomPatch.faceCentres()[i].y(), bottomPatch.faceCentres()[i].z())*mag(bottomPatch.faceAreas()[i]);
+                    bottomArea += mag(bottomPatch.faceAreas()[i]);
+                }
             }
-	    
+
             stemPatchCentre /= stemArea;
             bottomPatchCentre /= bottomArea;
 
 
-            Info << "Foam::layerSmooth::layerSmooth" 
-            << " calculated origin for valve n. " << valveI  
-            << " is " 
-            <<  (stemPatchCentre)  
+            Info << "Foam::layerSmooth::layerSmooth"
+            << " calculated origin for valve n. " << valveI
+            << " is "
+            <<  (stemPatchCentre)
             << endl;
-            
-            Info << "Foam::layerSmooth::layerSmooth" 
-            << " calculated axis for valve n. " << valveI  
+
+            Info << "Foam::layerSmooth::layerSmooth"
+            << " calculated axis for valve n. " << valveI
             << " is " 
-            <<  (stemPatchCentre-bottomPatchCentre)/mag(stemPatchCentre-bottomPatchCentre)  
+            << (stemPatchCentre - bottomPatchCentre)/
+                mag(stemPatchCentre-bottomPatchCentre)
             << endl;
-                    
         }
     }
 
@@ -172,12 +172,9 @@ Foam::layerSmooth::layerSmooth
 
 void Foam::layerSmooth::setBoundaryVelocity(volVectorField& U)
 {
-    
-    
     // Set valve velociaty
     forAll (valves(), valveI)
     {
-            
         vector valveVel =
             valves()[valveI].curVelocity()*valves()[valveI].cs().axis();
 

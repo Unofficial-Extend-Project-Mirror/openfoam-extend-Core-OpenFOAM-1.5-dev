@@ -35,8 +35,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::twoStrokeEngine::correctVerticalMotion()
-{
-}
+{}
 
 
 void Foam::twoStrokeEngine::calcMovingMasks() const

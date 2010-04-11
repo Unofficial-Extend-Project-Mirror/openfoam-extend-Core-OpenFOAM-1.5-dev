@@ -150,7 +150,7 @@ void Foam::engineValveSliding::addZonesAndModifiers()
     
     nV: valveTopPointsV
     nV: valveBottomPointsV
-    
+
     Adding the following cell zones:
 
     nV: movingCellsTopV
@@ -158,19 +158,19 @@ void Foam::engineValveSliding::addZonesAndModifiers()
 
 */
 
-#   include "addOutputCellsEngineValveSliding.H"    
-    
+#   include "addOutputCellsEngineValveSliding.H"
+
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;
-    
+        << nFaceZones << " face zones and "
+        << nCellZones << " cell zones" << endl;
 
     pz.setSize(nPointZones);
     Info << "setSize pz" << endl;
     fz.setSize(nFaceZones);
     Info << "setSize fz" << endl;
     cz.setSize(nCellZones);
-    Info << "setSize cz" << endl;    
-    
+    Info << "setSize cz" << endl;
+
     addZones(pz, fz, cz);
 
 #   include "addMeshModifiersEngineValveSliding.H"
@@ -180,14 +180,15 @@ void Foam::engineValveSliding::addZonesAndModifiers()
     setVirtualPositions();
 
     Info << " Write mesh " << endl;
-    // Write mesh
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     write();
+
     Info << " Mesh written " << endl;
 
 //    Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
 //    Info << "piston position = " << pistonPosition() << endl;
-    
+
 }
 
 

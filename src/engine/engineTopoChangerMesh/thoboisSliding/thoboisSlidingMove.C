@@ -466,8 +466,7 @@ bool Foam::thoboisSliding::update()
 
     {
 
-
-#        include "setValveMotionBoundaryConditionThoboisSliding.H"
+#       include "setValveMotionBoundaryConditionThoboisSliding.H"
 
         DynamicList<label> constrainedPoints(mSolver.curPoints()().size()/100);
         DynamicList<vector> constrainedVelocity
@@ -490,13 +489,8 @@ bool Foam::thoboisSliding::update()
         newPoints = mSolver.curPoints();
         movePoints(newPoints);
 
-        Info << "max mesh phi, 1 = " << max(phi()) << endl;
-        Info << "min mesh phi, 1 = " << min(phi()) << endl;
-
         setVirtualPositions();
         mSolver.clearConstraints();
-
-
 
 //      layering
 
@@ -505,9 +499,6 @@ bool Foam::thoboisSliding::update()
 //        newPoints = points();
         newPoints = allPoints();
         setVirtualPositions();
-
-        Info << "max mesh phi, 2 = " << max(phi()) << endl;
-        Info << "min mesh phi, 2 = " << min(phi()) << endl;
 
     }
 
@@ -612,18 +603,6 @@ bool Foam::thoboisSliding::update()
                 movePoints(newPoints);
             }
         }
-    }
-
-    Info << "max mesh phi, 4 = " << max(phi()) << endl;
-    Info << "min mesh phi, 4 = " << min(phi()) << endl;
-
-    if(moving())
-    {
-        Info << "Mesh moving, OK" << endl;
-    }
-    else
-    {
-        Info << "Mesh NOT moving, WARNINGGGG" << endl;
     }
 
     return true;

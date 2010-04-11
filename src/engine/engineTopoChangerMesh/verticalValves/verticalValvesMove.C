@@ -55,11 +55,11 @@ Class
 #include "slipTetPolyPatchFields.H"
 #include "zeroGradientTetPolyPatchFields.H"
 
-
 #include "zeroGradientFvPatchFields.H"
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::verticalValves::makeLayersLive()
 { 
     // Enable layering
@@ -316,6 +316,7 @@ void Foam::verticalValves::prepareValveDetach()
 
 bool Foam::verticalValves::update()
 {
+
     tetDecompositionMotionSolver& mSolver =
         refCast<tetDecompositionMotionSolver>(msPtr_());
 
@@ -328,7 +329,6 @@ bool Foam::verticalValves::update()
         autoPtr<mapPolyMesh> topoChangeMap1 = topoChanger_.changeMesh();
 
         Info << "sliding interfaces successfully decoupled!!!" << endl;
-
         if (topoChangeMap1->morphing())
         {
             mSolver.updateMesh(topoChangeMap1());
@@ -371,11 +371,11 @@ bool Foam::verticalValves::update()
             {
                 // Find piston mesh modifier
                 const label valveLayerID2 =
-                topoChanger_.findModifierID
-                (
-                    "valveBottomLayer"
-                  + Foam::name(valveI + 1)
-                );
+                    topoChanger_.findModifierID
+                    (
+                        "valveBottomLayer"
+                      + Foam::name(valveI + 1)
+                    );
 
                 topoChanger_[valveLayerID2].disable();
             }
@@ -395,7 +395,6 @@ bool Foam::verticalValves::update()
                     "valvePistonLayer"
                   + Foam::name(valveI + 1)
                 );
-
             topoChanger_[valveLayerID1].enable();
 
             if(valves_[valveI].bottomPatchID().active())
@@ -407,6 +406,7 @@ bool Foam::verticalValves::update()
                         "valveBottomLayer"
                       + Foam::name(valveI + 1)
                     );
+
                 topoChanger_[valveLayerID2].enable();
             }
         }
@@ -433,6 +433,7 @@ bool Foam::verticalValves::update()
     {
         if(valves_[valveI].poppetPatchID().active())
         {
+
             // Find valve layer mesh modifier
             const label valveLayerID =
                 topoChanger_.findModifierID
@@ -479,7 +480,6 @@ bool Foam::verticalValves::update()
     pointField newPoints = points();
 
     // Changing topology by hand
-
     if (topoChangeMap2->morphing())
     {
         mSolver.updateMesh(topoChangeMap2());
@@ -499,12 +499,9 @@ bool Foam::verticalValves::update()
 
     // Reset the position of layered interfaces
 
-
 /*
     Move the mesh points
-
     1) Move all the piston points
-
 */
 
     bool poppetDeformation = false;
@@ -513,7 +510,7 @@ bool Foam::verticalValves::update()
     {
         Info << "verticalValves::update()::Layering mode" << endl;
 
-#       include "movePistonPointsVerticalValves.H"
+#       include "movePistonPoints.H"
 #       include "moveValvePoints.H"
         movePoints(newPoints);
 #       include "poppetDeformation.H"
@@ -576,7 +573,6 @@ bool Foam::verticalValves::update()
     // Coupling the interface Again
 
     {
-
         pointField oldPointsNew = oldPoints();
 
         // Attach the interface
@@ -591,13 +587,9 @@ bool Foam::verticalValves::update()
         autoPtr<mapPolyMesh> topoChangeMap3 = topoChanger_.changeMesh();
 
         Info << "Sliding interfaces coupled: " << attached() << endl;
-
         if (topoChangeMap3->morphing())
         {
-            Info << "mesh changed 3" << endl;
-
             mSolver.updateMesh(topoChangeMap3());
-            Info << "updateMesh" << endl;
 
             if (topoChangeMap3->hasMotionPoints())
             {
@@ -608,11 +600,7 @@ bool Foam::verticalValves::update()
 
             if(correctPointsMotion_)
             {
-
-
-/*
                 // correct the motion after attaching the sliding interface
-
                 pointField mappedOldPointsNew(allPoints().size());
 
                 mappedOldPointsNew.map
@@ -620,28 +608,10 @@ bool Foam::verticalValves::update()
                     oldPointsNew,
                     topoChangeMap3->pointMap()
                 );
-
                 pointField newPoints = allPoints();
 
                 movePoints(mappedOldPointsNew);
 
-                resetMotion();
-                setV0();
-                movePoints(newPoints);
-
-*/
-                pointField newPoints = allPoints();
-                pointField mappedOldPointsNew(newPoints.size());
-
-                mappedOldPointsNew.map
-                (
-                    oldPointsNew,
-                    topoChangeMap3->pointMap()
-                );
-
-                // Solve the correct mesh motion to make sure motion fluxes
-                // are solved for and not mapped
-                movePoints(mappedOldPointsNew);
                 resetMotion();
                 setV0();
                 movePoints(newPoints);

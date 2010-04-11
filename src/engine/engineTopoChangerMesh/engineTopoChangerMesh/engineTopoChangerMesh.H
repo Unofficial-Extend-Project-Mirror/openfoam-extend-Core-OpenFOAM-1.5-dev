@@ -97,7 +97,8 @@ public:
             (const IOobject& io),
             (io)
         );
-        
+
+
     // Constructors
 
         //- Construct from objectRegistry, and read/write options
@@ -119,13 +120,13 @@ public:
         //- Update the mesh for both mesh motion and topology change
         virtual bool update() = 0;
 
-	// Access
-		
-		const engineTime& engTime() const
-		{
-			return engineTime_;
-		}
-        
+    // Access
+
+        const engineTime& engTime() const
+        {
+            return engineTime_;
+        }
+
         const volPointInterpolation& vpi() const
         {
             return vpi_;
@@ -141,7 +142,7 @@ public:
 
         //- Set Boundary Velocities
         virtual void setBoundaryVelocity(volVectorField& U) = 0;
-        
+
 };
 
 

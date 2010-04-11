@@ -163,7 +163,7 @@ public:
                 engTime().thetaRevolution() > -deformSwitch_
              && engTime().thetaRevolution() < deformSwitch_;
         }
-        
+
         //- Return number of valves
         label nValves() const
         {
@@ -175,10 +175,10 @@ public:
 
         //- Move and morph
         virtual bool update();
-        
+
         //- Set boundary velocities
         void setBoundaryVelocity(volVectorField& U);
-        
+
         //- Generate the mesh from a series of square blocks
         void generateMesh(){};
 };

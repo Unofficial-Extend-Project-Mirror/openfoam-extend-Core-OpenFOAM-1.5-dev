@@ -141,18 +141,18 @@ void Foam::layerSmooth::addZonesAndModifiers()
 #   include "addPistonFacesPointZonesLayerSmooth.H"
 
 
-#   include "addAttachDetachFacesLayerSmooth.H"    
-    
+#   include "addAttachDetachFacesLayerSmooth.H"
+
     Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;    
+        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;
 
     pz.setSize(nPointZones);
     Info << "setSize pz" << endl;
     fz.setSize(nFaceZones);
     Info << "setSize fz" << endl;
     cz.setSize(nCellZones);
-    Info << "setSize cz" << endl;    
-    
+    Info << "setSize cz" << endl;
+
     addZones(pz, fz, cz);
 
 #   include "addMeshModifiersLayerSmooth.H"
@@ -166,7 +166,6 @@ void Foam::layerSmooth::addZonesAndModifiers()
 
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

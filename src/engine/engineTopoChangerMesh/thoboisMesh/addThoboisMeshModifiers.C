@@ -114,20 +114,21 @@ void Foam::thoboisMesh::addZonesAndModifiers()
 
 #   include "addPistonFacesPointZonesThoboisMesh.H"
 
-//#   include "addAttachDetachFacesThoboisMesh.H"    
-    
-    Info<< "Adding " << nPointZones << " point, "
-        << nFaceZones << " face zones and " << nCellZones << " cell zones" << endl;    
+//#   include "addAttachDetachFacesThoboisMesh.H"
 
-#   include "addValveFaceZonesThoboisMesh.H"    
+    Info<< "Adding " << nPointZones << " point, "
+        << nFaceZones << " face zones and "
+        << nCellZones << " cell zones" << endl;
+
+#   include "addValveFaceZonesThoboisMesh.H"
 
     pz.setSize(nPointZones);
     Info << "setSize pz" << endl;
     fz.setSize(nFaceZones);
     Info << "setSize fz" << endl;
     cz.setSize(nCellZones);
-    Info << "setSize cz" << endl;    
-    
+    Info << "setSize cz" << endl;
+
     addZones(pz, fz, cz);
 
 #   include "addMeshModifiersThoboisMesh.H"
@@ -136,13 +137,12 @@ void Foam::thoboisMesh::addZonesAndModifiers()
 
     setVirtualPositions();
 
-    // Write mesh
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     write();
 
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

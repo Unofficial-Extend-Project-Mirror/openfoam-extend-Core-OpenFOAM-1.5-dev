@@ -75,7 +75,8 @@ class layerAR
 
         //- deckHeight
         scalar deckHeight_;
-               
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -86,12 +87,12 @@ class layerAR
 
         //- Make layering modifiers live
         void makeLayersLive();
-        
-        //- Check if all patches exist, then calculate virtualPistonPosition, 
+
+        //- Check if all patches exist, then calculate virtualPistonPosition,
         //- pistonPosition and deckHeight for the first time
         void checkAndCalculate();
-        
-        //- Calculate the virtualPistonPosition, 
+
+        //- Calculate the virtualPistonPosition,
         void setVirtualPistonPosition();
 
         //- Add valve and piston zones and modifiers
@@ -109,9 +110,10 @@ public:
         explicit layerAR(const IOobject& io);
 
 
-    // Destructor 
+    // Destructor
 
         virtual ~layerAR();
+
 
     // Member Functions
 
@@ -120,47 +122,47 @@ public:
             return delta_;
         }
 
-        scalar& delta() 
+        scalar& delta()
         {
             return delta_;
         }
-        
+
         const scalar& offSet() const
         {
             return offSet_;
         }
 
-        scalar& offSet() 
+        scalar& offSet()
         {
             return offSet_;
         }
-        
+
         const scalar& pistonPosition() const
         {
             return pistonPosition_;
         }
 
-        scalar& pistonPosition() 
+        scalar& pistonPosition()
         {
             return pistonPosition_;
         }
-        
+
         const scalar& virtualPistonPosition() const
         {
             return virtualPistonPosition_;
         }
 
-        scalar& virtualPistonPosition() 
+        scalar& virtualPistonPosition()
         {
             return virtualPistonPosition_;
         }
-        
+
         const scalar& deckHeight() const
         {
             return deckHeight_;
         }
 
-        scalar& deckHeight() 
+        scalar& deckHeight()
         {
             return deckHeight_;
         }

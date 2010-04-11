@@ -115,13 +115,14 @@ void Foam::simpleTwoStroke::setBoundaryVelocity(volVectorField& U)
 {
     vector pistonVel = piston().cs().axis()*engTime().pistonSpeed().value();
 
-//  On the piston movingWallVelocity is used. There is no need to update the piston velocity
+    // On the piston movingWallVelocity is used. There is no need to update
+    // the piston velocity
 
 //    U.boundaryField()[piston().patchID().index()] = pistonVel;
 
-    Info << "setting the boundary velocity" << endl;    
-    U.boundaryField()[boundaryMesh().findPatchID(scavInPortPatchName_)]
-    == pistonVel;
+    Info << "setting the boundary velocity" << endl;
+    U.boundaryField()[boundaryMesh().findPatchID(scavInPortPatchName_)] ==
+        pistonVel;
 
 }
 
@@ -130,13 +131,19 @@ bool Foam::simpleTwoStroke::portsOpened() const
 
     scalar maxScavPortsZ = max
        (
-           boundary()[boundaryMesh().findPatchID(scavInPortPatchName_)].patch().localPoints()
+           boundary()
+           [
+               boundaryMesh().findPatchID(scavInPortPatchName_)
+           ].patch().localPoints()
        ).z();
-       
+
 
     scalar minLinerZ = min
        (
-           boundary()[boundaryMesh().findPatchID(scavInCylPatchName_)].patch().localPoints()
+           boundary()
+           [
+               boundaryMesh().findPatchID(scavInCylPatchName_)
+           ].patch().localPoints()
        ).z();
 
 
@@ -149,7 +156,6 @@ bool Foam::simpleTwoStroke::portsOpened() const
         return true;
     }
 }
-              
 
 
 // ************************************************************************* //

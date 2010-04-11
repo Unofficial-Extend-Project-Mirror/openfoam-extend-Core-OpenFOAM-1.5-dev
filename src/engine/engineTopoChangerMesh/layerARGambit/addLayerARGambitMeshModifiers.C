@@ -39,7 +39,7 @@ void Foam::layerARGambit::addZonesAndModifiers()
         Info<< "void layerARGambit::addZonesAndModifiers() : "
             << "Zones and modifiers already present.  Skipping."
             << endl;
-        
+
         if (topoChanger_.size() == 0)
         {
             FatalErrorIn
@@ -311,10 +311,8 @@ void Foam::layerARGambit::addZonesAndModifiers()
             );
 
         nPointZones++;
-    
     }
 
-    
     Info<< "Adding " << nPointZones << " point and "
         << nFaceZones << " face zones" << endl;
 
@@ -326,8 +324,8 @@ void Foam::layerARGambit::addZonesAndModifiers()
     label nMods = 0;
 
     // Add piston layer addition
-    Info << "Adding Layer Addition/Removal Mesh Modifier" << endl; 
- 
+    Info << "Adding Layer Addition/Removal Mesh Modifier" << endl;
+
     if (piston().patchID().active())
     {
         topoChanger_.setSize(1);
@@ -346,17 +344,16 @@ void Foam::layerARGambit::addZonesAndModifiers()
         );
     }
 
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
-    
     write();
 
     // Calculating the virtual piston position
     setVirtualPistonPosition();
-        
+
     Info << "virtualPistonPosition = " << virtualPistonPosition() << endl;
     Info << "piston position = " << pistonPosition() << endl;
-    
 }
 
 

@@ -206,8 +206,62 @@ bool Foam::simpleTwoStroke::update()
     List<bool> pistonPoint(newPoints.size(), false);
     List<bool> headPoint(newPoints.size(), false);
 
-    label pistonPtsIndex = pointZones().findZoneID("pistonPoints");
-    const labelList& pistonPoints = pointZones()[pistonPtsIndex];
+//    label pistonPtsIndex = pointZones().findZoneID("pistonPoints");
+//    const labelList& pistonPoints = pointZones()[pistonPtsIndex];
+    
+    labelList pistonPoints;
+
+    {
+        label movingCellsIndex = cellZones().findZoneID("movingCells");
+
+        if (movingCellsIndex < 0)
+        {
+            FatalErrorIn("bool twoStrokeEngine::update()")
+                << "Cannot find cell zone movingCells"
+                << abort(FatalError);
+        }
+
+
+        const labelList& pistonCells = cellZones()[movingCellsIndex];
+
+        const labelListList& cp = cellPoints();
+
+        boolList count(newPoints.size(), false);
+
+        forAll (pistonCells, cellI)
+        {
+            const labelList& curCellPoints = cp[pistonCells[cellI]];
+
+            forAll (curCellPoints, i)
+            {
+                count[curCellPoints[i]] = true;
+            }
+        }
+
+        // Count the points
+        label nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                nCounted++;
+            }
+        }
+
+        pistonPoints.setSize(nCounted);
+
+        // Collect the points
+        nCounted = 0;
+        forAll (count, pointI)
+        {
+            if (count[pointI] == true)
+            {
+                pistonPoints[nCounted] = pointI;
+                nCounted++;
+            }
+        }
+
+    }
 
     label headPtsIndex = pointZones().findZoneID("headPoints");
     const labelList& headPoints = pointZones()[headPtsIndex];

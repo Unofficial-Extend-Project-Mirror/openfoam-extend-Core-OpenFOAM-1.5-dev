@@ -27,9 +27,61 @@
 
                 List<bool> valveTopPoint(newPoints.size(), false);
 		
-                label layeringVPtsIndex = pointZones().findZoneID("movingPointsTopZoneV"+ Foam::name(valveI+1));
-                		
-		        const labelList& layeringVPoints = pointZones()[layeringVPtsIndex];
+//                label layeringVPtsIndex = pointZones().findZoneID("movingPointsTopZoneV"+ Foam::name(valveI+1));               		
+//		        const labelList& layeringVPoints = pointZones()[layeringVPtsIndex];
+                
+                labelList layeringVPoints;                
+
+                {   
+                    label valveLayeringCellsIndex = cellZones().findZoneID("movingCellsTopZoneV" + Foam::name(valveI + 1));
+          
+                    if (valveLayeringCellsIndex < 0)
+                    {      
+                        FatalErrorIn("bool verticalValves::update()")
+                            << "movingCellsTopZoneV"+ Foam::name(valveI+1)
+                            << abort(FatalError);
+                    }
+
+                    const labelList& layeringCellsZoneV = cellZones()[valveLayeringCellsIndex];
+    
+                    const labelListList& cp = cellPoints();
+
+                    boolList count(newPoints.size(), false);
+
+                    forAll (layeringCellsZoneV, cellI)
+                    {
+                        const labelList& curCellPoints = cp[layeringCellsZoneV[cellI]];
+
+                        forAll (curCellPoints, i)
+                        {
+                            count[curCellPoints[i]] = true;
+                        }
+                    }
+
+                    // Count the points
+                    label nCounted = 0;
+                    forAll (count, pointI)
+                    {
+                        if (count[pointI] == true)
+                        {
+                            nCounted++;
+                        }
+                    }
+
+                    layeringVPoints.setSize(nCounted);
+
+                    // Collect the points
+                    nCounted = 0;
+                    forAll (count, pointI)
+                    {
+                        if (count[pointI] == true)
+                        {
+                            layeringVPoints[nCounted] = pointI;
+                            nCounted++;
+                        }
+                    }
+              
+                }
                 
                 forAll(layeringVPoints, i)
                 {
@@ -63,44 +115,77 @@
             }
         
 
-/*
-	
-	        {
-    
-        	    label movingPtsIndex = pointZones().findZoneID("movingPointsV"+Foam::name(valveI + 1));
-        	    const labelList& movingPointsV = pointZones()[movingPtsIndex];
-    
-        	    forAll(movingPointsV, mpI)
-        	    {
-            		constrainedPoints.append(movingPointsV[mpI]);
-            		constrainedVelocity.append(valveVel);
-           
-            		constraintSize++;
-        	    }
-    
-    	    }
 
-*/
-
-        }
+       }
 
        if(valves_[valveI].bottomPatchID().active() )
        {
 
            {
-
-               List<bool> valveBottomPoint(newPoints.size(), false);
 	
-               label valveBottomPtsIndex = pointZones().findZoneID("movingPointsBottomZoneV"+ Foam::name(valveI+1));
-           
-	           const labelList& valveBottomPoints = pointZones()[valveBottomPtsIndex];
+//               label valveBottomPtsIndex = pointZones().findZoneID("movingPointsBottomZoneV"+ Foam::name(valveI+1));          
+//	           const labelList& valveBottomPoints = pointZones()[valveBottomPtsIndex];
+               
+                labelList valveBottomPoints;
 
-               forAll(valveBottomPoints, i)
-               {
-                   point& p = newPoints[valveBottomPoints[i]];
-                   p.z() +=    valveDeltaZ*
+                {   
+                    label valveBottomCellsIndex = cellZones().findZoneID("movingCellsBottomZoneV" + Foam::name(valveI + 1));
+          
+                    if (valveBottomCellsIndex < 0)
+                    {      
+                        FatalErrorIn("bool verticalValves::update()")
+                            << "movingCellsBottomZoneV"+ Foam::name(valveI+1)
+                            << abort(FatalError);
+                    }
+
+                    const labelList& valveMovingCellsBotZoneV = cellZones()[valveBottomCellsIndex];
+    
+                    const labelListList& cp = cellPoints();
+
+                    boolList count(newPoints.size(), false);
+
+                    forAll (valveMovingCellsBotZoneV, cellI)
+                    {
+                        const labelList& curCellPoints = cp[valveMovingCellsBotZoneV[cellI]];
+
+                        forAll (curCellPoints, i)
+                        {
+                            count[curCellPoints[i]] = true;
+                        }
+                    }
+
+                    // Count the points
+                    label nCounted = 0;
+                    forAll (count, pointI)
+                    {
+                        if (count[pointI] == true)
+                        {
+                            nCounted++;
+                        }
+                    }
+
+                    valveBottomPoints.setSize(nCounted);
+
+                    // Collect the points
+                    nCounted = 0;
+                    forAll (count, pointI)
+                    {
+                        if (count[pointI] == true)
+                        {
+                            valveBottomPoints[nCounted] = pointI;
+                            nCounted++;
+                        }
+                    }
+              
+                }
+
+
+                forAll(valveBottomPoints, i)
+                {
+                    point& p = newPoints[valveBottomPoints[i]];
+                    p.z() +=    valveDeltaZ*
                            (valves_[valveI].cs().axis().z()/mag(valves_[valveI].cs().axis()));
-               }
+                }
 
            }
 

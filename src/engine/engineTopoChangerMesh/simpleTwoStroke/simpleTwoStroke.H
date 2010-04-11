@@ -51,19 +51,19 @@ class simpleTwoStroke
 
         //- Piston patch
         simpleEnginePiston piston_;
-        
+
         //- Upper bowl patch
         word scavInCylPatchName_;
-        
+
         //- Lower bowl patch
-        word scavInPortPatchName_;       
-                 
+        word scavInPortPatchName_;
+
         //- Markup field for points.  Moving points marked with 1
         mutable scalarField* movingPointsMaskPtr_;
 
         //- Layering-to-deformation switch in crank-angle degrees
         scalar deformSwitch_;
-        
+
         //- Tolerance used when the piston faceZone is created
         scalar delta_;
 
@@ -84,9 +84,10 @@ class simpleTwoStroke
 
         //- Are there scavenging ports?
         bool foundScavPorts_;
-        
+
         //- Tolerance for closure of scavenging ports
         scalar scavPortsTol_;
+
 
     // Private Member Functions
 
@@ -105,19 +106,20 @@ class simpleTwoStroke
         //- Is the sliding interface attached?
         bool attached() const;
 
-        //- Check if all patches exist, then calculate virtualPistonPosition, 
-        //- pistonPosition and deckHeight for the first time
+        //- Check if all patches exist, then calculate virtualPistonPosition,
+        //  pistonPosition and deckHeight for the first time
         void checkAndCalculate();
-        
-        //- Calculate the virtualPistonPosition, 
+
+        //- Calculate the virtualPistonPosition
         void setVirtualPistonPosition();
-        
-        //- Correct the vertical motion for the points below the "virtual piston", 
+
+        //- Correct the vertical motion for the points below
+        //  the "virtual piston",
         void correctVerticalMotion();
-        
-        //- Apply the moving mask, the points of the ports do not move. 
+
+        //- Apply the moving mask, the points of the ports do not move.
         void applyMovingMask();
-        
+
         //- Calculate moving masks
         void calcMovingMasks() const;
 
@@ -125,10 +127,11 @@ class simpleTwoStroke
         const scalarField& movingPointsMask() const;
 
         bool realDeformation() const;
-        
+
         //- Are the scavenging ports opened?
         bool portsOpened() const;
-                
+
+
 public:
 
     //- Runtime type information
@@ -157,51 +160,51 @@ public:
             return delta_;
         }
 
-        scalar& delta() 
+        scalar& delta()
         {
             return delta_;
         }
-        
+
         const scalar& offSet() const
         {
             return offSet_;
         }
 
-        scalar& offSet() 
+        scalar& offSet()
         {
             return offSet_;
         }
-        
+
         const scalar& pistonPosition() const
         {
             return pistonPosition_;
         }
 
-        scalar& pistonPosition() 
+        scalar& pistonPosition()
         {
             return pistonPosition_;
         }
-        
+
         const scalar& virtualPistonPosition() const
         {
             return virtualPistonPosition_;
         }
 
-        scalar& virtualPistonPosition() 
+        scalar& virtualPistonPosition()
         {
             return virtualPistonPosition_;
         }
-        
+
         const scalar& deckHeight() const
         {
             return deckHeight_;
         }
 
-        scalar& deckHeight() 
+        scalar& deckHeight()
         {
             return deckHeight_;
         }
-        
+
         const simpleEnginePiston& piston() const
         {
             return piston_;
@@ -211,7 +214,7 @@ public:
         {
             return foundScavPorts_;
         }
-        
+
         //- Return true for mesh deformation mode
         bool deformation() const
         {
@@ -219,14 +222,14 @@ public:
                 engTime().thetaRevolution() > -deformSwitch_
              && engTime().thetaRevolution() < deformSwitch_;
         }
-        
+
 
         //- Add valve and piston zones and modifiers
         void addZonesAndModifiers();
 
         //- Move and morph
         virtual bool update();
-        
+
         //- Set boundary velocities
         void setBoundaryVelocity(volVectorField& U);
 };

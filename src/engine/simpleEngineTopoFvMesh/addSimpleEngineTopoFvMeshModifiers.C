@@ -186,8 +186,8 @@ void Foam::simpleEngineTopoFvMesh::addZonesAndModifiers()
                         (
                             "void simpleEngineTopoFvMesh::"
                             "addZonesAndModifiers()"
-                        )   << "found boundary face in valve detach definition "
-                            << "for valve " << valveI + 1
+                        )   << "found boundary face in valve detach definition"
+                            << " for valve " << valveI + 1
                             << ".  This is not allowed.  Detach faces: "
                             << df << " nInternalFaces: " << nInternalFaces()
                             << abort(FatalError);
@@ -315,7 +315,6 @@ void Foam::simpleEngineTopoFvMesh::addZonesAndModifiers()
         nFaceZones++;
     }
 
-    
     Info<< "Adding " << nPointZones << " point and "
         << nFaceZones << " face zones" << endl;
 
@@ -414,7 +413,7 @@ void Foam::simpleEngineTopoFvMesh::addZonesAndModifiers()
                     topoChanger_,
                     "bottomZoneV" + Foam::name(valveI + 1),
                     valves_[valveI].minBottomLayer(),
-                    valves_[valveI].maxBottomLayer()                    
+                    valves_[valveI].maxBottomLayer()
                 )
             );
             nMods++;
@@ -443,9 +442,10 @@ void Foam::simpleEngineTopoFvMesh::addZonesAndModifiers()
     Info << "Adding " << nMods << " topology modifiers" << endl;
     topoChanger_.setSize(nMods);
 
-    // Write mesh modifiers
+    // Write mesh and modifiers
     topoChanger_.writeOpt() = IOobject::AUTO_WRITE;
     topoChanger_.write();
+    write();
 }
 
 

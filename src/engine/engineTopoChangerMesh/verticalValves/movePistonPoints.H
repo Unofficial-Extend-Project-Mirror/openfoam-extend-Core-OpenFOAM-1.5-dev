@@ -8,22 +8,64 @@
         List<bool> pistonPoint(newPoints.size(), false);
 
         label pistonPtsIndex = pointZones().findZoneID("pistonPoints");
-        const labelList& pistonPoints = pointZones()[pistonPtsIndex];
+//        const labelList& pistonPoints = pointZones()[pistonPtsIndex];
          
         const scalarField& movingPointsMPiston = movingPointsMaskPiston(); 
-         
-        forAll(pistonPoints, i)
+
+        labelList pistonPoints;
+
         {
-            label pointI = pistonPoints[i];
-            pistonPoint[pointI] = true;
-            point& p = newPoints[pointI];
-            
-            if (p.z() < pistonPosition() - 1.0e-6)
+            label pistonCellIndex = cellZones().findZoneID("movingCellsPiston");
+
+            if (pistonCellIndex < 0)
             {
-                scaleDisp[pointI] = false;
-                nScaled--;
+                FatalErrorIn("bool verticalValves::update()")
+                    << "Cannot find cell zone movingCellsPiston"
+                    << abort(FatalError);
             }
+
+            const labelList& pistonCells = cellZones()[pistonCellIndex];
+
+            const labelListList& cp = cellPoints();
+
+            boolList count(newPoints.size(), false);
+
+            forAll (pistonCells, cellI)
+            {
+                const labelList& curCellPoints = cp[pistonCells[cellI]];
+
+                forAll (curCellPoints, i)
+                {
+                    count[curCellPoints[i]] = true;
+                }
+            }
+
+            // Count the points
+            label nCounted = 0;
+            forAll (count, pointI)
+            {
+                if (count[pointI] == true)
+                {
+                    nCounted++;
+                }
+            }
+
+            pistonPoints.setSize(nCounted);
+
+            // Collect the points
+            nCounted = 0;
+            forAll (count, pointI)
+            {
+                if (count[pointI] == true)
+                {
+                    pistonPoints[nCounted] = pointI;
+                    nCounted++;
+                }
+            }
+
         }
+
+        
            
         {
                         
@@ -79,14 +121,62 @@
             boolList scaleDisp(nPoints(), true);
             label nScaled = nPoints();
 
-            List<bool> pistonPointValve(newPoints.size(), false);
-
-            label pistonValvePtsIndex =
-            pointZones().findZoneID("valvePistonPointsV"+Foam::name(valveI + 1));
-
-            const labelList& pistonPointsV = pointZones()[pistonValvePtsIndex];
-         
             const scalarField& movingPointsMPistonValves = movingPointsMaskPistonValves(valveI); 
+
+            List<bool> pistonPointValve(newPoints.size(), false);
+            labelList pistonPointsV;
+
+            {
+                label pistonCellVIndex = cellZones().findZoneID("movingCellsPistonV"+ Foam::name(valveI + 1));
+                
+                if (pistonCellVIndex < 0)
+                {      
+                    FatalErrorIn("bool verticalValves::update()")
+                        << "movingCellsPistonV"+ Foam::name(valveI + 1)
+                        << abort(FatalError);
+                }
+
+                const labelList& pistonCellsV = cellZones()[pistonCellVIndex];
+
+                const labelListList& cp = cellPoints();
+
+                boolList count(newPoints.size(), false);
+
+                forAll (pistonCellsV, cellI)
+                {
+                    const labelList& curCellPoints = cp[pistonCellsV[cellI]];
+
+                    forAll (curCellPoints, i)
+                    {
+                        count[curCellPoints[i]] = true;
+                    }
+                }
+
+                // Count the points
+                label nCounted = 0;
+                forAll (count, pointI)
+                {
+                    if (count[pointI] == true)
+                    {
+                        nCounted++;
+                    }
+                }
+
+                pistonPointsV.setSize(nCounted);
+
+                // Collect the points
+                nCounted = 0;
+                forAll (count, pointI)
+                {
+                    if (count[pointI] == true)
+                    {
+                        pistonPointsV[nCounted] = pointI;
+                        nCounted++;
+                    }
+                }
+                            
+            }
+
 
             forAll(pistonPointsV, i)
             {

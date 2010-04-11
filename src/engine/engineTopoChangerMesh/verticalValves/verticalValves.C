@@ -51,30 +51,26 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
-
-    
 bool Foam::verticalValves::realDeformation() const
 {
 
     bool deformationValve = false;
     forAll(valves(), valveI)
     {
-        
         scalar maxLayer = piston().minLayer();
-            
+
         if(valves()[valveI].bottomPatchID().active())
         {
             maxLayer = max(maxLayer, valves()[valveI].minBottomLayer());
         }
-    
+
         scalar valveDisplacement = valves_[valveI].curVelocity()*valves_[valveI].cs().axis().z()*engTime().deltaT().value()  ;
         if(valvePistonPosition()[valveI] + engTime().pistonDisplacement().value() >
         valveBottomPosition_[valveI] + valveDisplacement - 5.0*maxLayer - 0.001 )
         {
             deformationValve = true;
         }
-    }    
+    }
 
     if(deformationValve)
     {
@@ -119,19 +115,21 @@ Foam::verticalValves::verticalValves
     msPtr_(motionSolver::New(*this)),
     isReallyClosed_(valves().size(), false),
     correctPointsMotion_(engTime().engineDict().lookup("correctPointsMotion"))
-    
 {
     forAll(valves_, valveI)
     {
         if(valves_[valveI].valveHeadID().active())
         {
-            minValveZ_[valveI] = 
+            minValveZ_[valveI] =
             min
             (
-                boundary()[valves_[valveI].valveHeadID().index()].patch().localPoints()
+                boundary()
+                [
+                    valves_[valveI].valveHeadID().index()
+                ].patch().localPoints()
             ).z();
         }
-    }   
+    }
 
     // Add zones and modifiers if not already there.
     addZonesAndModifiers();
@@ -146,12 +144,9 @@ Foam::verticalValves::verticalValves
 
 void Foam::verticalValves::setBoundaryVelocity(volVectorField& U)
 {
-    
-    
     // Set valve velociaty
     forAll (valves(), valveI)
     {
-            
         vector valveVel =
             valves()[valveI].curVelocity()*valves()[valveI].cs().axis();
 
@@ -160,7 +155,8 @@ void Foam::verticalValves::setBoundaryVelocity(volVectorField& U)
         {
             // Bottom of the valve moves with given velocity
             U.boundaryField()[valves()[valveI].curtainInPortPatchID().index()] ==
-                valveVel;
+//                valveVel;
+                vector::zero;
         }
 
         // If valve is present in geometry, set the motion
@@ -168,8 +164,25 @@ void Foam::verticalValves::setBoundaryVelocity(volVectorField& U)
         {
             // Bottom of the valve moves with given velocity
             U.boundaryField()[valves()[valveI].curtainInCylinderPatchID().index()] ==
+//                valveVel;
+                vector::zero;
+        }
+
+        // If valve is present in geometry, set the motion
+        if (valves()[valveI].poppetPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].poppetPatchID().index()] ==
                 valveVel;
         }
+
+        if (valves()[valveI].bottomPatchID().active())
+        {
+            // Bottom of the valve moves with given velocity
+            U.boundaryField()[valves()[valveI].bottomPatchID().index()] ==
+                valveVel;
+        }
+
         
         // If valve is present in geometry, set the motion
         if (valves()[valveI].stemPatchID().active())

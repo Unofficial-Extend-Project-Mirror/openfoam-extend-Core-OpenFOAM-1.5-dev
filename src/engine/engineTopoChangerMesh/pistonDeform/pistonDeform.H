@@ -56,14 +56,15 @@ class pistonDeform
     // Private data
 
         //- Piston patch
-        simpleEnginePiston piston_;        
+        simpleEnginePiston piston_;
 
         //- Piston Position
         scalar pistonPosition_;
 
         //- deckHeight
         scalar deckHeight_;
-               
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -71,13 +72,14 @@ class pistonDeform
 
         //- Disallow default bitwise assignment
         void operator=(const pistonDeform&);
-        
-        //- Check if all patches exist, then calculate virtualPistonPosition, 
-        //- pistonPosition and deckHeight for the first time
+
+        //- Check if all patches exist, then calculate virtualPistonPosition,
+        //  pistonPosition and deckHeight for the first time
         void checkAndCalculate();
-        
+
         //- Add valve and piston zones and modifiers
-        void addZonesAndModifiers(){}
+        void addZonesAndModifiers()
+        {}
 
 public:
 
@@ -91,34 +93,32 @@ public:
         explicit pistonDeform(const IOobject& io);
 
 
-    // Destructor 
+    // Destructor
 
         virtual ~pistonDeform();
 
     // Member Functions
 
-        
+
         const scalar& pistonPosition() const
         {
             return pistonPosition_;
         }
 
-        scalar& pistonPosition() 
+        scalar& pistonPosition()
         {
             return pistonPosition_;
         }
-        
-        
+
         const scalar& deckHeight() const
         {
             return deckHeight_;
         }
 
-        scalar& deckHeight() 
+        scalar& deckHeight()
         {
             return deckHeight_;
         }
-        
 
         const simpleEnginePiston& piston() const
         {
@@ -128,10 +128,9 @@ public:
 
         //- Move and morph
         virtual bool update();
-        
+
         //- Set boundary velocities
         void setBoundaryVelocity(volVectorField& U);
-        
 };
 
 
