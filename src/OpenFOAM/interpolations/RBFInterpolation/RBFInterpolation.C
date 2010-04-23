@@ -67,7 +67,7 @@ void Foam::RBFInterpolation::calcB() const
         }
     }
 
-    if(polynomials_)
+    if (polynomials_)
     {
         for
         (
@@ -175,9 +175,10 @@ Foam::RBFInterpolation::RBFInterpolation
     allPoints_(allPoints),
     RBF_(RBFFunction::New(word(dict.lookup("RBF")), dict)),
     BPtr_(NULL),
+    focalPoint_(dict.lookup("focalPoint")),
     innerRadius_(readScalar(dict.lookup("innerRadius"))),
     outerRadius_(readScalar(dict.lookup("outerRadius"))),
-    polynomials_(readBool(dict.lookup("polynomials")))
+    polynomials_(dict.lookup("polynomials"))
 {}
 
 

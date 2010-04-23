@@ -69,6 +69,8 @@ SourceFiles
 
 #include "dictionary.H"
 #include "RBFFunction.H"
+#include "point.H"
+#include "Switch.H"
 #include "simpleMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,6 +101,9 @@ class RBFInterpolation
         //- Interpolation matrix
         mutable scalarMatrix* BPtr_;
 
+        //- Focal point for cut-off radii
+        point focalPoint_;
+
         //- Inner cut-off radius
         scalar innerRadius_;
 
@@ -106,7 +111,7 @@ class RBFInterpolation
         scalar outerRadius_;
 
         //- Add polynomials to RBF matrix
-        bool polynomials_;
+        Switch polynomials_;
 
 
     // Private Member Functions
