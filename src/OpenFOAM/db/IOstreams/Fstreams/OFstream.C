@@ -116,7 +116,7 @@ OFstream::OFstream
     setClosed();
 
     setState(ofPtr_->rdstate());
-                
+
     if (!good())
     {
         if (debug)
@@ -134,7 +134,7 @@ OFstream::OFstream
     {
         setOpened();
     }
-    
+
     lineNumber_ = 1;
 }
 
