@@ -91,24 +91,6 @@ Foam::reconCentral<Type>::interpolate
 
         const vectorField& pCf = Cf.boundaryField()[patchi];
 
-        // For fixed boundary patches copy the value
-        if (vf.boundaryField()[patchi].fixesValue())
-        {
-            pSf = vf.boundaryField()[patchi];
-        }
-        else
-        {
-            // For patches that do not fix the value, calculate
-            // extrapolated field
-            forAll(pOwner, facei)
-            {
-                label own = pOwner[facei];
-
-                pSf[facei] =
-                    (vf[own] + ((pCf[facei] - C[own]) & gradVf[own]));
-            }
-        }
-
         if (pSf.coupled())
         {
             Field<Type> vfNei =
@@ -117,7 +99,8 @@ Foam::reconCentral<Type>::interpolate
             Field<typename outerProduct<vector, Type>::type> pGradVfNei =
                 gradVf.boundaryField()[patchi].patchNeighbourField();
 
-            // Build the d-vectors
+            // Build the d-vectors.  Used to calculate neighbour face centre
+            // HJ, 19/Apr/2010
             vectorField pd =
                 mesh.Sf().boundaryField()[patchi]
                /(
@@ -149,6 +132,23 @@ Foam::reconCentral<Type>::interpolate
                           & pGradVfNei[facei]
                         )
                     );
+            }
+        }
+        else if (vf.boundaryField()[patchi].fixesValue())
+        {
+            // For fixed boundary patches copy the value
+            pSf = vf.boundaryField()[patchi];
+        }
+        else
+        {
+            // For patches that do not fix the value, calculate
+            // extrapolated field
+            forAll(pOwner, facei)
+            {
+                label own = pOwner[facei];
+
+                pSf[facei] =
+                    (vf[own] + ((pCf[facei] - C[own]) & gradVf[own]));
             }
         }
     }
