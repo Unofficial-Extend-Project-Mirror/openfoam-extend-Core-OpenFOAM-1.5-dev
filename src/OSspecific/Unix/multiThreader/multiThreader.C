@@ -116,7 +116,9 @@ rwMutex::rwMutex()
     // Set the attribute type
     // Writer-preferred appears to be the default,
     // but set it explicitly anyway.
+#ifndef darwin
     pthread_rwlockattr_setkind_np(&attribute, PTHREAD_RWLOCK_PREFER_WRITER_NP);
+#endif
 
     if (pthread_rwlock_init(&lock_, &attribute))
     {
@@ -508,7 +510,7 @@ pthread_t multiThreader::getID(int index)
         }
     }
 
-    return 1;
+    return pthread_self();
 }
 
 
