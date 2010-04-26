@@ -84,6 +84,16 @@ explicitConvectionScheme<Type>::fvmDiv
 
     fvm += this->fvcDiv(faceFlux, vf);
 
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
+        = faceFlux*interpolate(faceFlux, vf);
+
+    const fvMesh& mesh = this->mesh();
+
+    if (mesh.fluxRequired(vf.name()))
+    {
+        fvm.faceFluxCorrectionPtr() = tfaceFluxCorrection.ptr();
+    }
+
     return tfvm;
 }
 
