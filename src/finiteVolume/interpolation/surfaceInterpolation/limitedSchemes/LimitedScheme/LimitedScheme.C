@@ -116,18 +116,8 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
                 gradc.boundaryField()[patchi].patchNeighbourField();
 
             // Build the d-vectors
-            vectorField pd = 
-                mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                    /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
+            // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+            vectorField pd = bLim[patchi].patch().delta();
 
             forAll(pLim, face)
             {

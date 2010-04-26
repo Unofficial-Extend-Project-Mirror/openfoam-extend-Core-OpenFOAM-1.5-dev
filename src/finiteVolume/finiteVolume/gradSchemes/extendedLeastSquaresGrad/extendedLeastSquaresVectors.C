@@ -114,22 +114,20 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     // Set local references to mesh data
     const unallocLabelList& owner = mesh_.owner();
     const unallocLabelList& neighbour = mesh_.neighbour();
-
-    // Build the d-vectors
-    surfaceVectorField d = mesh_.Sf()/(mesh_.magSf()*mesh_.deltaCoeffs());
-
-    if (!mesh_.orthogonal())
-    {
-        d -= mesh_.correctionVectors()/mesh_.deltaCoeffs();
-    }
-
+    const volVectorField& C = mesh_.C();
 
     // Set up temporary storage for the dd tensor (before inversion)
     symmTensorField dd(mesh_.nCells(), symmTensor::zero);
 
     forAll(owner, faceI)
     {
-        symmTensor wdd = 1.0/magSqr(d[faceI])*sqr(d[faceI]);
+        // Build the d-vectors
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        vector d = C[nei] - C[own];
+
+        symmTensor wdd = (1.0/magSqr(d))*sqr(d);
 
         dd[owner[faceI]] += wdd;
         dd[neighbour[faceI]] += wdd;
@@ -137,12 +135,13 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     // Visit the boundaries. Coupled boundaries are taken into account
     // in the construction of d vectors.
-    forAll(d.boundaryField(), patchI)
+    forAll(lsP.boundaryField(), patchI)
     {
-        const fvsPatchVectorField& pd = d.boundaryField()[patchI];
-
-        const fvPatch& p = pd.patch();
+        const fvPatch& p = mesh_.boundary()[patchI];
         const unallocLabelList& faceCells = p.faceCells();
+
+        // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+        vectorField pd = p.delta();
 
         forAll(pd, patchFaceI)
         {
@@ -236,16 +235,20 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     // Revisit all faces and calculate the lsP and lsN vectors
     forAll(owner, faceI)
     {
-        lsP[faceI] =
-            (1.0/magSqr(d[faceI]))*(invDd[owner[faceI]] & d[faceI]);
+        // Build the d-vectors
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
 
-        lsN[faceI] =
-            ((-1.0)/magSqr(d[faceI]))*(invDd[neighbour[faceI]] & d[faceI]);
+        vector d = C[nei] - C[own];
+
+        lsP[faceI] = (1.0/magSqr(d))*(invDd[owner[faceI]] & d);
+
+        lsN[faceI] =((-1.0)/magSqr(d))*(invDd[neighbour[faceI]] & d);
     }
 
     forAll(lsP.boundaryField(), patchI)
     {
-        const fvsPatchVectorField& pd = d.boundaryField()[patchI];
+        vectorField pd = mesh_.boundary()[patchI].delta();
 
         fvsPatchVectorField& patchLsP = lsP.boundaryField()[patchI];
 
@@ -266,8 +269,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     forAll(additionalCells_, i)
     {
-        vector dCij =
-            mesh.C()[additionalCells_[i][1]] - mesh.C()[additionalCells_[i][0]];
+        vector dCij = mesh.C()[additionalCells_[i][1]]
+            - mesh.C()[additionalCells_[i][0]];
 
         additionalVectors_[i] =
             (1.0/magSqr(dCij))*(invDd[additionalCells_[i][0]] & dCij);

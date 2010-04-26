@@ -135,18 +135,8 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const unallocLabelList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd =
-            mesh_.Sf().boundaryField()[patchi]
-           /(
-               mesh_.magSf().boundaryField()[patchi]
-              *mesh_.deltaCoeffs().boundaryField()[patchi]
-           );
-
-        if (!mesh_.orthogonal())
-        {
-            pd -= mesh_.correctionVectors().boundaryField()[patchi]
-                /mesh_.deltaCoeffs().boundaryField()[patchi];
-        }
+        // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+        vectorField pd = p.delta();
 
         if (p.coupled())
         {
@@ -194,26 +184,15 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
         const fvsPatchScalarField& pw = w.boundaryField()[patchi];
         // Note: least squares in 1.4.1 and other OpenCFD versions
-        // are wrong becaus eof incorrect weighting.  HJ, 23/Oct/2008
+        // are wrong because of incorrect weighting.  HJ, 23/Oct/2008
 //         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
         const unallocLabelList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd =
-            mesh_.Sf().boundaryField()[patchi]
-           /(
-               mesh_.magSf().boundaryField()[patchi]
-              *mesh_.deltaCoeffs().boundaryField()[patchi]
-           );
-
-        if (!mesh_.orthogonal())
-        {
-            pd -= mesh_.correctionVectors().boundaryField()[patchi]
-                /mesh_.deltaCoeffs().boundaryField()[patchi];
-        }
-
+        // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+        vectorField pd = p.delta();
 
         if (p.coupled())
         {

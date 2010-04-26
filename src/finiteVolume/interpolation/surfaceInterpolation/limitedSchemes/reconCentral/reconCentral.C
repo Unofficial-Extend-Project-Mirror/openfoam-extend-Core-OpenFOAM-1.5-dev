@@ -84,10 +84,11 @@ Foam::reconCentral<Type>::interpolate
 
     forAll(bSf, patchi)
     {
+        const fvPatch& p = mesh.boundary()[patchi];
+
         fvsPatchField<Type>& pSf = bSf[patchi];
 
-        const unallocLabelList& pOwner =
-            mesh.boundary()[patchi].faceCells();
+        const unallocLabelList& pOwner = p.faceCells();
 
         const vectorField& pCf = Cf.boundaryField()[patchi];
 
@@ -101,18 +102,8 @@ Foam::reconCentral<Type>::interpolate
 
             // Build the d-vectors.  Used to calculate neighbour face centre
             // HJ, 19/Apr/2010
-            vectorField pd =
-                mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                    /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
+            // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+            vectorField pd = p.delta();
 
             forAll(pOwner, facei)
             {

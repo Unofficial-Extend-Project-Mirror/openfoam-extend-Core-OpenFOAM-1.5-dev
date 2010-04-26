@@ -95,8 +95,9 @@ Foam::linearUpwind<Type>::correction
 
         if (pSfCorr.coupled())
         {
-            const unallocLabelList& pOwner =
-                mesh.boundary()[patchi].faceCells();
+            const fvPatch& p = mesh.boundary()[patchi];
+
+            const unallocLabelList& pOwner = p.faceCells();
 
             const vectorField& pCf = Cf.boundaryField()[patchi];
 
@@ -106,18 +107,8 @@ Foam::linearUpwind<Type>::correction
                 gradVf.boundaryField()[patchi].patchNeighbourField();
 
             // Build the d-vectors
-            vectorField pd =
-                mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                    /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
+            // Better version of d-vectors: Zeljko Tukovic, 25/Apr/2010
+            vectorField pd = p.delta();
 
             forAll(pOwner, facei)
             {

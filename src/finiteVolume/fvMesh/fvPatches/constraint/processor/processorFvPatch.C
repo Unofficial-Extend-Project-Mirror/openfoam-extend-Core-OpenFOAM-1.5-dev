@@ -57,7 +57,8 @@ void processorFvPatch::makeWeights(scalarField& w) const
             - procPolyPatch_.neighbFaceCellCentres())
         );
 
-        w = neighbFaceCentresCn/((nf()&fvPatch::delta()) + neighbFaceCentresCn);
+        w = neighbFaceCentresCn/((nf() & fvPatch::delta())
+            + neighbFaceCentresCn);
     }
     else
     {

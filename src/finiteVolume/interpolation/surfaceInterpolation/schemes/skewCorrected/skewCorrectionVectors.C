@@ -84,23 +84,28 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
     const surfaceVectorField& Sf = mesh_.Sf();
 
     const unallocLabelList& owner = mesh_.owner();
+    const unallocLabelList& neighbour = mesh_.neighbour();
 
-    // Build the d-vectors
-    surfaceVectorField d = Sf/(mesh_.magSf()*mesh_.deltaCoeffs());
+    // Build the d-vectors.  Changed to exact vectors.  HJ, 24/Apr/2010
 
-    if (!mesh_.orthogonal())
-    {
-        d -= mesh_.correctionVectors()/mesh_.deltaCoeffs();
-    }
+    scalar skewCoeff = 0.0;
 
     forAll(owner, faceI)
     {
+        // Build the d-vectors
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        vector d = C[nei] - C[own];
+
         vector Cpf = Cf[faceI] - C[owner[faceI]];
 
         SkewCorrVecs[faceI] =
-            Cpf - ((Sf[faceI] & Cpf)/(Sf[faceI] & d[faceI]))*d[faceI];
-    }
+            Cpf - ((Sf[faceI] & Cpf)/(Sf[faceI] & d))*d;
 
+        skewCoeff = max(mag(SkewCorrVecs[faceI])/mag(d), skewCoeff);
+
+    }
 
     forAll(SkewCorrVecs.boundaryField(), patchI)
     {
@@ -117,7 +122,9 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
             const unallocLabelList& faceCells = p.faceCells();
             const vectorField& patchFaceCentres = Cf.boundaryField()[patchI];
             const vectorField& patchSf = Sf.boundaryField()[patchI];
-            const vectorField& patchD = d.boundaryField()[patchI];
+
+            // Better version: Zeljko Tukovic, 25/Apr/2010
+            vectorField patchD = p.delta();
 
             forAll(p, patchFaceI)
             {
@@ -132,13 +139,6 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
                     )*patchD[patchFaceI];
             }
         }
-    }
-
-    scalar skewCoeff = 0.0;
-
-    if (Sf.internalField().size() > 0)
-    {
-        skewCoeff = max(mag(SkewCorrVecs)/mag(d)).value();
     }
 
     if (debug)
