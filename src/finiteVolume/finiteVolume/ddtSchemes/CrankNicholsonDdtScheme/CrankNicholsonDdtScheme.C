@@ -1009,7 +1009,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 dimensioned<typename flux<Type>::type>
                 (
                     "0",
-                    rA.dimensions()*rho.dimensions()*phi.dimensions()/dimTime,
+                    rA.dimensions()*phi.dimensions()/dimTime,
                     pTraits<typename flux<Type>::type>::zero
                 )
             )
