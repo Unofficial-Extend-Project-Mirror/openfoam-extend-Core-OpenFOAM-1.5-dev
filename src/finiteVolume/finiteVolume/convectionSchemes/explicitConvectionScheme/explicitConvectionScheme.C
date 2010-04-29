@@ -82,6 +82,9 @@ explicitConvectionScheme<Type>::fvmDiv
     );
     fvMatrix<Type>& fvm = tfvm();
 
+    // Matrix consistency
+    fvm.diag() = 0;
+
     fvm += this->fvcDiv(faceFlux, vf);
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
