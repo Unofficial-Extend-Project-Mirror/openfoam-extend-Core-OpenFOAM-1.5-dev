@@ -29,9 +29,10 @@ coarseningRatio 5;
 interpolation
 {
     RBF  IMQB;
-	innerRadius 2.5;//5.0
-	outerRadius 12.5;
-	polyNomials true;
+    focalPoint (0 0 0);
+    innerRadius 2.5;//5.0
+    outerRadius 12.5;
+    polynomials true;
 
     W2Coeffs
     {
@@ -41,14 +42,14 @@ interpolation
     {
         radius     5.0;
     }
-	GaussCoeffs
-	{
-		radius		0.1;
-	}
-	IMQBCoeffs
-	{
-		radius		0.001;
-	}
+    GaussCoeffs
+    {
+        radius     0.1;
+    }
+    IMQBCoeffs
+    {
+        radius     0.001;
+    }
 }
 
 
