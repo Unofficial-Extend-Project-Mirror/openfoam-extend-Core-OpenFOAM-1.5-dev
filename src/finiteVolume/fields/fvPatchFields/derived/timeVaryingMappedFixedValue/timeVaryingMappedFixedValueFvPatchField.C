@@ -224,11 +224,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::rmap
 {
     fixedValueFvPatchField<Type>::rmap(ptf, addr);
 
-    const timeVaryingMappedFixedValueFvPatchField<Type>& tiptf =
-        refCast<const timeVaryingMappedFixedValueFvPatchField<Type> >(ptf);
-
-    startSampledValues_.rmap(tiptf.startSampledValues_, addr);
-    endSampledValues_.rmap(tiptf.endSampledValues_, addr);
+    // Do not map sampled values on reconstruction.  HJ, 18/May/2010
 }
 
 
