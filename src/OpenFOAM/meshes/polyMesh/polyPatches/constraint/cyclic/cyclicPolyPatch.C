@@ -1267,7 +1267,9 @@ bool Foam::cyclicPolyPatch::order
     {
         label baffleI = 0;
 
-        forAll(*this, faceI)
+        // Bug fix: *this is not a correct new patch.  Use pp instead
+        // Hrvoje Jasak and Tommaso Lucchini, 25/May/2010
+        forAll(pp, faceI)
         {
             const face& f = pp.localFaces()[faceI];
             const labelList& pFaces = pp.pointFaces()[f[0]];
