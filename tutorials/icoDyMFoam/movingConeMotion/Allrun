@@ -1,0 +1,17 @@
+#!/bin/bash
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Get application directory
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
+
+# Compile tutorial-specific application
+compileApplication setMotionMovingCone
+
+runApplication blockMesh
+
+#Generate motionGamma file
+runApplication setMotionMovingCone
+
+runApplication $application
