@@ -1,7 +1,7 @@
 #!/bin/sh
 
 currDir=`pwd`
-application=`basename $currDir`
+application=conjugateHeatFoam
 cases="conjugateCavity"
 
 tutorialPath=`dirname $0`/..
