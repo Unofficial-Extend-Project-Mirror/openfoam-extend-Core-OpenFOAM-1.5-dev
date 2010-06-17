@@ -30,6 +30,9 @@ setDamBreakFine ()
 cloneCase damBreak damBreakFine
 
 cd damBreakFine
+    # Clean cloned case
+    cleanCase
+
     # Modify case
     setDamBreakFine
     cp ../damBreak/0/gamma.org 0/gamma
