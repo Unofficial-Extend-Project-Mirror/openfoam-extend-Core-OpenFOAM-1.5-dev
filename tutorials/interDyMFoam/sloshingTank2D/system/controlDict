@@ -57,6 +57,9 @@ functions
         // Type of functionObject
         type probes;
 
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libsampling.so");
+
         // Name of the directory for the probe data
         name probes;
 
