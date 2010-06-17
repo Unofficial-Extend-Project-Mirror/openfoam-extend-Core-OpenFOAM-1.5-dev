@@ -9,6 +9,5 @@ tutorialPath=`dirname $0`/..
 
 for case in $cases
 do
-    cleanCase $case
-    rm $case/*.dat
+    (cd $case; cleanCase; rm *.dat)
 done 
