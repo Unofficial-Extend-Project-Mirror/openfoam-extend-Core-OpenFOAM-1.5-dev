@@ -86,9 +86,7 @@ Foam::objectRegistry::~objectRegistry()
     {
         if (iter()->ownedByRegistry())
         {
-            regIOobject* elemPtr = iter();
             erase(iter);
-            delete elemPtr;
         }
     }
 }
