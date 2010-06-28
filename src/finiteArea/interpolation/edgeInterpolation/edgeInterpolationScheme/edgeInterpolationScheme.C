@@ -214,7 +214,7 @@ edgeInterpolationScheme<Type>::interpolate
         const tensor& TP = curT[1];
         const tensor& TN = curT[2];
 
-        sfi[fi] = 
+        sfi[fi] =
             transform
             (
                 Te.T(),
@@ -243,7 +243,7 @@ edgeInterpolationScheme<Type>::interpolate
 
             for (label i=0; i<size; i++)
             {
-                const tensorField& curT = 
+                const tensorField& curT =
                     mesh.edgeTransformTensors()[start + i];
 
                 const tensor& Te = curT[0];
@@ -360,7 +360,7 @@ edgeInterpolationScheme<Type>::interpolate
 
             for (label i=0; i<size; i++)
             {
-                const tensorField& curT = 
+                const tensorField& curT =
                     mesh.edgeTransformTensors()[start + i];
 
                 const tensor& Te = curT[0];
@@ -372,13 +372,13 @@ edgeInterpolationScheme<Type>::interpolate
                     (
                         Te.T(),
                         pLambda[i]*transform(TP, pOwnVf[i])
-                      + (1.0 - pLambda[i])*transform(TN, pNgbVf[i])
+                      + (scalar(1) - pLambda[i])*transform(TN, pNgbVf[i])
                     );
             }
 
 //             tsf().boundaryField()[pi] =
 //                 pLambda*vf.boundaryField()[pi].patchInternalField()
-//              + (1.0 - pLambda)*vf.boundaryField()[pi].patchNeighbourField();
+//              + (1 - pLambda)*vf.boundaryField()[pi].patchNeighbourField();
         }
         else
         {
