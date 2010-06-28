@@ -112,6 +112,9 @@ regIOobject::~regIOobject()
     if (isPtr_)
     {
         delete isPtr_;
+
+        // Make sure we won't delete this object more than once. MB 06/2010
+        isPtr_ = NULL;
     }
 
     // Check out of objectRegistry if not owned by the registry
