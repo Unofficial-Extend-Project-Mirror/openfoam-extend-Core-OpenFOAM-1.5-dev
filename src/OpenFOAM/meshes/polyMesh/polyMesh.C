@@ -1142,6 +1142,39 @@ void Foam::polyMesh::resetMotion() const
     deleteDemandDrivenData(oldPointsPtr_);
 }
 
+// Reset motion by deleting old points
+void Foam::polyMesh::setOldPoints
+(
+    const pointField& setPoints
+) 
+{
+
+    if(setPoints.size() != allPoints_.size())
+    {
+            FatalErrorIn
+            (
+                "polyMesh::setOldPoints\n"
+                "(\n"
+                "    const pointField& setPoints\n"
+                ")\n"
+            )   << "setPoints size " << setPoints.size() << "different from the mesh points size "
+                << allPoints_.size()
+                << abort(FatalError);
+    }
+
+    moving(false);
+
+    // Mesh motion in the new time step
+    deleteDemandDrivenData(oldAllPointsPtr_);
+    deleteDemandDrivenData(oldPointsPtr_);
+    allPoints_ = setPoints;
+    oldAllPointsPtr_ = new pointField(allPoints_);    
+    oldPointsPtr_ = new pointField::subField(oldAllPoints(), nPoints());
+    curMotionTimeIndex_ = 0;
+    primitiveMesh::clearGeom();
+
+}
+
 
 // Return parallel info
 const Foam::globalMeshData& Foam::polyMesh::globalData() const

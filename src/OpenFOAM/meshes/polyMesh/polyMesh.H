@@ -404,6 +404,8 @@ public:
             //- Reset motion
             void resetMotion() const;
 
+            //- Set old points without executing motion
+            void setOldPoints(const pointField& setPoints);
 
         // Topological change
 
