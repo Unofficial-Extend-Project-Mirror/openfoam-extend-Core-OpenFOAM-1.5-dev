@@ -182,6 +182,10 @@ snapControls
 // Settings for the layer addition.
 addLayersControls
 {
+    // Are the thickness parameters below relative to the undistorted
+    // size of the refined cell outside layer (true) or absolute sizes (false).
+    relativeSizes true;
+
     // Per final patch (so not geometry!) the layer information
     layers
     {
@@ -466,7 +470,7 @@ addLayersControls
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerRatio 0.3; 
+    finalLayerThickness 0.3; 
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
@@ -510,6 +514,9 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+    // Overall max number of layer addition iterations
+    nLayerIter 50;
 }
 
 
