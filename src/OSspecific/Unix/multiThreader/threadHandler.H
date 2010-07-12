@@ -169,6 +169,21 @@ public:
     inline void * operator()(const label index);
 };
 
+// Lock all threads provided by sequence
+template <class T>
+void lockThreads
+(
+    const List<label>& sequence,
+    PtrList<threadHandler<T> >& handler
+);
+
+// Synchronize all threads provided by sequence
+template <class T>
+void synchronizeThreads
+(
+    const List<label>& sequence,
+    PtrList<threadHandler<T> >& handler
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

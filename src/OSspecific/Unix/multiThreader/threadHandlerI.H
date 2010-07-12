@@ -371,6 +371,43 @@ inline void * threadHandler<T>::operator()
 }
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+// Lock all threads provided by sequence
+template <class T>
+void lockThreads
+(
+    const List<label>& sequence,
+    PtrList<threadHandler<T> >& handler
+)
+{
+    forAll(sequence, i)
+    {
+        handler[sequence[i]].lock(threadHandler<T>::START);
+        handler[sequence[i]].lock(threadHandler<T>::STOP);
+
+        handler[sequence[i]].unsetPredicate(threadHandler<T>::START);
+        handler[sequence[i]].unsetPredicate(threadHandler<T>::STOP);
+    }
+}
+
+
+// Synchronize all threads provided by sequence
+template <class T>
+void synchronizeThreads
+(
+    const List<label>& sequence,
+    PtrList<threadHandler<T> >& handler
+)
+{
+    forAll(sequence, i)
+    {
+        // Wait for a signal from this thread before moving on.
+        handler[sequence[i]].waitForSignal(threadHandler<T>::STOP);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
