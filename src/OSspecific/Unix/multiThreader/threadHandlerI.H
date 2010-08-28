@@ -338,6 +338,14 @@ inline pthread_t threadHandler<T>::ID() const
 }
 
 
+// Does the calling thread correspond to this handler?
+template<class T>
+inline bool threadHandler<T>::self() const
+{
+    return pthread_equal(ID(), pthread_self());
+}
+
+
 // Return an argument pointer at a particular index
 template<class T>
 inline void * threadHandler<T>::operator()

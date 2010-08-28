@@ -165,6 +165,9 @@ public:
     // Return the ID
     inline pthread_t ID() const;
 
+    // Does the calling thread correspond to this handler?
+    inline bool self() const;
+
     // Return an argument pointer at a particular index
     inline void * operator()(const label index);
 };
