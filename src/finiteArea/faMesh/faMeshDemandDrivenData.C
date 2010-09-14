@@ -130,8 +130,8 @@ void faMesh::calcLe() const
 
     edgeVectorField& Le = *LePtr_;
 
-
     const pointField& pPoints = points();
+
     const edgeList& pEdges = edges();
 
     const edgeVectorField& eCentres = edgeCentres();
@@ -304,20 +304,15 @@ void faMesh::calcAreaCentres() const
 
     forAll (boundary(), patchI)
     {
-        if (!boundary()[patchI].coupled())
-        {
-            const edgeList::subList patchEdges =
-                boundary()[patchI].patchSlice(edges());
+        const edgeList::subList patchEdges =
+            boundary()[patchI].patchSlice(edges());
 
-            forAll (patchEdges, edgeI)
-            {
-                centres.boundaryField()[patchI][edgeI] =
-                    patchEdges[edgeI].centre(localPoints);
-            }
+        forAll (patchEdges, edgeI)
+        {
+            centres.boundaryField()[patchI][edgeI] =
+                patchEdges[edgeI].centre(localPoints);
         }
     }
-
-    centres.correctBoundaryConditions();
 }
 
 
