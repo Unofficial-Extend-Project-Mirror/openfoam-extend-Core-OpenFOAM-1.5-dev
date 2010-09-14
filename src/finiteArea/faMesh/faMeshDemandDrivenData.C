@@ -313,6 +313,8 @@ void faMesh::calcAreaCentres() const
                 patchEdges[edgeI].centre(localPoints);
         }
     }
+
+    centres.correctBoundaryConditions();
 }
 
 
