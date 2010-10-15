@@ -130,11 +130,11 @@ tmp<volScalarField> twoPhaseMixture::rho() const
 {
     volScalarField limitedAlpha1 = min(max(alpha1_, scalar(0)), scalar(1));
 
-    return tmp<volScalarField> 
+    return tmp<volScalarField>
     (
         new volScalarField
         (
-            "rho",
+            "rho_twoPhaseMixture",
             limitedAlpha1*rho1_
           + (scalar(1) - limitedAlpha1)*rho2_
         )
