@@ -38,6 +38,7 @@ Description
 #include "PstreamCombineReduceOps.H"
 #include "cartesianCS.H"
 #include "scalarMatrix.H"
+#include "processorFaPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -314,7 +315,20 @@ void faMesh::calcAreaCentres() const
         }
     }
 
-    centres.correctBoundaryConditions();
+    forAll(centres.boundaryField(), patchI)
+    {
+        if
+        (
+            isA<processorFaPatchVectorField>
+            (
+                centres.boundaryField()[patchI]
+            )
+        )
+        {
+            centres.boundaryField()[patchI].initEvaluate();
+            centres.boundaryField()[patchI].evaluate();            
+        }
+    }
 }
 
 
@@ -466,14 +480,24 @@ void faMesh::calcFaceAreaNormals() const
 
     forAll (boundary(), patchI)
     {
-        if (!boundary()[patchI].coupled())
-        {
-            faceAreaNormals.boundaryField()[patchI] =
-                edgeAreaNormals().boundaryField()[patchI];
-        }
+        faceAreaNormals.boundaryField()[patchI] =
+            edgeAreaNormals().boundaryField()[patchI];
     }
 
-    faceAreaNormals.correctBoundaryConditions();
+    forAll(faceAreaNormals.boundaryField(), patchI)
+    {
+        if 
+        (
+            isA<processorFaPatchVectorField>
+            (
+                faceAreaNormals.boundaryField()[patchI]
+            )
+        )
+        {
+            faceAreaNormals.boundaryField()[patchI].initEvaluate();
+            faceAreaNormals.boundaryField()[patchI].evaluate();            
+        }
+    }
 }
 
 
@@ -1107,80 +1131,6 @@ void faMesh::calcPointAreaNormals() const
         }
     }
 
-    // Correcte wedge points
-    forAll (boundary(), patchI)
-    {
-        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
-        {
-            const wedgeFaPatch& wedgePatch =
-                refCast<const wedgeFaPatch>(boundary()[patchI]);
-
-            labelList patchPoints = wedgePatch.pointLabels();
-
-            vector N =
-                transform
-                (
-                    wedgePatch.edgeT(),
-                    wedgePatch.centreNormal()
-                );
-
-            N /= mag(N);
-
-            forAll (patchPoints, pointI)
-            {
-                result[patchPoints[pointI]]
-                    -= N*(N&result[patchPoints[pointI]]);
-            }
-        }
-    }
-
-    // Axis point correction
-    forAll (boundary(), patchI)
-    {
-        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
-        {
-            const wedgeFaPatch& wedgePatch =
-                refCast<const wedgeFaPatch>(boundary()[patchI]);
-
-            if (wedgePatch.axisPoint() > -1)
-            {
-                result[wedgePatch.axisPoint()] =
-                    wedgePatch.axis()
-                   *(
-                       wedgePatch.axis()
-                      &result[wedgePatch.axisPoint()]
-                    );
-            }
-
-            break;
-        }
-    }
-
-    // Boundary points correction
-    forAll (boundary(), patchI)
-    {
-        if (correctPatchPointNormals(patchI) && !boundary()[patchI].coupled())
-        {
-            if (boundary()[patchI].ngbPolyPatchIndex() == -1)
-            {
-                FatalErrorIn
-                    (
-                        "void faMesh::calcPointAreaNormals const"
-                    )   << "Neighbour polyPatch index is not defined "
-                        << "for faPatch " << boundary()[patchI].name()
-                        << abort(FatalError);
-            }
-
-            labelList patchPoints = boundary()[patchI].pointLabels();
-            vectorField N = boundary()[patchI].ngbPolyPatchPointNormals();
-
-            forAll (patchPoints, pointI)
-            {
-                result[patchPoints[pointI]]
-                    -= N[pointI]*(N[pointI]&result[patchPoints[pointI]]);
-            }
-        }
-    }
 
     // Processor patch points correction
     forAll (boundary(), patchI)
@@ -1245,8 +1195,7 @@ void faMesh::calcPointAreaNormals() const
     }
 
 
-    // Correct global points
-
+    // Correct global processor points
     if (globalData().nGlobalPoints() > 0)
     {
         const labelList& spLabels =
@@ -1282,6 +1231,84 @@ void faMesh::calcPointAreaNormals() const
         forAll (spNormals, pointI)
         {
             result[spLabels[pointI]] = spNormals[pointI];
+        }
+    }
+
+
+    // Correcte wedge points
+    forAll (boundary(), patchI)
+    {
+        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
+        {
+            const wedgeFaPatch& wedgePatch =
+                refCast<const wedgeFaPatch>(boundary()[patchI]);
+
+            labelList patchPoints = wedgePatch.pointLabels();
+
+            vector N =
+                transform
+                (
+                    wedgePatch.edgeT(),
+                    wedgePatch.centreNormal()
+                );
+
+            N /= mag(N);
+
+            forAll (patchPoints, pointI)
+            {
+                result[patchPoints[pointI]]
+                    -= N*(N&result[patchPoints[pointI]]);
+            }
+        }
+    }
+
+
+    // Axis point correction
+    forAll (boundary(), patchI)
+    {
+        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
+        {
+            const wedgeFaPatch& wedgePatch =
+                refCast<const wedgeFaPatch>(boundary()[patchI]);
+
+            if (wedgePatch.axisPoint() > -1)
+            {
+                result[wedgePatch.axisPoint()] =
+                    wedgePatch.axis()
+                   *(
+                       wedgePatch.axis()
+                      &result[wedgePatch.axisPoint()]
+                    );
+            }
+
+            break;
+        }
+    }
+
+
+    // Boundary points correction
+    forAll (boundary(), patchI)
+    {
+        if (correctPatchPointNormals(patchI) && !boundary()[patchI].coupled())
+        {
+            if (boundary()[patchI].ngbPolyPatchIndex() == -1)
+            {
+                FatalErrorIn
+                    (
+                        "void faMesh::calcPointAreaNormals const"
+                    )   << "Neighbour polyPatch index is not defined "
+                        << "for faPatch " << boundary()[patchI].name()
+                        << abort(FatalError);
+            }
+
+            labelList patchPoints = boundary()[patchI].pointLabels();
+            vectorField N = boundary()[patchI].ngbPolyPatchPointNormals();
+
+            forAll (patchPoints, pointI)
+            {
+                result[patchPoints[pointI]]
+                    -= N[pointI]*(N[pointI]&result[patchPoints[pointI]]);
+            }
         }
     }
 
