@@ -93,7 +93,7 @@ void faMesh::calcPatchStarts() const
     for (label i = 1; i < boundary().size(); i++)
     {
         patchStarts[i] =
-            patchStarts[i - 1] + boundary()[i - 1].size();
+            patchStarts[i - 1] + boundary()[i - 1].faPatch::size();
     }
 }
 
@@ -307,7 +307,7 @@ void faMesh::calcAreaCentres() const
     {
         const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
-
+        
         forAll (patchEdges, edgeI)
         {
             centres.boundaryField()[patchI][edgeI] =
