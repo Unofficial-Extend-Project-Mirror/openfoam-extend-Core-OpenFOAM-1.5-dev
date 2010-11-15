@@ -83,7 +83,7 @@ lduSolverPerformance faMatrix<Type>::solve(Istream& solverControls)
         // copy field and source
 
         scalarField psiCmpt = psi_.internalField().component(cmpt);
-        addBoundaryDiag(diag(), solvingComponent);
+        addBoundaryDiag(diag(), cmpt);
 
         scalarField sourceCmpt = source.component(cmpt);
 
@@ -95,6 +95,27 @@ lduSolverPerformance faMatrix<Type>::solve(Istream& solverControls)
         FieldField<Field, scalar> intCoeffsCmpt
         (
             internalCoeffs_.component(cmpt)
+        );
+
+        // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
+        // bouCoeffsCmpt for the explicit part of the coupled boundary
+        // conditions
+        initMatrixInterfaces
+        (
+            bouCoeffsCmpt,
+            interfaces,
+            psiCmpt,
+            sourceCmpt,
+            cmpt
+        );
+
+        updateMatrixInterfaces
+        (
+            bouCoeffsCmpt,
+            interfaces,
+            psiCmpt,
+            sourceCmpt,
+            cmpt
         );
 
         lduSolverPerformance solverPerf;
