@@ -45,8 +45,10 @@ faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 {
     forAll (directAddressing_, i)
     {
-        // Subtract one to align addressing.  
-        directAddressing_[i] -= addressingOffset + 1;
+        // Subtract one to align addressing.
+//         directAddressing_[i] -= addressingOffset + 1;
+        // ZT, 12/Nov/2010
+        directAddressing_[i] -= addressingOffset;
     }
 }
 
